@@ -44,12 +44,16 @@ final class OrderSnapshotReader {
 		$base_currency        = (string) $order->get_meta( OrderSnapshot::META_BASE_CURRENCY );
 		$transaction_currency = (string) $order->get_meta( OrderSnapshot::META_TRANSACTION_CURRENCY );
 		$exchange_rate        = (string) $order->get_meta( OrderSnapshot::META_EXCHANGE_RATE );
-		$rate_timestamp       = $order->get_meta( OrderSnapshot::META_RATE_TIMESTAMP );
+		$rate_timestamp_raw   = $order->get_meta( OrderSnapshot::META_RATE_TIMESTAMP );
 		$rate_source          = (string) $order->get_meta( OrderSnapshot::META_RATE_SOURCE );
 		$plugin_version       = (string) $order->get_meta( OrderSnapshot::META_PLUGIN_VERSION );
 		$rate_identity        = (string) $order->get_meta( OrderSnapshot::META_RATE_IDENTITY );
 		$snapshot_version     = $order->get_meta( '_umc_snapshot_version' );
-		$stored_decimals      = $order->get_meta( '_umc_transaction_decimals' );
+		$stored_decimals_raw  = $order->get_meta( '_umc_transaction_decimals' );
+
+		// Convert types for classification.
+		$rate_timestamp = '' !== (string) $rate_timestamp_raw ? (int) $rate_timestamp_raw : null;
+		$stored_decimals = '' !== (string) $stored_decimals_raw ? (int) $stored_decimals_raw : null;
 
 		// Classify the snapshot state.
 		$has_any_m3_keys = '' !== $transaction_currency;
@@ -98,11 +102,11 @@ final class OrderSnapshotReader {
 		$base_currency_out        = '' !== $base_currency ? $base_currency : null;
 		$transaction_currency_out = '' !== $transaction_currency ? $transaction_currency : null;
 		$exchange_rate_out        = '' !== $exchange_rate ? $exchange_rate : null;
-		$rate_timestamp_out       = ( '' !== (string) $rate_timestamp && (int) $rate_timestamp > 0 ) ? (int) $rate_timestamp : null;
+		$rate_timestamp_out       = null !== $rate_timestamp && $rate_timestamp > 0 ? $rate_timestamp : null;
 		$rate_source_out          = '' !== $rate_source ? $rate_source : null;
 		$plugin_version_out       = '' !== $plugin_version ? $plugin_version : null;
 		$rate_identity_out        = '' !== $rate_identity ? $rate_identity : null;
-		$stored_decimals_out      = ( '' !== (string) $stored_decimals && (int) $stored_decimals >= 0 ) ? (int) $stored_decimals : null;
+		$stored_decimals_out      = null !== $stored_decimals && $stored_decimals >= 0 ? $stored_decimals : null;
 
 		return new OrderCurrencySnapshot(
 			$schema_version,

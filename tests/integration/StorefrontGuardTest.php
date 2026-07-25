@@ -141,13 +141,33 @@ final class StorefrontGuardTest extends WP_UnitTestCase {
 		$src       = dirname( ( new \ReflectionClass( Converter::class ) )->getFileName() );
 		$order_dir = $src . '/Order';
 
+		// M4 historical service files (OrderSnapshot is M3, not M4).
+		$m4_services = array(
+			'OrderSnapshotReader.php',
+			'OrderCurrencySnapshot.php',
+			'HistoricalFormattingResolver.php',
+			'ResolvedOrderCurrencyFormatting.php',
+			'OrderCurrencyContext.php',
+			'OrderCurrencyFormatting.php',
+			'HistoricalOrderDisplay.php',
+			'OrderPayCurrencyLock.php',
+			'RefundSnapshot.php',
+		);
+
 		if ( is_dir( $order_dir ) ) {
 			foreach ( glob( "$order_dir/*.php" ) as $file ) {
+				$basename = basename( $file );
+
+				// Skip M3 services (OrderSnapshot).
+				if ( ! in_array( $basename, $m4_services, true ) ) {
+					continue;
+				}
+
 				$source = (string) file_get_contents( $file );
 
-				// Historical services must never reference the conversion seam.
+				// M4 historical services must never reference the conversion seam.
 				if ( preg_match( '/Converter::|PriceConversionService\b|->convert/', $source ) ) {
-					$offenders[] = basename( $file );
+					$offenders[] = $basename;
 				}
 			}
 		}
@@ -164,13 +184,33 @@ final class StorefrontGuardTest extends WP_UnitTestCase {
 		$src       = dirname( ( new \ReflectionClass( Converter::class ) )->getFileName() );
 		$order_dir = $src . '/Order';
 
+		// M4 historical service files (OrderSnapshot is M3, not M4).
+		$m4_services = array(
+			'OrderSnapshotReader.php',
+			'OrderCurrencySnapshot.php',
+			'HistoricalFormattingResolver.php',
+			'ResolvedOrderCurrencyFormatting.php',
+			'OrderCurrencyContext.php',
+			'OrderCurrencyFormatting.php',
+			'HistoricalOrderDisplay.php',
+			'OrderPayCurrencyLock.php',
+			'RefundSnapshot.php',
+		);
+
 		if ( is_dir( $order_dir ) ) {
 			foreach ( glob( "$order_dir/*.php" ) as $file ) {
+				$basename = basename( $file );
+
+				// Skip M3 services (OrderSnapshot).
+				if ( ! in_array( $basename, $m4_services, true ) ) {
+					continue;
+				}
+
 				$source = (string) file_get_contents( $file );
 
-				// Historical services must not read session/active currency.
+				// M4 historical services must not read session/active currency.
 				if ( preg_match( '/get_active_code|get_active_currency|->session|COOKIE_NAME/', $source ) ) {
-					$offenders[] = basename( $file );
+					$offenders[] = $basename;
 				}
 			}
 		}

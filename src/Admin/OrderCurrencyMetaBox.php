@@ -58,6 +58,11 @@ final class OrderCurrencyMetaBox {
 	 * Registers the meta box.
 	 */
 	public function register(): void {
+		// Only register in admin context.
+		if ( ! is_admin() ) {
+			return;
+		}
+
 		// Register for HPOS screen.
 		$hpos_screen = \Automattic\WooCommerce\Utilities\OrderUtil::get_order_admin_screen();
 		add_meta_box(
