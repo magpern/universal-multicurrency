@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Thrown when an exchange rate value is not a usable positive number.
  *

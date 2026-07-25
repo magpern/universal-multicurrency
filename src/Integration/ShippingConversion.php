@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Core shipping-rate conversion and per-currency package-cache isolation.
  *

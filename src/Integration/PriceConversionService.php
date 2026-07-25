@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Display-price conversion seam.
  *

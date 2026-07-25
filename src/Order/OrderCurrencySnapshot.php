@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Immutable order-time currency snapshot with schema versioning.
  *
@@ -134,11 +133,11 @@ final class OrderCurrencySnapshot {
 	 * @param string|null $plugin_version     Plugin version.
 	 * @param string|null $rate_identity      Rate identity string.
 	 * @param int|null    $stored_decimals    Stored transaction decimals (M4+).
-	 * @param bool        $has_snapshot       Has any snapshot?
-	 * @param bool        $is_legacy          Is legacy (no snapshot)?
-	 * @param bool        $is_partial         Some keys missing?
-	 * @param bool        $is_malformed       Malformed metadata?
-	 * @param bool        $is_future          Unknown future version?
+	 * @param bool        $has_snapshot       Whether any snapshot data is present.
+	 * @param bool        $is_legacy          Whether this is a legacy order (no snapshot).
+	 * @param bool        $is_partial         Whether some snapshot keys are missing.
+	 * @param bool        $is_malformed       Whether the snapshot metadata is malformed.
+	 * @param bool        $is_future          Whether the schema version is an unknown future one.
 	 */
 	public function __construct(
 		?int $schema_version,

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Immutable order-time currency / rate snapshot.
  *
@@ -113,7 +112,7 @@ final class OrderSnapshot {
 			self::SOURCE_MANUAL,
 			$this->version,
 			$this->context->get_currency_signature(),
-			2, // Schema version for M4+
+			2, // Schema version for M4 and later.
 			$this->context->get_active_currency()->decimals()
 		);
 

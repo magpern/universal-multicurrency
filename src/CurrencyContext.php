@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Request-scoped active-currency facade.
  *

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Currencies admin table (custom WooCommerce settings field).
  *

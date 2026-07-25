@@ -1,5 +1,4 @@
 <?php
-
 /**
  * WooCommerce settings tab for multicurrency configuration.
  *

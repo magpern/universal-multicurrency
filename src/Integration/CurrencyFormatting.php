@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Currency identity and price formatting for the active currency.
  *

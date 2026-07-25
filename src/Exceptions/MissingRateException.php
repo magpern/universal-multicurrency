@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Thrown when a conversion is requested but no usable rate exists.
  *

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Exchange-rate provider contract.
  *

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Runtime product-price conversion filters.
  *

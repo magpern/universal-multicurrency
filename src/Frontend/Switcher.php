@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Currency switcher renderer and shortcode.
  *

@@ -48,7 +48,7 @@ final class HistoricalFormattingResolverTest extends WP_UnitTestCase {
 			'manual',
 			'0.4.0',
 			'JPY:155.50',
-			0, // stored_decimals overrides config
+			0, // Stored decimals override config.
 			true,
 			false,
 			false,
@@ -133,7 +133,7 @@ final class HistoricalFormattingResolverTest extends WP_UnitTestCase {
 	/**
 	 * Creates a real CurrencyRegistry from test data.
 	 *
-	 * @param array<string, array{symbol: string, position: string}> $currencies
+	 * @param array<string, array{symbol: string, position: string}> $currencies Configured currencies.
 	 */
 	private function create_registry( array $currencies ): CurrencyRegistry {
 		update_option( 'woocommerce_currency', 'EUR' );

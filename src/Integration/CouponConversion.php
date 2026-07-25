@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Coupon amount conversion.
  *

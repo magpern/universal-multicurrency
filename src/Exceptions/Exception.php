@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Marker interface for all domain exceptions.
  *

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Immutable currency value object.
  *

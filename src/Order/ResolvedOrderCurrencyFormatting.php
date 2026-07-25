@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Resolved order currency formatting (immutable).
  *

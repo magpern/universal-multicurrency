@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Manual (admin-entered) exchange-rate provider.
  *

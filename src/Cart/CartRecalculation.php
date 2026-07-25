@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Cart recalculation on currency / rate change.
  *

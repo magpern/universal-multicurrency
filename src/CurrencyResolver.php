@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Active-currency resolution.
  *

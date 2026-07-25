@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Read-only order currency audit meta box.
  *

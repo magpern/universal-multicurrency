@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Resolve formatting for historical order currencies.
  *
@@ -98,13 +97,7 @@ final class HistoricalFormattingResolver {
 			return $currency->decimals();
 		}
 
-		// 3. ISO-4217 map.
-		$iso_decimals = IsoCurrencyDecimals::decimals( $code );
-		if ( $iso_decimals !== 2 ) {
-			return $iso_decimals;
-		}
-
-		// 4. WooCommerce default.
-		return 2;
+		// 3. ISO-4217 map (unknown codes already resolve to the default of 2).
+		return IsoCurrencyDecimals::decimals( $code );
 	}
 }

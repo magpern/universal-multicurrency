@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Immutable order-snapshot metadata reader.
  *
@@ -52,7 +51,7 @@ final class OrderSnapshotReader {
 		$stored_decimals_raw  = $order->get_meta( '_umc_transaction_decimals' );
 
 		// Convert types for classification.
-		$rate_timestamp = '' !== (string) $rate_timestamp_raw ? (int) $rate_timestamp_raw : null;
+		$rate_timestamp  = '' !== (string) $rate_timestamp_raw ? (int) $rate_timestamp_raw : null;
 		$stored_decimals = '' !== (string) $stored_decimals_raw ? (int) $stored_decimals_raw : null;
 
 		// Classify the snapshot state.

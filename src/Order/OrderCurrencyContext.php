@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Request-scoped order currency context stack.
  *

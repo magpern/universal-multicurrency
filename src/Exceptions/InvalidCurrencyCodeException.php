@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Thrown when a currency code does not match the required format.
  *
