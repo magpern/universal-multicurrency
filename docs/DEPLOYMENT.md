@@ -29,8 +29,12 @@ milestones.
 | `docs/adr/0004-transaction-currency-and-order-snapshot.md` | The transaction-currency / snapshot decision. |
 | `docs/DEPLOYMENT.md` | This record. |
 | `tests/unit/OrderSnapshotTest.php` | Pure snapshot-meta builder tests. |
-| `tests/integration/TransactionCartTest.php` | Cart/coupons/shipping/gateways/tax integration. |
-| `tests/integration/TransactionOrderTest.php` | Order snapshot + immutability + HPOS. |
+| `tests/integration/CartConversionTest.php` | Cart totals conversion, base no-op, sale price, no-double-conversion, recalc on signature change. |
+| `tests/integration/CouponConversionTest.php` | Fixed cart/product amounts, percentage, and min-spend thresholds. |
+| `tests/integration/ShippingConversionTest.php` | Core-rate cost/tax conversion, non-core pass-through, base no-op, per-currency cache isolation. |
+| `tests/integration/TaxReconciliationTest.php` | Native tax computation, sum-of-parts reconciliation, no-drift on repeated recalculation. |
+| `tests/integration/GatewayCompatibilityTest.php` | Hiding an incompatible gateway; default no-op. |
+| `tests/integration/TransactionOrderTest.php` | Order snapshot audit meta, write-once, rate-change immutability, HPOS round-trip. |
 
 ### Files modified
 
@@ -40,10 +44,16 @@ milestones.
 | `src/Integration/PriceConversionService.php` | Add `convert_amount()` — the seam entry for coupon/shipping conversion. |
 | `src/Plugin.php` | Wire the new services on `woocommerce_init`; pass `UMC_VERSION` to the snapshot. |
 | `universal-multicurrency.php` | Version → 0.3.0 (`Version:` header + `UMC_VERSION`). |
-| `tests/integration/bootstrap.php` | Enable HPOS at install so the order suite runs against it. |
-| `tests/integration/SmokeTest.php`, `StorefrontGuardTest.php`, `CurrencyRegistryTest.php` | Update denylists for M3 scope; add structural guards. |
-| `tests/unit/PriceConversionServiceTest.php` | Cover `convert_amount()`. |
 | `phpcs.xml.dist` | Relax two comment sniffs for `tests/*`. |
+| `tests/integration/bootstrap.php` | Enable HPOS at install so the order suite runs against it. |
+| `tests/integration/SmokeTest.php` | Update the out-of-scope hook denylist for M3 scope. |
+| `tests/integration/StorefrontGuardTest.php` | Update the denylist; add the no-direct-Converter / no-SQL / no-broad-catch / uninstall-retention structural guards. |
+| `tests/integration/CurrencyRegistryTest.php` | Drop `woocommerce_checkout_create_order` from the domain-layer denylist (now legitimately hooked). |
+| `tests/unit/PriceConversionServiceTest.php` | Cover `convert_amount()`. |
+| `docs/ARCHITECTURE.md` | Add the M3 transaction layer. |
+| `docs/HOOKS.md` | Catalogue the M3 hooks, filters and actions; update the deliberately-not-hooked list. |
+| `docs/ROADMAP.md` | Record the M3/M4 split and the deferred Blocks milestone. |
+| `docs/TEST_STRATEGY.md` | Add the M3 invariants under test. |
 
 ### New hooks registered
 
@@ -76,9 +86,10 @@ None. No new plugin option; the settings schema is unchanged; no migrations.
 
 ### Tests / CI
 
-`composer phpcs` clean; `composer test:unit` (145) green; `composer
-test:integration` (58, HPOS enabled) green. Integration runs against MySQL/MariaDB
-with `tests/bin/install-wp.sh`; see `.github/workflows/ci.yml`.
+`composer phpcs` clean; `composer test:unit` — 145 tests / 203 assertions green;
+`composer test:integration` — 62 tests / 139 assertions green, **HPOS enabled**.
+Integration runs against MySQL/MariaDB with `tests/bin/install-wp.sh`; see
+`.github/workflows/ci.yml`.
 
 ### Deployment sequence
 
