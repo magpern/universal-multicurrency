@@ -57,17 +57,40 @@ final class GatewayCompatibility {
 	 * @return mixed
 	 */
 	public function filter_gateways( $gateways ) {
+		// If an order context is active, defer (order-pay will handle it explicitly).
+		if ( class_exists( '\UMC\Order\OrderCurrencyContext' ) ) {
+			// Check if there's a global order context active.
+			// For now, just proceed with the session-based filtering.
+		}
+
 		if ( ! is_array( $gateways ) || array() === $gateways || ! $this->context->is_convertible_request() ) {
 			return $gateways;
 		}
 
-		$active  = $this->context->get_active_code();
+		$active = $this->context->get_active_code();
+		return $this->filter_gateways_for_currency( $gateways, $active );
+	}
+
+	/**
+	 * Filters gateways for a specific currency code.
+	 *
+	 * Extracted for reuse in order-pay and other historical contexts.
+	 *
+	 * @param array<string, object> $gateways Available gateways keyed by id.
+	 * @param string                $currency Currency code to filter against.
+	 * @return array<string, object> Filtered gateways.
+	 */
+	public function filter_gateways_for_currency( array $gateways, string $currency ): array {
+		if ( array() === $gateways ) {
+			return $gateways;
+		}
+
 		$removed = false;
 
 		foreach ( $gateways as $id => $gateway ) {
 			$supported = $this->supported_currencies( $gateway );
 
-			if ( null !== $supported && ! in_array( $active, $supported, true ) ) {
+			if ( null !== $supported && ! in_array( strtoupper( $currency ), $supported, true ) ) {
 				unset( $gateways[ $id ] );
 				$removed = true;
 
@@ -77,15 +100,15 @@ final class GatewayCompatibility {
 				 *
 				 * @since 0.3.0
 				 *
-				 * @param string $id     Gateway id.
-				 * @param string $active Active currency code.
+				 * @param string $id       Gateway id.
+				 * @param string $currency Currency code.
 				 */
-				do_action( 'umc_gateway_hidden', (string) $id, $active );
+				do_action( 'umc_gateway_hidden', (string) $id, strtoupper( $currency ) );
 			}
 		}
 
-		if ( $removed && array() === $gateways && ! $this->context->is_base_active() ) {
-			$this->notify_no_gateway( $active );
+		if ( $removed && array() === $gateways ) {
+			$this->notify_no_gateway( strtoupper( $currency ) );
 		}
 
 		return $gateways;
