@@ -25,10 +25,7 @@ final class PluginTest extends TestCase {
 		$this->assertSame( Plugin::instance(), Plugin::instance() );
 	}
 
-	public function test_init_is_idempotent(): void {
-		$plugin = Plugin::instance();
-		$plugin->init();
-		$plugin->init();
-		$this->assertSame( $plugin, Plugin::instance() );
-	}
+	// init() wires WooCommerce hooks and reads options, so its behaviour
+	// (idempotent boot, no double registration) is covered by the integration
+	// suite rather than here.
 }
