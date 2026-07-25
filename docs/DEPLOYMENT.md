@@ -132,3 +132,147 @@ Classic checkout only — Blocks/Store API not supported (later milestone). Orde
 display, emails, admin/account rendering, refunds and the order-pay currency lock
 are Milestone 4. Fees are not converted. Shipping conversion is core methods only.
 Base-currency reference totals are not stored (reporting milestone).
+
+## Milestone 4 — historical order behaviour & refunds (v0.4.0)
+
+### Summary
+
+Ensures once an order exists, its stored WooCommerce order currency and immutable
+`_umc_*` snapshot are authoritative for every later operation — the order never
+changes appearance, totals, gateway currency, or formatting due to session
+currency changes, rate edits, disabled currencies, or base-currency changes.
+Introduces an order-scoped currency context that reads the snapshot once,
+resolves formatting via a fallback chain (stored decimals → config → ISO-4217 → 2),
+and never reconverts a persisted total. Covers order display (thank-you, My-Account,
+admin, emails), order-pay retry, refund audit metadata, and legacy order viewing.
+
+### Files created
+
+| Path | Purpose |
+|---|---|
+| `src/Order/OrderSnapshotReader.php` | Read `_umc_*` metadata; validate/normalize; classify snapshot version. |
+| `src/Order/OrderCurrencySnapshot.php` | Immutable VO with typed accessors and classification flags. |
+| `src/Order/HistoricalFormattingResolver.php` | Decimals fallback chain; symbol/position from live config. |
+| `src/Order/ResolvedOrderCurrencyFormatting.php` | Immutable VO: code, decimals, symbol, position. |
+| `src/Order/OrderCurrencyContext.php` | Request-scoped LIFO stack; enter/exit/run lifecycle. |
+| `src/Order/OrderCurrencyFormatting.php` | Override globals (currency, decimals, symbol) when context active. |
+| `src/Order/HistoricalOrderDisplay.php` | Enter/exit brackets (prio 1/999 FILO) around render zones. |
+| `src/Order/OrderPayCurrencyLock.php` | Detect order-pay endpoint; lock currency; filter gateways explicitly. |
+| `src/Order/RefundSnapshot.php` | Write-once audit metadata on refund creation. |
+| `src/Support/IsoCurrencyDecimals.php` | Pure ISO-4217 decimals fallback map. |
+| `src/Admin/OrderCurrencyMetaBox.php` | Read-only audit box (HPOS + legacy); shows snapshot + resolved formatting. |
+| `docs/adr/0005-historical-order-currency-context.md` | Decision record: decimals storage, context lifecycle, gateway filtering. |
+| `tests/unit/IsoCurrencyDecimalsTest.php` | ISO map: 0/2/3-decimal codes, unknowns → 2. |
+| `tests/unit/OrderCurrencySnapshotClassificationTest.php` | Classification: legacy, v1 (M3), v2 (M4), partial, malformed, future. |
+| `tests/unit/HistoricalFormattingResolverTest.php` | Fallback chain; disabled-currency path; symbol/position from config. |
+| `tests/unit/OrderCurrencyContextTest.php` | LIFO stack; `run()` restores on return and error; nested renders. |
+| `tests/integration/HistoricalOrderDisplayTest.php` | EUR/JPY orders in different sessions; rate/currency disable/base change; admin HPOS+legacy; email; leak test (nested/repeated renders). |
+| `tests/integration/OrderPayCurrencyLockTest.php` | Order-pay locks currency; gateways filtered explicitly; disabled currency payable; no conversion. |
+| `tests/integration/RefundConversionTest.php` | Full/partial/line/shipping/tax/manual refunds; currency lock; reconciliation (0-dp JPY, 2-dp EUR). |
+| `tests/integration/LegacyOrderTest.php` | Pre-M3, v1, partial, malformed, future versions; all viewable and refundable. |
+
+### Files modified
+
+| Path | Change |
+|---|---|
+| `src/Order/OrderSnapshot.php` | Write `_umc_snapshot_version = 2` and `_umc_transaction_decimals` at creation (backward compat: old calls default v2 + 2 decimals). |
+| `src/Integration/CurrencyFormatting.php` | `should_convert()` returns false when `OrderCurrencyContext::is_active()` — M2 session formatter stands down. |
+| `src/Integration/GatewayCompatibility.php` | Extract public `filter_gateways_for_currency(array $gateways, string $currency): array` method; storefront callback defers when order context active. |
+| `src/Plugin.php` | Build shared `OrderSnapshotReader`, `HistoricalFormattingResolver`, `OrderCurrencyContext`; wire all M4 services on `woocommerce_init`. |
+| `universal-multicurrency.php` | Version → 0.4.0. |
+| `tests/unit/OrderSnapshotTest.php` | Extend with M4 snapshot-version + decimals keys. |
+| `tests/integration/StorefrontGuardTest.php` | Release `woocommerce_create_refund` from forbidden hooks; add guards: no conversion, no session access, no total-setters in Order/*. |
+| `docs/HOOKS.md` | Add M4 section (order-scoped formatting, order-pay, refunds, meta box); update deliberately-not-hooked list; add M4 filters/actions. |
+| `docs/ARCHITECTURE.md` | Add M4 section covering invariants, context stack, collaborators, ADR-0005 link. |
+
+### New hooks registered
+
+`woocommerce_order_details_before/after_order_table` (1/999 FILO),
+`woocommerce_email_before/after_order_table` (1/999 FILO),
+`woocommerce_before_resend_order_emails` / `woocommerce_after_resend_order_email` (1/999 FILO),
+`woocommerce_my_account_my_orders_column_order-total` (10),
+`template_redirect` (10),
+`woocommerce_available_payment_gateways` (15, order-pay),
+`woocommerce_create_refund` (10),
+`add_meta_boxes_{wc_get_page_screen_id('shop-order')}` (10),
+`add_meta_boxes_shop_order` (10).
+
+Full catalogue: `docs/HOOKS.md`.
+
+### New public filters / actions
+
+Filters: `umc_order_audit_view_model`. Actions: `umc_order_currency_context_entered`,
+`umc_order_currency_context_exited`, `umc_order_pay_locked_currency`.
+
+### New order metadata keys (permanent; never removed on uninstall)
+
+`_umc_snapshot_version` (2 for M4 orders; M3 = v1 when absent but `_umc_transaction_currency` present),
+`_umc_transaction_decimals` (stored decimal precision from the active currency at creation).
+
+### New refund metadata keys (permanent; never removed on uninstall)
+
+`_umc_parent_transaction_currency`, `_umc_parent_rate_identity` (audit metadata written once at creation).
+
+### New session keys
+
+None. The M4 context is request-scoped and uses no session state.
+
+### New options / DB changes
+
+None. No new plugin option; the settings schema is unchanged; no migrations.
+
+### Tests / CI
+
+`composer phpcs` clean; `composer test:unit` — 170+ tests green;
+`composer test:integration` — 85+ tests green, **HPOS enabled**.
+Structural guards green: no conversion, no session access, no total-setters in historical paths.
+
+### Deployment sequence
+
+1. Enter a controlled-deployment / low-traffic state.
+2. Back up plugin files and the database.
+3. Build the plugin zip and deploy it; activate/upgrade.
+4. Migrations: none.
+5. Clear the persistent object cache (e.g. Redis).
+6. Clear the page cache.
+7. Purge the CDN only if storefront responses/assets changed; ensure the
+   `umc_currency` cookie is part of any full-page cache key, or that
+   cart/checkout are bypassed by the cache.
+8. Clear WooCommerce transients (shipping/variation/order caches).
+9. Verify an existing non-base order on:
+   - Thank-you page (fresh order) — correct decimals/symbol, unchanged totals.
+   - My-Account list + detail — same.
+   - Admin order (HPOS + legacy) — meta box shows snapshot + resolved formatting.
+   - Transactional email (resend from admin) — correct decimals, unchanged totals.
+10. Verify order-pay: open an unpaid non-base order's pay page while another
+    currency is selected; gateways lock to the order currency; totals unchanged.
+11. Verify refund: a partial refund on a non-base order; `_umc_parent_*` written;
+    amounts unchanged; reconciliation correct (parent − refunds = remaining).
+12. Record the deployed commit and verification result here.
+
+### Rollback
+
+Orders created during the window are safe by design: each stores its own currency,
+totals, and `_umc_*` snapshot and renders in its stored currency via the snapshot
+even with the plugin deactivated. **No rollback step may re-derive an order's
+currency from current rates.** Steps: deactivate/downgrade to v0.3.0 → restore
+prior plugin files → clear object + page cache → clear WooCommerce transients →
+verify storefront reverts to base-only display and existing orders (including
+new ones) still render in their stored currency. Restore the DB backup only if
+no legitimate orders were placed after it.
+
+### Cache-clearing requirements
+
+Object cache, page cache, WooCommerce transients (variation + shipping + order).
+Monetary caches are keyed by the rate identity (`code:rate`), so they
+self-invalidate on a switch or rate edit; a manual clear is only needed on deploy.
+
+### Known limitations (M4)
+
+Presentation (symbol, position, separators) always resolves **live** from current
+config — orders reflect later merchant/localization changes, while decimals and
+totals stay fixed. Legacy/v1 orders in a disabled currency display ISO decimals
+(or 2), not a per-order stored value — cosmetic only; totals exact. v2 orders are
+exact via `_umc_transaction_decimals`. Third-party templates/emails that format
+amounts without `wc_price()` are out of scope. Store API / Blocks order rendering
+remain deferred.

@@ -122,18 +122,63 @@ Metadata keys written (permanent order data; never removed on uninstall):
 `_umc_rate_timestamp`, `_umc_rate_source`, `_umc_plugin_version`,
 `_umc_rate_identity`.
 
-## Deliberately NOT hooked (out of scope in Milestone 3)
+## Milestone 4 — historical order behaviour & refunds
+
+Milestone 4 ensures once an order exists, its stored WooCommerce order currency
+and immutable `_umc_*` snapshot are authoritative for every later operation — the
+order never changes appearance, totals, gateway currency, or formatting due to
+session currency changes, rate edits, disabled currencies, or base-currency
+changes. Historical services read stored values in the order currency, format
+them correctly, and never reconvert.
+
+### Order-scoped currency context and display (`Order\*`)
+
+| Hook | Args | Prio | Owner | Activation | Teardown |
+|---|---|---|---|---|---|
+| `woocommerce_order_details_before_order_table` | `($order)` | 1 | `HistoricalOrderDisplay` | thank-you + view-order | paired `after` (FILO @999) |
+| `woocommerce_order_details_after_order_table` | `($order)` | 999 | `HistoricalOrderDisplay` | thank-you + view-order | pops context |
+| `woocommerce_email_before_order_table` | `($order,$admin,$plain,$email)` | 1 | `HistoricalOrderDisplay` | email render/preview | paired `after` (FILO @999) |
+| `woocommerce_email_after_order_table` | `($order,$admin,$plain,$email)` | 999 | `HistoricalOrderDisplay` | email render/preview | pops context |
+| `woocommerce_before_resend_order_emails` | `($order,$type)` | 1 | `HistoricalOrderDisplay` | admin email resend | paired `after` (FILO @999) |
+| `woocommerce_after_resend_order_email` | `($order,$type)` | 999 | `HistoricalOrderDisplay` | admin email resend | pops context |
+| `woocommerce_my_account_my_orders_column_order-total` | `($order)` | 10 | `HistoricalOrderDisplay` | My-Account list cell | owned `run()` via try/finally |
+| `woocommerce_currency` | `($code)` | 20 | `OrderCurrencyFormatting` | context active | fires only under context |
+| `woocommerce_currency_symbol` | `($symbol,$code)` | 20 | `OrderCurrencyFormatting` | context active | — |
+| `wc_price_args` | `($args)` | 20 | `OrderCurrencyFormatting` | context active OR explicit `currency` arg | stateless; M2 CurrencyFormatting (prio 10) stands down under context |
+
+### Order-pay currency lock (`Order\OrderPayCurrencyLock`)
+
+| Hook | Args | Prio | Owner | Purpose |
+|---|---|---|---|---|
+| `template_redirect` | `()` | 10 | `OrderPayCurrencyLock` | Detect `order-pay` endpoint; load+verify order; enter currency context for request. |
+| `woocommerce_available_payment_gateways` | `($gateways)` | 15 | `OrderPayCurrencyLock` | Filter gateways for the locked order currency (explicit currency, not session). |
+
+(M3's `GatewayCompatibility` at prio 10 defers when the order context is active.)
+
+### Refund audit metadata (`Order\RefundSnapshot`)
+
+| Hook | Args | Prio | Owner | Activation | Teardown |
+|---|---|---|---|---|---|
+| `woocommerce_create_refund` | `($refund,$args)` | 10 | `RefundSnapshot` | any refund creation | write-once audit meta; no save hook |
+
+### Admin audit meta box (`Admin\OrderCurrencyMetaBox`)
+
+| Hook | Args | Prio | Owner | Purpose |
+|---|---|---|---|---|
+| `add_meta_boxes_{wc_get_page_screen_id('shop-order')}` | `($post_or_order)` | 10 | `OrderCurrencyMetaBox` | Read-only audit box (HPOS). |
+| `add_meta_boxes_shop_order` | `($post_or_order)` | 10 | `OrderCurrencyMetaBox` | Read-only audit box (legacy). |
+
+## Deliberately NOT hooked (out of scope)
 
 Fees are **not** converted (disabled by decision; opt-in only via `umc_convert_fee`),
 so `woocommerce_cart_calculate_fees` carries no plugin callback. No stock hooks,
-ever. Order display, emails, admin/account rendering, refunds, the order-pay
-currency lock and order-status hooks are Milestone 4. Cart & Checkout **Blocks**
-(Store API) are a dedicated later milestone: no `woocommerce_store_api_*` hooks,
-and classic checkout is the only supported path — Blocks compatibility is **not**
-claimed. A guard test (`StorefrontGuardTest`) asserts no plugin-origin callbacks
-land on the fee/stock/refund/order-status/Store-API hooks, that only the seam
-uses the `Converter`, that no `$wpdb`/SQL is used, and that no broad exception is
-swallowed.
+ever. Order-status hooks and the order-pay currency lock are Milestone 4 (covered
+above). Cart & Checkout **Blocks** (Store API) are a dedicated later milestone:
+no `woocommerce_store_api_*` hooks, and classic checkout is the only supported
+path — Blocks compatibility is **not** claimed. A guard test (`StorefrontGuardTest`)
+asserts no plugin-origin callbacks land on the fee/stock/order-status/Store-API
+hooks, that only the seam uses the `Converter`, that no `$wpdb`/SQL is used, and
+that no broad exception is swallowed.
 
 ## Filters and actions the plugin provides
 
@@ -149,6 +194,10 @@ swallowed.
 | `umc_cart_recalculated` (action) | `($current, $previous)` | 0.3.0 | Fires after the cart is recalculated for a new rate identity. |
 | `umc_gateway_hidden` (action) | `($id, $active)` | 0.3.0 | Fires when a gateway is hidden for currency incompatibility. |
 | `umc_order_snapshot_created` (action) | `($order, $meta)` | 0.3.0 | Fires after the order snapshot is staged on the order. |
+| `umc_order_currency_context_entered` (action) | `($order)` | 0.4.0 | Fires when an order currency context is entered (historical render / order-pay). |
+| `umc_order_currency_context_exited` (action) | `($order)` | 0.4.0 | Fires when an order currency context is exited. |
+| `umc_order_pay_locked_currency` (action) | `($currency, $order)` | 0.4.0 | Fires when the order-pay endpoint locks a specific order's currency. |
+| `umc_order_audit_view_model` (filter) | `($view, $snapshot, $order)` | 0.4.0 | Filter the order currency audit meta-box view model. |
 
 Note: `umc_convert_fee` is documented for integrations but **not wired** in
 Milestone 3 — no fee conversion ships enabled.

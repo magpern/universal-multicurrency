@@ -127,3 +127,66 @@ in `docs/architecture/transaction-flow.md`; the model is governed by ADR-0004.
 - **Fees are not converted** (disabled; opt-in `umc_convert_fee` only). **Blocks /
   Store API** and order display / emails / refunds are later milestones; classic
   checkout is the only supported path and Blocks compatibility is not claimed.
+
+## Order & display layer (Milestone 4)
+
+Milestone 4 ensures once an order exists, its stored WooCommerce order currency
+and immutable `_umc_*` snapshot are authoritative for every later operation — the
+order never changes appearance, totals, gateway currency, or formatting due to
+session currency changes, rate edits, disabled currencies, or base-currency
+changes. The historical services layer reads stored values in the order currency,
+formats them correctly via a fallback chain (stored decimals → config → ISO-4217),
+and never reconverts a persisted total.
+
+### Invariants
+
+1. **Stored totals authoritative** — never multiplied by any rate at render/pay/refund.
+2. **Order currency overrides session currency** while an order is rendered, paid, or refunded.
+3. **Refund currency == parent order currency**, always.
+4. **No exchange-rate service on any historical/refund path** — no `Converter`,
+   `PriceConversionService`, `RateProvider`, or `CurrencyContext` rate/active lookup.
+5. **Context cannot leak** — every enter is paired with an exit via `try/finally`
+   (owned paths) or strict FILO hook priorities; after render, formatting reverts.
+6. **HPOS-only access** — `WC_Order`/`WC_Order_Refund` CRUD; no `$wpdb`, post-meta API, or table SQL.
+7. **Snapshot permanent & additive** — M3 keys never rewritten; M4 only adds `_umc_*` keys; no `_umc_*` deletion.
+8. **Legacy orders viewable & refundable** — missing snapshot never blocks read/refund.
+
+### Architecture
+
+A new **order-scoped request state stack** that reads and resolves currency formatting
+once on entry, then caches the formatting for the request:
+
+```
+WC_Order
+  → OrderSnapshotReader        (CRUD read + validate + classify; NO Settings/registry/session)
+  → OrderCurrencySnapshot       (immutable VO; schema_version, stored_decimals, audit fields)
+  → HistoricalFormattingResolver (decimals/symbol/position fallback; uses CurrencyRegistry + IsoCurrencyDecimals)
+  → ResolvedOrderCurrencyFormatting (immutable: code, decimals, symbol, position)
+       ↓
+  OrderCurrencyContext (stack of ResolvedOrderCurrencyFormatting, LIFO)
+       ├─ OrderCurrencyFormatting  (override globals under context; M2 CurrencyFormatting stands down)
+       ├─ HistoricalOrderDisplay   (enter/exit brackets around render zones)
+       ├─ OrderPayCurrencyLock     (order-pay: enter context; gateway filtering with explicit order currency)
+       └─ Admin\OrderCurrencyMetaBox (read-only audit; direct reader + resolver use)
+  RefundSnapshot (reader only — writes _umc_parent_* audit meta)
+```
+
+### Collaborators
+
+| Class | Deps | Responsibility |
+|---|---|---|
+| `Order\OrderSnapshotReader` | *(none)* | CRUD-read `_umc_*` metadata; validate/normalize; classify via `_umc_snapshot_version`. No Settings, registry, session, or rates. |
+| `Order\OrderCurrencySnapshot` | — | Immutable VO: accessors + classification flags (`has_snapshot`, `is_legacy`, `is_partial`, `is_malformed`, `is_future`). |
+| `Order\HistoricalFormattingResolver` | `CurrencyRegistry`, `Support\IsoCurrencyDecimals` | Decimals fallback: stored → config → ISO-4217 → 2. Symbol/position from live config (presentation-only). |
+| `Order\ResolvedOrderCurrencyFormatting` | — | Immutable VO: `code()`, `decimals()`, `symbol()`, `position()`. |
+| `Order\OrderCurrencyContext` | `OrderSnapshotReader`, `HistoricalFormattingResolver` | Request-scoped LIFO stack. `enter(order)`, `exit()`, `run(order, callable)`, `is_active()`, `depth()`, `current_code()`. |
+| `Order\OrderCurrencyFormatting` | `OrderCurrencyContext` | Override `woocommerce_currency`, `_symbol`, `wc_price_args` decimals/separators when context active. M2 `CurrencyFormatting` gates on `is_active()`. |
+| `Order\HistoricalOrderDisplay` | `OrderCurrencyContext` | Enter/exit brackets (prio 1/999 FILO) around order-details table, emails, resend, My-Account list. |
+| `Order\OrderPayCurrencyLock` | `OrderCurrencyContext`, `Integration\GatewayCompatibility` | On `order-pay`, load+verify order, enter context for request, filter gateways with explicit order currency. |
+| `Order\RefundSnapshot` | `OrderSnapshotReader` | On `woocommerce_create_refund`, write-once `_umc_parent_transaction_currency` + `_umc_parent_rate_identity` (audit). |
+| `Support\IsoCurrencyDecimals` | *(none)* | Pure ISO-4217 fallback map: 0-decimal (JPY, etc), 3-decimal (BHD, etc), default 2. |
+| `Admin\OrderCurrencyMetaBox` | `OrderSnapshotReader`, `HistoricalFormattingResolver` | Read-only audit box (HPOS + legacy). Pure `view_model()` builder + escaped render. |
+
+The snapshot schema includes `_umc_snapshot_version = 2` for M4 (M3 = v1). Legacy,
+partial, malformed and future versions remain readable and refundable via the
+fallback chain. See ADR-0005.
