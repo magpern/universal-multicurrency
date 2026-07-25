@@ -12,7 +12,7 @@ jobs:
   phpcs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
@@ -23,7 +23,7 @@ jobs:
   unit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
@@ -52,7 +52,7 @@ jobs:
       WP_DB_USER: root
       WP_DB_PASS: root
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
@@ -65,14 +65,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.1'
           coverage: none
       - run: composer install --no-dev --prefer-dist --no-progress --optimize-autoloader
       - run: bash bin/build-zip.sh
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: universal-multicurrency
           path: dist/universal-multicurrency-*.zip
