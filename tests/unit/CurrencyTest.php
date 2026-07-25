@@ -42,8 +42,18 @@ final class CurrencyTest extends TestCase {
 		);
 	}
 
-	public function test_lowercase_code_is_normalized_to_uppercase(): void {
-		$this->assertSame( 'EUR', ( new Currency( 'eur' ) )->code() );
+	public function test_lowercase_code_is_rejected(): void {
+		$this->expectException( InvalidCurrencyCodeException::class );
+		new Currency( 'eur' );
+	}
+
+	public function test_from_array_rejects_lowercase_code(): void {
+		$this->expectException( InvalidCurrencyCodeException::class );
+		Currency::from_array( 'eur', array() );
+	}
+
+	public function test_uppercase_code_is_preserved_unchanged(): void {
+		$this->assertSame( 'EUR', ( new Currency( 'EUR' ) )->code() );
 	}
 
 	/**
@@ -59,12 +69,15 @@ final class CurrencyTest extends TestCase {
 	 */
 	public static function malformed_codes(): array {
 		return array(
+			'lowercase'   => array( 'eur' ),
+			'mixed case'  => array( 'Eur' ),
 			'too short'   => array( 'EU' ),
 			'too long'    => array( 'EURO' ),
 			'has digit'   => array( 'E1R' ),
 			'all digits'  => array( '123' ),
 			'empty'       => array( '' ),
 			'punctuation' => array( 'E-R' ),
+			'whitespace'  => array( ' EUR' ),
 		);
 	}
 

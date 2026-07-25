@@ -67,7 +67,11 @@ final class Currency {
 	/**
 	 * Validates and constructs. A Currency is always valid once constructed.
 	 *
-	 * @param string $code     Currency code; normalized to uppercase.
+	 * The code must already be canonical: exactly three uppercase letters. The
+	 * value object is strict and does not normalize — trimming and uppercasing
+	 * of user input belong to forgiving boundary layers (e.g. Settings).
+	 *
+	 * @param string $code     Canonical uppercase three-letter code (e.g. "EUR").
 	 * @param int    $decimals Fraction digits, 0..MAX_DECIMALS.
 	 * @param string $symbol   Display symbol; '' allowed.
 	 * @param string $position One of self::POSITIONS.
@@ -83,8 +87,6 @@ final class Currency {
 		string $position = self::DEFAULT_POSITION,
 		bool $enabled = true
 	) {
-		$code = strtoupper( $code );
-
 		if ( 1 !== preg_match( '/^[A-Z]{3}$/', $code ) ) {
 			throw InvalidCurrencyCodeException::for_code( $code );
 		}
@@ -107,10 +109,12 @@ final class Currency {
 	/**
 	 * Builds a Currency from a settings-shaped config array (no 'code' key).
 	 *
-	 * Missing attributes fall back to defaults. Intended for sanitized config,
-	 * where every value is already valid.
+	 * Missing attributes fall back to defaults. Follows the same strict code
+	 * contract as the constructor — the code must already be canonical uppercase
+	 * and is not normalized here. Intended for sanitized config, where every
+	 * value is already valid.
 	 *
-	 * @param string               $code   Currency code.
+	 * @param string               $code   Canonical uppercase three-letter code.
 	 * @param array<string, mixed> $config Attributes: decimals, symbol, position, enabled.
 	 */
 	public static function from_array( string $code, array $config ): self {
