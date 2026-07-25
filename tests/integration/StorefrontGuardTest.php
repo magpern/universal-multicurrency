@@ -22,7 +22,6 @@ final class StorefrontGuardTest extends WP_UnitTestCase {
 		'woocommerce_checkout_create_order',
 		'woocommerce_store_api_checkout_update_order_meta',
 		'woocommerce_cart_calculate_fees',
-		'woocommerce_package_rates',
 		'woocommerce_shipping_packages',
 		'woocommerce_product_get_stock_quantity',
 		'woocommerce_product_get_stock_status',

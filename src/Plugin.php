@@ -16,6 +16,7 @@ use UMC\Integration\CouponConversion;
 use UMC\Integration\CurrencyFormatting;
 use UMC\Integration\PriceConversionService;
 use UMC\Integration\PriceHooks;
+use UMC\Integration\ShippingConversion;
 use UMC\Rates\ManualRateProvider;
 
 /**
@@ -82,6 +83,7 @@ final class Plugin {
 				( new Switcher( $context ) )->register();
 				( new CartRecalculation( $context ) )->register();
 				( new CouponConversion( $service, $context ) )->register();
+				( new ShippingConversion( $service, $context ) )->register();
 			}
 		);
 

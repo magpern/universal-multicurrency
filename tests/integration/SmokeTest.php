@@ -48,7 +48,6 @@ final class SmokeTest extends WP_UnitTestCase {
 	 */
 	public function test_registers_no_out_of_scope_hooks(): void {
 		$forbidden = array(
-			'woocommerce_package_rates',
 			'woocommerce_shipping_packages',
 			'woocommerce_cart_hash',
 			'woocommerce_cart_calculate_fees',
