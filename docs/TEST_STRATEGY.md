@@ -56,46 +56,57 @@ idempotent boot.
 
 ## Milestone 4 invariants under test
 
+Exercised end to end through the real registered hooks under HPOS
+(`HistoricalOrderDisplayTest`, `OrderPayCurrencyLockTest`, `RefundConversionTest`,
+`LegacyOrderTest`), not just unit-level parsers.
+
 ### Historical order display
 
-EUR/JPY orders in different session currencies show correct decimals + symbol;
-totals identical to creation. After a rate edit / currency disable / base-currency
-change, the order's formatting and totals remain unchanged. Admin order (HPOS +
-legacy) shows the audit meta box with snapshot version, decimals, symbol, position.
+An EUR order rendered through the actual display brackets in a SEK session reports
+EUR identity, symbol and 2 decimals, then reverts to SEK after the after-table
+bracket; a 0-decimal JPY order reports 0 decimals in a 2-decimal session and
+renders without a decimal separator; a currency with no live configuration falls
+back to the ISO decimals. Stored totals are identical to creation, and a rate edit
+or currency removal after order creation changes neither. Nested renders are LIFO;
+repeated renders leave `depth() == 0` with no leaked context.
 
 ### Order-pay currency lock
 
-Order-pay endpoint locks the order currency regardless of session. Gateway filter
-receives the order currency explicitly; incompatible gateways hidden; if no
-compatible gateway exists and the currency is disabled, a blocking error shows
-and the order remains payable via the ISO fallback. Order totals never change;
-payment request currency equals order currency.
+Both endpoint forms resolve — standard `?order-pay=<id>` and legacy
+`?pay_for_order=<id>`; missing/zero/malformed ids and the boolean `pay_for_order`
+flag bail safely; the order key is validated and an order owned by another
+customer is rejected; a paid order is not locked. Under lock the gateway filter
+receives the **explicit** order currency: compatible gateways stay, incompatible
+are removed, and a gateway supported by the order currency survives even though the
+session filter would have removed it (the order-pay filter evaluates the original
+gateway set). A disabled historical currency stays payable when a gateway supports
+it; no compatible gateway yields an empty set plus a blocking notice. Totals and
+order currency are never rewritten.
 
 ### Refunds
 
-Full, partial, line, shipping, tax, manual, and multiple refunds all store/display
-in the parent order currency; no conversion; parent − refunds = remaining
-(reconciliation with zero-decimal JPY and two-decimal EUR). `_umc_parent_*`
-metadata written once and correct.
+Full, partial and line-level refunds inherit the parent currency and store the
+entered amount verbatim (no conversion); `_umc_parent_transaction_currency` and
+`_umc_parent_rate_identity` are recorded and stable across reads; multiple partial
+refunds reconcile without drift (0-dp JPY and 2-dp EUR); a rate edit or session
+switch after creation changes nothing; a legacy parent falls back to its own order
+currency for the audit currency.
 
 ### Legacy & malformed orders
 
-Pre-M3 (no snapshot), M3 v1 (no version key), partial, malformed, and future
-versions all remain viewable and refundable. Decimal fallback chain applies:
-stored → config → ISO → 2.
-
-### Context lifecycle
-
-Nested + repeated renders leave `OrderCurrencyContext::depth() == 0`. Formatting
-reverts to session after the context exits. The `run()` method restores even if
-the wrapped render throws (exception safety via try/finally).
+Legacy (no snapshot), M3 v1, partial, malformed and future versions are each
+classified correctly and remain readable and refundable in the stored currency
+with unchanged totals. The order currency falls back to `$order->get_currency()`,
+and the decimal fallback chain holds: stored → live config → ISO-4217 → 2.
 
 ### Structural guards
 
 M4 services (`Order/*` + `Admin\OrderCurrencyMetaBox`) contain no `Converter` /
-`PriceConversionService` / `CurrencyContext` rate/active access / session/cookie /
-total-setters. `_umc_*` metadata never deleted. Refund hook released;
-bracket pairing intact. Idempotent boot; no leaks.
+`PriceConversionService`, no live rate lookup (`get_rate`/`RateProvider`), no
+`CurrencyContext` access, no session/cookie access, no post-meta API and no order/
+refund total setters. `GatewayCompatibility` never inspects the order context. No
+runtime `_umc_*` deletion; no Store API / Blocks hook registration in `src`; the
+historical-display enter/exit brackets are paired. Idempotent boot; no leaks.
 
 ## Deferred (later milestones)
 

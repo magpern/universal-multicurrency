@@ -163,25 +163,25 @@ admin, emails), order-pay retry, refund audit metadata, and legacy order viewing
 | `src/Admin/OrderCurrencyMetaBox.php` | Read-only audit box (HPOS + legacy); shows snapshot + resolved formatting. |
 | `docs/adr/0005-historical-order-currency-context.md` | Decision record: decimals storage, context lifecycle, gateway filtering. |
 | `tests/unit/IsoCurrencyDecimalsTest.php` | ISO map: 0/2/3-decimal codes, unknowns → 2. |
-| `tests/unit/OrderCurrencySnapshotClassificationTest.php` | Classification: legacy, v1 (M3), v2 (M4), partial, malformed, future. |
-| `tests/unit/HistoricalFormattingResolverTest.php` | Fallback chain; disabled-currency path; symbol/position from config. |
-| `tests/unit/OrderCurrencyContextTest.php` | LIFO stack; `run()` restores on return and error; nested renders. |
-| `tests/integration/HistoricalOrderDisplayTest.php` | EUR/JPY orders in different sessions; rate/currency disable/base change; admin HPOS+legacy; email; leak test (nested/repeated renders). |
-| `tests/integration/OrderPayCurrencyLockTest.php` | Order-pay locks currency; gateways filtered explicitly; disabled currency payable; no conversion. |
-| `tests/integration/RefundConversionTest.php` | Full/partial/line/shipping/tax/manual refunds; currency lock; reconciliation (0-dp JPY, 2-dp EUR). |
-| `tests/integration/LegacyOrderTest.php` | Pre-M3, v1, partial, malformed, future versions; all viewable and refundable. |
+| `tests/integration/OrderCurrencySnapshotClassificationTest.php` | Classification: legacy, v1 (M3), v2 (M4), partial, malformed, future. |
+| `tests/integration/HistoricalFormattingResolverTest.php` | Fallback chain; disabled-currency path; symbol/position from config. |
+| `tests/integration/OrderCurrencyContextTest.php` | LIFO stack; `run()` restores on return and error; nested renders. |
+| `tests/integration/HistoricalOrderDisplayTest.php` | EUR/JPY orders in a different session through the real display brackets; symbol/decimals; rate-edit & currency-removal immutability; stored totals unchanged; nested/repeated-render leak checks. |
+| `tests/integration/OrderPayCurrencyLockTest.php` | Standard & legacy endpoints; key/ownership/paid-order checks; explicit-currency gateway filtering; compatible kept / incompatible removed; original-set determinism; disabled currency payable; empty-set blocking notice; no total/currency rewrite. |
+| `tests/integration/RefundConversionTest.php` | Full/partial/line-level refunds; parent-currency inheritance; amount stored unchanged; `_umc_parent_*` audit; reconciliation without drift (0-dp JPY, 2-dp EUR); rate-edit & session-switch immutability; legacy-parent fallback. |
+| `tests/integration/LegacyOrderTest.php` | Legacy / v1 / partial / malformed / future snapshots — each readable and refundable; order-currency fallback; decimal fallback chain. |
 
 ### Files modified
 
 | Path | Change |
 |---|---|
 | `src/Order/OrderSnapshot.php` | Write `_umc_snapshot_version = 2` and `_umc_transaction_decimals` at creation (backward compat: old calls default v2 + 2 decimals). |
-| `src/Integration/CurrencyFormatting.php` | `should_convert()` returns false when `OrderCurrencyContext::is_active()` — M2 session formatter stands down. |
-| `src/Integration/GatewayCompatibility.php` | Extract public `filter_gateways_for_currency(array $gateways, string $currency): array` method; storefront callback defers when order context active. |
-| `src/Plugin.php` | Build shared `OrderSnapshotReader`, `HistoricalFormattingResolver`, `OrderCurrencyContext`; wire all M4 services on `woocommerce_init`. |
+| `src/Integration/GatewayCompatibility.php` | Extract public `filter_gateways_for_currency(array $gateways, string $currency): array` engine driven by an explicit code; storefront callback resolves the session currency; no order-context inspection. |
+| `src/Order/RefundSnapshot.php` | Parent-currency audit falls back to the parent order currency for legacy parents. |
+| `src/Plugin.php` | Build shared `OrderSnapshotReader`, `HistoricalFormattingResolver`, `OrderCurrencyContext` and a single shared `GatewayCompatibility`; wire all M4 services on `woocommerce_init`. |
 | `universal-multicurrency.php` | Version → 0.4.0. |
 | `tests/unit/OrderSnapshotTest.php` | Extend with M4 snapshot-version + decimals keys. |
-| `tests/integration/StorefrontGuardTest.php` | Release `woocommerce_create_refund` from forbidden hooks; add guards: no conversion, no session access, no total-setters in Order/*. |
+| `tests/integration/StorefrontGuardTest.php` | Release `woocommerce_create_refund` from forbidden hooks; add guards for no conversion / no session / no live-rate / no CurrencyContext / no post-meta API in historical services, gateway not inspecting the order context, no runtime `_umc_*` deletion, no Store API/Blocks registration, and paired display brackets. |
 | `docs/HOOKS.md` | Add M4 section (order-scoped formatting, order-pay, refunds, meta box); update deliberately-not-hooked list; add M4 filters/actions. |
 | `docs/ARCHITECTURE.md` | Add M4 section covering invariants, context stack, collaborators, ADR-0005 link. |
 
@@ -192,7 +192,8 @@ admin, emails), order-pay retry, refund audit metadata, and legacy order viewing
 `woocommerce_before_resend_order_emails` / `woocommerce_after_resend_order_email` (1/999 FILO),
 `woocommerce_my_account_my_orders_column_order-total` (10),
 `template_redirect` (10),
-`woocommerce_available_payment_gateways` (15, order-pay),
+`woocommerce_available_payment_gateways` (10, order-pay — after deregistering the
+storefront callback for the request),
 `woocommerce_create_refund` (10),
 `add_meta_boxes_{wc_get_page_screen_id('shop-order')}` (10),
 `add_meta_boxes_shop_order` (10).
@@ -202,7 +203,8 @@ Full catalogue: `docs/HOOKS.md`.
 ### New public filters / actions
 
 Filters: `umc_order_audit_view_model`. Actions: `umc_order_currency_context_entered`,
-`umc_order_currency_context_exited`, `umc_order_pay_locked_currency`.
+`umc_order_currency_context_exited`, `umc_order_pay_locked_currency`,
+`umc_refund_snapshot_created`.
 
 ### New order metadata keys (permanent; never removed on uninstall)
 
@@ -223,9 +225,11 @@ None. No new plugin option; the settings schema is unchanged; no migrations.
 
 ### Tests / CI
 
-`composer phpcs` clean; `composer test:unit` — 170+ tests green;
-`composer test:integration` — 85+ tests green, **HPOS enabled**.
-Structural guards green: no conversion, no session access, no total-setters in historical paths.
+`composer phpcs` clean; `composer test:unit` — 163 tests / 224 assertions green;
+`composer test:integration` — 133 tests / 337 assertions green, **HPOS enabled**.
+Structural guards green: no conversion, no session, no live-rate, no CurrencyContext,
+no post-meta API in historical services; gateway never inspects the order context;
+no runtime `_umc_*` deletion; no Store API/Blocks registration; paired display brackets.
 
 ### Deployment sequence
 

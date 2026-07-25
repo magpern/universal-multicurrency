@@ -180,10 +180,10 @@ WC_Order
 | `Order\HistoricalFormattingResolver` | `CurrencyRegistry`, `Support\IsoCurrencyDecimals` | Decimals fallback: stored → config → ISO-4217 → 2. Symbol/position from live config (presentation-only). |
 | `Order\ResolvedOrderCurrencyFormatting` | — | Immutable VO: `code()`, `decimals()`, `symbol()`, `position()`. |
 | `Order\OrderCurrencyContext` | `OrderSnapshotReader`, `HistoricalFormattingResolver` | Request-scoped LIFO stack. `enter(order)`, `exit()`, `run(order, callable)`, `is_active()`, `depth()`, `current_code()`. |
-| `Order\OrderCurrencyFormatting` | `OrderCurrencyContext` | Override `woocommerce_currency`, `_symbol`, `wc_price_args` decimals/separators when context active. M2 `CurrencyFormatting` gates on `is_active()`. |
+| `Order\OrderCurrencyFormatting` | `OrderCurrencyContext` | Override `woocommerce_currency`, `_symbol`, `wc_price_args` decimals/separators when context active. Registered at priority 20, it overrides the M2 `CurrencyFormatting` (priority 10) result while a context is on the stack; M2 does not inspect the order context. |
 | `Order\HistoricalOrderDisplay` | `OrderCurrencyContext` | Enter/exit brackets (prio 1/999 FILO) around order-details table, emails, resend, My-Account list. |
-| `Order\OrderPayCurrencyLock` | `OrderCurrencyContext`, `Integration\GatewayCompatibility` | On `order-pay`, load+verify order, enter context for request, filter gateways with explicit order currency. |
-| `Order\RefundSnapshot` | `OrderSnapshotReader` | On `woocommerce_create_refund`, write-once `_umc_parent_transaction_currency` + `_umc_parent_rate_identity` (audit). |
+| `Order\OrderPayCurrencyLock` | `OrderCurrencyContext`, `Integration\GatewayCompatibility` | On `order-pay`/`pay_for_order`, load+verify order, enter context for the request; deregister the storefront gateway callback and filter the original gateway set with the explicit order currency. |
+| `Order\RefundSnapshot` | `OrderSnapshotReader` | On `woocommerce_create_refund`, write-once `_umc_parent_transaction_currency` (falling back to the parent order currency for legacy parents) + `_umc_parent_rate_identity` (audit). |
 | `Support\IsoCurrencyDecimals` | *(none)* | Pure ISO-4217 fallback map: 0-decimal (JPY, etc), 3-decimal (BHD, etc), default 2. |
 | `Admin\OrderCurrencyMetaBox` | `OrderSnapshotReader`, `HistoricalFormattingResolver` | Read-only audit box (HPOS + legacy). Pure `view_model()` builder + escaped render. |
 

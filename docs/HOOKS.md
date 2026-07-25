@@ -109,7 +109,7 @@ All storefront hooks below register on `woocommerce_init` and gate on
 
 | Hook | Args | Prio | Why |
 |---|---|---|---|
-| `woocommerce_available_payment_gateways` | `($gateways)` | 10 | Remove gateways that do not support the active currency (declared via `umc_gateway_supported_currencies`); if none remain in a non-base currency, add one explanatory checkout notice. Never rewrites a gateway's amount/currency. |
+| `woocommerce_available_payment_gateways` | `($gateways)` | 10 | Storefront callback: remove gateways that do not support the **session** currency (via the shared `filter_gateways_for_currency()` engine, given an explicit code); if none remain, add one explanatory checkout notice. Never rewrites a gateway's amount/currency. On the order-pay endpoint this callback is deregistered by `OrderPayCurrencyLock` (see M4). |
 
 ### Order snapshot (`Order\OrderSnapshot`)
 
@@ -120,7 +120,9 @@ All storefront hooks below register on `woocommerce_init` and gate on
 Metadata keys written (permanent order data; never removed on uninstall):
 `_umc_base_currency`, `_umc_transaction_currency`, `_umc_exchange_rate`,
 `_umc_rate_timestamp`, `_umc_rate_source`, `_umc_plugin_version`,
-`_umc_rate_identity`.
+`_umc_rate_identity`. Milestone 4 adds two more at creation:
+`_umc_snapshot_version` (`2`) and `_umc_transaction_decimals`. Refunds carry
+`_umc_parent_transaction_currency` and `_umc_parent_rate_identity` (see M4).
 
 ## Milestone 4 — historical order behaviour & refunds
 
@@ -144,16 +146,26 @@ them correctly, and never reconvert.
 | `woocommerce_my_account_my_orders_column_order-total` | `($order)` | 10 | `HistoricalOrderDisplay` | My-Account list cell | owned `run()` via try/finally |
 | `woocommerce_currency` | `($code)` | 20 | `OrderCurrencyFormatting` | context active | fires only under context |
 | `woocommerce_currency_symbol` | `($symbol,$code)` | 20 | `OrderCurrencyFormatting` | context active | — |
-| `wc_price_args` | `($args)` | 20 | `OrderCurrencyFormatting` | context active OR explicit `currency` arg | stateless; M2 CurrencyFormatting (prio 10) stands down under context |
+| `wc_price_args` | `($args)` | 20 | `OrderCurrencyFormatting` | context active OR explicit `currency` arg | stateless; registered after M2 `CurrencyFormatting` (prio 10) so it overrides the session formatting while a context is on the stack |
+
+While an order context is on the stack, `OrderCurrencyFormatting` (priority 20)
+overrides the M2 `CurrencyFormatting` (default priority 10) result. M2 does not
+inspect the order context; the two are mutually exclusive by construction (M2
+only rewrites formatting on a convertible non-base storefront request).
 
 ### Order-pay currency lock (`Order\OrderPayCurrencyLock`)
 
 | Hook | Args | Prio | Owner | Purpose |
 |---|---|---|---|---|
-| `template_redirect` | `()` | 10 | `OrderPayCurrencyLock` | Detect `order-pay` endpoint; load+verify order; enter currency context for request. |
-| `woocommerce_available_payment_gateways` | `($gateways)` | 15 | `OrderPayCurrencyLock` | Filter gateways for the locked order currency (explicit currency, not session). |
+| `template_redirect` | `()` | 10 | `OrderPayCurrencyLock` | Detect the `order-pay` / `pay_for_order` endpoint; load+verify order; enter the currency context for the request. |
+| `woocommerce_available_payment_gateways` | `($gateways)` | 10 | `OrderPayCurrencyLock` | Filter gateways for the locked order currency (explicit currency, not session). |
 
-(M3's `GatewayCompatibility` at prio 10 defers when the order context is active.)
+On lock, `OrderPayCurrencyLock` **deregisters** the storefront `GatewayCompatibility`
+callback (the shared instance) and registers its own at the vacated priority 10,
+so the order-currency filter evaluates the **original** gateway set. Filtering is
+deterministic and never depends on a later filter repairing an earlier
+session-based result. Both endpoint forms are supported: the standard
+`?order-pay=<id>&key=…` and the legacy `?pay_for_order=<id>&key=…`.
 
 ### Refund audit metadata (`Order\RefundSnapshot`)
 
@@ -195,8 +207,9 @@ that no broad exception is swallowed.
 | `umc_gateway_hidden` (action) | `($id, $active)` | 0.3.0 | Fires when a gateway is hidden for currency incompatibility. |
 | `umc_order_snapshot_created` (action) | `($order, $meta)` | 0.3.0 | Fires after the order snapshot is staged on the order. |
 | `umc_order_currency_context_entered` (action) | `($order)` | 0.4.0 | Fires when an order currency context is entered (historical render / order-pay). |
-| `umc_order_currency_context_exited` (action) | `($order)` | 0.4.0 | Fires when an order currency context is exited. |
+| `umc_order_currency_context_exited` (action) | `()` | 0.4.0 | Fires when an order currency context is exited. |
 | `umc_order_pay_locked_currency` (action) | `($currency, $order)` | 0.4.0 | Fires when the order-pay endpoint locks a specific order's currency. |
+| `umc_refund_snapshot_created` (action) | `($refund, $meta, $snapshot)` | 0.4.0 | Fires after refund audit metadata is staged on a refund. |
 | `umc_order_audit_view_model` (filter) | `($view, $snapshot, $order)` | 0.4.0 | Filter the order currency audit meta-box view model. |
 
 Note: `umc_convert_fee` is documented for integrations but **not wired** in
