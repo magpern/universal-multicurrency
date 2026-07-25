@@ -14,6 +14,7 @@ use UMC\Cart\CartRecalculation;
 use UMC\Frontend\Switcher;
 use UMC\Integration\CouponConversion;
 use UMC\Integration\CurrencyFormatting;
+use UMC\Integration\GatewayCompatibility;
 use UMC\Integration\PriceConversionService;
 use UMC\Integration\PriceHooks;
 use UMC\Integration\ShippingConversion;
@@ -84,6 +85,7 @@ final class Plugin {
 				( new CartRecalculation( $context ) )->register();
 				( new CouponConversion( $service, $context ) )->register();
 				( new ShippingConversion( $service, $context ) )->register();
+				( new GatewayCompatibility( $context ) )->register();
 			}
 		);
 
