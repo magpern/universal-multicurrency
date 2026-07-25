@@ -1,11 +1,12 @@
 <?php
+
 /**
  * Order-pay endpoint currency lock.
  *
  * @package UniversalMulticurrency
  */
 
-declare( strict_types=1 );
+declare(strict_types=1);
 
 namespace UMC\Order;
 

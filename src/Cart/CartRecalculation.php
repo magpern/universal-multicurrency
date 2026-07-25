@@ -1,11 +1,12 @@
 <?php
+
 /**
  * Cart recalculation on currency / rate change.
  *
  * @package UniversalMulticurrency
  */
 
-declare( strict_types=1 );
+declare(strict_types=1);
 
 namespace UMC\Cart;
 

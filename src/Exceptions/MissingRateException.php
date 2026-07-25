@@ -1,11 +1,12 @@
 <?php
+
 /**
  * Thrown when a conversion is requested but no usable rate exists.
  *
  * @package UniversalMulticurrency
  */
 
-declare( strict_types=1 );
+declare(strict_types=1);
 
 namespace UMC\Exceptions;
 

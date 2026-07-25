@@ -1,11 +1,12 @@
 <?php
+
 /**
  * Immutable order-time currency / rate snapshot.
  *
  * @package UniversalMulticurrency
  */
 
-declare( strict_types=1 );
+declare(strict_types=1);
 
 namespace UMC\Order;
 
@@ -30,15 +31,15 @@ use WC_Order;
  */
 final class OrderSnapshot {
 
-	public const META_BASE_CURRENCY         = '_umc_base_currency';
-	public const META_TRANSACTION_CURRENCY  = '_umc_transaction_currency';
-	public const META_EXCHANGE_RATE         = '_umc_exchange_rate';
-	public const META_RATE_TIMESTAMP        = '_umc_rate_timestamp';
-	public const META_RATE_SOURCE           = '_umc_rate_source';
-	public const META_PLUGIN_VERSION        = '_umc_plugin_version';
-	public const META_RATE_IDENTITY         = '_umc_rate_identity';
-	public const META_SNAPSHOT_VERSION      = '_umc_snapshot_version';
-	public const META_TRANSACTION_DECIMALS  = '_umc_transaction_decimals';
+	public const META_BASE_CURRENCY        = '_umc_base_currency';
+	public const META_TRANSACTION_CURRENCY = '_umc_transaction_currency';
+	public const META_EXCHANGE_RATE        = '_umc_exchange_rate';
+	public const META_RATE_TIMESTAMP       = '_umc_rate_timestamp';
+	public const META_RATE_SOURCE          = '_umc_rate_source';
+	public const META_PLUGIN_VERSION       = '_umc_plugin_version';
+	public const META_RATE_IDENTITY        = '_umc_rate_identity';
+	public const META_SNAPSHOT_VERSION     = '_umc_snapshot_version';
+	public const META_TRANSACTION_DECIMALS = '_umc_transaction_decimals';
 
 	/**
 	 * Rate source identifier for the manual (admin-entered) provider.
@@ -170,15 +171,15 @@ final class OrderSnapshot {
 		int $transaction_decimals = 2
 	): array {
 		return array(
-			self::META_BASE_CURRENCY         => $base_currency,
-			self::META_TRANSACTION_CURRENCY  => $transaction_currency,
-			self::META_EXCHANGE_RATE         => $exchange_rate,
-			self::META_RATE_TIMESTAMP        => $rate_timestamp,
-			self::META_RATE_SOURCE           => $rate_source,
-			self::META_PLUGIN_VERSION        => $plugin_version,
-			self::META_RATE_IDENTITY         => $rate_identity,
-			self::META_SNAPSHOT_VERSION      => $schema_version,
-			self::META_TRANSACTION_DECIMALS  => $transaction_decimals,
+			self::META_BASE_CURRENCY        => $base_currency,
+			self::META_TRANSACTION_CURRENCY => $transaction_currency,
+			self::META_EXCHANGE_RATE        => $exchange_rate,
+			self::META_RATE_TIMESTAMP       => $rate_timestamp,
+			self::META_RATE_SOURCE          => $rate_source,
+			self::META_PLUGIN_VERSION       => $plugin_version,
+			self::META_RATE_IDENTITY        => $rate_identity,
+			self::META_SNAPSHOT_VERSION     => $schema_version,
+			self::META_TRANSACTION_DECIMALS => $transaction_decimals,
 		);
 	}
 

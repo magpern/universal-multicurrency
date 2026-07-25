@@ -1,11 +1,12 @@
 <?php
+
 /**
  * Marker interface for all domain exceptions.
  *
  * @package UniversalMulticurrency
  */
 
-declare( strict_types=1 );
+declare(strict_types=1);
 
 namespace UMC\Exceptions;
 
@@ -15,4 +16,5 @@ namespace UMC\Exceptions;
  * while each concrete class still extends the most fitting SPL exception type.
  */
 interface Exception {
+
 }

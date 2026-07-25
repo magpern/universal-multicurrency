@@ -1,11 +1,12 @@
 <?php
+
 /**
  * Currencies admin table (custom WooCommerce settings field).
  *
  * @package UniversalMulticurrency
  */
 
-declare( strict_types=1 );
+declare(strict_types=1);
 
 namespace UMC\Admin;
 

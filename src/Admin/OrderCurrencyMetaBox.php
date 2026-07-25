@@ -1,11 +1,12 @@
 <?php
+
 /**
  * Read-only order currency audit meta box.
  *
  * @package UniversalMulticurrency
  */
 
-declare( strict_types=1 );
+declare(strict_types=1);
 
 namespace UMC\Admin;
 

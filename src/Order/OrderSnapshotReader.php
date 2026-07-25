@@ -1,11 +1,12 @@
 <?php
+
 /**
  * Immutable order-snapshot metadata reader.
  *
  * @package UniversalMulticurrency
  */
 
-declare( strict_types=1 );
+declare(strict_types=1);
 
 namespace UMC\Order;
 

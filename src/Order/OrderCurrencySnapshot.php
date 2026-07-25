@@ -1,11 +1,12 @@
 <?php
+
 /**
  * Immutable order-time currency snapshot with schema versioning.
  *
  * @package UniversalMulticurrency
  */
 
-declare( strict_types=1 );
+declare(strict_types=1);
 
 namespace UMC\Order;
 

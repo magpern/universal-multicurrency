@@ -1,11 +1,12 @@
 <?php
+
 /**
  * Thrown when an exchange rate value is not a usable positive number.
  *
  * @package UniversalMulticurrency
  */
 
-declare( strict_types=1 );
+declare(strict_types=1);
 
 namespace UMC\Exceptions;
 

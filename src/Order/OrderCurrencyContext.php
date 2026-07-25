@@ -1,11 +1,12 @@
 <?php
+
 /**
  * Request-scoped order currency context stack.
  *
  * @package UniversalMulticurrency
  */
 
-declare( strict_types=1 );
+declare(strict_types=1);
 
 namespace UMC\Order;
 
@@ -49,8 +50,8 @@ final class OrderCurrencyContext {
 	/**
 	 * Binds the context to its dependencies.
 	 *
-	 * @param OrderSnapshotReader           $reader   Snapshot reader.
-	 * @param HistoricalFormattingResolver  $resolver Formatting resolver.
+	 * @param OrderSnapshotReader          $reader   Snapshot reader.
+	 * @param HistoricalFormattingResolver $resolver Formatting resolver.
 	 */
 	public function __construct(
 		OrderSnapshotReader $reader,

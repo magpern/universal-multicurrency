@@ -1,11 +1,12 @@
 <?php
+
 /**
  * Refund parent-currency metadata.
  *
  * @package UniversalMulticurrency
  */
 
-declare( strict_types=1 );
+declare(strict_types=1);
 
 namespace UMC\Order;
 

@@ -1,11 +1,12 @@
 <?php
+
 /**
  * WooCommerce settings tab for multicurrency configuration.
  *
  * @package UniversalMulticurrency
  */
 
-declare( strict_types=1 );
+declare(strict_types=1);
 
 namespace UMC\Admin;
 

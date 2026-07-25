@@ -1,11 +1,12 @@
 <?php
+
 /**
  * Thrown when a currency code does not match the required format.
  *
  * @package UniversalMulticurrency
  */
 
-declare( strict_types=1 );
+declare(strict_types=1);
 
 namespace UMC\Exceptions;
 

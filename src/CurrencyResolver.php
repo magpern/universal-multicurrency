@@ -1,11 +1,12 @@
 <?php
+
 /**
  * Active-currency resolution.
  *
  * @package UniversalMulticurrency
  */
 
-declare( strict_types=1 );
+declare(strict_types=1);
 
 namespace UMC;
 

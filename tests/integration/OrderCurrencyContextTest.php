@@ -156,9 +156,9 @@ final class OrderCurrencyContextTest extends WP_UnitTestCase {
 	private function create_context(): OrderCurrencyContext {
 		update_option( 'woocommerce_currency', 'EUR' );
 
-		$registry  = new CurrencyRegistry( new Settings(), new Currency( 'EUR', 2 ) );
-		$reader    = new OrderSnapshotReader();
-		$resolver  = new HistoricalFormattingResolver( $registry );
+		$registry = new CurrencyRegistry( new Settings(), new Currency( 'EUR', 2 ) );
+		$reader   = new OrderSnapshotReader();
+		$resolver = new HistoricalFormattingResolver( $registry );
 
 		return new OrderCurrencyContext( $reader, $resolver );
 	}

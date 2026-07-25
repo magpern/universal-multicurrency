@@ -1,11 +1,12 @@
 <?php
+
 /**
  * Thrown when a currency's formatting attributes are invalid.
  *
  * @package UniversalMulticurrency
  */
 
-declare( strict_types=1 );
+declare(strict_types=1);
 
 namespace UMC\Exceptions;
 
