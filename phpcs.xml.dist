@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<ruleset name="UniversalMulticurrency">
+	<description>Coding standards for the Universal Multicurrency plugin.</description>
+
+	<file>universal-multicurrency.php</file>
+	<file>uninstall.php</file>
+	<file>src</file>
+	<file>tests</file>
+
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>*/tests/tmp/*</exclude-pattern>
+
+	<arg value="sp"/>
+	<arg name="extensions" value="php"/>
+	<arg name="parallel" value="4"/>
+
+	<config name="minimum_wp_version" value="6.5"/>
+	<config name="testVersion" value="8.1-"/>
+
+	<rule ref="WordPress-Extra">
+		<!-- PSR-4 class files (src/Plugin.php) instead of class-plugin.php. -->
+		<exclude name="WordPress.Files.FileName"/>
+	</rule>
+
+	<rule ref="WooCommerce-Core">
+		<exclude name="WordPress.Files.FileName"/>
+	</rule>
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="universal-multicurrency"/>
+			</property>
+		</properties>
+	</rule>
+
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="umc"/>
+				<element value="UMC"/>
+			</property>
+		</properties>
+		<!-- "umc"/"UMC" is the project-approved prefix (docs/); accepted despite being under 4 chars. -->
+		<exclude name="WordPress.NamingConventions.PrefixAllGlobals.ShortPrefixPassed"/>
+	</rule>
+
+	<!-- Test method names are self-describing; don't demand docblocks there. -->
+	<rule ref="Squiz.Commenting.FunctionComment.Missing">
+		<exclude-pattern>*/tests/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.PHP.DiscouragedPHPFunctions">
+		<exclude-pattern>*/tests/*</exclude-pattern>
+	</rule>
+
+	<!-- Test files legitimately override globals and load files dynamically. -->
+	<rule ref="WordPress.WP.GlobalVariablesOverride">
+		<exclude-pattern>*/tests/*</exclude-pattern>
+	</rule>
+</ruleset>
