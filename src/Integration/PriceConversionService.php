@@ -57,6 +57,29 @@ final class PriceConversionService {
 	}
 
 	/**
+	 * Converts a known-numeric base amount into the active currency, as a string.
+	 *
+	 * The single entry point for the Milestone 3 transaction integrations (coupon
+	 * and shipping conversion): those callers hold plain numeric amounts (coupon
+	 * amounts, shipping costs) rather than product-price values, and must never
+	 * reach {@see Converter} directly. It reuses {@see convert()} — so the
+	 * base no-op and empty/non-numeric passthrough rules still live in one place —
+	 * and normalizes the result to a string WooCommerce can consume.
+	 *
+	 * Callers are expected to gate on the active currency themselves and only call
+	 * this when a conversion is wanted; on the base-currency no-op the amount is
+	 * returned unchanged (stringified).
+	 *
+	 * @param string|int|float $base Base-currency amount.
+	 * @return string Converted decimal string, or the stringified original on no-op.
+	 */
+	public function convert_amount( string|int|float $base ): string {
+		$converted = $this->convert( $base );
+
+		return is_scalar( $converted ) ? (string) $converted : '';
+	}
+
+	/**
 	 * Converts a base amount into a specific target currency for display.
 	 *
 	 * @param mixed    $amount Base-currency amount (string|int|float), or '' / null.

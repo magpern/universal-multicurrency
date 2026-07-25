@@ -40,6 +40,19 @@ tests_add_filter(
 	'setup_theme',
 	function () {
 		\WC_Install::install();
+
+		// Run the order suite against High-Performance Order Storage. Tables are
+		// created here, before any test transaction, so no runtime DDL (which
+		// would implicitly commit) happens mid-test.
+		update_option( 'woocommerce_feature_custom_order_tables_enabled', 'yes' );
+
+		$umc_sync = \Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer::class;
+		if ( function_exists( 'wc_get_container' ) && class_exists( $umc_sync ) ) {
+			wc_get_container()->get( $umc_sync )->create_database_tables();
+			update_option( 'woocommerce_custom_orders_table_enabled', 'yes' );
+			update_option( 'woocommerce_custom_orders_table_data_sync_enabled', 'no' );
+		}
+
 		$GLOBALS['wp_roles'] = new \WP_Roles(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 	}
 );

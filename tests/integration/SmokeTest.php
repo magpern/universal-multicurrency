@@ -41,22 +41,22 @@ final class SmokeTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The plugin must never register cart/checkout/coupon/shipping/fee/stock
-	 * callbacks — these remain out of scope through Milestone 2. (Storefront
-	 * price/currency/decimals filters are added in Milestone 2 and are asserted
-	 * separately in StorefrontGuardTest.) Only plugin-origin callbacks count.
+	 * The plugin must never register stock, fee, order-status/refund or Blocks
+	 * (Store API) callbacks. Milestone 3 deliberately keeps fees disabled, defers
+	 * Blocks, and never touches stock; the cart/coupon/core-shipping/order-create
+	 * hooks it *does* add are asserted in StorefrontGuardTest. Only plugin-origin
+	 * callbacks count.
 	 */
 	public function test_registers_no_out_of_scope_hooks(): void {
 		$forbidden = array(
-			'woocommerce_coupon_get_amount',
-			'woocommerce_coupon_get_minimum_amount',
-			'woocommerce_package_rates',
+			'woocommerce_cart_calculate_fees',
 			'woocommerce_shipping_packages',
 			'woocommerce_cart_hash',
-			'woocommerce_cart_calculate_fees',
 			'woocommerce_product_get_stock_quantity',
 			'woocommerce_product_get_stock_status',
-			'woocommerce_checkout_create_order',
+			'woocommerce_payment_complete_reduce_order_stock',
+			'woocommerce_order_status_changed',
+			'woocommerce_store_api_checkout_update_order_meta',
 		);
 
 		foreach ( $forbidden as $hook ) {

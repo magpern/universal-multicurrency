@@ -175,6 +175,31 @@ final class CurrencyContext {
 	}
 
 	/**
+	 * The rate identity for the active currency, e.g. "SEK:11.50" (base: "EUR:1").
+	 *
+	 * A currency code alone is not enough to key a monetary cache: a configured
+	 * rate can change while the code stays the same. Combining the active code
+	 * with the exact rate string yields a value that changes whenever either
+	 * does, so caches keyed by it self-invalidate on a rate edit. Filterable via
+	 * `umc_currency_signature` for callers that resolve custom rate identities.
+	 */
+	public function get_currency_signature(): string {
+		$code = $this->get_active_code();
+		$rate = $this->get_rate();
+
+		/**
+		 * Filters the active currency's rate identity used for cache isolation.
+		 *
+		 * @since 0.3.0
+		 *
+		 * @param string $signature Default `code:rate` signature.
+		 * @param string $code      Active currency code.
+		 * @param string $rate      Base→active rate string.
+		 */
+		return (string) apply_filters( 'umc_currency_signature', $code . ':' . $rate, $code, $rate );
+	}
+
+	/**
 	 * Whether prices should be converted for the current request.
 	 *
 	 * Frontend page views and frontend AJAX convert; admin screens, REST/Store
