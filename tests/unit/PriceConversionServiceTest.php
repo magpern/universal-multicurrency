@@ -58,4 +58,15 @@ final class PriceConversionServiceTest extends TestCase {
 	public function test_zero_amount_is_converted_not_passed_through(): void {
 		$this->assertSame( '0.00', $this->service()->convert_to( '0', new Currency( 'SEK', 2 ), '11.5' ) );
 	}
+
+	public function test_convert_amount_is_a_string_no_op_when_base_is_active(): void {
+		// No request state in a unit context, so the active currency is the base:
+		// convert_amount() must return the amount unchanged, as a string.
+		$this->assertSame( '100', $this->service()->convert_amount( '100' ) );
+		$this->assertSame( '100', $this->service()->convert_amount( 100 ) );
+	}
+
+	public function test_convert_amount_passes_non_numeric_through_as_string(): void {
+		$this->assertSame( 'abc', $this->service()->convert_amount( 'abc' ) );
+	}
 }
