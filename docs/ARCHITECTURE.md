@@ -60,3 +60,39 @@ is unit-testable without a bootstrap. It never registers hooks.
 Exceptions live in `UMC\Exceptions` and all implement the marker interface
 `UMC\Exceptions\Exception` for catch-all handling, while extending the most
 fitting SPL type (`InvalidArgumentException` / `RuntimeException`).
+
+## Storefront integration layer (Milestone 2)
+
+Milestone 2 connects the domain core to WooCommerce for **runtime, display-only**
+price conversion. Base product prices in the database are never written;
+conversion happens only in `view`-context read filters. Stock, cart totals
+persistence, orders, refunds, gateways, shipping, taxes, coupons, fees and
+REST/Store API remain untouched (later milestones).
+
+Request flow and collaborators:
+
+- `CurrencyResolver` — pure priority resolution (explicit → session → cookie →
+  base) against the selectable allow-list.
+- `CurrencySwitcher` — validates a `?currency=` request, persists to the WC
+  session + a 30-day cookie, and safe-redirects without the parameter.
+- `CurrencyContext` — request-scoped facade: resolves the active `Currency`,
+  computes the base→active rate once, builds the selectable set (enabled **and**
+  rated, plus base), and decides `is_convertible_request()`. Memoized.
+- `Integration\PriceConversionService` — the single conversion seam
+  (empty/non-numeric passthrough + base no-op, then `Converter::apply_rate()`).
+  All integration points (M2 price hooks and later cart/coupon/shipping) go
+  through it.
+- `Integration\PriceHooks` / `Integration\CurrencyFormatting` — thin
+  view-context filters delegating to the seam and reporting the active currency's
+  identity/formatting. Attached unconditionally, gated per request.
+- `Frontend\Switcher` — one reusable `render()` behind `[umc_switcher]`; future
+  block/Elementor wrappers reuse it.
+- `Admin\SettingsPage` / `Admin\CurrencyTableField` — a WooCommerce settings tab
+  whose currencies table persists through `Settings::save()` (M1 sanitizer).
+
+The base `Currency` is built at the composition root (`Plugin::init()`) from
+`woocommerce_currency` and WooCommerce's price options, then injected into
+`CurrencyRegistry` — the read Milestone 1 deferred.
+
+Every hook is catalogued in `docs/HOOKS.md`. Runtime conversion and rounding are
+governed by ADR-0002.
