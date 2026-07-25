@@ -45,8 +45,16 @@
 		<exclude name="WordPress.NamingConventions.PrefixAllGlobals.ShortPrefixPassed"/>
 	</rule>
 
-	<!-- Test method names are self-describing; don't demand docblocks there. -->
+	<!-- Test method names are self-describing; don't demand full docblocks
+	     there. Data-provider annotations still require a docblock, so relax the
+	     short-description and param-tag requirements for test files only. -->
 	<rule ref="Squiz.Commenting.FunctionComment.Missing">
+		<exclude-pattern>*/tests/*</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Commenting.FunctionComment.MissingParamTag">
+		<exclude-pattern>*/tests/*</exclude-pattern>
+	</rule>
+	<rule ref="Generic.Commenting.DocComment.MissingShort">
 		<exclude-pattern>*/tests/*</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.PHP.DiscouragedPHPFunctions">
@@ -56,5 +64,18 @@
 	<!-- Test files legitimately override globals and load files dynamically. -->
 	<rule ref="WordPress.WP.GlobalVariablesOverride">
 		<exclude-pattern>*/tests/*</exclude-pattern>
+	</rule>
+
+	<!-- The pure-domain layer (value objects, converter, rate providers and
+	     their exceptions) contains no HTML output and must run without
+	     WordPress loaded, so esc_html() is unavailable there. Exception
+	     messages built in these files are developer diagnostics, never echoed
+	     to the browser. This exclusion does NOT apply to output-producing code
+	     (admin/frontend), which arrives in later milestones. -->
+	<rule ref="WordPress.Security.EscapeOutput.ExceptionNotEscaped">
+		<exclude-pattern>*src/Currency.php</exclude-pattern>
+		<exclude-pattern>*src/Converter.php</exclude-pattern>
+		<exclude-pattern>*src/Rates/*</exclude-pattern>
+		<exclude-pattern>*src/Exceptions/*</exclude-pattern>
 	</rule>
 </ruleset>
