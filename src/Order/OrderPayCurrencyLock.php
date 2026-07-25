@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Order-pay endpoint currency lock.
  *
@@ -144,23 +143,30 @@ final class OrderPayCurrencyLock {
 	 * @return int|null Order ID, or null if not on order-pay.
 	 */
 	private function get_order_id_from_request(): ?int {
-		// Check for the `order-pay` query variable (used by checkout shortcode).
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only order ID lookup.
+		// Read-only order-id lookup on the order-pay endpoint; no state changes,
+		// so no nonce is required. absint() sanitises the raw request value.
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+
+		// The `order-pay` query variable (used by the checkout shortcode) carries
+		// the order id in the standard endpoint form.
 		if ( ! empty( $_GET['order-pay'] ) ) {
-			$order_id = (int) wp_unslash( $_GET['order-pay'] );
+			$order_id = absint( wp_unslash( $_GET['order-pay'] ) );
 			if ( $order_id > 0 ) {
 				return $order_id;
 			}
 		}
 
-		// Check for `pay_for_order` (legacy form).
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only order ID lookup.
+		// Legacy `pay_for_order` form: reads the id from the same parameter it
+		// checks. A boolean `pay_for_order=true` sanitises to 0 and falls through
+		// (the `order-pay` branch above carries the id in that case).
 		if ( ! empty( $_GET['pay_for_order'] ) ) {
-			$order_id = (int) wp_unslash( $_GET['order-pay'] );
+			$order_id = absint( wp_unslash( $_GET['pay_for_order'] ) );
 			if ( $order_id > 0 ) {
 				return $order_id;
 			}
 		}
+
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		return null;
 	}
