@@ -30,13 +30,15 @@ use WC_Order;
  */
 final class OrderSnapshot {
 
-	public const META_BASE_CURRENCY        = '_umc_base_currency';
-	public const META_TRANSACTION_CURRENCY = '_umc_transaction_currency';
-	public const META_EXCHANGE_RATE        = '_umc_exchange_rate';
-	public const META_RATE_TIMESTAMP       = '_umc_rate_timestamp';
-	public const META_RATE_SOURCE          = '_umc_rate_source';
-	public const META_PLUGIN_VERSION       = '_umc_plugin_version';
-	public const META_RATE_IDENTITY        = '_umc_rate_identity';
+	public const META_BASE_CURRENCY         = '_umc_base_currency';
+	public const META_TRANSACTION_CURRENCY  = '_umc_transaction_currency';
+	public const META_EXCHANGE_RATE         = '_umc_exchange_rate';
+	public const META_RATE_TIMESTAMP        = '_umc_rate_timestamp';
+	public const META_RATE_SOURCE           = '_umc_rate_source';
+	public const META_PLUGIN_VERSION        = '_umc_plugin_version';
+	public const META_RATE_IDENTITY         = '_umc_rate_identity';
+	public const META_SNAPSHOT_VERSION      = '_umc_snapshot_version';
+	public const META_TRANSACTION_DECIMALS  = '_umc_transaction_decimals';
 
 	/**
 	 * Rate source identifier for the manual (admin-entered) provider.
@@ -109,7 +111,9 @@ final class OrderSnapshot {
 			$this->rate_timestamp( $this->context->get_active_code() ),
 			self::SOURCE_MANUAL,
 			$this->version,
-			$this->context->get_currency_signature()
+			$this->context->get_currency_signature(),
+			2, // Schema version for M4+
+			$this->context->get_active_currency()->decimals()
 		);
 
 		/**
@@ -150,6 +154,8 @@ final class OrderSnapshot {
 	 * @param string $rate_source          Rate source identifier.
 	 * @param string $plugin_version       Plugin version.
 	 * @param string $rate_identity        Rate identity (code:rate).
+	 * @param int    $schema_version       Snapshot schema version (2 for M4+).
+	 * @param int    $transaction_decimals Transaction currency decimals.
 	 * @return array<string, scalar>
 	 */
 	public static function snapshot_meta(
@@ -159,16 +165,20 @@ final class OrderSnapshot {
 		int $rate_timestamp,
 		string $rate_source,
 		string $plugin_version,
-		string $rate_identity
+		string $rate_identity,
+		int $schema_version = 2,
+		int $transaction_decimals = 2
 	): array {
 		return array(
-			self::META_BASE_CURRENCY        => $base_currency,
-			self::META_TRANSACTION_CURRENCY => $transaction_currency,
-			self::META_EXCHANGE_RATE        => $exchange_rate,
-			self::META_RATE_TIMESTAMP       => $rate_timestamp,
-			self::META_RATE_SOURCE          => $rate_source,
-			self::META_PLUGIN_VERSION       => $plugin_version,
-			self::META_RATE_IDENTITY        => $rate_identity,
+			self::META_BASE_CURRENCY         => $base_currency,
+			self::META_TRANSACTION_CURRENCY  => $transaction_currency,
+			self::META_EXCHANGE_RATE         => $exchange_rate,
+			self::META_RATE_TIMESTAMP        => $rate_timestamp,
+			self::META_RATE_SOURCE           => $rate_source,
+			self::META_PLUGIN_VERSION        => $plugin_version,
+			self::META_RATE_IDENTITY         => $rate_identity,
+			self::META_SNAPSHOT_VERSION      => $schema_version,
+			self::META_TRANSACTION_DECIMALS  => $transaction_decimals,
 		);
 	}
 
