@@ -96,3 +96,34 @@ The base `Currency` is built at the composition root (`Plugin::init()`) from
 
 Every hook is catalogued in `docs/HOOKS.md`. Runtime conversion and rounding are
 governed by ADR-0002.
+
+## Transaction layer (Milestone 3)
+
+Milestone 3 makes the **classic** cart and checkout authoritative in the selected
+currency and records an immutable order-time rate snapshot. It reuses the M2 seam
+as the single product-price converter and adds conversion only for the monetary
+inputs M2 never touched. The end-to-end flow and the double-conversion proof live
+in `docs/architecture/transaction-flow.md`; the model is governed by ADR-0004.
+
+- **Unit-price-authoritative conversion.** M2's `view`-context getters remain the
+  only product-price converter; WooCommerce's native totals engine computes line
+  totals, discounts, shipping, fees and taxes from the converted unit prices. The
+  cart stores product references, never prices, so every recalculation reconverts
+  from base — a converted value is never reused as input, and `set_price()` is
+  never called.
+- **Taxes are never converted** — WooCommerce computes them natively; tax rates are
+  currency-agnostic percentages.
+- Collaborators (all consuming `Integration\PriceConversionService`):
+  - `Cart\CartRecalculation` — recomputes totals when the rate identity changes.
+  - `Integration\CouponConversion` — fixed amounts + min/max thresholds base→active.
+  - `Integration\ShippingConversion` — **core methods only** cost/tax conversion +
+    per-currency shipping-cache isolation; `umc_convert_shipping_rate` opt-out.
+  - `Integration\GatewayCompatibility` — hides gateways incompatible with the
+    active currency.
+  - `Order\OrderSnapshot` — writes the write-once `_umc_*` snapshot via `WC_Order`
+    CRUD (HPOS-safe) at order creation.
+- **Rate identity** — `CurrencyContext::get_currency_signature()` (`code:rate`)
+  keys every monetary cache so they self-invalidate on a switch **or** rate edit.
+- **Fees are not converted** (disabled; opt-in `umc_convert_fee` only). **Blocks /
+  Store API** and order display / emails / refunds are later milestones; classic
+  checkout is the only supported path and Blocks compatibility is not claimed.

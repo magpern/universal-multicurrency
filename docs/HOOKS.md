@@ -70,18 +70,85 @@ The switch itself is a `?currency=<code>` request handled by
 selectable allow-list, persists to the WC session + a 30-day cookie
 (`wc_setcookie`), and `wp_safe_redirect`s to the same URL without the parameter.
 
-## Deliberately NOT hooked (out of scope through Milestone 2)
+## Milestone 3 — cart, checkout & order currency
 
-No cart totals, coupon, shipping, tax, fee, checkout, order, refund, gateway,
-stock, or Store API/Blocks hooks. Because catalog conversion uses WooCommerce's
-own view-context price getters, the cart naturally reflects converted unit
-prices; however cart-level rounding, coupons, shipping, taxes and order
-persistence are addressed in Milestone 3 and must not be considered final in
-Milestone 2. A guard test (`StorefrontGuardTest`) asserts no plugin-origin
-callbacks land on those hooks.
+Milestone 3 makes the whole classic transaction authoritative in the selected
+currency. It reuses the M2 seam (`Integration\PriceConversionService`) as the
+**single** product-price converter and adds conversion only for the monetary
+inputs M2 never touched — fixed coupon amounts, coupon spend thresholds and core
+shipping costs — plus gateway currency compatibility and the immutable order
+snapshot. **Taxes are never converted**: WooCommerce computes them natively on
+already-converted amounts. See `docs/architecture/transaction-flow.md` for the
+end-to-end flow and the double-conversion proof, and ADR-0004 for the model.
 
-## Filters the plugin provides
+All storefront hooks below register on `woocommerce_init` and gate on
+`is_convertible_request() && ! is_base_active()` unless noted.
 
-| Filter | Args | Purpose |
-|---|---|---|
-| `umc_is_request_convertible` | `($convertible)` | Override whether the current request converts prices. |
+### Cart recalculation (`Cart\CartRecalculation`)
+
+| Hook | Args | Prio | Why |
+|---|---|---|---|
+| `woocommerce_cart_loaded_from_session` | `($cart)` | 20 | Recompute totals when the cart's stored rate identity no longer matches the active one (currency switch, rate edit, stale/cross-tab session). Keyed on `code:rate`, so a changed rate also triggers it. |
+
+### Coupons (`Integration\CouponConversion`)
+
+| Hook | Args | Prio | Why |
+|---|---|---|---|
+| `woocommerce_coupon_get_amount` | `($amount, $coupon)` | 10 | Convert fixed cart / fixed product amounts base→active once. Percentage coupons are left untouched — they operate on already-converted totals. |
+| `woocommerce_coupon_get_minimum_amount` | `($amount, $coupon)` | 10 | Convert the min-spend threshold so the comparison against the converted subtotal is apples-to-apples. |
+| `woocommerce_coupon_get_maximum_amount` | `($amount, $coupon)` | 10 | Convert the max-spend threshold, as above. |
+
+### Shipping — core methods only (`Integration\ShippingConversion`)
+
+| Hook | Args | Prio | Why |
+|---|---|---|---|
+| `woocommerce_package_rates` | `($rates, $package)` | 90 | Convert cost + per-class taxes for **core** methods (`flat_rate`, `free_shipping`, `local_pickup`) base→active by the same rate; non-core / third-party rates pass through unchanged (assumed already in the transaction currency). |
+| `woocommerce_cart_shipping_packages` | `($packages)` | 10 | Inject the rate identity into each package so WooCommerce's `shipping_for_package_*` cache is keyed per currency+rate and self-invalidates on a switch or rate edit. |
+
+### Gateways (`Integration\GatewayCompatibility`)
+
+| Hook | Args | Prio | Why |
+|---|---|---|---|
+| `woocommerce_available_payment_gateways` | `($gateways)` | 10 | Remove gateways that do not support the active currency (declared via `umc_gateway_supported_currencies`); if none remain in a non-base currency, add one explanatory checkout notice. Never rewrites a gateway's amount/currency. |
+
+### Order snapshot (`Order\OrderSnapshot`)
+
+| Hook | Args | Prio | Why |
+|---|---|---|---|
+| `woocommerce_checkout_create_order` | `($order, $data)` | 10 | Write the immutable `_umc_*` currency/rate snapshot via `WC_Order` CRUD (HPOS-safe), once. WooCommerce already stores the order currency and active-currency totals natively; this adds the audit trail. |
+
+Metadata keys written (permanent order data; never removed on uninstall):
+`_umc_base_currency`, `_umc_transaction_currency`, `_umc_exchange_rate`,
+`_umc_rate_timestamp`, `_umc_rate_source`, `_umc_plugin_version`,
+`_umc_rate_identity`.
+
+## Deliberately NOT hooked (out of scope in Milestone 3)
+
+Fees are **not** converted (disabled by decision; opt-in only via `umc_convert_fee`),
+so `woocommerce_cart_calculate_fees` carries no plugin callback. No stock hooks,
+ever. Order display, emails, admin/account rendering, refunds, the order-pay
+currency lock and order-status hooks are Milestone 4. Cart & Checkout **Blocks**
+(Store API) are a dedicated later milestone: no `woocommerce_store_api_*` hooks,
+and classic checkout is the only supported path — Blocks compatibility is **not**
+claimed. A guard test (`StorefrontGuardTest`) asserts no plugin-origin callbacks
+land on the fee/stock/refund/order-status/Store-API hooks, that only the seam
+uses the `Converter`, that no `$wpdb`/SQL is used, and that no broad exception is
+swallowed.
+
+## Filters and actions the plugin provides
+
+| Filter / Action | Args | Since | Purpose |
+|---|---|---|---|
+| `umc_is_request_convertible` (filter) | `($convertible)` | 0.2.0 | Override whether the current request converts prices. |
+| `umc_currency_signature` (filter) | `($signature, $code, $rate)` | 0.3.0 | Override the rate identity (`code:rate`) used for cache isolation. |
+| `umc_coupon_amount_is_base` (filter) | `($is_base, $coupon)` | 0.3.0 | Return false to declare a coupon already priced in the active currency (skips conversion). |
+| `umc_convert_shipping_rate` (filter) | `($convert, $rate, $package)` | 0.3.0 | Override per rate whether to convert; defaults true for core methods, false otherwise. |
+| `umc_convert_fee` (filter) | `($should, $fee)` | 0.3.0 | Opt-in fee conversion. Default false — fees are not converted in Milestone 3. |
+| `umc_gateway_supported_currencies` (filter) | `($codes, $gateway)` | 0.3.0 | Declare a gateway's supported currencies; null = all. |
+| `umc_order_snapshot_meta` (filter) | `($meta, $order, $context)` | 0.3.0 | Filter the order snapshot metadata before it is written. |
+| `umc_cart_recalculated` (action) | `($current, $previous)` | 0.3.0 | Fires after the cart is recalculated for a new rate identity. |
+| `umc_gateway_hidden` (action) | `($id, $active)` | 0.3.0 | Fires when a gateway is hidden for currency incompatibility. |
+| `umc_order_snapshot_created` (action) | `($order, $meta)` | 0.3.0 | Fires after the order snapshot is staged on the order. |
+
+Note: `umc_convert_fee` is documented for integrations but **not wired** in
+Milestone 3 — no fee conversion ships enabled.
