@@ -22,9 +22,9 @@ use WP_UnitTestCase;
 final class StorefrontGuardTest extends WP_UnitTestCase {
 
 	/**
-	 * Hooks that remain out of scope in Milestone 3: fees are disabled, stock is
-	 * never touched, and order-status / refund / Blocks (Store API) belong to
-	 * Milestone 4 or a later Blocks milestone.
+	 * Hooks that remain out of scope: fees are disabled, stock is never touched,
+	 * and Blocks (Store API) belong to a later Blocks milestone.
+	 * woocommerce_create_refund is released to M4 (RefundSnapshot).
 	 */
 	private const FORBIDDEN_HOOKS = array(
 		'woocommerce_cart_calculate_fees',
@@ -33,7 +33,6 @@ final class StorefrontGuardTest extends WP_UnitTestCase {
 		'woocommerce_product_get_stock_status',
 		'woocommerce_payment_complete_reduce_order_stock',
 		'woocommerce_order_status_changed',
-		'woocommerce_create_refund',
 		'woocommerce_store_api_checkout_update_order_meta',
 	);
 
@@ -135,6 +134,73 @@ final class StorefrontGuardTest extends WP_UnitTestCase {
 		$this->assertStringNotContainsString( 'delete_metadata', $source );
 		$this->assertStringNotContainsString( '$wpdb', $source );
 		$this->assertStringContainsString( "delete_option( 'umc_settings' )", $source );
+	}
+
+	public function test_m4_historical_services_no_conversion(): void {
+		$offenders = array();
+		$src       = dirname( ( new \ReflectionClass( Converter::class ) )->getFileName() );
+		$order_dir = $src . '/Order';
+
+		if ( is_dir( $order_dir ) ) {
+			foreach ( glob( "$order_dir/*.php" ) as $file ) {
+				$source = (string) file_get_contents( $file );
+
+				// Historical services must never reference the conversion seam.
+				if ( preg_match( '/Converter::|PriceConversionService\b|->convert/', $source ) ) {
+					$offenders[] = basename( $file );
+				}
+			}
+		}
+
+		$this->assertSame(
+			array(),
+			$offenders,
+			'M4 historical services (Order/*) must not reference conversion: they format stored values only.'
+		);
+	}
+
+	public function test_m4_historical_services_no_session_access(): void {
+		$offenders = array();
+		$src       = dirname( ( new \ReflectionClass( Converter::class ) )->getFileName() );
+		$order_dir = $src . '/Order';
+
+		if ( is_dir( $order_dir ) ) {
+			foreach ( glob( "$order_dir/*.php" ) as $file ) {
+				$source = (string) file_get_contents( $file );
+
+				// Historical services must not read session/active currency.
+				if ( preg_match( '/get_active_code|get_active_currency|->session|COOKIE_NAME/', $source ) ) {
+					$offenders[] = basename( $file );
+				}
+			}
+		}
+
+		$this->assertSame(
+			array(),
+			$offenders,
+			'M4 historical services must not access session/active currency; order currency is explicit.'
+		);
+	}
+
+	public function test_m4_no_order_total_setters(): void {
+		$offenders = array();
+
+		foreach ( $this->umc_source_files() as $file ) {
+			$source = (string) file_get_contents( $file );
+
+			if ( preg_match(
+				'/->set_(total|subtotal|discount_total|shipping_total|cart_tax|shipping_tax|total_tax|amount|fee_total)\s*\(/',
+				$source
+			) ) {
+				$offenders[] = basename( $file );
+			}
+		}
+
+		$this->assertSame(
+			array(),
+			$offenders,
+			'The plugin must never set order or refund totals; stored values are authoritative.'
+		);
 	}
 
 	/**
