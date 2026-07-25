@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Refund parent-currency metadata.
  *
@@ -76,8 +75,9 @@ final class RefundSnapshot {
 		// Read the parent snapshot.
 		$snapshot = $this->reader->read( $parent );
 
-		// Build and write refund metadata.
-		$meta = self::refund_meta( $snapshot );
+		// Build and write refund metadata. Legacy parents carry no snapshot
+		// currency, so the parent's own order currency is the audit fallback.
+		$meta = self::refund_meta( $snapshot, $parent->get_currency() );
 
 		foreach ( $meta as $key => $value ) {
 			$refund->update_meta_data( (string) $key, $value );
@@ -98,14 +98,24 @@ final class RefundSnapshot {
 	/**
 	 * Builds refund metadata from the parent order's snapshot.
 	 *
-	 * Pure and WordPress-free for unit testability.
+	 * Pure and WordPress-free for unit testability. The parent transaction
+	 * currency falls back to the parent order's own currency when the snapshot
+	 * has none (legacy/pre-M3 parents), so the audit trail is always populated.
+	 * The rate identity has no such fallback: a legacy parent simply has none.
 	 *
-	 * @param OrderCurrencySnapshot $snapshot Parent order's snapshot.
+	 * @param OrderCurrencySnapshot $snapshot        Parent order's snapshot.
+	 * @param string                $parent_currency Parent order currency fallback.
 	 * @return array<string, scalar|null>
 	 */
-	public static function refund_meta( OrderCurrencySnapshot $snapshot ): array {
+	public static function refund_meta( OrderCurrencySnapshot $snapshot, string $parent_currency = '' ): array {
+		$currency = $snapshot->transaction_currency();
+
+		if ( null === $currency && '' !== $parent_currency ) {
+			$currency = $parent_currency;
+		}
+
 		return array(
-			'_umc_parent_transaction_currency' => $snapshot->transaction_currency(),
+			'_umc_parent_transaction_currency' => $currency,
 			'_umc_parent_rate_identity'        => $snapshot->rate_identity(),
 		);
 	}
