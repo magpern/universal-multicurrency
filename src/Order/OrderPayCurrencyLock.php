@@ -98,11 +98,24 @@ final class OrderPayCurrencyLock {
 		// Enter the order currency context for the request.
 		$this->context->enter( $order );
 
-		// Register gateway filtering for this order's currency.
+		// Order-pay is authoritative for this request. Remove the storefront
+		// session-based gateway filter so our explicit order-currency filter
+		// evaluates the ORIGINAL gateway set: a gateway unsupported in the session
+		// currency but supported by the order currency must not be permanently
+		// discarded before we run. Both paths share one GatewayCompatibility
+		// instance, so remove_filter matches the registered callback exactly.
+		remove_filter(
+			'woocommerce_available_payment_gateways',
+			array( $this->gateway_compat, 'filter_gateways' ),
+			10
+		);
+
+		// Register gateway filtering for this order's currency at the storefront
+		// priority now vacated, so no later filter can repair a session-based result.
 		add_filter(
 			'woocommerce_available_payment_gateways',
 			array( $this, 'filter_gateways_for_order' ),
-			15, // After M3's 10, before other filters.
+			10,
 			1
 		);
 

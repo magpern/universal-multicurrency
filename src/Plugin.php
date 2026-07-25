@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Composition root for the Universal Multicurrency plugin.
  *
@@ -96,6 +95,12 @@ final class Plugin {
 		add_action(
 			'woocommerce_init',
 			static function () use ( $context, $service, $settings, $version, $registry ) {
+				// One GatewayCompatibility instance is shared between the
+				// storefront callback and the order-pay lock so the lock can
+				// deregister the storefront callback (matched by instance) and
+				// filter the original gateway set with the explicit order currency.
+				$gateway_compat = new GatewayCompatibility( $context );
+
 				( new CurrencySwitcher( $context ) )->maybe_switch();
 				( new PriceHooks( $service, $context ) )->register();
 				( new CurrencyFormatting( $context ) )->register();
@@ -103,14 +108,13 @@ final class Plugin {
 				( new CartRecalculation( $context ) )->register();
 				( new CouponConversion( $service, $context ) )->register();
 				( new ShippingConversion( $service, $context ) )->register();
-				( new GatewayCompatibility( $context ) )->register();
+				$gateway_compat->register();
 				( new OrderSnapshot( $context, $settings, $version ) )->register();
 
 				// M4 services: historical orders, refunds, order-pay.
-				$reader         = new OrderSnapshotReader();
-				$resolver       = new HistoricalFormattingResolver( $registry );
-				$order_context  = new OrderCurrencyContext( $reader, $resolver );
-				$gateway_compat = new GatewayCompatibility( $context );
+				$reader        = new OrderSnapshotReader();
+				$resolver      = new HistoricalFormattingResolver( $registry );
+				$order_context = new OrderCurrencyContext( $reader, $resolver );
 
 				( new OrderCurrencyFormatting( $order_context, $resolver ) )->register();
 				( new HistoricalOrderDisplay( $order_context ) )->register();
