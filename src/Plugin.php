@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace UMC;
 
 use UMC\Admin\SettingsPage;
+use UMC\Cart\CartRecalculation;
 use UMC\Frontend\Switcher;
 use UMC\Integration\CurrencyFormatting;
 use UMC\Integration\PriceConversionService;
@@ -78,6 +79,7 @@ final class Plugin {
 				( new PriceHooks( $service, $context ) )->register();
 				( new CurrencyFormatting( $context ) )->register();
 				( new Switcher( $context ) )->register();
+				( new CartRecalculation( $context ) )->register();
 			}
 		);
 
