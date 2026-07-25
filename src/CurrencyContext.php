@@ -89,6 +89,15 @@ final class CurrencyContext {
 	}
 
 	/**
+	 * Resolves a code to a Currency (base or configured), or null.
+	 *
+	 * @param string $code Currency code.
+	 */
+	public function get_currency( string $code ): ?Currency {
+		return $this->registry->get_currency( $code );
+	}
+
+	/**
 	 * The currency codes that may be activated: enabled and rated, plus base.
 	 *
 	 * @return array<int, string>
