@@ -12,6 +12,7 @@ namespace UMC;
 use UMC\Admin\SettingsPage;
 use UMC\Cart\CartRecalculation;
 use UMC\Frontend\Switcher;
+use UMC\Integration\CouponConversion;
 use UMC\Integration\CurrencyFormatting;
 use UMC\Integration\PriceConversionService;
 use UMC\Integration\PriceHooks;
@@ -80,6 +81,7 @@ final class Plugin {
 				( new CurrencyFormatting( $context ) )->register();
 				( new Switcher( $context ) )->register();
 				( new CartRecalculation( $context ) )->register();
+				( new CouponConversion( $service, $context ) )->register();
 			}
 		);
 
