@@ -66,6 +66,11 @@
 		<exclude-pattern>*/tests/*</exclude-pattern>
 	</rule>
 
+	<!-- Structural tests read local source files directly. -->
+	<rule ref="WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents">
+		<exclude-pattern>*/tests/*</exclude-pattern>
+	</rule>
+
 	<!-- The pure-domain layer (value objects, converter, rate providers and
 	     their exceptions) contains no HTML output and must run without
 	     WordPress loaded, so esc_html() is unavailable there. Exception
