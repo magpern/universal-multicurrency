@@ -18,6 +18,7 @@ use UMC\Integration\GatewayCompatibility;
 use UMC\Integration\PriceConversionService;
 use UMC\Integration\PriceHooks;
 use UMC\Integration\ShippingConversion;
+use UMC\Order\OrderSnapshot;
 use UMC\Rates\ManualRateProvider;
 
 /**
@@ -71,13 +72,18 @@ final class Plugin {
 		$rates    = new ManualRateProvider( $settings, $base->code() );
 		$context  = new CurrencyContext( $registry, $rates, new CurrencyResolver() );
 		$service  = new PriceConversionService( $context );
+		$version  = defined( 'UMC_VERSION' ) ? (string) UMC_VERSION : '';
 
 		// Storefront: attach conversion filters, handle the switch, register the
 		// shortcode. Registered on woocommerce_init so the WC session is
 		// available; filters attach unconditionally and gate themselves.
+		//
+		// Milestone 3 adds the transaction integrations: cart recalculation on
+		// currency change, coupon and core-shipping conversion, gateway currency
+		// compatibility, and the immutable order snapshot written at creation.
 		add_action(
 			'woocommerce_init',
-			static function () use ( $context, $service ) {
+			static function () use ( $context, $service, $settings, $version ) {
 				( new CurrencySwitcher( $context ) )->maybe_switch();
 				( new PriceHooks( $service, $context ) )->register();
 				( new CurrencyFormatting( $context ) )->register();
@@ -86,6 +92,7 @@ final class Plugin {
 				( new CouponConversion( $service, $context ) )->register();
 				( new ShippingConversion( $service, $context ) )->register();
 				( new GatewayCompatibility( $context ) )->register();
+				( new OrderSnapshot( $context, $settings, $version ) )->register();
 			}
 		);
 

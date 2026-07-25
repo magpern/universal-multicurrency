@@ -19,7 +19,6 @@ use WP_UnitTestCase;
 final class StorefrontGuardTest extends WP_UnitTestCase {
 
 	private const FORBIDDEN_HOOKS = array(
-		'woocommerce_checkout_create_order',
 		'woocommerce_store_api_checkout_update_order_meta',
 		'woocommerce_cart_calculate_fees',
 		'woocommerce_shipping_packages',

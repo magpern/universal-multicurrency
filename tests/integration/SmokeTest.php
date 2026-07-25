@@ -53,7 +53,6 @@ final class SmokeTest extends WP_UnitTestCase {
 			'woocommerce_cart_calculate_fees',
 			'woocommerce_product_get_stock_quantity',
 			'woocommerce_product_get_stock_status',
-			'woocommerce_checkout_create_order',
 		);
 
 		foreach ( $forbidden as $hook ) {
