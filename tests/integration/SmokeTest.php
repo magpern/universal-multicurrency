@@ -41,24 +41,13 @@ final class SmokeTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Milestone 0 must not register any behavior-changing WooCommerce hooks:
-	 * no price, currency, cart, checkout, coupon, shipping, tax, fee,
-	 * order-value or stock filters. WooCommerce itself hooks some of these
-	 * (e.g. its deprecated-hook bridge), so only callbacks originating from
-	 * this plugin are forbidden.
+	 * The plugin must never register cart/checkout/coupon/shipping/fee/stock
+	 * callbacks — these remain out of scope through Milestone 2. (Storefront
+	 * price/currency/decimals filters are added in Milestone 2 and are asserted
+	 * separately in StorefrontGuardTest.) Only plugin-origin callbacks count.
 	 */
-	public function test_registers_no_behavior_filters(): void {
+	public function test_registers_no_out_of_scope_hooks(): void {
 		$forbidden = array(
-			'woocommerce_currency',
-			'woocommerce_currency_symbol',
-			'woocommerce_product_get_price',
-			'woocommerce_product_get_regular_price',
-			'woocommerce_product_get_sale_price',
-			'woocommerce_product_variation_get_price',
-			'woocommerce_variation_prices_price',
-			'woocommerce_get_variation_prices_hash',
-			'wc_get_price_decimals',
-			'wc_price_args',
 			'woocommerce_coupon_get_amount',
 			'woocommerce_coupon_get_minimum_amount',
 			'woocommerce_package_rates',
@@ -67,13 +56,14 @@ final class SmokeTest extends WP_UnitTestCase {
 			'woocommerce_cart_calculate_fees',
 			'woocommerce_product_get_stock_quantity',
 			'woocommerce_product_get_stock_status',
+			'woocommerce_checkout_create_order',
 		);
 
 		foreach ( $forbidden as $hook ) {
 			$this->assertSame(
 				array(),
 				$this->plugin_callbacks_on( $hook ),
-				"Milestone 0 must not hook '{$hook}'."
+				"The plugin must not hook '{$hook}'."
 			);
 		}
 	}
