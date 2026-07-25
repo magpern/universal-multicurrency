@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Order currency context bracketing for historical order display.
  *
@@ -27,7 +26,8 @@ namespace UMC\Order;
  * 1. Priorities are strict FILO (1 enter, 999 exit).
  * 2. Template hooks are always paired (verified by structural guard).
  * 3. Non-template renders use run() with try/finally (admin, order-pay).
- * 4. M2 CurrencyFormatting checks is_active() and stands down.
+ * 4. While the context is on the stack, OrderCurrencyFormatting (priority 20)
+ *    overrides the M2 session formatter (priority 10) for the render.
  */
 final class HistoricalOrderDisplay {
 

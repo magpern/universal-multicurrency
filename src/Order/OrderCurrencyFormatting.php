@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Historical order currency formatting filters.
  *
@@ -16,8 +15,13 @@ namespace UMC\Order;
  * Two modes:
  *
  * 1. Context mode: When the order context is active, forces woocommerce_currency,
- *    woocommerce_currency_symbol, wc_get_price_decimals to use the order's currency.
- *    The M2 session formatter stands down (should_convert() gates on !is_context_active).
+ *    woocommerce_currency_symbol, wc_get_price_decimals and wc_price_args to use
+ *    the order's currency. These filters register at priority 20, after the M2
+ *    session formatter (`Integration\CurrencyFormatting`, default priority 10), so
+ *    while the context is active this formatter deterministically overrides the M2
+ *    result for the order render. The two are mutually exclusive by construction:
+ *    M2 only rewrites formatting on a convertible, non-base storefront request,
+ *    and these callbacks only rewrite it while an order context is on the stack.
  *
  * 2. Currency-arg belt: When no context is active but wc_price_args contains an
  *    explicit 'currency' arg, resolves decimals for that currency. Covers admin
