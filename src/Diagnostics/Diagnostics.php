@@ -10,14 +10,23 @@ declare(strict_types=1);
 namespace UMC\Diagnostics;
 
 /**
- * The only Diagnostics class {@see \UMC\Plugin} will name in a later commit.
- * This milestone wires the detection stack only; admin surfaces register in
- * subsequent commits.
+ * The only Diagnostics class {@see \UMC\Plugin} names outside this namespace.
+ * Wires the detection stack and admin advisory surfaces.
  */
 final class Diagnostics {
 
+	/**
+	 * Memoized conflict detector shared by advisory surfaces.
+	 *
+	 * @var ConflictDetector
+	 */
 	private ConflictDetector $detector;
 
+	/**
+	 * Builds the diagnostics service and its detector stack.
+	 *
+	 * @param ConflictDetector|null $detector Optional detector for tests.
+	 */
 	public function __construct( ?ConflictDetector $detector = null ) {
 		$this->detector = $detector ?? new ConflictDetector(
 			new DetectorRegistry(),
@@ -27,9 +36,11 @@ final class Diagnostics {
 	}
 
 	/**
-	 * Reserved for admin hook registration in a later milestone.
+	 * Registers admin advisory surfaces. Detection still runs lazily at render
+	 * time inside {@see ConflictDetector::findings()}.
 	 */
 	public function register(): void {
+		( new ConflictNotice( $this->detector ) )->register();
 	}
 
 	/**

@@ -142,7 +142,16 @@ final class DiagnosticsBoundaryGuardTest extends TestCase {
 			array_filter(
 				$all_files,
 				static function ( string $file ): bool {
-					return false === strpos( $file, '/Diagnostics/' );
+					if ( false !== strpos( $file, '/Diagnostics/' ) ) {
+						return false;
+					}
+
+					// Plugin.php is the sole registration seam for Diagnostics (M6).
+					if ( false !== strpos( $file, '/Plugin.php' ) ) {
+						return false;
+					}
+
+					return true;
 				}
 			)
 		);
