@@ -46,6 +46,7 @@ final class CurrencyFormatting {
 		add_filter( 'woocommerce_currency_symbol', array( $this, 'filter_symbol' ), 10, 2 );
 		add_filter( 'wc_get_price_decimals', array( $this, 'filter_decimals' ) );
 		add_filter( 'wc_price_args', array( $this, 'filter_price_args' ) );
+		add_filter( 'option_woocommerce_currency_pos', array( $this, 'filter_currency_position' ) );
 	}
 
 	/**
@@ -104,6 +105,25 @@ final class CurrencyFormatting {
 		$args['price_format'] = $this->price_format( $this->context->get_active_currency()->position() );
 
 		return $args;
+	}
+
+	/**
+	 * Reports the active currency's symbol position.
+	 *
+	 * `wc_price()` takes its format from {@see self::filter_price_args()}, so on
+	 * the storefront this filter is redundant. The Store API is why it exists:
+	 * its currency serializer derives the `currency_prefix` and `currency_suffix`
+	 * fields from a raw read of this option, the only part of the money identity
+	 * WooCommerce does not already pass through a filter.
+	 *
+	 * Substituting a value cannot compound the way an arithmetic filter could,
+	 * so applying to both paths is harmless and keeps the two consistent.
+	 *
+	 * @param mixed $position Stored symbol position.
+	 * @return mixed
+	 */
+	public function filter_currency_position( $position ) {
+		return $this->should_convert() ? $this->context->get_active_currency()->position() : $position;
 	}
 
 	/**

@@ -41,11 +41,22 @@ final class SmokeTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The plugin must never register stock, fee, order-status/refund or Blocks
-	 * (Store API) callbacks. Milestone 3 deliberately keeps fees disabled, defers
-	 * Blocks, and never touches stock; the cart/coupon/core-shipping/order-create
-	 * hooks it *does* add are asserted in StorefrontGuardTest. Only plugin-origin
-	 * callbacks count.
+	 * The declaration above is only honest if something actually implements it.
+	 * A Store API order carries no snapshot unless the adapter is listening,
+	 * because WooCommerce's block checkout never fires the classic hook.
+	 */
+	public function test_backs_the_blocks_declaration_with_a_snapshot_adapter(): void {
+		$this->assertSame(
+			array( 'UMC\StoreApi\CheckoutSnapshotAdapter::stage_snapshot' ),
+			$this->plugin_callbacks_on( 'woocommerce_store_api_checkout_update_order_meta' )
+		);
+	}
+
+	/**
+	 * The plugin must never register stock, fee or order-status callbacks.
+	 * Fees stay disabled and stock is never touched; the cart, coupon,
+	 * core-shipping, order-create and Store API hooks it *does* add are asserted
+	 * in StorefrontGuardTest. Only plugin-origin callbacks count.
 	 */
 	public function test_registers_no_out_of_scope_hooks(): void {
 		$forbidden = array(
@@ -56,7 +67,6 @@ final class SmokeTest extends WP_UnitTestCase {
 			'woocommerce_product_get_stock_status',
 			'woocommerce_payment_complete_reduce_order_stock',
 			'woocommerce_order_status_changed',
-			'woocommerce_store_api_checkout_update_order_meta',
 		);
 
 		foreach ( $forbidden as $hook ) {

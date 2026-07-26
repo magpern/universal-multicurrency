@@ -99,9 +99,33 @@ final class OrderSnapshot {
 			return;
 		}
 
-		// Write-once: never overwrite an existing snapshot.
-		if ( '' !== (string) $order->get_meta( self::META_TRANSACTION_CURRENCY ) ) {
-			return;
+		$this->write_snapshot_for( $order );
+	}
+
+	/**
+	 * Stages the snapshot on an order, optionally refreshing an existing one.
+	 *
+	 * Classic checkout never refreshes: the order is created once, from a cart
+	 * whose currency cannot change afterwards. The Store API reuses a draft
+	 * order across payment retries and re-stamps its currency and totals from
+	 * the cart on the way, so a snapshot written before a mid-retry currency
+	 * change would end up describing a currency the order no longer has.
+	 * Refreshing is therefore permitted, but only while the order is unpaid;
+	 * see {@see \UMC\StoreApi\CheckoutSnapshotAdapter} for that policy.
+	 *
+	 * Meta is staged, never saved. Callers running on a hook that fires after
+	 * WooCommerce has already saved the order must save it themselves, which is
+	 * what the returned flag is for.
+	 *
+	 * @param WC_Order $order         Order to stage the snapshot on.
+	 * @param bool     $allow_refresh Whether an existing snapshot may be rewritten.
+	 * @return bool Whether any metadata changed.
+	 */
+	public function write_snapshot_for( WC_Order $order, bool $allow_refresh = false ): bool {
+		$existing = (string) $order->get_meta( self::META_TRANSACTION_CURRENCY );
+
+		if ( '' !== $existing && ! $allow_refresh ) {
+			return false;
 		}
 
 		$meta = self::snapshot_meta(
@@ -127,6 +151,10 @@ final class OrderSnapshot {
 		 */
 		$meta = (array) apply_filters( 'umc_order_snapshot_meta', $meta, $order, $this->context );
 
+		if ( '' !== $existing ) {
+			return $this->refresh_snapshot( $order, $meta );
+		}
+
 		foreach ( $meta as $key => $value ) {
 			$order->update_meta_data( (string) $key, $value );
 		}
@@ -140,6 +168,53 @@ final class OrderSnapshot {
 		 * @param array<string, scalar> $meta  Snapshot metadata written.
 		 */
 		do_action( 'umc_order_snapshot_created', $order, $meta );
+
+		return true;
+	}
+
+	/**
+	 * Rewrites an existing snapshot, but only when it has actually gone stale.
+	 *
+	 * Comparing first keeps the common case free: a draft order is re-synced
+	 * from the cart on every mutating cart request, and almost none of those
+	 * involve a currency change.
+	 *
+	 * @param WC_Order              $order Order carrying the existing snapshot.
+	 * @param array<string, scalar> $meta  Freshly built snapshot metadata.
+	 * @return bool Whether any metadata changed.
+	 */
+	private function refresh_snapshot( WC_Order $order, array $meta ): bool {
+		$stored_identity = (string) $order->get_meta( self::META_RATE_IDENTITY );
+		$stored_currency = (string) $order->get_meta( self::META_TRANSACTION_CURRENCY );
+
+		$fresh_identity   = (string) ( $meta[ self::META_RATE_IDENTITY ] ?? '' );
+		$identity_matches = $fresh_identity === $stored_identity;
+		$currency_matches = $order->get_currency() === $stored_currency;
+
+		if ( $identity_matches && $currency_matches ) {
+			return false;
+		}
+
+		$previous = array();
+
+		foreach ( $meta as $key => $value ) {
+			$previous[ $key ] = $order->get_meta( (string) $key );
+			$order->update_meta_data( (string) $key, $value );
+		}
+
+		/**
+		 * Fires when an unpaid order's snapshot is rewritten for a new currency
+		 * or rate.
+		 *
+		 * @since 0.5.0
+		 *
+		 * @param WC_Order              $order    Order whose snapshot changed.
+		 * @param array<string, mixed>  $previous Metadata replaced.
+		 * @param array<string, scalar> $meta     Metadata written.
+		 */
+		do_action( 'umc_order_snapshot_refreshed', $order, $previous, $meta );
+
+		return true;
 	}
 
 	/**

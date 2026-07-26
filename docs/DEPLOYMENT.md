@@ -278,5 +278,112 @@ config — orders reflect later merchant/localization changes, while decimals an
 totals stay fixed. Legacy/v1 orders in a disabled currency display ISO decimals
 (or 2), not a per-order stored value — cosmetic only; totals exact. v2 orders are
 exact via `_umc_transaction_decimals`. Third-party templates/emails that format
-amounts without `wc_price()` are out of scope. Store API / Blocks order rendering
-remain deferred.
+amounts without `wc_price()` are out of scope.
+
+
+## Milestone 5 — Cart & Checkout Blocks (v0.5.0)
+
+### Files created
+
+- `src/StoreApi/CheckoutSnapshotAdapter.php` — snapshot timing and the
+  unpaid-draft refresh policy for Store API checkout.
+- `src/StoreApi/OrderCurrencyLock.php` — order-scope currency for the Store API's
+  order and pay-for-order routes.
+- `src/StoreApi/CartExtensionData.php` — currency state on the cart endpoint.
+- `docs/adr/0006-store-api-and-blocks-parity.md`,
+  `docs/architecture/store-api-request-lifecycle.md`.
+- `tests/integration/StoreApi/` — shared harness plus ten suites;
+  `tests/unit/StoreApiHooksStructureTest.php`.
+
+### Files modified
+
+- `src/CurrencyContext.php` — the conversion gate now admits Store API requests
+  and keeps every other REST namespace out.
+- `src/CurrencySwitcher.php` — returns early on REST requests.
+- `src/Integration/CurrencyFormatting.php`, `src/Order/OrderCurrencyFormatting.php`
+  — filter `option_woocommerce_currency_pos`.
+- `src/Integration/GatewayCompatibility.php` — no session notices from REST.
+- `src/Order/OrderSnapshot.php` — `write_snapshot_for()` seam; the classic path is
+  unchanged.
+- `src/Plugin.php` — wires the three adapters.
+- `.github/workflows/ci.yml` — WooCommerce pinned to **10.9.4** at workflow
+  level (`WC_VERSION`), consumed by `tests/bin/install-wp.sh`. An unpinned
+  `latest` resolves to pre-release builds, whose response-shape changes would
+  surface as CI failures unrelated to the plugin.
+
+### New hooks
+
+`option_woocommerce_currency_pos` (10 and 20),
+`woocommerce_store_api_checkout_update_order_meta` (10),
+`woocommerce_store_api_cart_update_order_from_request` (10),
+`rest_request_before_callbacks` / `rest_request_after_callbacks` (10).
+
+### New actions provided
+
+`umc_order_snapshot_refreshed( $order, $previous, $meta )` — fires only when an
+unpaid Store API draft's snapshot is realigned to a new currency or rate.
+
+### New persisted data
+
+None. Same `_umc_*` keys, same `_umc_snapshot_version = 2`. One new namespaced
+identifier, the `umc` Store API extension namespace, which publishes the active
+currency, the base currency and the selectable codes — no amounts, no exchange
+rate.
+
+### Validation
+
+PHPCS clean (0 errors, 0 warnings). Unit **171 tests / 247 assertions**.
+Integration **238 tests / 721 assertions**, HPOS enabled, 0 skipped, 0
+incomplete, 0 risky. Verified against WordPress 7.0.2 and WooCommerce 10.9.4.
+
+### Deployment sequence
+
+1. Deploy the plugin files; no migration and no schema change.
+2. Clear the object cache and any page or edge cache.
+3. `docker compose ps` / logs clean; public listeners unchanged.
+4. Smoke the blocks: put a Cart block and a Checkout block on a page, select a
+   non-base currency, confirm the block cart totals, shipping rates and payment
+   methods are all in that currency.
+5. Place a test order through the Checkout block; confirm the admin order shows
+   the currency audit box with `_umc_snapshot_version = 2` and the expected rate.
+6. Place a test order through classic checkout; confirm no regression.
+7. Open the block order confirmation while browsing in a different currency;
+   confirm the order still reports its own.
+8. Confirm HPOS is still enabled and orders are readable.
+9. Record the deployed commit and verification result here.
+
+### Rollback
+
+Downgrade to v0.4.0. Nothing is destructive in either direction: no schema
+changed and no metadata format changed.
+
+Orders placed through the blocks while v0.5.0 was active keep their snapshots and
+remain fully readable by v0.4.0, since the schema version is the same. Orders
+placed through the blocks *after* a rollback carry no snapshot and are classified
+legacy — the pre-M5 behaviour, which M4 already handles through the ISO decimal
+fallback, and refunds still work in the parent currency. Store API responses
+revert to base currency, which is what they did before this milestone.
+
+### Cache-clearing requirements
+
+As M4. Monetary caches are keyed by the rate identity and self-invalidate; a
+manual clear is only needed on deploy.
+
+Additionally, `/wp-json/wc/store/v1/products` responses now vary by the selected
+currency but, unlike the cart routes, WooCommerce does not send them with
+`Cache-Control: no-store`. Any cookie-blind page, edge or CDN cache must exclude
+`/wp-json/wc/store/` or vary on the `umc_currency` cookie, or shoppers can be
+served another currency's prices.
+
+### Known limitations (M5)
+
+Switching currency reloads the page; there is no in-place switch, which would
+require shipping JavaScript. Product price-filter blocks query WooCommerce's
+base-currency lookup table, so filtering by price range is evaluated in base
+currency — the same limitation the classic price-filter widget has. Third-party
+shipping methods are not converted unless a host opts in per rate. Block editor
+previews of product prices follow the editing administrator's own selected
+currency. A no-compatible-gateway error notice raised on a storefront request can
+still surface as a Store API cart error on a later request, because WooCommerce
+stores notices in the session and converts error notices into cart errors; the
+plugin no longer creates such notices during REST requests.

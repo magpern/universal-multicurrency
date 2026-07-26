@@ -202,8 +202,15 @@ final class CurrencyContext {
 	/**
 	 * Whether prices should be converted for the current request.
 	 *
-	 * Frontend page views and frontend AJAX convert; admin screens, REST/Store
-	 * API, cron and WP-CLI do not. Filterable via `umc_is_request_convertible`.
+	 * Frontend page views, frontend AJAX and the Store API convert; admin
+	 * screens, other REST namespaces, cron and WP-CLI do not. The Store API
+	 * backs the Cart and Checkout blocks, which are storefront surfaces in
+	 * everything but transport, so they resolve and convert exactly as a page
+	 * view does. Every other REST namespace — the admin REST API included —
+	 * keeps reporting base-currency values, because those consumers expect the
+	 * stored data rather than a shopper's presentation of it.
+	 *
+	 * Filterable via `umc_is_request_convertible`.
 	 */
 	public function is_convertible_request(): bool {
 		if ( null !== $this->convertible ) {
@@ -214,7 +221,7 @@ final class CurrencyContext {
 
 		if ( wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
 			$convertible = false;
-		} elseif ( function_exists( 'WC' ) && WC()->is_rest_api_request() ) {
+		} elseif ( function_exists( 'WC' ) && WC()->is_rest_api_request() && ! $this->is_store_api_request() ) {
 			$convertible = false;
 		} elseif ( is_admin() && ! wp_doing_ajax() ) {
 			$convertible = false;
@@ -230,6 +237,49 @@ final class CurrencyContext {
 		$this->convertible = (bool) apply_filters( 'umc_is_request_convertible', $convertible );
 
 		return $this->convertible;
+	}
+
+	/**
+	 * Whether the current request targets the WooCommerce Store API.
+	 *
+	 * Prefers the route WordPress parsed, anchored at the start, which is what
+	 * WooCommerce's own Store API authentication matches on. Matching the raw
+	 * request URI instead would accept the namespace anywhere in the string, so
+	 * a query argument that happened to contain a Store API path — a redirect
+	 * target, a search term — would be read as a Store API request and open the
+	 * conversion boundary on a route that should never convert.
+	 *
+	 * The URI test remains as a fallback for dispatches that carry no parsed
+	 * route, and is deliberately identical to WooCommerce's own so behaviour
+	 * there is unchanged.
+	 */
+	private function is_store_api_request(): bool {
+		$route = $this->parsed_rest_route();
+
+		if ( null !== $route ) {
+			return 0 === strpos( $route, '/wc/store/' );
+		}
+
+		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
+			return false;
+		}
+
+		$uri = sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+
+		return false !== strpos( $uri, trailingslashit( rest_get_url_prefix() ) . 'wc/store/' );
+	}
+
+	/**
+	 * The REST route WordPress resolved for this request, if any.
+	 */
+	private function parsed_rest_route(): ?string {
+		if ( ! isset( $GLOBALS['wp'] ) || ! $GLOBALS['wp'] instanceof \WP ) {
+			return null;
+		}
+
+		$route = $GLOBALS['wp']->query_vars['rest_route'] ?? '';
+
+		return is_string( $route ) && '' !== $route ? $route : null;
 	}
 
 	/**

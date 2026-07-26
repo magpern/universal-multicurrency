@@ -58,3 +58,8 @@ tests_add_filter(
 );
 
 require_once $umc_tests_dir . '/includes/bootstrap.php';
+
+// Shared test base classes. Required explicitly because they extend
+// WP_UnitTestCase, which only exists once the bootstrap above has run, and
+// because PHPUnit only autoloads files matching the *Test.php suffix.
+require_once __DIR__ . '/StoreApi/StoreApiTestCase.php';

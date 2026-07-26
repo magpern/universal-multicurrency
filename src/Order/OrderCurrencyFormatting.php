@@ -67,6 +67,7 @@ final class OrderCurrencyFormatting {
 		add_filter( 'woocommerce_currency_symbol', array( $this, 'filter_symbol' ), 20, 2 );
 		add_filter( 'wc_get_price_decimals', array( $this, 'filter_decimals' ), 20 );
 		add_filter( 'wc_price_args', array( $this, 'filter_price_args' ), 20 );
+		add_filter( 'option_woocommerce_currency_pos', array( $this, 'filter_currency_position' ), 20 );
 	}
 
 	/**
@@ -120,6 +121,28 @@ final class OrderCurrencyFormatting {
 
 		$formatting = $this->context->current_formatting();
 		return $formatting ? $formatting->decimals() : $decimals;
+	}
+
+	/**
+	 * Reports the order currency's symbol position (if context is active).
+	 *
+	 * Registered at priority 20 so an order render wins over the session
+	 * formatter, matching how the other four filters here are layered. Needed
+	 * because the Store API's order routes build their currency identity from a
+	 * raw read of this option; without it a historical order would be shown with
+	 * its own code and symbol but the store's symbol placement.
+	 *
+	 * @param mixed $position Stored symbol position.
+	 * @return mixed
+	 */
+	public function filter_currency_position( $position ) {
+		if ( ! $this->context->is_active() ) {
+			return $position;
+		}
+
+		$formatting = $this->context->current_formatting();
+
+		return $formatting ? $formatting->position() : $position;
 	}
 
 	/**

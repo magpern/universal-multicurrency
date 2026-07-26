@@ -5,9 +5,15 @@ on:
     branches: [main]
   pull_request:
 
-# Milestone 0 runs against current stable WordPress/WooCommerce/PHP only.
-# The minimum-supported-version matrix (PHP 8.1 / WP 6.5 / WC 8.2) is added
-# in Milestone 5 (hardening), per the approved plan.
+# WordPress core is pinned to the installed wp-phpunit version by
+# tests/bin/install-wp.sh. WooCommerce is pinned explicitly below: the Store API
+# suite asserts response shapes, and an unpinned "latest" resolves to
+# pre-release builds whose changes would surface as unrelated CI failures.
+# The minimum-supported-version matrix (PHP 8.1 / WP 6.5 / WC 8.2) remains a
+# later hardening milestone.
+env:
+  WC_VERSION: '10.9.4'
+
 jobs:
   phpcs:
     runs-on: ubuntu-latest

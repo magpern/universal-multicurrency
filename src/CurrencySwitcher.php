@@ -44,8 +44,18 @@ final class CurrencySwitcher {
 	 * When the parameter is present it is consumed (persisted if valid) and the
 	 * request is redirected to the same URL without it. Absent parameter is a
 	 * no-op so normal requests are untouched.
+	 *
+	 * REST requests never switch. Answering an API call with a redirect to a
+	 * storefront URL would corrupt the response, and persisting a preference as
+	 * a side effect of a read would be surprising for API consumers. A
+	 * `?currency=` argument on a REST request still resolves for that response
+	 * alone, because {@see CurrencyContext} reads it independently.
 	 */
 	public function maybe_switch(): void {
+		if ( $this->is_rest_request() ) {
+			return;
+		}
+
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Own display preference, allow-list validated, no nonce by design.
 		if ( ! isset( $_GET[ CurrencyContext::QUERY_VAR ] ) ) {
 			return;
@@ -63,6 +73,17 @@ final class CurrencySwitcher {
 
 		wp_safe_redirect( remove_query_arg( CurrencyContext::QUERY_VAR ) );
 		$this->halt();
+	}
+
+	/**
+	 * Whether the current request is served by the REST API.
+	 */
+	private function is_rest_request(): bool {
+		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+			return true;
+		}
+
+		return function_exists( 'WC' ) && WC()->is_rest_api_request();
 	}
 
 	/**
