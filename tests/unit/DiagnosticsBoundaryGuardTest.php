@@ -1,0 +1,171 @@
+<?php
+/**
+ * Structural guard: Diagnostics stays isolated from the money path in both
+ * directions, and third-party knowledge stays confined to one file
+ * (WordPress-free).
+ *
+ * @package UniversalMulticurrency
+ */
+
+declare(strict_types=1);
+
+namespace UMC\Tests\Unit;
+
+use FilesystemIterator;
+use PHPUnit\Framework\TestCase;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+
+/**
+ * This is a scoped subset of the full guard suite the architecture plan
+ * designs for `tests/integration/DiagnosticsGuardTest.php` (a later
+ * commit): the three checks the Milestone 6 scoring-core commit needs
+ * immediately, kept WordPress-free since nothing in `src/Diagnostics/` yet
+ * touches WordPress. Each assertion was verified to fail when the
+ * condition it guards is violated, not merely to pass today.
+ */
+final class DiagnosticsBoundaryGuardTest extends TestCase {
+
+	/**
+	 * Foreign identifiers a future detector might legitimately need to
+	 * name. Confined to DetectorManifest.php by guard, not by convention.
+	 *
+	 * @var array<int, string>
+	 */
+	private const FOREIGN_IDENTIFIERS = array(
+		'woocs',
+		'aelia',
+		'wcml',
+		'curcy',
+		'yay_currency',
+		'yaycurrency',
+		// Deliberately no generic "currency-switcher" / "currencyswitcher"
+		// entry: this plugin's own domain vocabulary legitimately contains
+		// that phrase (src/CurrencySwitcher.php, src/Frontend/Switcher.php's
+		// docblock) and every brand-specific term above already covers the
+		// real third-party products that phrase would otherwise catch.
+		'woocommerce-currency-switcher',
+	);
+
+	/**
+	 * Money-path classes and namespaces Diagnostics must never reach.
+	 *
+	 * @var array<int, string>
+	 */
+	private const MONETARY_REFERENCES = array(
+		'Converter',
+		'PriceConversionService',
+		'CurrencyContext',
+		'RateProvider',
+		'CurrencyRegistry',
+		'CurrencySwitcher',
+		'OrderSnapshot',
+		'StoreApi\\',
+		'Order\\',
+		'Cart\\',
+		'->convert(',
+		'apply_rate',
+		'->get_rate(',
+		'->get_currency_signature(',
+	);
+
+	private function src_root(): string {
+		return dirname( __DIR__, 2 ) . '/src';
+	}
+
+	/**
+	 * @return array<int, string>
+	 */
+	private function source_files( ?string $subdirectory = null ): array {
+		$root = null === $subdirectory ? $this->src_root() : $this->src_root() . '/' . $subdirectory;
+
+		if ( ! is_dir( $root ) ) {
+			return array();
+		}
+
+		$files = array();
+
+		$iterator = new RecursiveIteratorIterator(
+			new RecursiveDirectoryIterator( $root, FilesystemIterator::SKIP_DOTS )
+		);
+
+		foreach ( $iterator as $file ) {
+			if ( 'php' === $file->getExtension() ) {
+				$files[] = (string) $file->getPathname();
+			}
+		}
+
+		return $files;
+	}
+
+	private function assert_pattern_absent_from( array $files, string $pattern, string $message ): void {
+		$offenders = array();
+
+		foreach ( $files as $file ) {
+			if ( 1 === preg_match( $pattern, (string) file_get_contents( $file ) ) ) {
+				$offenders[] = basename( $file );
+			}
+		}
+
+		$this->assertSame( array(), $offenders, $message );
+	}
+
+	public function test_third_party_identifiers_are_confined_to_the_manifest(): void {
+		$all_files = $this->source_files();
+		$this->assertNotSame( array(), $all_files, 'Expected source files to scan.' );
+
+		$outside_manifest = array_values(
+			array_filter(
+				$all_files,
+				static function ( string $file ): bool {
+					return false === strpos( $file, 'DetectorManifest.php' );
+				}
+			)
+		);
+
+		$this->assertNotSame( array(), $outside_manifest, 'Expected source files outside DetectorManifest.php.' );
+
+		$pattern = '/(' . implode( '|', array_map( 'preg_quote', self::FOREIGN_IDENTIFIERS ) ) . ')/i';
+
+		$this->assert_pattern_absent_from(
+			$outside_manifest,
+			$pattern,
+			'Third-party plugin identifiers may only appear in DetectorManifest.php.'
+		);
+	}
+
+	public function test_monetary_namespaces_do_not_import_diagnostics(): void {
+		$all_files = $this->source_files();
+		$this->assertNotSame( array(), $all_files, 'Expected source files to scan.' );
+
+		$non_diagnostics = array_values(
+			array_filter(
+				$all_files,
+				static function ( string $file ): bool {
+					return false === strpos( $file, '/Diagnostics/' );
+				}
+			)
+		);
+
+		$this->assertNotSame( array(), $non_diagnostics, 'Expected source files outside src/Diagnostics/.' );
+
+		$this->assert_pattern_absent_from(
+			$non_diagnostics,
+			'/UMC\\\\Diagnostics|Diagnostics\\\\/',
+			'No file outside src/Diagnostics/ may reference the Diagnostics namespace.'
+		);
+	}
+
+	public function test_diagnostics_does_not_import_monetary_services(): void {
+		$diagnostics_files = $this->source_files( 'Diagnostics' );
+		$this->assertNotSame( array(), $diagnostics_files, 'Expected source files under src/Diagnostics/.' );
+
+		$pattern = '/\b(' . implode( '|', array_map( 'preg_quote', self::MONETARY_REFERENCES ) ) . ')/';
+
+		$this->assert_pattern_absent_from(
+			$diagnostics_files,
+			$pattern,
+			'src/Diagnostics/ must never reference conversion, pricing, snapshot, Store API, cart, or order-monetary services.'
+		);
+	}
+}

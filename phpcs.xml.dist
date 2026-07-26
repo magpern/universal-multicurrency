@@ -85,11 +85,20 @@
 	     WordPress loaded, so esc_html() is unavailable there. Exception
 	     messages built in these files are developer diagnostics, never echoed
 	     to the browser. This exclusion does NOT apply to output-producing code
-	     (admin/frontend), which arrives in later milestones. -->
+	     (admin/frontend), which arrives in later milestones.
+
+	     src/Diagnostics/ is the same case: its value objects and pure scoring
+	     core (Signature, Detector, Finding, Confidence, SignatureKind,
+	     ConflictScorer, VersionPolicy, and DetectorRegistry::sanitize()) are
+	     WordPress-free by design (see docs/adr, Milestone 6) and their
+	     exceptions are likewise developer diagnostics. The eventual
+	     WordPress-touching files in this namespace (the environment probe,
+	     the admin notice) are output-producing and must NOT be added here. -->
 	<rule ref="WordPress.Security.EscapeOutput.ExceptionNotEscaped">
 		<exclude-pattern>*src/Currency.php</exclude-pattern>
 		<exclude-pattern>*src/Converter.php</exclude-pattern>
 		<exclude-pattern>*src/Rates/*</exclude-pattern>
 		<exclude-pattern>*src/Exceptions/*</exclude-pattern>
+		<exclude-pattern>*src/Diagnostics/*</exclude-pattern>
 	</rule>
 </ruleset>
