@@ -28,16 +28,23 @@ use UMC\Order\OrderSnapshot;
 use UMC\Order\OrderSnapshotReader;
 use UMC\Order\RefundSnapshot;
 use UMC\Rates\ManualRateProvider;
+use UMC\StoreApi\CartExtensionData;
 use UMC\StoreApi\CheckoutSnapshotAdapter;
 use UMC\StoreApi\OrderCurrencyLock;
 
 /**
  * Instantiates services once and registers their hooks.
  *
- * Milestone 2 builds the object graph from the store's base currency and the
- * plugin settings, then registers the storefront conversion filters, the
- * switch handler, the switcher shortcode and the admin settings tab. Nothing
- * touches stock, orders, cart totals persistence, or REST/Store API.
+ * The object graph is built from the store's base currency and the plugin
+ * settings, then wired in layers: storefront conversion filters and the switch
+ * handler, the transaction integrations (cart, coupons, core shipping, gateway
+ * compatibility, order snapshot), historical order rendering and refunds, and
+ * the Store API adapters serving the Cart and Checkout blocks.
+ *
+ * Stock is never touched, fees are never converted, and no monetary total is
+ * ever written: WooCommerce owns those. Everything registers on every request
+ * type and gates itself at call time, which keeps the variation-price cache key
+ * stable regardless of how a request arrived.
  */
 final class Plugin {
 
@@ -131,6 +138,7 @@ final class Plugin {
 				// M5 services: Cart and Checkout blocks via the Store API.
 				( new CheckoutSnapshotAdapter( $order_snapshot ) )->register();
 				( new OrderCurrencyLock( $order_context, $gateway_compat ) )->register();
+				( new CartExtensionData( $context ) )->register();
 			}
 		);
 

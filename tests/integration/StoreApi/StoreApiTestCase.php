@@ -27,6 +27,7 @@ use UMC\Order\OrderSnapshot;
 use UMC\Order\OrderSnapshotReader;
 use UMC\Rates\ManualRateProvider;
 use UMC\Settings;
+use UMC\StoreApi\CartExtensionData;
 use UMC\StoreApi\CheckoutSnapshotAdapter;
 use UMC\StoreApi\OrderCurrencyLock;
 use WC_Product_Simple;
@@ -246,6 +247,7 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 
 		( new CheckoutSnapshotAdapter( $snapshot ) )->register();
 		( new OrderCurrencyLock( $order_context, $this->gateway_compat ) )->register();
+		( new CartExtensionData( $context ) )->register();
 	}
 
 	/**
