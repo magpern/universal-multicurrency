@@ -27,6 +27,7 @@ use UMC\Order\OrderSnapshot;
 use UMC\Order\OrderSnapshotReader;
 use UMC\Rates\ManualRateProvider;
 use UMC\Settings;
+use UMC\StoreApi\CheckoutSnapshotAdapter;
 use WC_Product_Simple;
 use WC_Product_Variable;
 use WC_Product_Variation;
@@ -52,6 +53,11 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 	 * Route namespace prefix shared by every Store API request.
 	 */
 	protected const STORE_API_ROOT = '/wc/store/v1';
+
+	/**
+	 * Plugin version stamped into snapshots written under test.
+	 */
+	protected const PLUGIN_VERSION = '0.5.0';
 
 	/**
 	 * Default request URI used between explicit route calls.
@@ -199,7 +205,7 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 		( new CouponConversion( $service, $this->context ) )->register();
 		( new ShippingConversion( $service, $this->context ) )->register();
 		( new GatewayCompatibility( $this->context ) )->register();
-		( new OrderSnapshot( $this->context, $settings, '0.5.0' ) )->register();
+		( new OrderSnapshot( $this->context, $settings, self::PLUGIN_VERSION ) )->register();
 
 		$reader        = new OrderSnapshotReader();
 		$resolver      = new HistoricalFormattingResolver( $registry );
@@ -217,17 +223,18 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Registers the Store API adapters, once they exist.
-	 *
-	 * Overridden as the milestone lands its adapters; the base implementation
-	 * keeps earlier commits green while the namespace is still empty.
+	 * Registers the Store API adapters, mirroring `Plugin::init()`.
 	 *
 	 * @param CurrencyContext      $context       Live currency context.
 	 * @param OrderCurrencyContext $order_context Order-scope currency context.
 	 * @param Settings             $settings      Settings store.
 	 */
 	protected function register_store_api_services( CurrencyContext $context, OrderCurrencyContext $order_context, Settings $settings ): void {
-		unset( $context, $order_context, $settings );
+		unset( $order_context );
+
+		$snapshot = new OrderSnapshot( $context, $settings, self::PLUGIN_VERSION );
+
+		( new CheckoutSnapshotAdapter( $snapshot ) )->register();
 	}
 
 	/**
@@ -273,6 +280,8 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 		$this->set_request_uri( '/wp-json' . $route );
 
 		try {
+			$this->reset_rest_server();
+
 			$request = new WP_REST_Request( $method, $route );
 
 			if ( array() !== $body ) {
@@ -284,6 +293,21 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 		} finally {
 			$this->set_request_uri( $previous_uri );
 		}
+	}
+
+	/**
+	 * Discards the REST server so the next request builds fresh route objects.
+	 *
+	 * WooCommerce instantiates each Store API route once, when `rest_api_init`
+	 * fires, and the checkout route remembers the order it last worked on
+	 * (`$this->order = $this->order ?? $this->get_draft_order()`). One PHP
+	 * process serving many requests would therefore carry an order between them,
+	 * which never happens in production. Rebuilding the server per request also
+	 * means a checkout retry genuinely reloads its draft from the session, which
+	 * is the path being tested.
+	 */
+	private function reset_rest_server(): void {
+		$GLOBALS['wp_rest_server'] = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 	}
 
 	/**
@@ -410,11 +434,15 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 			WC()->session->init();
 		}
 
-		// WC()->session outlives an individual test, so plugin-owned keys are
+		// WC()->session outlives an individual test, so per-shopper state is
 		// cleared explicitly. Without this a currency persisted by one test
-		// silently satisfies (or breaks) the next one's assertions.
+		// silently satisfies (or breaks) the next one's assertions, and the
+		// Store API's draft order id would make a later checkout reuse — and
+		// report on — an order a previous test already completed.
 		WC()->session->set( CurrencyContext::SESSION_KEY, null );
 		WC()->session->set( CartRecalculation::SESSION_KEY, null );
+		WC()->session->set( 'store_api_draft_order', null );
+		WC()->session->set( 'chosen_payment_method', null );
 
 		WC()->customer = new \WC_Customer( 0, true );
 		WC()->cart     = new \WC_Cart();

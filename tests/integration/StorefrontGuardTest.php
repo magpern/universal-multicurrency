@@ -22,9 +22,9 @@ use WP_UnitTestCase;
 final class StorefrontGuardTest extends WP_UnitTestCase {
 
 	/**
-	 * Hooks that remain out of scope: fees are disabled, stock is never touched,
-	 * and Blocks (Store API) belong to a later Blocks milestone.
-	 * woocommerce_create_refund is released to M4 (RefundSnapshot).
+	 * Hooks that remain out of scope: fees are disabled and stock is never
+	 * touched. woocommerce_create_refund is released to M4 (RefundSnapshot);
+	 * the Store API checkout hooks are released to M5 (CheckoutSnapshotAdapter).
 	 */
 	private const FORBIDDEN_HOOKS = array(
 		'woocommerce_cart_calculate_fees',
@@ -33,7 +33,6 @@ final class StorefrontGuardTest extends WP_UnitTestCase {
 		'woocommerce_product_get_stock_status',
 		'woocommerce_payment_complete_reduce_order_stock',
 		'woocommerce_order_status_changed',
-		'woocommerce_store_api_checkout_update_order_meta',
 	);
 
 	/**
@@ -219,14 +218,25 @@ final class StorefrontGuardTest extends WP_UnitTestCase {
 		);
 	}
 
-	public function test_no_store_api_or_blocks_registration_in_src(): void {
-		// Store API / Blocks order rendering remain deferred: src registers no
-		// Store-API or Blocks hooks (the cart_checkout_blocks compat declaration
-		// lives in the bootstrap file, not in src).
+	public function test_store_api_registration_stays_in_the_store_api_namespace(): void {
+		// Store API integration is confined to src/StoreApi: every other service
+		// stays transport-agnostic, so the domain layer cannot grow a dependency
+		// on how a particular client happens to reach it.
+		$outside_store_api = array_values(
+			array_filter(
+				$this->umc_source_files(),
+				static function ( string $file ): bool {
+					return false === strpos( $file, '/StoreApi/' );
+				}
+			)
+		);
+
+		$this->assertNotSame( array(), $outside_store_api, 'Expected source files outside the Store API namespace.' );
+
 		$this->assert_pattern_absent_from(
-			$this->umc_source_files(),
-			'/woocommerce_store_api_|woocommerce_blocks_|StoreApi\\\\|register_endpoint_data/',
-			'src must register no Store API / Blocks hooks (deferred milestone).'
+			$outside_store_api,
+			'/woocommerce_store_api_|woocommerce_blocks_|register_endpoint_data/',
+			'Only src/StoreApi may register Store API or Blocks hooks.'
 		);
 	}
 

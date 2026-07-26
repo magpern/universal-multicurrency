@@ -28,6 +28,7 @@ use UMC\Order\OrderSnapshot;
 use UMC\Order\OrderSnapshotReader;
 use UMC\Order\RefundSnapshot;
 use UMC\Rates\ManualRateProvider;
+use UMC\StoreApi\CheckoutSnapshotAdapter;
 
 /**
  * Instantiates services once and registers their hooks.
@@ -109,7 +110,12 @@ final class Plugin {
 				( new CouponConversion( $service, $context ) )->register();
 				( new ShippingConversion( $service, $context ) )->register();
 				$gateway_compat->register();
-				( new OrderSnapshot( $context, $settings, $version ) )->register();
+
+				// One OrderSnapshot instance serves both checkout flows: classic
+				// checkout hooks it directly, the Store API adapter drives the same
+				// writer at the equivalent points in its own lifecycle.
+				$order_snapshot = new OrderSnapshot( $context, $settings, $version );
+				$order_snapshot->register();
 
 				// M4 services: historical orders, refunds, order-pay.
 				$reader        = new OrderSnapshotReader();
@@ -120,6 +126,9 @@ final class Plugin {
 				( new HistoricalOrderDisplay( $order_context ) )->register();
 				( new OrderPayCurrencyLock( $order_context, $gateway_compat, $registry ) )->register();
 				( new RefundSnapshot( $reader ) )->register();
+
+				// M5 services: Cart and Checkout blocks via the Store API.
+				( new CheckoutSnapshotAdapter( $order_snapshot ) )->register();
 			}
 		);
 
