@@ -151,10 +151,21 @@ final class GatewayCompatibility {
 	/**
 	 * Adds a single explanatory notice when no gateway is available.
 	 *
+	 * Storefront templates only. WooCommerce notices are stored in the session
+	 * and rendered by whichever page reads them next, so raising one during a
+	 * REST request would leak the message onto an unrelated later page view.
+	 * Store API consumers learn the same thing from the response itself — the
+	 * Checkout block renders its own empty-payment-methods state from the empty
+	 * list — so there is nothing to announce here.
+	 *
 	 * @param string $active Active currency code.
 	 */
 	private function notify_no_gateway( string $active ): void {
 		if ( ! function_exists( 'wc_add_notice' ) ) {
+			return;
+		}
+
+		if ( function_exists( 'WC' ) && WC()->is_rest_api_request() ) {
 			return;
 		}
 
