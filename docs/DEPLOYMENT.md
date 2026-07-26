@@ -292,7 +292,7 @@ amounts without `wc_price()` are out of scope.
 - `src/StoreApi/CartExtensionData.php` — currency state on the cart endpoint.
 - `docs/adr/0006-store-api-and-blocks-parity.md`,
   `docs/architecture/store-api-request-lifecycle.md`.
-- `tests/integration/StoreApi/` — shared harness plus eight suites;
+- `tests/integration/StoreApi/` — shared harness plus ten suites;
   `tests/unit/StoreApiHooksStructureTest.php`.
 
 ### Files modified
@@ -306,7 +306,10 @@ amounts without `wc_price()` are out of scope.
 - `src/Order/OrderSnapshot.php` — `write_snapshot_for()` seam; the classic path is
   unchanged.
 - `src/Plugin.php` — wires the three adapters.
-- `.github/workflows/ci.yml` — WooCommerce pinned.
+- `.github/workflows/ci.yml` — WooCommerce pinned to **10.9.4** at workflow
+  level (`WC_VERSION`), consumed by `tests/bin/install-wp.sh`. An unpinned
+  `latest` resolves to pre-release builds, whose response-shape changes would
+  surface as CI failures unrelated to the plugin.
 
 ### New hooks
 
@@ -323,7 +326,15 @@ unpaid Store API draft's snapshot is realigned to a new currency or rate.
 ### New persisted data
 
 None. Same `_umc_*` keys, same `_umc_snapshot_version = 2`. One new namespaced
-identifier, the `umc` Store API extension namespace.
+identifier, the `umc` Store API extension namespace, which publishes the active
+currency, the base currency and the selectable codes — no amounts, no exchange
+rate.
+
+### Validation
+
+PHPCS clean (0 errors, 0 warnings). Unit **171 tests / 247 assertions**.
+Integration **238 tests / 721 assertions**, HPOS enabled, 0 skipped, 0
+incomplete, 0 risky. Verified against WordPress 7.0.2 and WooCommerce 10.9.4.
 
 ### Deployment sequence
 

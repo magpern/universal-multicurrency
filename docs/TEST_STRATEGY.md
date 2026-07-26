@@ -139,7 +139,8 @@ those tests mean anything, each of which had to be discovered:
   error notices into Store API cart errors, so a notice left behind by one test
   fails the next one's requests.
 
-Coverage: the conversion gate (Store API in, other REST namespaces out); the
+Coverage: the conversion gate (Store API in, other REST namespaces out,
+including a route parsed by WordPress rather than matched anywhere in the URI); the
 session-less products route including zero-decimal and rounding-sensitive
 amounts; the cart lifecycle with repeated reads pinning single conversion;
 coupons by type and threshold; real shipping zones including cache isolation
