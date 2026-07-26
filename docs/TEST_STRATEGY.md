@@ -105,10 +105,52 @@ M4 services (`Order/*` + `Admin\OrderCurrencyMetaBox`) contain no `Converter` /
 `PriceConversionService`, no live rate lookup (`get_rate`/`RateProvider`), no
 `CurrencyContext` access, no session/cookie access, no post-meta API and no order/
 refund total setters. `GatewayCompatibility` never inspects the order context. No
-runtime `_umc_*` deletion; no Store API / Blocks hook registration in `src`; the
-historical-display enter/exit brackets are paired. Idempotent boot; no leaks.
+runtime `_umc_*` deletion; Store API hook registration stays inside
+`src/StoreApi`; the historical-display enter/exit brackets are paired. Idempotent
+boot; no leaks.
+
+M5 adds five more: only the snapshot writers stage order metadata; nothing stamps
+the order currency; Store API code raises no session notices; only the Store API
+adapter saves an order; no frontend assets are registered. Each was verified to
+fail when violated, not merely to pass today.
+
+## Store API and Blocks (Milestone 5)
+
+`tests/integration/StoreApi/` drives real `/wc/store/v1` routes through
+`rest_do_request()`. The shared `StoreApiTestCase` owns the details that make
+those tests mean anything, each of which had to be discovered:
+
+- **Request identity.** `WC::is_rest_api_request()` and
+  `WC::is_store_api_request()` read `$_SERVER['REQUEST_URI']` and return false
+  when it is empty, while `rest_do_request()` sets nothing. Without simulating
+  it, a test exercises the storefront path while appearing to test the Store API.
+  The URI is set before any currency context is built, since the
+  convertible-request decision is memoized.
+- **Fresh routes per request.** WooCommerce instantiates each route once at
+  `rest_api_init`, and the checkout route remembers the order it last handled.
+  The REST server is discarded between requests, which also makes a checkout
+  retry genuinely reload its draft from the session.
+- **Per-request cart hydration.** Session loading is guarded by `did_action()`,
+  so within one process only the first cart load fires
+  `woocommerce_cart_loaded_from_session`. Switching currency re-hydrates the cart
+  so recalculation is actually exercised.
+- **Session and notice hygiene.** Plugin session keys, the Store API draft-order
+  id and WooCommerce notices are cleared between tests. WooCommerce turns session
+  error notices into Store API cart errors, so a notice left behind by one test
+  fails the next one's requests.
+
+Coverage: the conversion gate (Store API in, other REST namespaces out); the
+session-less products route including zero-decimal and rounding-sensitive
+amounts; the cart lifecycle with repeated reads pinning single conversion;
+coupons by type and threshold; real shipping zones including cache isolation
+across a switch; taxes derived from converted amounts; gateway availability and
+notice suppression; currency switching with an existing cart, including
+round-trips that would expose compounding; snapshots on block orders with the
+unpaid-draft refresh window and post-payment permanence; stored orders reported
+in their own currency; and a reconciliation suite running one scenario through
+both flows.
 
 ## Deferred (later milestones)
 
-Cart & Checkout **Blocks** / Store API (dedicated later milestone). Fee conversion
-(opt-in only).
+Fee conversion (opt-in only). A no-reload in-place currency switch, which would
+require shipping JavaScript.

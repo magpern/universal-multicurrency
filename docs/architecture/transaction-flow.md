@@ -2,9 +2,9 @@
 
 This document traces a base-currency amount through the cart, coupons, shipping,
 taxes, checkout and the order, and proves that no amount is ever converted twice.
-It is the reference for Milestone 3 (classic cart & checkout). Order display,
-emails, refunds and Blocks/Store API are later milestones and are not covered
-here.
+It is the reference for the transaction layer. Order display, emails and refunds
+are covered by ADR-0005; the Store API section at the end covers the Cart and
+Checkout blocks.
 
 ## The model: unit-price-authoritative conversion
 
@@ -117,3 +117,51 @@ transaction currency, exact rate, timestamp, source, plugin version, rate
 identity) via `WC_Order` CRUD — once, at `woocommerce_checkout_create_order`. The
 snapshot is never overwritten, so later store-rate changes cannot alter a
 historical order. See ADR-0004.
+
+
+## The same flow over the Store API (Milestone 5)
+
+The Cart and Checkout blocks reach the same code by a different transport. The
+conversion point is unchanged, because WooCommerce's Store API schemas read
+prices exactly as its templates do.
+
+```mermaid
+sequenceDiagram
+    participant B as Cart block
+    participant R as Store API cart route
+    participant C as WC_Cart
+    participant P as PriceHooks + PriceConversionService
+    participant S as CartSchema
+
+    B->>R: GET /wc/store/v1/cart
+    R->>C: route loads session and cart
+    Note over C: CartRecalculation recalculates if the<br/>rate identity changed
+    C->>P: get_price('view')  [BASE]
+    P-->>C: converted unit price  [the ONLY conversion]
+    Note over C: coupons, core shipping converted;<br/>taxes derived natively, never converted
+    R->>S: serialize
+    S-->>B: minor-unit integers + currency identity
+    Note over B: display only — no client-side arithmetic
+```
+
+Where each amount stands:
+
+| Amount | State reaching the response |
+| --- | --- |
+| Product and cart item prices | converted once, by the M2 view-context getters |
+| Line and cart totals | derived by `WC_Cart` from already-converted unit prices |
+| Fixed coupon amounts and thresholds | converted in transit; never written back |
+| Core shipping rate costs and their taxes | converted once, at `woocommerce_package_rates` |
+| Taxes | derived by WooCommerce from converted amounts — conversion prohibited |
+| Order totals at checkout | the converted cart totals, persisted verbatim |
+| Stored order totals on `/order/{id}` | served exactly as recorded — reconversion prohibited |
+
+Two things differ from the classic flow, both about timing rather than amounts.
+
+Store API checkout does not use `WC_Checkout`, so `woocommerce_checkout_create_order`
+never fires; `StoreApi\CheckoutSnapshotAdapter` runs the same snapshot writer at
+`woocommerce_store_api_checkout_update_order_meta` instead. And because the draft
+order is reused across payment retries — with its currency restamped from the cart
+each time — the adapter realigns the snapshot while the order is still unpaid, so
+a persisted order never contradicts its own recorded currency. From payment
+onward the snapshot is permanent, as it is for classic orders. See ADR-0006.

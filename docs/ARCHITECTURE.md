@@ -66,8 +66,8 @@ fitting SPL type (`InvalidArgumentException` / `RuntimeException`).
 Milestone 2 connects the domain core to WooCommerce for **runtime, display-only**
 price conversion. Base product prices in the database are never written;
 conversion happens only in `view`-context read filters. Stock, cart totals
-persistence, orders, refunds, gateways, shipping, taxes, coupons, fees and
-REST/Store API remain untouched (later milestones).
+persistence, orders, refunds, gateways, shipping, taxes and coupons are later
+layers; fees are never converted.
 
 Request flow and collaborators:
 
@@ -124,9 +124,9 @@ in `docs/architecture/transaction-flow.md`; the model is governed by ADR-0004.
     CRUD (HPOS-safe) at order creation.
 - **Rate identity** — `CurrencyContext::get_currency_signature()` (`code:rate`)
   keys every monetary cache so they self-invalidate on a switch **or** rate edit.
-- **Fees are not converted** (disabled; opt-in `umc_convert_fee` only). **Blocks /
-  Store API** and order display / emails / refunds are later milestones; classic
-  checkout is the only supported path and Blocks compatibility is not claimed.
+- **Fees are not converted** (disabled; opt-in `umc_convert_fee` only). Order
+  display, emails and refunds are Milestone 4; the Cart and Checkout blocks are
+  Milestone 5.
 
 ## Order & display layer (Milestone 4)
 
@@ -190,3 +190,32 @@ WC_Order
 The snapshot schema includes `_umc_snapshot_version = 2` for M4 (M3 = v1). Legacy,
 partial, malformed and future versions remain readable and refundable via the
 fallback chain. See ADR-0005.
+
+## Store API layer (Milestone 5)
+
+The Cart and Checkout blocks are served by the same domain services as the
+classic flow. `CurrencyContext::is_convertible_request()` now admits Store API
+requests — they are storefront surfaces in everything but transport — while every
+other REST namespace continues to report stored base values.
+
+Opening that gate is most of the milestone: prices, coupons, core shipping, cart
+recalculation and gateway availability all work over the Store API without new
+code, because WooCommerce's schemas read prices through the same `view`-context
+getters its templates use. `src/StoreApi` supplies only what WooCommerce's block
+path does differently.
+
+| Class | Deps | Responsibility |
+|---|---|---|
+| `StoreApi\CheckoutSnapshotAdapter` | `Order\OrderSnapshot` | Runs the snapshot writer at the Store API's equivalent of order creation, since `woocommerce_checkout_create_order` never fires for it. Owns the policy that lets an unpaid draft's snapshot follow a currency change, and nothing else — the metadata and the authority to write it stay with `OrderSnapshot`. |
+| `StoreApi\OrderCurrencyLock` | `Order\OrderCurrencyContext`, `Integration\GatewayCompatibility` | The REST counterpart of `OrderPayCurrencyLock`, which hooks `template_redirect` and so never runs for an API request. Brackets the two order-scoped routes so a stored order is reported in its own currency and gateways are filtered by it. |
+| `StoreApi\CartExtensionData` | `CurrencyContext` | Publishes currency state — active and base codes, selectable codes, rate identity — under the `umc` namespace on the cart endpoint. Carries no money: amounts already reach clients through WooCommerce's own fields. |
+
+Two supporting changes sit outside the namespace. `CurrencySwitcher` returns early
+on REST requests, because answering an API call with a redirect would corrupt the
+response and persisting a preference as a side effect of a read would surprise
+API consumers. And both formatters filter `option_woocommerce_currency_pos`, the
+one part of the money identity WooCommerce reads without a filter.
+
+No JavaScript ships. Switching currency reloads the page, which makes every block
+refetch on its own; an in-place switch would belong on `POST /cart/extensions`
+under the same namespace. See ADR-0006.
