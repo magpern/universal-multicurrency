@@ -29,6 +29,7 @@ use UMC\Order\OrderSnapshotReader;
 use UMC\Order\RefundSnapshot;
 use UMC\Rates\ManualRateProvider;
 use UMC\StoreApi\CheckoutSnapshotAdapter;
+use UMC\StoreApi\OrderCurrencyLock;
 
 /**
  * Instantiates services once and registers their hooks.
@@ -129,6 +130,7 @@ final class Plugin {
 
 				// M5 services: Cart and Checkout blocks via the Store API.
 				( new CheckoutSnapshotAdapter( $order_snapshot ) )->register();
+				( new OrderCurrencyLock( $order_context, $gateway_compat ) )->register();
 			}
 		);
 

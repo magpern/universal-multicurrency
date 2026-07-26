@@ -28,6 +28,7 @@ use UMC\Order\OrderSnapshotReader;
 use UMC\Rates\ManualRateProvider;
 use UMC\Settings;
 use UMC\StoreApi\CheckoutSnapshotAdapter;
+use UMC\StoreApi\OrderCurrencyLock;
 use WC_Product_Simple;
 use WC_Product_Variable;
 use WC_Product_Variation;
@@ -125,6 +126,13 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 	protected int $base_decimals = 2;
 
 	/**
+	 * Gateway compatibility instance shared by the storefront filter and locks.
+	 *
+	 * @var GatewayCompatibility
+	 */
+	protected GatewayCompatibility $gateway_compat;
+
+	/**
 	 * Currencies the graph was booted with.
 	 *
 	 * @var array<string, array<string, mixed>>
@@ -204,7 +212,11 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 		( new CartRecalculation( $this->context ) )->register();
 		( new CouponConversion( $service, $this->context ) )->register();
 		( new ShippingConversion( $service, $this->context ) )->register();
-		( new GatewayCompatibility( $this->context ) )->register();
+
+		// One shared instance, as Plugin::init() wires it: the order lock removes
+		// this exact callback so its order-currency rule sees the original set.
+		$this->gateway_compat = new GatewayCompatibility( $this->context );
+		$this->gateway_compat->register();
 		( new OrderSnapshot( $this->context, $settings, self::PLUGIN_VERSION ) )->register();
 
 		$reader        = new OrderSnapshotReader();
@@ -230,11 +242,10 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 	 * @param Settings             $settings      Settings store.
 	 */
 	protected function register_store_api_services( CurrencyContext $context, OrderCurrencyContext $order_context, Settings $settings ): void {
-		unset( $order_context );
-
 		$snapshot = new OrderSnapshot( $context, $settings, self::PLUGIN_VERSION );
 
 		( new CheckoutSnapshotAdapter( $snapshot ) )->register();
+		( new OrderCurrencyLock( $order_context, $this->gateway_compat ) )->register();
 	}
 
 	/**
@@ -272,8 +283,9 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 	 * @param string               $method HTTP method.
 	 * @param string               $path   Route below `/wc/store/v1`, e.g. `/cart`.
 	 * @param array<string, mixed> $body   Request body parameters.
+	 * @param array<string, mixed> $query  Query-string parameters.
 	 */
-	protected function store_api_request( string $method, string $path, array $body = array() ): WP_REST_Response {
+	protected function store_api_request( string $method, string $path, array $body = array(), array $query = array() ): WP_REST_Response {
 		$route = self::STORE_API_ROOT . $path;
 
 		$previous_uri = $this->current_request_uri();
@@ -283,6 +295,10 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 			$this->reset_rest_server();
 
 			$request = new WP_REST_Request( $method, $route );
+
+			if ( array() !== $query ) {
+				$request->set_query_params( $query );
+			}
 
 			if ( array() !== $body ) {
 				$request->set_header( 'Content-Type', 'application/json' );
