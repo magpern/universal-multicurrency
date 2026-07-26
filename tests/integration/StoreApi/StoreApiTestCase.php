@@ -102,7 +102,32 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 		'woocommerce_store_api_cart_update_order_from_request',
 		'rest_request_before_callbacks',
 		'rest_request_after_callbacks',
+		// Plugin-provided filters, through which a test states how the host is
+		// configured. Rebuilding the graph re-states that configuration, so these
+		// are cleared alongside the hooks the plugin itself registers.
 		'umc_is_request_convertible',
+		'umc_currency_signature',
+		'umc_gateway_supported_currencies',
+		'umc_convert_shipping_rate',
+		'umc_coupon_amount_is_base',
+		'umc_order_snapshot_meta',
+	);
+
+	/**
+	 * Plugin-provided actions tests subscribe to in order to observe behaviour.
+	 *
+	 * Unlike the hooks above these are cleared only between tests: a subscriber
+	 * registered before a currency switch must still be listening after it.
+	 *
+	 * @var array<int, string>
+	 */
+	private const OBSERVED_ACTIONS = array(
+		'umc_order_snapshot_created',
+		'umc_order_snapshot_refreshed',
+		'umc_order_currency_context_entered',
+		'umc_order_currency_context_exited',
+		'umc_cart_recalculated',
+		'umc_gateway_hidden',
 	);
 
 	/**
@@ -160,16 +185,31 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 		// this filter specifically so API endpoints can be exercised in tests.
 		add_filter( 'woocommerce_store_api_disable_nonce_check', '__return_true' );
 
+		if ( function_exists( 'wc_clear_notices' ) ) {
+			wc_clear_notices();
+		}
+
 		$this->reset_cart();
 	}
 
 	public function tear_down(): void {
+		// WooCommerce stores notices in the session and its NoticeHandler turns
+		// session error notices into Store API errors, so a notice one test
+		// leaves behind would fail the next one's requests.
+		if ( function_exists( 'wc_clear_notices' ) ) {
+			wc_clear_notices();
+		}
+
 		if ( WC()->cart ) {
 			WC()->cart->empty_cart();
 		}
 
 		remove_filter( 'woocommerce_store_api_disable_nonce_check', '__return_true' );
 		$this->clear_managed_hooks();
+
+		foreach ( self::OBSERVED_ACTIONS as $hook ) {
+			remove_all_actions( $hook );
+		}
 
 		unset( $_COOKIE[ CurrencyContext::COOKIE_NAME ] );
 		delete_option( Settings::OPTION );
