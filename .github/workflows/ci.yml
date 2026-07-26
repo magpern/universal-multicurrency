@@ -9,14 +9,14 @@ on:
 # tests/bin/install-wp.sh. The `integration` job below exercises the
 # supported-version matrix (PHP / WordPress / WooCommerce); coordinates are
 # fixed here rather than resolved dynamically so a leg's identity cannot
-# drift without editing this file. `WC_VERSION` is overridden per leg by
-# `matrix.wc`; the floor and current coordinates use exact WooCommerce
-# releases (not "latest") because the Store API suite asserts response
-# shapes, and floating tags resolve to pre-release builds whose changes
-# would surface as unrelated CI failures. The `ceiling` leg intentionally
-# floats on `latest` for early warning on upstream drift.
-env:
-  WC_VERSION: '10.9.4'
+# drift without editing this file. Each integration leg sets its own
+# `env.WC_VERSION` from `matrix.wc` (no workflow-level default — every job
+# that needs the value now sets it directly); the floor and current
+# coordinates use exact WooCommerce releases (not "latest") because the
+# Store API suite asserts response shapes, and floating tags resolve to
+# pre-release builds whose changes would surface as unrelated CI failures.
+# The `ceiling` leg intentionally floats on `latest` for early warning on
+# upstream drift.
 
 jobs:
   phpcs:

@@ -92,7 +92,7 @@ does and does not touch.
 |---|---|---|---|---|---|
 | PHP | 8.1 | 8.3 | 8.4 | 8.1, 8.3, 8.4 | Supported |
 | WordPress | 6.5 | latest stable release | 7.0.2 (floats with `wp-phpunit`; not independently pinned) | 6.5.8, 7.0.2 | Supported |
-| WooCommerce | 8.2 | current major (10.x) | 10.9.4 (pinned); `latest` observed at 11.0.0-beta.2 on the non-blocking ceiling leg | 8.2.5, 10.9.4, latest (ceiling, non-blocking) | Supported |
+| WooCommerce | 8.2 | current major (10.x) | 10.9.4 | 8.2.5, 10.9.4, latest (ceiling, non-blocking) | Supported |
 <!-- umc:versions:end -->
 
 ## Version support
