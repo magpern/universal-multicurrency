@@ -5,10 +5,11 @@
  * @package UniversalMulticurrency
  */
 
-declare( strict_types=1 );
+declare(strict_types=1);
 
 namespace UMC;
 
+use UMC\Admin\OrderCurrencyMetaBox;
 use UMC\Admin\SettingsPage;
 use UMC\Cart\CartRecalculation;
 use UMC\Frontend\Switcher;
@@ -18,7 +19,14 @@ use UMC\Integration\GatewayCompatibility;
 use UMC\Integration\PriceConversionService;
 use UMC\Integration\PriceHooks;
 use UMC\Integration\ShippingConversion;
+use UMC\Order\HistoricalFormattingResolver;
+use UMC\Order\HistoricalOrderDisplay;
+use UMC\Order\OrderCurrencyContext;
+use UMC\Order\OrderCurrencyFormatting;
+use UMC\Order\OrderPayCurrencyLock;
 use UMC\Order\OrderSnapshot;
+use UMC\Order\OrderSnapshotReader;
+use UMC\Order\RefundSnapshot;
 use UMC\Rates\ManualRateProvider;
 
 /**
@@ -81,9 +89,18 @@ final class Plugin {
 		// Milestone 3 adds the transaction integrations: cart recalculation on
 		// currency change, coupon and core-shipping conversion, gateway currency
 		// compatibility, and the immutable order snapshot written at creation.
+		//
+		// Milestone 4 adds historical order rendering, order-pay currency lock,
+		// and refund metadata.
 		add_action(
 			'woocommerce_init',
-			static function () use ( $context, $service, $settings, $version ) {
+			static function () use ( $context, $service, $settings, $version, $registry ) {
+				// One GatewayCompatibility instance is shared between the
+				// storefront callback and the order-pay lock so the lock can
+				// deregister the storefront callback (matched by instance) and
+				// filter the original gateway set with the explicit order currency.
+				$gateway_compat = new GatewayCompatibility( $context );
+
 				( new CurrencySwitcher( $context ) )->maybe_switch();
 				( new PriceHooks( $service, $context ) )->register();
 				( new CurrencyFormatting( $context ) )->register();
@@ -91,8 +108,18 @@ final class Plugin {
 				( new CartRecalculation( $context ) )->register();
 				( new CouponConversion( $service, $context ) )->register();
 				( new ShippingConversion( $service, $context ) )->register();
-				( new GatewayCompatibility( $context ) )->register();
+				$gateway_compat->register();
 				( new OrderSnapshot( $context, $settings, $version ) )->register();
+
+				// M4 services: historical orders, refunds, order-pay.
+				$reader        = new OrderSnapshotReader();
+				$resolver      = new HistoricalFormattingResolver( $registry );
+				$order_context = new OrderCurrencyContext( $reader, $resolver );
+
+				( new OrderCurrencyFormatting( $order_context, $resolver ) )->register();
+				( new HistoricalOrderDisplay( $order_context ) )->register();
+				( new OrderPayCurrencyLock( $order_context, $gateway_compat, $registry ) )->register();
+				( new RefundSnapshot( $reader ) )->register();
 			}
 		);
 
@@ -103,6 +130,16 @@ final class Plugin {
 				$pages[] = new SettingsPage( $settings, $base );
 
 				return $pages;
+			}
+		);
+
+		// M4 admin audit meta box.
+		add_action(
+			'woocommerce_init',
+			static function () use ( $registry ) {
+				$reader   = new OrderSnapshotReader();
+				$resolver = new HistoricalFormattingResolver( $registry );
+				( new OrderCurrencyMetaBox( $reader, $resolver ) )->register();
 			}
 		);
 	}

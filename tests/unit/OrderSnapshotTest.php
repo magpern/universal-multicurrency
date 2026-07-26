@@ -18,6 +18,7 @@ use UMC\Order\OrderSnapshot;
 final class OrderSnapshotTest extends TestCase {
 
 	public function test_snapshot_meta_uses_stable_keys_and_values(): void {
+		// M4 snapshots include schema version and decimals (defaults to v2, decimals=2).
 		$meta = OrderSnapshot::snapshot_meta( 'EUR', 'SEK', '11.50', 1_700_000_000, 'manual', '0.3.0', 'SEK:11.50' );
 
 		$this->assertSame(
@@ -29,6 +30,8 @@ final class OrderSnapshotTest extends TestCase {
 				'_umc_rate_source'          => 'manual',
 				'_umc_plugin_version'       => '0.3.0',
 				'_umc_rate_identity'        => 'SEK:11.50',
+				'_umc_snapshot_version'     => 2,
+				'_umc_transaction_decimals' => 2,
 			),
 			$meta
 		);
@@ -44,5 +47,33 @@ final class OrderSnapshotTest extends TestCase {
 		$this->assertArrayHasKey( OrderSnapshot::META_RATE_SOURCE, $meta );
 		$this->assertArrayHasKey( OrderSnapshot::META_PLUGIN_VERSION, $meta );
 		$this->assertArrayHasKey( OrderSnapshot::META_RATE_IDENTITY, $meta );
+	}
+
+	public function test_snapshot_meta_m4_includes_version_and_decimals(): void {
+		$meta = OrderSnapshot::snapshot_meta( 'EUR', 'JPY', '155.50', 1_700_000_000, 'manual', '0.4.0', 'JPY:155.50', 2, 0 );
+
+		$this->assertSame(
+			array(
+				'_umc_base_currency'        => 'EUR',
+				'_umc_transaction_currency' => 'JPY',
+				'_umc_exchange_rate'        => '155.50',
+				'_umc_rate_timestamp'       => 1_700_000_000,
+				'_umc_rate_source'          => 'manual',
+				'_umc_plugin_version'       => '0.4.0',
+				'_umc_rate_identity'        => 'JPY:155.50',
+				'_umc_snapshot_version'     => 2,
+				'_umc_transaction_decimals' => 0,
+			),
+			$meta
+		);
+	}
+
+	public function test_snapshot_meta_m4_keys_match_constants(): void {
+		$meta = OrderSnapshot::snapshot_meta( 'EUR', 'JPY', '155.50', 1_700_000_000, 'manual', '0.4.0', 'JPY:155.50', 2, 0 );
+
+		$this->assertArrayHasKey( OrderSnapshot::META_SNAPSHOT_VERSION, $meta );
+		$this->assertArrayHasKey( OrderSnapshot::META_TRANSACTION_DECIMALS, $meta );
+		$this->assertSame( 2, $meta[ OrderSnapshot::META_SNAPSHOT_VERSION ] );
+		$this->assertSame( 0, $meta[ OrderSnapshot::META_TRANSACTION_DECIMALS ] );
 	}
 }

@@ -5,22 +5,33 @@
  * @package UniversalMulticurrency
  */
 
-declare( strict_types=1 );
+declare(strict_types=1);
 
 namespace UMC\Integration;
 
 use UMC\CurrencyContext;
 
 /**
- * Hides payment gateways that do not support the active transaction currency.
+ * Hides payment gateways that do not support a given transaction currency.
  *
  * WooCommerce core gateways accept any store currency, so nothing is hidden by
  * default. A gateway's supported-currency list is declared through the
  * `umc_gateway_supported_currencies` filter (return `null` for "all currencies",
- * or an array of codes). When the active currency is not supported the gateway is
+ * or an array of codes). When the currency is not supported the gateway is
  * removed *before* order placement, so the customer is never silently charged in
- * a currency the gateway cannot process. If that leaves no gateway available in a
- * non-base currency, an explanatory checkout notice is shown.
+ * a currency the gateway cannot process. If that leaves no gateway available, an
+ * explanatory checkout notice is shown.
+ *
+ * The availability rule ({@see self::filter_gateways_for_currency()}) is driven by
+ * an **explicit** currency code and inspects no session, cookie, or order context:
+ *
+ * - Storefront checkout calls it with the active session currency
+ *   ({@see self::filter_gateways()}, registered on
+ *   `woocommerce_available_payment_gateways`).
+ * - The order-pay endpoint calls it with `$order->get_currency()` and removes the
+ *   storefront callback for that request, so filtering is deterministic and never
+ *   depends on a later filter repairing an earlier session-based result
+ *   ({@see \UMC\Order\OrderPayCurrencyLock}).
  *
  * Gateway-specific settlement conversion is deliberately out of scope: this class
  * only decides availability; it never rewrites a gateway's amount or currency.
@@ -51,7 +62,12 @@ final class GatewayCompatibility {
 	}
 
 	/**
-	 * Removes gateways incompatible with the active currency.
+	 * Storefront callback: removes gateways incompatible with the session currency.
+	 *
+	 * Resolves the active storefront currency and delegates to the explicit-currency
+	 * rule. On the order-pay endpoint this callback is deregistered by
+	 * {@see \UMC\Order\OrderPayCurrencyLock}, so it never pre-filters the gateway
+	 * list with the wrong (session) currency there.
 	 *
 	 * @param mixed $gateways Available gateways keyed by id.
 	 * @return mixed
@@ -61,13 +77,29 @@ final class GatewayCompatibility {
 			return $gateways;
 		}
 
-		$active  = $this->context->get_active_code();
+		return $this->filter_gateways_for_currency( $gateways, $this->context->get_active_code() );
+	}
+
+	/**
+	 * Filters gateways for a specific currency code.
+	 *
+	 * Extracted for reuse in order-pay and other historical contexts.
+	 *
+	 * @param array<string, object> $gateways Available gateways keyed by id.
+	 * @param string                $currency Currency code to filter against.
+	 * @return array<string, object> Filtered gateways.
+	 */
+	public function filter_gateways_for_currency( array $gateways, string $currency ): array {
+		if ( array() === $gateways ) {
+			return $gateways;
+		}
+
 		$removed = false;
 
 		foreach ( $gateways as $id => $gateway ) {
 			$supported = $this->supported_currencies( $gateway );
 
-			if ( null !== $supported && ! in_array( $active, $supported, true ) ) {
+			if ( null !== $supported && ! in_array( strtoupper( $currency ), $supported, true ) ) {
 				unset( $gateways[ $id ] );
 				$removed = true;
 
@@ -77,15 +109,15 @@ final class GatewayCompatibility {
 				 *
 				 * @since 0.3.0
 				 *
-				 * @param string $id     Gateway id.
-				 * @param string $active Active currency code.
+				 * @param string $id       Gateway id.
+				 * @param string $currency Currency code.
 				 */
-				do_action( 'umc_gateway_hidden', (string) $id, $active );
+				do_action( 'umc_gateway_hidden', (string) $id, strtoupper( $currency ) );
 			}
 		}
 
-		if ( $removed && array() === $gateways && ! $this->context->is_base_active() ) {
-			$this->notify_no_gateway( $active );
+		if ( $removed && array() === $gateways ) {
+			$this->notify_no_gateway( strtoupper( $currency ) );
 		}
 
 		return $gateways;
