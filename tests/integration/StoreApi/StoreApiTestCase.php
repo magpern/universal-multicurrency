@@ -241,6 +241,22 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 	 */
 	protected function switch_currency( string $code ): void {
 		$this->boot_plugin( $this->booted_currencies, $code, $this->base_code, $this->base_decimals );
+		$this->rehydrate_cart();
+	}
+
+	/**
+	 * Reloads the cart from its session, as the next request would.
+	 *
+	 * WooCommerce guards session loading with `did_action()`, so within a single
+	 * PHP process only the first cart load reads the session and fires
+	 * `woocommerce_cart_loaded_from_session`. Production never hits that guard,
+	 * because every request is a new process. Driving `WC_Cart_Session` directly
+	 * restores the per-request behaviour the recalculation hook depends on.
+	 */
+	protected function rehydrate_cart(): void {
+		WC()->cart = new \WC_Cart();
+
+		( new \WC_Cart_Session( WC()->cart ) )->get_cart_from_session();
 	}
 
 	/**
