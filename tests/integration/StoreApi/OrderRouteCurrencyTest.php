@@ -154,6 +154,80 @@ final class OrderRouteCurrencyTest extends StoreApiTestCase {
 		);
 	}
 
+	public function test_nested_locks_restore_the_session_filter_exactly_once(): void {
+		$this->boot_plugin( self::CURRENCIES, 'USD' );
+		$order = $this->stored_order( 'SEK', '1150.00' );
+		$lock  = new \UMC\StoreApi\OrderCurrencyLock( $this->order_context, $this->gateway_compat );
+		$args  = $this->lock_args( $order );
+
+		$lock->maybe_lock( ...$args );
+		$lock->maybe_lock( ...$args );
+
+		$this->assertSame( 2, $this->order_context->depth(), 'Each entry pushes the order context.' );
+
+		$lock->release( ...$args );
+
+		$this->assertSame( 1, $this->order_context->depth() );
+		$this->assertTrue(
+			$this->order_context->is_active(),
+			'An inner exit must not release a lock the outer request still holds.'
+		);
+
+		$lock->release( ...$args );
+
+		$this->assertSame( 0, $this->order_context->depth() );
+		$this->assertFalse( $this->order_context->is_active() );
+	}
+
+	public function test_release_without_a_lock_is_a_no_op(): void {
+		$this->boot_plugin( self::CURRENCIES, 'USD' );
+		$lock = new \UMC\StoreApi\OrderCurrencyLock( $this->order_context, $this->gateway_compat );
+
+		$response = $lock->release( 'untouched', null, null );
+
+		$this->assertSame( 'untouched', $response );
+		$this->assertSame( 0, $this->order_context->depth(), 'A stray release must not underflow the stack.' );
+	}
+
+	public function test_error_responses_still_release_the_lock(): void {
+		$this->boot_plugin( self::CURRENCIES, 'USD' );
+		$order = $this->stored_order( 'SEK', '1150.00' );
+		$lock  = new \UMC\StoreApi\OrderCurrencyLock( $this->order_context, $this->gateway_compat );
+		$args  = $this->lock_args( $order );
+
+		$lock->maybe_lock( ...$args );
+
+		// WordPress applies rest_request_after_callbacks even when the route
+		// failed, so an unauthorized or invalid request still tears down.
+		$error    = new \WP_Error( 'woocommerce_rest_invalid_order', 'Invalid order.' );
+		$returned = $lock->release( $error, $args[1], $args[2] );
+
+		$this->assertSame( $error, $returned, 'The response passes through untouched.' );
+		$this->assertSame( 0, $this->order_context->depth() );
+	}
+
+	public function test_unmatched_routes_never_lock(): void {
+		$this->boot_plugin( self::CURRENCIES, 'USD' );
+		$lock = new \UMC\StoreApi\OrderCurrencyLock( $this->order_context, $this->gateway_compat );
+
+		foreach ( array( '/wc/store/v1/cart', '/wc/store/v1/checkout', '/wc/store/v1/products/12', '/wc/v3/orders/12' ) as $route ) {
+			$lock->maybe_lock( null, null, new \WP_REST_Request( 'GET', $route ) );
+
+			$this->assertSame( 0, $this->order_context->depth(), "Route {$route} must not lock." );
+		}
+	}
+
+	/**
+	 * Arguments matching the REST dispatch filters, for an order-scoped route.
+	 *
+	 * @param WC_Order $order Order the route addresses.
+	 *
+	 * @return array{0: mixed, 1: mixed, 2: \WP_REST_Request}
+	 */
+	private function lock_args( WC_Order $order ): array {
+		return array( null, null, new \WP_REST_Request( 'GET', '/wc/store/v1/order/' . $order->get_id() ) );
+	}
+
 	/**
 	 * Creates a stored, paid order in a given currency.
 	 *

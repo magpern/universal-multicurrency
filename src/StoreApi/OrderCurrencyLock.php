@@ -49,11 +49,16 @@ final class OrderCurrencyLock {
 	private GatewayCompatibility $gateway_compat;
 
 	/**
-	 * Whether this request currently holds a lock.
+	 * How many order contexts this lock currently holds.
 	 *
-	 * @var bool
+	 * A counter rather than a flag, so entry and exit stay symmetric with the
+	 * LIFO stack they drive. The gateway filters are swapped on the outermost
+	 * entry and restored on the matching exit, which keeps the swap balanced if
+	 * an order route is ever dispatched inside another.
+	 *
+	 * @var int
 	 */
-	private bool $locked = false;
+	private int $depth = 0;
 
 	/**
 	 * Binds the lock to the order context and gateway service.
@@ -108,20 +113,22 @@ final class OrderCurrencyLock {
 		 * Swapped before the context is entered, so that anything reacting to
 		 * the context-entered action already sees the fully established lock.
 		 */
-		remove_filter(
-			'woocommerce_available_payment_gateways',
-			array( $this->gateway_compat, 'filter_gateways' ),
-			10
-		);
+		if ( 0 === $this->depth ) {
+			remove_filter(
+				'woocommerce_available_payment_gateways',
+				array( $this->gateway_compat, 'filter_gateways' ),
+				10
+			);
 
-		add_filter(
-			'woocommerce_available_payment_gateways',
-			array( $this, 'filter_gateways_for_order' ),
-			10,
-			1
-		);
+			add_filter(
+				'woocommerce_available_payment_gateways',
+				array( $this, 'filter_gateways_for_order' ),
+				10,
+				1
+			);
+		}
 
-		$this->locked = true;
+		++$this->depth;
 
 		$this->context->enter( $order );
 
@@ -139,26 +146,28 @@ final class OrderCurrencyLock {
 	public function release( $response, $handler, $request ) {
 		unset( $handler, $request );
 
-		if ( ! $this->locked ) {
+		if ( 0 === $this->depth ) {
 			return $response;
 		}
 
-		$this->locked = false;
-
-		remove_filter(
-			'woocommerce_available_payment_gateways',
-			array( $this, 'filter_gateways_for_order' ),
-			10
-		);
-
-		add_filter(
-			'woocommerce_available_payment_gateways',
-			array( $this->gateway_compat, 'filter_gateways' ),
-			10,
-			1
-		);
+		--$this->depth;
 
 		$this->context->exit();
+
+		if ( 0 === $this->depth ) {
+			remove_filter(
+				'woocommerce_available_payment_gateways',
+				array( $this, 'filter_gateways_for_order' ),
+				10
+			);
+
+			add_filter(
+				'woocommerce_available_payment_gateways',
+				array( $this->gateway_compat, 'filter_gateways' ),
+				10,
+				1
+			);
+		}
 
 		return $response;
 	}
