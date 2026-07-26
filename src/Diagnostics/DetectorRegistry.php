@@ -23,7 +23,7 @@ namespace UMC\Diagnostics;
  * unit-tested here — the same split `\UMC\Settings` already draws between
  * its pure static sanitiser and its option-reading instance methods.
  */
-final class DetectorRegistry {
+final class DetectorRegistry implements DetectorCatalog {
 
 	/**
 	 * Filter through which a site or another plugin may add, remove or

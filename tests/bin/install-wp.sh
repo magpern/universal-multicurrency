@@ -67,4 +67,74 @@ fi
 
 ln -sfn "$ROOT" "$PLUGINS_DIR/universal-multicurrency"
 
+umc_write_test_fixtures() {
+    if [ "${UMC_TEST_FIXTURES:-1}" = "0" ]; then
+        return 0
+    fi
+
+    local fixture_a="$PLUGINS_DIR/umc-fixture-switcher-a/umc-fixture-switcher-a.php"
+    local fixture_b="$PLUGINS_DIR/umc-fixture-switcher-b/umc-fixture-switcher-b.php"
+    local fixture_inert="$PLUGINS_DIR/umc-fixture-inert/umc-fixture-inert.php"
+
+    mkdir -p "$(dirname "$fixture_a")" "$(dirname "$fixture_b")" "$(dirname "$fixture_inert")"
+
+    cat >"$fixture_a" <<'PHP'
+<?php
+/**
+ * Plugin Name: UMC Fixture Switcher A
+ * Description: Integration-test fixture simulating a full conflicting switcher signature set.
+ * Version: 0.0.0
+ */
+declare(strict_types=1);
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+final class UMC_Fixture_Switcher_A {}
+
+define( 'UMC_FIXTURE_SWITCHER_A_VERSION', '0.0.0' );
+
+function umc_fixture_switcher_a_symbol(): void {}
+
+add_shortcode( 'umc_fixture_switcher_a', static function (): string {
+	return '';
+} );
+
+add_filter( 'umc_fixture_switcher_a_hook', static function ( $value ) {
+	return $value;
+} );
+PHP
+
+    cat >"$fixture_b" <<'PHP'
+<?php
+/**
+ * Plugin Name: UMC Fixture Switcher B
+ * Description: Integration-test fixture with plugin-path evidence only.
+ * Version: 0.0.0
+ */
+declare(strict_types=1);
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+PHP
+
+    cat >"$fixture_inert" <<'PHP'
+<?php
+/**
+ * Plugin Name: UMC Fixture Inert
+ * Description: Negative-control fixture that must never match a detector.
+ * Version: 0.0.0
+ */
+declare(strict_types=1);
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+PHP
+}
+
+umc_write_test_fixtures
+
 echo "WordPress core ready: $CORE_DIR"

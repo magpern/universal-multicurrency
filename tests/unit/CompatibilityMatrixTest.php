@@ -507,4 +507,67 @@ final class CompatibilityMatrixTest extends TestCase {
 		$this->assertStringNotContainsString( 'latest', $tested );
 		$this->assertNotSame( $ceiling_wc, $tested );
 	}
+
+	// ---------------------------------------------------------------------
+	// Built-in detector slugs ↔ docs/COMPATIBILITY.md § Known incompatible.
+	// ---------------------------------------------------------------------
+
+	/**
+	 * @return array<int, string>
+	 *
+	 * @throws RuntimeException If the incompatible block is missing or malformed.
+	 */
+	private function incompatible_slugs_from_doc(): array {
+		$source = $this->doc_source();
+
+		if ( 1 !== preg_match( '/<!-- umc:incompatible:start -->(.*?)<!-- umc:incompatible:end -->/s', $source, $block ) ) {
+			throw new RuntimeException( 'Missing umc:incompatible fenced block in docs/COMPATIBILITY.md.' );
+		}
+
+		$slugs = array();
+
+		foreach ( preg_split( '/\R/', $block[1] ) as $line ) {
+			if ( 1 !== preg_match( '/^\|\s*[^|]+\s*\|\s*`([a-z0-9_-]{2,32})`\s*\|/', $line, $match ) ) {
+				continue;
+			}
+
+			$slug = $match[1];
+
+			if ( in_array( $slug, $slugs, true ) ) {
+				throw new RuntimeException( 'Duplicate incompatible slug row in docs/COMPATIBILITY.md.' );
+			}
+
+			$slugs[] = $slug;
+		}
+
+		if ( array() === $slugs ) {
+			throw new RuntimeException( 'No incompatible slugs parsed from docs/COMPATIBILITY.md.' );
+		}
+
+		return $slugs;
+	}
+
+	public function test_every_incompatible_doc_slug_exists_in_the_manifest(): void {
+		$manifest = array_keys( \UMC\Diagnostics\DetectorManifest::manifest() );
+
+		foreach ( $this->incompatible_slugs_from_doc() as $slug ) {
+			$this->assertContains(
+				$slug,
+				$manifest,
+				"docs/COMPATIBILITY.md lists incompatible slug '{$slug}' but DetectorManifest has no matching id."
+			);
+		}
+	}
+
+	public function test_every_manifest_detector_is_listed_as_incompatible(): void {
+		$doc_slugs = $this->incompatible_slugs_from_doc();
+
+		foreach ( array_keys( \UMC\Diagnostics\DetectorManifest::manifest() ) as $slug ) {
+			$this->assertContains(
+				$slug,
+				$doc_slugs,
+				"DetectorManifest id '{$slug}' is missing from docs/COMPATIBILITY.md § Known incompatible."
+			);
+		}
+	}
 }

@@ -1,22 +1,20 @@
 # Compatibility
 
-This document is the intended single authoritative source for what Universal
-Multicurrency supports: minimum versions, the CI matrix that exercises them, and
-which WooCommerce feature surfaces are covered where. "Intended," because the
-mechanical enforcement of that authority — a test proving the plugin header,
-`composer.json`, `phpcs.xml.dist` and `CLAUDE.md` all agree with the tables
-below — is introduced in a later commit within this milestone (§ Changing this
-document). Until then, treat every claim here as evidence-backed but not yet
-drift-proof.
+This document is the single authoritative source for what Universal
+Multicurrency supports: minimum versions, the CI matrix that exercises them,
+which WooCommerce feature surfaces are covered where, and which third-party
+currency switchers are detected as incompatible. `CompatibilityMatrixTest`
+mechanically enforces agreement between this document, the plugin header,
+`composer.json`, `phpcs.xml.dist`, `CLAUDE.md`, `.github/workflows/ci.yml`,
+and `DetectorManifest::manifest()`.
 
 Nothing in this document is aspirational. Every row cites the CI leg or test
 that produced it; where no such evidence exists, the row is simply absent (see
 § How to read this document).
 
-_A section on third-party currency-switcher detection — known compatible,
-known incompatible, and how conflicts are reported — is intentionally absent
-from this revision. It is added once the detector exists, later in this
-milestone._
+Third-party currency-switcher detection is advisory only: the plugin observes
+passive presence evidence and never deactivates, modifies, or calls into
+another plugin. See § Detection and § Known incompatible.
 
 ## How to read this document
 
@@ -228,6 +226,54 @@ deliberate:
   Store API response-*shape* incompatibility, which this is not, and none has
   been recorded.
 
+## Third-party plugins
+
+Universal Multicurrency is standalone (see ADR-0003). No third-party
+currency-switcher plugin is *Supported* — the ceiling for any such plugin is
+*Works with* at best. The built-in detectors below are labelled *Incompatible*
+because two independent runtime price converters cannot coexist safely.
+
+### Known incompatible
+
+<!-- umc:incompatible:start -->
+| Plugin | Slug | Category | Failure mode | Detected as | Resolution |
+|---|---|---|---|---|---|
+| FOX - Currency Switcher Professional for WooCommerce | `woocs` | Runtime currency conversion | Both plugins convert the same WooCommerce price getters; hook order determines which rate wins, so catalogue, cart, and saved order totals can disagree | `DetectorManifest` id `woocs` | Deactivate the conflicting switcher before relying on Universal Multicurrency |
+| CURCY - Multi Currency for WooCommerce | `curcy` | Runtime currency conversion | Same double-conversion failure mode as other runtime switchers | `DetectorManifest` id `curcy` | Deactivate the conflicting switcher before relying on Universal Multicurrency |
+| WPML Multilingual & Multicurrency for WooCommerce | `wcml` | Runtime currency conversion | WPML's multicurrency layer converts prices independently of Universal Multicurrency | `DetectorManifest` id `wcml` | Deactivate WPML multicurrency or Universal Multicurrency — only one converter may be authoritative |
+| YayCurrency | `yaycurrency` | Runtime currency conversion | Same double-conversion failure mode as other runtime switchers | `DetectorManifest` id `yaycurrency` | Deactivate the conflicting switcher before relying on Universal Multicurrency |
+<!-- umc:incompatible:end -->
+
+Every slug in the table above must exist as a built-in detector id in
+`DetectorManifest::manifest()`, and vice versa. `CompatibilityMatrixTest`
+asserts that bi-directional agreement on every pull request.
+
+### Reported, unverified
+
+No third-party reports have been reproduced and admitted under the detector
+governance checklist yet.
+
+## Detection
+
+Diagnostics observes the host environment using passive evidence only:
+active plugin paths, declared classes (`class_exists( $name, false )`),
+defined constants (`defined()`, never `constant()`), registered functions,
+shortcodes, and hooks (`isset( $wp_filter[ $tag ] )`, never
+`apply_filters()`). It never reads another plugin's options, cookies,
+sessions, rates, or selected currency.
+
+Built-in detectors live in `DetectorManifest.php` — the only file permitted
+to name a third-party product. Sites may add runtime rows through the
+`umc_conflict_detectors` filter; those rows pass through the same sanitiser
+as the built-ins and are never merged into the manifest automatically.
+
+Detector lifecycle governance (ownership, the five admission checks, removal
+rules, weight review, and false-positive handling) is specified in the
+Milestone 6 architecture plan and will move into ADR-0007 in a later commit.
+Every manifest change must ship with the matching row in § Known incompatible,
+verified signature evidence in tests, and a release-note entry when
+merchant-visible behaviour changes.
+
 ## Environment requirements
 
 High-Performance Order Storage is enabled identically on every CI leg (see
@@ -239,12 +285,10 @@ claim in either direction.
 
 ## Changing this document
 
-This document is intended to become the single authoritative source for
-every version claim the project makes. As of this commit, that authority is
-declared but not yet mechanically enforced: a later commit in this milestone
-introduces a unit test that parses the plugin header, `composer.json`,
-`phpcs.xml.dist`, `.github/workflows/ci.yml` and `CLAUDE.md`, and fails if any
-of them disagrees with the tables above. Until that test exists, a version
-literal changed in one of those files without a matching update here will not
-be caught automatically — treat this document as the intended source of
-truth today, and as the enforced one once that test lands.
+This document is the single authoritative source for every version claim and
+every built-in incompatible-detector slug the project makes.
+`tests/unit/CompatibilityMatrixTest.php` parses the machine-readable blocks
+above and fails if the plugin header, `composer.json`, `phpcs.xml.dist`,
+`.github/workflows/ci.yml`, `CLAUDE.md`, or `DetectorManifest::manifest()`
+disagree with it. Adding or removing a built-in detector requires updating §
+Known incompatible in the same commit.

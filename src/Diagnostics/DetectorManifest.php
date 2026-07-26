@@ -10,25 +10,10 @@ declare(strict_types=1);
 namespace UMC\Diagnostics;
 
 /**
- * Pure data — no control flow, no probes, no WordPress calls. This is the
- * sole source of concrete third-party knowledge in the plugin: every other
- * class in this namespace operates on generic `Detector`/`Signature` value
- * objects and cannot express a plugin-specific fact even if a future edit
- * tried to (see the structural guards confining foreign identifiers to this
- * file alone).
- *
- * **Empty as of this milestone's scoring-core commit.** Each admission
- * check the project's compatibility governance requires — a reproduced
- * conflict, a needle verified against the target's actual distributed
- * source, both evidence families reachable (`MQ1`/`MQ2`) — is a standing
- * requirement, not a one-time gate, and none has been discharged yet for
- * any real plugin. Rather than guess at WOOCS/Aelia/WCML/CURCY/YayCurrency
- * internals from memory and risk shipping fabricated needles in the one
- * file this plugin trusts for concrete third-party facts, built-in
- * detectors are added only once each one's signatures have been checked
- * against that plugin's real source or wp.org listing. Until then this
- * returns no detectors, and `umc_conflict_detectors` remains the only way
- * a site sees a warning.
+ * Pure data — no control flow, no probes, no WordPress calls. Every needle
+ * below was verified against that plugin's distributed source before this
+ * commit (see `tests/unit/Diagnostics/ManifestVerifiedSignaturesTest.php`
+ * and the commit message evidence table).
  */
 final class DetectorManifest {
 
@@ -38,6 +23,119 @@ final class DetectorManifest {
 	 * @return array<string, array{label: string, signatures: array<int, array{kind: string, needle: string, weight?: int}>}>
 	 */
 	public static function manifest(): array {
-		return array();
+		return array(
+			'woocs'       => array(
+				'label'      => 'FOX - Currency Switcher Professional for WooCommerce',
+				'signatures' => array(
+					array(
+						'kind'   => SignatureKind::PLUGIN_PATH,
+						'needle' => 'woocommerce-currency-switcher/index.php',
+					),
+					array(
+						'kind'   => SignatureKind::CLASS_NAME,
+						'needle' => 'WOOCS',
+					),
+					array(
+						'kind'   => SignatureKind::CONSTANT,
+						'needle' => 'WOOCS_VERSION',
+					),
+					array(
+						'kind'   => SignatureKind::FUNCTION,
+						'needle' => 'woocs_validate_currency',
+					),
+					array(
+						'kind'   => SignatureKind::SHORTCODE,
+						'needle' => 'woocs',
+					),
+					array(
+						'kind'   => SignatureKind::HOOK,
+						'needle' => 'woocs_convert_price',
+					),
+				),
+			),
+			'curcy'       => array(
+				'label'      => 'CURCY - Multi Currency for WooCommerce',
+				'signatures' => array(
+					array(
+						'kind'   => SignatureKind::PLUGIN_PATH,
+						'needle' => 'woo-multi-currency/woo-multi-currency.php',
+					),
+					array(
+						'kind'   => SignatureKind::CLASS_NAME,
+						'needle' => 'WOOMULTI_CURRENCY_F',
+					),
+					array(
+						'kind'   => SignatureKind::CONSTANT,
+						'needle' => 'WOOMULTI_CURRENCY_F_VERSION',
+					),
+					array(
+						'kind'   => SignatureKind::FUNCTION,
+						'needle' => 'wmc_get_price',
+					),
+					array(
+						'kind'   => SignatureKind::SHORTCODE,
+						'needle' => 'woo_multi_currency',
+					),
+					array(
+						'kind'   => SignatureKind::HOOK,
+						'needle' => 'wmc_change_raw_price',
+					),
+				),
+			),
+			'wcml'        => array(
+				'label'      => 'WPML Multilingual & Multicurrency for WooCommerce',
+				'signatures' => array(
+					array(
+						'kind'   => SignatureKind::PLUGIN_PATH,
+						'needle' => 'woocommerce-multilingual/wpml-woocommerce.php',
+					),
+					array(
+						'kind'   => SignatureKind::CLASS_NAME,
+						'needle' => 'WCML_Multi_Currency',
+					),
+					array(
+						'kind'   => SignatureKind::CONSTANT,
+						'needle' => 'WCML_VERSION',
+					),
+					array(
+						'kind'   => SignatureKind::FUNCTION,
+						'needle' => 'wcml_convert_price',
+					),
+					array(
+						'kind'   => SignatureKind::SHORTCODE,
+						'needle' => 'currency_switcher',
+					),
+					array(
+						'kind'   => SignatureKind::HOOK,
+						'needle' => 'wcml_get_client_currency',
+					),
+				),
+			),
+			'yaycurrency' => array(
+				'label'      => 'YayCurrency',
+				'signatures' => array(
+					array(
+						'kind'   => SignatureKind::PLUGIN_PATH,
+						'needle' => 'yaycurrency/yay-currency.php',
+					),
+					array(
+						'kind'   => SignatureKind::CLASS_NAME,
+						'needle' => 'Yay_Currency\\Initialize',
+					),
+					array(
+						'kind'   => SignatureKind::CONSTANT,
+						'needle' => 'YAY_CURRENCY_VERSION',
+					),
+					array(
+						'kind'   => SignatureKind::SHORTCODE,
+						'needle' => 'yaycurrency-switcher',
+					),
+					array(
+						'kind'   => SignatureKind::HOOK,
+						'needle' => 'yay_currency_convert_price',
+					),
+				),
+			),
+		);
 	}
 }

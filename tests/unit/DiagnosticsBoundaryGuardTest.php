@@ -168,4 +168,60 @@ final class DiagnosticsBoundaryGuardTest extends TestCase {
 			'src/Diagnostics/ must never reference conversion, pricing, snapshot, Store API, cart, or order-monetary services.'
 		);
 	}
+
+	public function test_diagnostics_never_reads_cookies_or_sessions(): void {
+		$this->assert_pattern_absent_from(
+			$this->source_files( 'Diagnostics' ),
+			'/\$_COOKIE|\$_SESSION|get_transient\s*\(|set_transient\s*\(/',
+			'Diagnostics must never read cookies, sessions, or transients.'
+		);
+	}
+
+	public function test_probe_code_does_not_read_foreign_runtime_state(): void {
+		$probe_files = array_filter(
+			$this->source_files( 'Diagnostics' ),
+			static function ( string $file ): bool {
+				return false !== strpos( $file, 'WordPressEnvironmentProbe.php' );
+			}
+		);
+
+		$this->assertCount( 1, $probe_files );
+
+		$source = (string) file_get_contents( array_values( $probe_files )[0] );
+
+		$this->assertDoesNotMatchRegularExpression( '/\$_COOKIE|\$_SESSION|get_transient\s*\(|set_transient\s*\(/', $source );
+		$this->assertDoesNotMatchRegularExpression( '/(?<!`)\bconstant\s*\(/', $source );
+		$this->assertSame( 1, preg_match_all( '/\bget_option\s*\(/', $source ), 'WordPressEnvironmentProbe may call get_option only for active_plugins.' );
+		$this->assertStringContainsString( "'active_plugins'", $source );
+	}
+
+	public function test_class_exists_uses_the_non_autoload_flag(): void {
+		$probe_files = array_filter(
+			$this->source_files( 'Diagnostics' ),
+			static function ( string $file ): bool {
+				return false !== strpos( $file, 'WordPressEnvironmentProbe.php' );
+			}
+		);
+
+		$source = (string) file_get_contents( array_values( $probe_files )[0] );
+
+		$this->assertMatchesRegularExpression( '/class_exists\s*\(\s*\$signature->needle\(\)\s*,\s*false\s*\)/', $source );
+	}
+
+	public function test_diagnostics_never_calls_deactivation_apis(): void {
+		$this->assert_pattern_absent_from(
+			$this->source_files( 'Diagnostics' ),
+			'/deactivate_plugins\s*\(|delete_plugins\s*\(/',
+			'Diagnostics must remain advisory and never deactivate another plugin.'
+		);
+	}
+
+	public function test_fixture_identifiers_are_confined_to_tests(): void {
+		$src_files = $this->source_files();
+		$this->assert_pattern_absent_from(
+			$src_files,
+			'/umc-fixture|UMC_Fixture/',
+			'Fixture identifiers must not appear under src/.'
+		);
+	}
 }

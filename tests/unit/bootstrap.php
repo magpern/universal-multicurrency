@@ -13,3 +13,5 @@ require_once dirname( __DIR__, 2 ) . '/vendor/autoload.php';
 // discovery never loads them; required explicitly, matching how
 // tests/integration/bootstrap.php loads StoreApiTestCase.
 require_once __DIR__ . '/Doubles/ArrayEnvironmentProbe.php';
+require_once __DIR__ . '/Doubles/CountingEnvironmentProbe.php';
+require_once __DIR__ . '/Doubles/StaticDetectorRegistry.php';
