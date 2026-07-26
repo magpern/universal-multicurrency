@@ -20,9 +20,16 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
+        id: setup-php
         with:
           php-version: '8.3'
           coverage: none
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer
+          key: ${{ runner.os }}-composer-${{ steps.setup-php.outputs.php-version }}-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-${{ steps.setup-php.outputs.php-version }}-
       - run: composer install --prefer-dist --no-progress
       - run: composer phpcs
 
@@ -31,9 +38,16 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
+        id: setup-php
         with:
           php-version: '8.3'
           coverage: none
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer
+          key: ${{ runner.os }}-composer-${{ steps.setup-php.outputs.php-version }}-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-${{ steps.setup-php.outputs.php-version }}-
       - run: composer install --prefer-dist --no-progress
       - run: composer test:unit
 
@@ -60,10 +74,24 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
+        id: setup-php
         with:
           php-version: '8.3'
           extensions: mysqli
           coverage: none
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer
+          key: ${{ runner.os }}-composer-${{ steps.setup-php.outputs.php-version }}-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-${{ steps.setup-php.outputs.php-version }}-
+      # wp-phpunit's version (which pins WordPress core, see tests/bin/install-wp.sh)
+      # comes from composer.lock; WC_VERSION is pinned above. Bump either, or edit
+      # the install script itself, and the key changes with them.
+      - uses: actions/cache@v4
+        with:
+          path: tests/tmp/wordpress
+          key: ${{ runner.os }}-wp-install-${{ env.WC_VERSION }}-${{ hashFiles('composer.lock', 'tests/bin/install-wp.sh') }}
       - run: composer install --prefer-dist --no-progress
       - run: bash tests/bin/install-wp.sh
       - run: composer test:integration
@@ -73,9 +101,16 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
+        id: setup-php
         with:
           php-version: '8.1'
           coverage: none
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer
+          key: ${{ runner.os }}-composer-${{ steps.setup-php.outputs.php-version }}-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-${{ steps.setup-php.outputs.php-version }}-
       - run: composer install --no-dev --prefer-dist --no-progress --optimize-autoloader
       - run: bash bin/build-zip.sh
       - uses: actions/upload-artifact@v5
