@@ -6,11 +6,15 @@ on:
   pull_request:
 
 # WordPress core is pinned to the installed wp-phpunit version by
-# tests/bin/install-wp.sh. WooCommerce is pinned explicitly below: the Store API
-# suite asserts response shapes, and an unpinned "latest" resolves to
-# pre-release builds whose changes would surface as unrelated CI failures.
-# The minimum-supported-version matrix (PHP 8.1 / WP 6.5 / WC 8.2) remains a
-# later hardening milestone.
+# tests/bin/install-wp.sh. The `integration` job below exercises the
+# supported-version matrix (PHP / WordPress / WooCommerce); coordinates are
+# fixed here rather than resolved dynamically so a leg's identity cannot
+# drift without editing this file. `WC_VERSION` is overridden per leg by
+# `matrix.wc`; the floor and current coordinates use exact WooCommerce
+# releases (not "latest") because the Store API suite asserts response
+# shapes, and floating tags resolve to pre-release builds whose changes
+# would surface as unrelated CI failures. The `ceiling` leg intentionally
+# floats on `latest` for early warning on upstream drift.
 env:
   WC_VERSION: '10.9.4'
 
@@ -35,12 +39,19 @@ jobs:
 
   unit:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The PHP floor, the current development version and the ceiling one
+        # minor ahead of it. Unit tests never load WordPress (see
+        # tests/unit/bootstrap.php), so this is the PHP axis in isolation.
+        php: ['8.1', '8.3', '8.4']
     steps:
       - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
         id: setup-php
         with:
-          php-version: '8.3'
+          php-version: ${{ matrix.php }}
           coverage: none
       - uses: actions/cache@v4
         with:
@@ -53,6 +64,50 @@ jobs:
 
   integration:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # The lowest supported corner. The only leg that can substantiate
+          # the declared floors. Excludes wc-order-route-unavailable: at this
+          # WooCommerce version the Store API's Order/CheckoutOrder routes are
+          # gated behind an internal experimental-build flag no standard
+          # install sets (see tests/integration/StoreApi/OrderRouteCurrencyTest.php).
+          - leg: floor
+            php: '8.1'
+            wp_phpunit: '6.5.*'
+            wc: '8.2.5'
+            exclude_group: 'wc-order-route-unavailable'
+          # Today's coordinate. The authority for Store API response-shape
+          # assertions.
+          - leg: current
+            php: '8.3'
+            wp_phpunit: ''
+            wc: '10.9.4'
+            exclude_group: ''
+          # Isolates the PHP axis: floor PHP against the current WP/WC pair.
+          - leg: mixed-php-floor
+            php: '8.1'
+            wp_phpunit: ''
+            wc: '10.9.4'
+            exclude_group: ''
+          # Isolates the WordPress axis: floor WP against current PHP/WC.
+          # Without this leg a `floor` failure could not be attributed to the
+          # PHP axis or the WordPress axis.
+          - leg: mixed-wp-floor
+            php: '8.3'
+            wp_phpunit: '6.5.*'
+            wc: '10.9.4'
+            exclude_group: ''
+          # Early warning on upstream drift. Deliberately floats on the
+          # latest WooCommerce release; never blocks a merge (see
+          # continue-on-error below).
+          - leg: ceiling
+            php: '8.4'
+            wp_phpunit: ''
+            wc: 'latest'
+            exclude_group: ''
+    continue-on-error: ${{ matrix.leg == 'ceiling' }}
     services:
       mysql:
         image: mariadb:11.4
@@ -67,6 +122,7 @@ jobs:
           --health-timeout=5s
           --health-retries=10
     env:
+      WC_VERSION: ${{ matrix.wc }}
       WP_DB_HOST: 127.0.0.1
       WP_DB_NAME: wordpress_test
       WP_DB_USER: root
@@ -76,25 +132,45 @@ jobs:
       - uses: shivammathur/setup-php@v2
         id: setup-php
         with:
-          php-version: '8.3'
+          php-version: ${{ matrix.php }}
           extensions: mysqli
           coverage: none
+      # Includes matrix.wp_phpunit: a leg that pins wp-phpunit below (the
+      # floor and mixed-wp-floor legs) must not share a composer package
+      # cache line with a leg that leaves it at whatever composer.lock
+      # already resolves to, even when their PHP version and lockfile hash
+      # otherwise match.
       - uses: actions/cache@v4
         with:
           path: ~/.cache/composer
-          key: ${{ runner.os }}-composer-${{ steps.setup-php.outputs.php-version }}-${{ hashFiles('composer.lock') }}
+          key: ${{ runner.os }}-composer-${{ steps.setup-php.outputs.php-version }}-${{ hashFiles('composer.lock') }}-${{ matrix.wp_phpunit }}
           restore-keys: |
-            ${{ runner.os }}-composer-${{ steps.setup-php.outputs.php-version }}-
-      # wp-phpunit's version (which pins WordPress core, see tests/bin/install-wp.sh)
-      # comes from composer.lock; WC_VERSION is pinned above. Bump either, or edit
-      # the install script itself, and the key changes with them.
+            ${{ runner.os }}-composer-${{ steps.setup-php.outputs.php-version }}-${{ hashFiles('composer.lock') }}-
+      # Keyed by the WordPress/WooCommerce coordinate the leg actually wants,
+      # not by PHP version (the downloaded core/plugin files are identical
+      # regardless of which PHP interpreter later runs against them) and not
+      # by composer.lock's hash (which is the same committed file for every
+      # leg before the pin step below runs). Skipped for `ceiling`: it floats
+      # on WooCommerce's literal "latest", and caching a directory keyed by
+      # that literal string would silently serve last run's "latest" forever,
+      # defeating the leg's purpose of catching upstream drift.
       - uses: actions/cache@v4
+        if: matrix.wc != 'latest'
         with:
           path: tests/tmp/wordpress
-          key: ${{ runner.os }}-wp-install-${{ env.WC_VERSION }}-${{ hashFiles('composer.lock', 'tests/bin/install-wp.sh') }}
+          key: ${{ runner.os }}-wp-install-${{ matrix.wp_phpunit }}-${{ matrix.wc }}-${{ hashFiles('tests/bin/install-wp.sh') }}
       - run: composer install --prefer-dist --no-progress
+      - name: Pin the WordPress test library
+        if: matrix.wp_phpunit != ''
+        run: composer update "wp-phpunit/wp-phpunit:${{ matrix.wp_phpunit }}" --with-all-dependencies --no-progress
       - run: bash tests/bin/install-wp.sh
-      - run: composer test:integration
+      - name: Run integration tests
+        run: |
+          if [ -n "${{ matrix.exclude_group }}" ]; then
+            composer test:integration -- --exclude-group "${{ matrix.exclude_group }}"
+          else
+            composer test:integration
+          fi
 
   build:
     runs-on: ubuntu-latest
