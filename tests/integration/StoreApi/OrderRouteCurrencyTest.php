@@ -29,6 +29,9 @@ final class OrderRouteCurrencyTest extends StoreApiTestCase {
 		'USD' => array( 'rate' => '1.20' ),
 	);
 
+	/**
+	 * @group wc-order-route-unavailable
+	 */
 	public function test_order_is_reported_in_its_own_currency(): void {
 		$this->boot_plugin( self::CURRENCIES, 'USD' );
 		$order = $this->stored_order( 'SEK', '1150.00' );
@@ -43,6 +46,9 @@ final class OrderRouteCurrencyTest extends StoreApiTestCase {
 		$this->assertSame( '115000', $data['totals']['total_price'], 'Stored totals are served raw.' );
 	}
 
+	/**
+	 * @group wc-order-route-unavailable
+	 */
 	public function test_order_formatting_follows_the_order_currency(): void {
 		$this->boot_plugin( self::CURRENCIES, 'USD' );
 		$order = $this->stored_order( 'SEK', '1150.00' );
@@ -54,6 +60,9 @@ final class OrderRouteCurrencyTest extends StoreApiTestCase {
 		$this->assertSame( ' kr', $totals['currency_suffix'], 'Symbol position follows the order, not the store.' );
 	}
 
+	/**
+	 * @group wc-order-route-unavailable
+	 */
 	public function test_stored_totals_are_never_reconverted(): void {
 		$this->boot_plugin( self::CURRENCIES, 'SEK' );
 		$order = $this->stored_order( 'SEK', '1150.00' );
@@ -65,6 +74,9 @@ final class OrderRouteCurrencyTest extends StoreApiTestCase {
 		$this->assertSame( '115000', $data['totals']['total_price'] );
 	}
 
+	/**
+	 * @group wc-order-route-unavailable
+	 */
 	public function test_order_in_a_since_disabled_currency_still_reports_itself(): void {
 		$this->boot_plugin( self::CURRENCIES, 'USD' );
 		$order = $this->stored_order( 'NOK', '1200.00' );
@@ -76,6 +88,9 @@ final class OrderRouteCurrencyTest extends StoreApiTestCase {
 		$this->assertSame( 2, $data['totals']['currency_minor_unit'], 'Falls back to the ISO decimals.' );
 	}
 
+	/**
+	 * @group wc-order-route-unavailable
+	 */
 	public function test_context_does_not_leak_into_later_requests(): void {
 		$this->boot_plugin( self::CURRENCIES, 'SEK' );
 		$order = $this->stored_order( 'USD', '120.00' );
@@ -98,6 +113,9 @@ final class OrderRouteCurrencyTest extends StoreApiTestCase {
 		$this->assertSame( '115000', $cart['totals']['total_price'] );
 	}
 
+	/**
+	 * @group wc-order-route-unavailable
+	 */
 	public function test_reading_an_order_does_not_rewrite_its_snapshot(): void {
 		$this->boot_plugin( self::CURRENCIES, 'USD' );
 		$order = $this->stored_order( 'SEK', '1150.00' );
@@ -110,6 +128,9 @@ final class OrderRouteCurrencyTest extends StoreApiTestCase {
 		$this->assertSame( 'SEK:11.50', $reloaded->get_meta( OrderSnapshot::META_RATE_IDENTITY ) );
 	}
 
+	/**
+	 * @group wc-order-route-unavailable
+	 */
 	public function test_gateways_are_filtered_by_the_order_currency(): void {
 		$this->boot_plugin( self::CURRENCIES, 'USD' );
 		$order = $this->stored_order( 'SEK', '1150.00' );
@@ -130,6 +151,9 @@ final class OrderRouteCurrencyTest extends StoreApiTestCase {
 		$this->assertContains( 'cheque', $available, 'The order currency decides, not the session.' );
 	}
 
+	/**
+	 * @group wc-order-route-unavailable
+	 */
 	public function test_gateway_filtering_returns_to_the_session_after_the_request(): void {
 		$this->boot_plugin( self::CURRENCIES, 'USD' );
 		$order = $this->stored_order( 'SEK', '1150.00' );
@@ -252,6 +276,21 @@ final class OrderRouteCurrencyTest extends StoreApiTestCase {
 	}
 
 	/**
+	 * Whether WooCommerce currently exposes the Store API's single-order route.
+	 *
+	 * `Routes\V1\Order` is unconditionally registered on every WooCommerce
+	 * version this plugin targets at its "current" CI coordinate, but is
+	 * absent at the declared floor: WooCommerce's own `RoutesController` gates
+	 * it behind an internal experimental-build flag that a standard
+	 * wordpress.org install never sets. Checked against the live route table
+	 * rather than `WC_VERSION`, so the probe tracks reality and cannot go
+	 * stale if a future WooCommerce release changes the gating condition.
+	 */
+	private function order_route_is_registered(): bool {
+		return isset( rest_get_server()->get_routes()['/wc/store/v1/order/(?P<id>[\d]+)'] );
+	}
+
+	/**
 	 * Reads an order through the Store API order route.
 	 *
 	 * @param WC_Order $order Order to fetch.
@@ -259,6 +298,10 @@ final class OrderRouteCurrencyTest extends StoreApiTestCase {
 	 * @return array<string, mixed>
 	 */
 	private function fetch_order( WC_Order $order ): array {
+		if ( ! $this->order_route_is_registered() ) {
+			$this->markTestSkipped( 'WooCommerce does not register the Store API order route at this version.' );
+		}
+
 		$request = $this->store_api_request(
 			'GET',
 			'/order/' . $order->get_id(),
