@@ -208,7 +208,7 @@ path does differently.
 |---|---|---|
 | `StoreApi\CheckoutSnapshotAdapter` | `Order\OrderSnapshot` | Runs the snapshot writer at the Store API's equivalent of order creation, since `woocommerce_checkout_create_order` never fires for it. Owns the policy that lets an unpaid draft's snapshot follow a currency change, and nothing else — the metadata and the authority to write it stay with `OrderSnapshot`. |
 | `StoreApi\OrderCurrencyLock` | `Order\OrderCurrencyContext`, `Integration\GatewayCompatibility` | The REST counterpart of `OrderPayCurrencyLock`, which hooks `template_redirect` and so never runs for an API request. Brackets the two order-scoped routes so a stored order is reported in its own currency and gateways are filtered by it. |
-| `StoreApi\CartExtensionData` | `CurrencyContext` | Publishes currency state — active and base codes, selectable codes, rate identity — under the `umc` namespace on the cart endpoint. Carries no money: amounts already reach clients through WooCommerce's own fields. |
+| `StoreApi\CartExtensionData` | `CurrencyContext` | Publishes currency state — the active code, the base code and the selectable codes — under the `umc` namespace on the cart endpoint. Carries no money, because amounts already reach clients through WooCommerce's own fields, and no exchange rate or cache identity, because those are implementation details rather than contract. |
 
 Two supporting changes sit outside the namespace. `CurrencySwitcher` returns early
 on REST requests, because answering an API call with a redirect would corrupt the

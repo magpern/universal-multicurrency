@@ -29,7 +29,6 @@ final class CartExtensionDataTest extends StoreApiTestCase {
 
 		$this->assertSame( 'SEK', $umc['active_currency'] );
 		$this->assertSame( 'EUR', $umc['base_currency'] );
-		$this->assertSame( 'SEK:11.50', $umc['rate_identity'] );
 	}
 
 	public function test_selectable_currencies_are_listed(): void {
@@ -65,19 +64,16 @@ final class CartExtensionDataTest extends StoreApiTestCase {
 
 		$this->switch_currency( 'USD' );
 
-		$umc = $this->extension_data();
-
-		$this->assertSame( 'USD', $umc['active_currency'] );
-		$this->assertSame( 'USD:1.20', $umc['rate_identity'] );
+		$this->assertSame( 'USD', $this->extension_data()['active_currency'] );
 	}
 
-	public function test_base_currency_state_reports_a_unit_rate(): void {
+	public function test_base_currency_state_reports_the_base_code(): void {
 		$this->boot_plugin( self::CURRENCIES, 'EUR' );
 
 		$umc = $this->extension_data();
 
 		$this->assertSame( 'EUR', $umc['active_currency'] );
-		$this->assertSame( 'EUR:1', $umc['rate_identity'] );
+		$this->assertSame( 'EUR', $umc['base_currency'] );
 	}
 
 	public function test_extension_namespace_is_prefixed_and_alone(): void {
@@ -100,13 +96,24 @@ final class CartExtensionDataTest extends StoreApiTestCase {
 		$this->assertSame( array( 'umc' ), $plugin_keys, 'Exactly one prefixed namespace.' );
 	}
 
+	public function test_extension_does_not_publish_the_exchange_rate(): void {
+		$this->boot_plugin( self::CURRENCIES, 'SEK' );
+
+		$payload = (string) wp_json_encode( $this->extension_data() );
+
+		// The rate is admin-configured commercial information and an internal
+		// cache identity; neither belongs in an unauthenticated response.
+		$this->assertStringNotContainsString( '11.50', $payload );
+		$this->assertStringNotContainsString( 'rate', $payload );
+	}
+
 	public function test_extension_carries_no_monetary_values(): void {
 		$this->boot_plugin( self::CURRENCIES, 'SEK' );
 
 		$this->assertSame(
-			array( 'active_currency', 'base_currency', 'selectable_currencies', 'rate_identity' ),
+			array( 'active_currency', 'base_currency', 'selectable_currencies' ),
 			array_keys( $this->extension_data() ),
-			'Amounts belong to the core fields; duplicating them would invite drift.'
+			'Amounts belong to the core fields, and the rate is an implementation detail.'
 		);
 	}
 

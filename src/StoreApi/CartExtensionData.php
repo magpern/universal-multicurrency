@@ -16,12 +16,13 @@ use UMC\CurrencyContext;
  *
  * Every converted amount and the whole `currency_*` identity already reach
  * clients through WooCommerce's own fields, so no monetary value is duplicated
- * here. What core cannot express is which currencies a shopper may choose and
- * which rate produced the response. That answers three needs: a client can
- * render a currency selector without a second request, a rate identity makes
- * responses self-describing for debugging and caching, and the parity tests can
- * assert which currency and rate a payload came from instead of inferring it
- * from the numbers.
+ * here. What core cannot express is which currency the shopper is in and which
+ * ones they may choose, which is what a client needs to render a selector
+ * without a second request.
+ *
+ * Nothing beyond that is published. The exchange rate and the internal cache
+ * identity derived from it are implementation details, not part of the contract
+ * a client should be able to depend on, so they stay server-side.
  *
  * No update callback is registered. Switching currency reloads the page today,
  * so there is nothing for a client to POST; when an in-place switch is added it
@@ -79,7 +80,6 @@ final class CartExtensionData {
 			'active_currency'       => $this->context->get_active_code(),
 			'base_currency'         => $this->context->get_base_currency()->code(),
 			'selectable_currencies' => $this->context->get_selectable_codes(),
-			'rate_identity'         => $this->context->get_currency_signature(),
 		);
 	}
 
@@ -104,11 +104,6 @@ final class CartExtensionData {
 				'description' => __( 'Currency codes the shopper may choose.', 'universal-multicurrency' ),
 				'type'        => 'array',
 				'items'       => array( 'type' => 'string' ),
-				'readonly'    => true,
-			),
-			'rate_identity'         => array(
-				'description' => __( 'Currency code and exchange rate that produced these amounts.', 'universal-multicurrency' ),
-				'type'        => 'string',
 				'readonly'    => true,
 			),
 		);

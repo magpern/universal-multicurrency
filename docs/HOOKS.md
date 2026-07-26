@@ -211,7 +211,7 @@ swallowed.
 | `woocommerce_store_api_checkout_update_order_meta` | action (10) | `StoreApi\CheckoutSnapshotAdapter` | Store API checkout never fires `woocommerce_checkout_create_order`, so this is where a block order's snapshot is staged. WooCommerce saves afterwards. |
 | `woocommerce_store_api_cart_update_order_from_request` | action (10) | `StoreApi\CheckoutSnapshotAdapter` | A draft order is re-synced from the cart on every mutating cart request, restamping its currency. Realigns the snapshot while the order is unpaid. Fires after WooCommerce's own save, so this callback saves. |
 | `rest_request_before_callbacks` / `rest_request_after_callbacks` | filter (10) | `StoreApi\OrderCurrencyLock` | Brackets `/order/{id}` and `/checkout/{id}` so a stored order is reported in its own currency, and gateways are filtered by it rather than by the session. |
-| `woocommerce_store_api_register_endpoint_data` | API call | `StoreApi\CartExtensionData` | Publishes currency state (not money) under the `umc` namespace on the cart endpoint. |
+| `woocommerce_store_api_register_endpoint_data` | API call | `StoreApi\CartExtensionData` | Publishes currency state — active code, base code, selectable codes — under the `umc` namespace on the cart endpoint. No amounts and no exchange rate. |
 
 ## Filters and actions the plugin provides
 
