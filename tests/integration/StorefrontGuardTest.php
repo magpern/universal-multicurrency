@@ -44,6 +44,14 @@ final class StorefrontGuardTest extends WP_UnitTestCase {
 		'PriceConversionService.php',
 	);
 
+	/**
+	 * The only source files permitted to stage order metadata.
+	 */
+	private const SNAPSHOT_WRITER_FILES = array(
+		'OrderSnapshot.php',
+		'RefundSnapshot.php',
+	);
+
 	public function test_no_out_of_scope_hooks_have_plugin_callbacks(): void {
 		foreach ( self::FORBIDDEN_HOOKS as $hook ) {
 			$this->assertSame(
@@ -240,6 +248,60 @@ final class StorefrontGuardTest extends WP_UnitTestCase {
 		);
 	}
 
+	public function test_only_the_snapshot_writers_stage_order_metadata(): void {
+		// Both checkout flows must converge on one writer. An adapter that wrote
+		// its own metadata would be the start of two snapshot formats.
+		$this->assert_pattern_absent_from(
+			$this->umc_source_files_except( self::SNAPSHOT_WRITER_FILES ),
+			'/->update_meta_data\s*\(/',
+			'Only the snapshot writers may stage order metadata; everything else delegates.'
+		);
+	}
+
+	public function test_no_service_stamps_the_order_currency(): void {
+		// WooCommerce sets the order currency, from a filtered value, in both
+		// checkout flows. A plugin that also set it could disagree with itself.
+		$this->assert_pattern_absent_from(
+			$this->umc_source_files(),
+			'/->set_currency\s*\(/',
+			'WooCommerce stamps the order currency; the plugin only records it.'
+		);
+	}
+
+	public function test_store_api_code_raises_no_session_notices(): void {
+		// Notices live in the session and are rendered by whichever page reads
+		// them next, so one raised during an API request leaks onto an unrelated
+		// page view. WooCommerce also turns session error notices into Store API
+		// errors, which would block an otherwise valid checkout.
+		$this->assert_pattern_absent_from(
+			$this->store_api_source_files(),
+			'/wc_add_notice\s*\(/',
+			'Store API code must not raise session notices.'
+		);
+	}
+
+	public function test_only_the_store_api_adapter_saves_an_order(): void {
+		// Staging metadata and letting WooCommerce save is the rule. The single
+		// exception is the cart re-sync hook, which fires after WooCommerce has
+		// already saved, so a change made there would otherwise be lost.
+		$this->assert_pattern_absent_from(
+			$this->umc_source_files_except( array( 'CheckoutSnapshotAdapter.php' ) ),
+			'/->save\s*\(\s*\)/',
+			'Only CheckoutSnapshotAdapter may save an order; see its docblock for why.'
+		);
+	}
+
+	public function test_no_frontend_assets_are_registered(): void {
+		// This milestone is server-side only: currency switching reloads the page.
+		// Shipping JavaScript would also mean shipping a second place where money
+		// could be formatted or, worse, calculated.
+		$this->assert_pattern_absent_from(
+			$this->umc_source_files(),
+			'/wp_(register|enqueue)_script|IntegrationInterface|woocommerce_blocks_(cart|checkout|mini-cart)_block_registration/',
+			'No frontend assets: the blocks are served entirely by server-side conversion.'
+		);
+	}
+
 	public function test_historical_display_brackets_are_paired(): void {
 		// Every enter (before_/resend) bracket has a matching exit (after_) bracket
 		// so a render can never leave the order context on the stack.
@@ -283,6 +345,43 @@ final class StorefrontGuardTest extends WP_UnitTestCase {
 	 *
 	 * @return array<int, string>
 	 */
+	/**
+	 * Every source file except the given basenames.
+	 *
+	 * @param array<int, string> $basenames Files to exclude.
+	 * @return array<int, string>
+	 */
+	private function umc_source_files_except( array $basenames ): array {
+		$files = array();
+
+		foreach ( $this->umc_source_files() as $file ) {
+			if ( ! in_array( basename( $file ), $basenames, true ) ) {
+				$files[] = $file;
+			}
+		}
+
+		return $files;
+	}
+
+	/**
+	 * Source files inside the Store API namespace.
+	 *
+	 * @return array<int, string>
+	 */
+	private function store_api_source_files(): array {
+		$files = array();
+
+		foreach ( $this->umc_source_files() as $file ) {
+			if ( false !== strpos( $file, '/StoreApi/' ) ) {
+				$files[] = $file;
+			}
+		}
+
+		$this->assertNotSame( array(), $files, 'Expected Store API source files.' );
+
+		return $files;
+	}
+
 	private function m4_historical_service_files(): array {
 		$files = array();
 
