@@ -159,6 +159,13 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 	protected GatewayCompatibility $gateway_compat;
 
 	/**
+	 * Order-scope currency context backing the currently booted graph.
+	 *
+	 * @var OrderCurrencyContext
+	 */
+	protected OrderCurrencyContext $order_context;
+
+	/**
 	 * Currencies the graph was booted with.
 	 *
 	 * @var array<string, array<string, mixed>>
@@ -260,13 +267,13 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 		$this->gateway_compat->register();
 		( new OrderSnapshot( $this->context, $settings, self::PLUGIN_VERSION ) )->register();
 
-		$reader        = new OrderSnapshotReader();
-		$resolver      = new HistoricalFormattingResolver( $registry );
-		$order_context = new OrderCurrencyContext( $reader, $resolver );
+		$reader              = new OrderSnapshotReader();
+		$resolver            = new HistoricalFormattingResolver( $registry );
+		$this->order_context = new OrderCurrencyContext( $reader, $resolver );
 
-		( new OrderCurrencyFormatting( $order_context, $resolver ) )->register();
+		( new OrderCurrencyFormatting( $this->order_context, $resolver ) )->register();
 
-		$this->register_store_api_services( $this->context, $order_context, $settings );
+		$this->register_store_api_services( $this->context, $this->order_context, $settings );
 
 		if ( null === $active ) {
 			unset( $_COOKIE[ CurrencyContext::COOKIE_NAME ] );
@@ -448,6 +455,32 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 				return $this->new_context()->is_convertible_request();
 			}
 		);
+	}
+
+	/**
+	 * Evaluates the conversion gate for a fully-formed REST request.
+	 *
+	 * A real REST request carries both a request URI and the route WordPress
+	 * parsed out of it. `rest_do_request()` sets neither, so a test that wants
+	 * to exercise route-based detection has to supply both.
+	 *
+	 * @param string $uri   Request URI to present.
+	 * @param string $route Parsed REST route, e.g. `/wc/store/v1/cart`.
+	 */
+	protected function converts_under_route( string $uri, string $route ): bool {
+		$previous = $GLOBALS['wp']->query_vars['rest_route'] ?? null;
+
+		$GLOBALS['wp']->query_vars['rest_route'] = $route;
+
+		try {
+			return $this->converts_under_uri( $uri );
+		} finally {
+			if ( null === $previous ) {
+				unset( $GLOBALS['wp']->query_vars['rest_route'] );
+			} else {
+				$GLOBALS['wp']->query_vars['rest_route'] = $previous;
+			}
+		}
 	}
 
 	/**

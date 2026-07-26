@@ -34,23 +34,32 @@ Consequences for this plugin:
 
 ## Request identity
 
-Both predicates read `$_SERVER['REQUEST_URI']` on every call and return `false`
-when it is empty. Neither memoizes.
+WooCommerce offers three ways to recognise its own API requests, and they are not
+equally precise.
 
-| Predicate | Source | Notes |
+| Predicate | Source | Match |
 | --- | --- | --- |
-| `WC::is_rest_api_request()` | `includes/class-woocommerce.php:607` | matches the REST prefix anywhere in the URI |
-| `WC::is_store_api_request()` | `includes/class-woocommerce.php:628` | matches `<rest-prefix>/wc/store/` |
+| `WC::is_rest_api_request()` | `includes/class-woocommerce.php:607` | the REST prefix **anywhere** in `$_SERVER['REQUEST_URI']` |
+| `WC::is_store_api_request()` | `includes/class-woocommerce.php:628` | `<rest-prefix>/wc/store/` **anywhere** in the request URI |
+| `Authentication::is_request_to_store_api()` | `src/StoreApi/Authentication.php` | `/wc/store/` **anchored** at the start of `$GLOBALS['wp']->query_vars['rest_route']` |
 
-`is_store_api_request()` **does not exist in WooCommerce 8.2**, this plugin's
-minimum supported version — it was added later. Code that needs it must feature
-detect and fall back to the same URI check, which is what
-`CurrencyContext::is_store_api_request()` does.
+The first two are substring tests, so a query argument that happens to contain a
+Store API path — a redirect target, a search term — matches. That is harmless for
+the decisions WooCommerce makes with them, but it is not harmless for a
+conversion boundary: it would let an admin REST call be read as a Store API
+request and return converted prices.
 
-`rest_do_request()` sets no request URI. Integration tests must simulate it or
-they exercise the storefront path while appearing to test the Store API; the
-shared harness (`tests/integration/StoreApi/StoreApiTestCase.php`) owns that
-simulation.
+`CurrencyContext::is_store_api_request()` therefore uses the third form, the
+anchored parsed route, and falls back to the URI test only when no parsed route
+exists. The anchored form also removes the need to feature-detect
+`WC::is_store_api_request()`, which **does not exist in WooCommerce 8.2**, this
+plugin's minimum supported version.
+
+`rest_do_request()` sets neither a request URI nor a parsed route. Integration
+tests must simulate them or they exercise the storefront path while appearing to
+test the Store API; the shared harness
+(`tests/integration/StoreApi/StoreApiTestCase.php`) owns that simulation and
+exposes both forms.
 
 ## Money serialization
 

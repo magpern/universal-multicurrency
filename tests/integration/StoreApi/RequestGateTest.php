@@ -46,6 +46,37 @@ final class RequestGateTest extends StoreApiTestCase {
 		);
 	}
 
+	public function test_route_detection_is_anchored_not_a_substring_match(): void {
+		$this->boot_plugin( self::CURRENCIES, 'SEK' );
+
+		// A query argument can legitimately contain a Store API path — a redirect
+		// target, a search term. Detection must read the route WordPress parsed,
+		// not look for the namespace anywhere in the URI, or an admin REST call
+		// would convert.
+		$this->assertFalse(
+			$this->converts_under_route(
+				'/wp-json/wc/v3/orders?search=%2Fwp-json%2Fwc%2Fstore%2Fv1%2Fcart',
+				'/wc/v3/orders'
+			),
+			'A Store API path inside a query argument must not open the boundary.'
+		);
+
+		$this->assertFalse(
+			$this->converts_under_route( '/wp-json/wp/v2/posts?s=/wp-json/wc/store/', '/wp/v2/posts' )
+		);
+	}
+
+	public function test_genuine_store_api_routes_still_convert_when_parsed(): void {
+		$this->boot_plugin( self::CURRENCIES, 'SEK' );
+
+		$this->assertTrue( $this->converts_under_route( '/wp-json/wc/store/v1/cart', '/wc/store/v1/cart' ) );
+		$this->assertTrue( $this->converts_under_route( '/wp-json/wc/store/v1/batch', '/wc/store/v1/batch' ) );
+		$this->assertTrue(
+			$this->converts_under_route( '/index.php?rest_route=/wc/store/v1/cart', '/wc/store/v1/cart' ),
+			'The plain permalink form of a Store API request must convert too.'
+		);
+	}
+
 	public function test_other_rest_namespaces_do_not_convert(): void {
 		$this->boot_plugin( self::CURRENCIES, 'SEK' );
 
