@@ -40,7 +40,10 @@ final class Diagnostics {
 	 * time inside {@see ConflictDetector::findings()}.
 	 */
 	public function register(): void {
-		( new ConflictNotice( $this->detector ) )->register();
+		$dismissal = new NoticeDismissal( $this->detector );
+		$dismissal->register();
+
+		( new ConflictNotice( $this->detector, $dismissal ) )->register();
 	}
 
 	/**

@@ -136,7 +136,8 @@ final class ConflictNoticeIntegrationTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'notice-error', $output );
 		$this->assertStringContainsString( 'Fixture Switcher A', $output );
 		$this->assertStringContainsString( 'Review multicurrency settings', $output );
-		$this->assertStringNotContainsString( 'is-dismissible', $output );
+		$this->assertStringContainsString( 'is-dismissible', $output );
+		$this->assertStringContainsString( 'Dismiss this notice', $output );
 	}
 
 	public function test_inactive_fixture_renders_no_notice(): void {

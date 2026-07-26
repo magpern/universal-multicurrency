@@ -179,10 +179,36 @@ final class DiagnosticsBoundaryGuardTest extends TestCase {
 	}
 
 	public function test_diagnostics_never_reads_cookies_or_sessions(): void {
+		$files = array_values(
+			array_filter(
+				$this->source_files( 'Diagnostics' ),
+				static function ( string $file ): bool {
+					return false === strpos( $file, 'NoticeDismissal.php' );
+				}
+			)
+		);
+
 		$this->assert_pattern_absent_from(
-			$this->source_files( 'Diagnostics' ),
+			$files,
 			'/\$_COOKIE|\$_SESSION|get_transient\s*\(|set_transient\s*\(/',
 			'Diagnostics must never read cookies, sessions, or transients.'
+		);
+	}
+
+	public function test_only_notice_dismissal_persists_user_state(): void {
+		$files = array_values(
+			array_filter(
+				$this->source_files( 'Diagnostics' ),
+				static function ( string $file ): bool {
+					return false === strpos( $file, 'NoticeDismissal.php' );
+				}
+			)
+		);
+
+		$this->assert_pattern_absent_from(
+			$files,
+			'/\b(update_user_meta|update_user_option|add_user_meta|delete_user_meta)\s*\(/',
+			'Only NoticeDismissal.php may persist user state under src/Diagnostics/.'
 		);
 	}
 

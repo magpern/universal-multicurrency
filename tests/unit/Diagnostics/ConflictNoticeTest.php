@@ -117,6 +117,26 @@ final class ConflictNoticeTest extends TestCase {
 	/**
 	 * @return array<string, array{0: string, 1: string, 2: bool}>
 	 */
+	public function dismissible_provider(): array {
+		return array(
+			'high dashboard'     => array( Confidence::HIGH, 'dashboard', true ),
+			'high plugins'       => array( Confidence::HIGH, 'plugins', false ),
+			'high wc settings'   => array( Confidence::HIGH, 'woocommerce_page_wc-settings', false ),
+			'medium plugins'     => array( Confidence::MEDIUM, 'plugins', true ),
+			'medium wc settings' => array( Confidence::MEDIUM, 'woocommerce_page_wc-settings', false ),
+		);
+	}
+
+	/**
+	 * @dataProvider dismissible_provider
+	 */
+	public function test_is_dismissible( string $confidence, string $screen_id, bool $expected ): void {
+		$this->assertSame( $expected, ConflictNotice::is_dismissible( $confidence, $screen_id ) );
+	}
+
+	/**
+	 * @return array<string, array{0: string, 1: string, 2: bool}>
+	 */
 	public function screen_scope_provider(): array {
 		return array(
 			'high dashboard'     => array( Confidence::HIGH, 'dashboard', true ),

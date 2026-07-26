@@ -12,10 +12,9 @@ namespace UMC\Diagnostics;
 /**
  * Renders an advisory admin notice when {@see ConflictDetector} finds one or
  * more conflicting switchers. Detection runs lazily at {@see self::render()}
- * time, not at registration.
- *
- * Dismissal UI and persistence are added in a later milestone; this surface is
- * intentionally non-dismissible for now.
+ * time, not at registration. Dismissal is persisted per user via
+ * {@see NoticeDismissal} except on screens where a critical warning must stay
+ * visible.
  */
 final class ConflictNotice {
 
@@ -62,6 +61,13 @@ final class ConflictNotice {
 	private ConflictDetector $detector;
 
 	/**
+	 * Per-user dismissal store for the dashboard notice.
+	 *
+	 * @var NoticeDismissal|null
+	 */
+	private ?NoticeDismissal $dismissal;
+
+	/**
 	 * Request-scoped flag set when a plugin was deactivated this request.
 	 *
 	 * @var bool
@@ -69,12 +75,14 @@ final class ConflictNotice {
 	private bool $suppress = false;
 
 	/**
-	 * Binds the notice to a conflict detector.
+	 * Binds the notice to a conflict detector and optional dismissal store.
 	 *
-	 * @param ConflictDetector $detector Memoized conflict detector.
+	 * @param ConflictDetector     $detector   Memoized conflict detector.
+	 * @param NoticeDismissal|null $dismissal  Dismissal persistence, if wired.
 	 */
-	public function __construct( ConflictDetector $detector ) {
-		$this->detector = $detector;
+	public function __construct( ConflictDetector $detector, ?NoticeDismissal $dismissal = null ) {
+		$this->detector  = $detector;
+		$this->dismissal = $dismissal;
 	}
 
 	/**
@@ -111,6 +119,16 @@ final class ConflictNotice {
 			return;
 		}
 
+		$fingerprint = $this->detector->fingerprint();
+		$dismissible = self::is_dismissible( (string) $view['confidence'], $screen_id );
+
+		if ( $dismissible && null !== $this->dismissal && $this->dismissal->is_dismissed( $fingerprint ) ) {
+			return;
+		}
+
+		$view['dismissible'] = $dismissible;
+		$view['fingerprint'] = $fingerprint;
+
 		$this->render_view( $view );
 	}
 
@@ -128,6 +146,16 @@ final class ConflictNotice {
 		if ( null === $view ) {
 			return;
 		}
+
+		$fingerprint = $this->detector->fingerprint();
+		$dismissible = self::is_dismissible( (string) $view['confidence'], $screen_id );
+
+		if ( $dismissible && null !== $this->dismissal && $this->dismissal->is_dismissed( $fingerprint ) ) {
+			return;
+		}
+
+		$view['dismissible'] = $dismissible;
+		$view['fingerprint'] = $fingerprint;
 
 		$this->render_view( $view );
 	}
@@ -222,6 +250,27 @@ final class ConflictNotice {
 	}
 
 	/**
+	 * Whether the dashboard notice may be dismissed on `$screen_id`.
+	 *
+	 * HIGH conflicts stay visible on `plugins.php` and the multicurrency settings
+	 * tab; every other scoped screen allows dismissal.
+	 *
+	 * @param string $confidence Highest finding confidence.
+	 * @param string $screen_id  Admin screen id.
+	 */
+	public static function is_dismissible( string $confidence, string $screen_id ): bool {
+		if ( 'woocommerce_page_wc-settings' === $screen_id ) {
+			return false;
+		}
+
+		if ( 'plugins' === $screen_id && Confidence::HIGH === $confidence ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
 	 * Maps a confidence level to the WordPress admin notice class string.
 	 *
 	 * @param string $confidence Confidence level.
@@ -280,12 +329,30 @@ final class ConflictNotice {
 	private function render_view( array $view ): void {
 		$labels       = isset( $view['labels'] ) && is_array( $view['labels'] ) ? $view['labels'] : array();
 		$notice_class = isset( $view['notice_class'] ) ? (string) $view['notice_class'] : 'notice notice-warning';
+		$dismissible  = ! empty( $view['dismissible'] );
+		$fingerprint  = isset( $view['fingerprint'] ) ? (string) $view['fingerprint'] : '';
 		$is_network   = ! empty( $view['is_network'] );
 		$settings_url = \admin_url( isset( $view['settings_url'] ) ? (string) $view['settings_url'] : 'admin.php?page=wc-settings&tab=umc' );
 		$plugin_list  = $this->format_plugin_list( $labels );
 
+		if ( $dismissible ) {
+			$notice_class .= ' is-dismissible';
+		}
+
+		$dismiss_url = '';
+
+		if ( $dismissible && '' !== $fingerprint && NoticeDismissal::is_valid_fingerprint( $fingerprint ) ) {
+			$return_url  = \remove_query_arg(
+				array( NoticeDismissal::QUERY_ARG, '_wpnonce' )
+			);
+			$dismiss_url = \wp_nonce_url(
+				\add_query_arg( NoticeDismissal::QUERY_ARG, $fingerprint, $return_url ),
+				'umc_dismiss_' . $fingerprint
+			);
+		}
+
 		?>
-		<div class="<?php echo \esc_attr( $notice_class ); ?> umc-conflict-notice">
+		<div class="<?php echo \esc_attr( $notice_class ); ?> umc-conflict-notice"<?php echo $dismissible ? ' data-umc-conflict-dismissible="1"' : ''; ?>>
 			<p>
 				<strong>
 					<?php
@@ -337,6 +404,12 @@ final class ConflictNotice {
 				<a href="<?php echo \esc_url( $settings_url ); ?>">
 					<?php \esc_html_e( 'Review multicurrency settings', 'universal-multicurrency' ); ?>
 				</a>
+				<?php if ( '' !== $dismiss_url ) : ?>
+					<span aria-hidden="true"> · </span>
+					<a href="<?php echo \esc_url( $dismiss_url ); ?>">
+						<?php \esc_html_e( 'Dismiss this notice', 'universal-multicurrency' ); ?>
+					</a>
+				<?php endif; ?>
 			</p>
 		</div>
 		<?php
