@@ -297,14 +297,59 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 	 * @return mixed Whatever the callback returns.
 	 */
 	protected function as_storefront_request( callable $callback ) {
+		return $this->with_request_uri( null, $callback );
+	}
+
+	/**
+	 * Runs a callback with a specific request URI in place.
+	 *
+	 * @param string|null $uri      Request URI to present, or null for none.
+	 * @param callable    $callback Work to perform.
+	 *
+	 * @return mixed Whatever the callback returns.
+	 */
+	protected function with_request_uri( ?string $uri, callable $callback ) {
 		$previous_uri = $this->current_request_uri();
-		$this->set_request_uri( null );
+		$this->set_request_uri( $uri );
 
 		try {
 			return $callback();
 		} finally {
 			$this->set_request_uri( $previous_uri );
 		}
+	}
+
+	/**
+	 * Builds a currency context from current settings without registering hooks.
+	 *
+	 * Each call returns a new instance: the context memoizes its active currency,
+	 * rate and convertible-request decision for its lifetime, so assertions about
+	 * differing request conditions need their own instance, exactly as separate
+	 * requests would have in production.
+	 */
+	protected function new_context(): CurrencyContext {
+		$settings = new Settings();
+		$registry = new CurrencyRegistry( $settings, new Currency( $this->base_code, $this->base_decimals ) );
+
+		return new CurrencyContext(
+			$registry,
+			new ManualRateProvider( $settings, $this->base_code ),
+			new CurrencyResolver()
+		);
+	}
+
+	/**
+	 * Evaluates the conversion gate as it would be for a given request URI.
+	 *
+	 * @param string|null $uri Request URI to present, or null for a page view.
+	 */
+	protected function converts_under_uri( ?string $uri ): bool {
+		return (bool) $this->with_request_uri(
+			$uri,
+			function (): bool {
+				return $this->new_context()->is_convertible_request();
+			}
+		);
 	}
 
 	/**
@@ -348,6 +393,12 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 			WC()->session = new \WC_Session_Handler();
 			WC()->session->init();
 		}
+
+		// WC()->session outlives an individual test, so plugin-owned keys are
+		// cleared explicitly. Without this a currency persisted by one test
+		// silently satisfies (or breaks) the next one's assertions.
+		WC()->session->set( CurrencyContext::SESSION_KEY, null );
+		WC()->session->set( CartRecalculation::SESSION_KEY, null );
 
 		WC()->customer = new \WC_Customer( 0, true );
 		WC()->cart     = new \WC_Cart();
