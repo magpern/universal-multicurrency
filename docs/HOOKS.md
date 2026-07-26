@@ -232,6 +232,7 @@ swallowed.
 | `umc_order_pay_locked_currency` (action) | `($currency, $order)` | 0.4.0 | Fires when the order-pay endpoint locks a specific order's currency. |
 | `umc_refund_snapshot_created` (action) | `($refund, $meta, $snapshot)` | 0.4.0 | Fires after refund audit metadata is staged on a refund. |
 | `umc_order_audit_view_model` (filter) | `($view, $snapshot, $order)` | 0.4.0 | Filter the order currency audit meta-box view model. |
+| `umc_order_snapshot_refreshed` (action) | `($order, $previous, $meta)` | 0.5.0 | Fires when an unpaid Store API draft's snapshot is rewritten for a new currency or rate. |
 
 Note: `umc_convert_fee` is documented for integrations but **not wired** in
 Milestone 3 — no fee conversion ships enabled.
