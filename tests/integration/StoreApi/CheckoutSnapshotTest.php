@@ -56,7 +56,7 @@ final class CheckoutSnapshotTest extends StoreApiTestCase {
 		$this->assertSame( '11.50', $order->get_meta( OrderSnapshot::META_EXCHANGE_RATE ) );
 		$this->assertSame( 'SEK:11.50', $order->get_meta( OrderSnapshot::META_RATE_IDENTITY ) );
 		$this->assertSame( 'manual', $order->get_meta( OrderSnapshot::META_RATE_SOURCE ) );
-		$this->assertSame( self::PLUGIN_VERSION, $order->get_meta( OrderSnapshot::META_PLUGIN_VERSION ) );
+		$this->assertSame( $this->plugin_version(), $order->get_meta( OrderSnapshot::META_PLUGIN_VERSION ) );
 	}
 
 	public function test_snapshot_is_schema_version_two(): void {

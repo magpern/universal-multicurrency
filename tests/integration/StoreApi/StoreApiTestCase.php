@@ -57,14 +57,20 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 	protected const STORE_API_ROOT = '/wc/store/v1';
 
 	/**
-	 * Plugin version stamped into snapshots written under test.
-	 */
-	protected const PLUGIN_VERSION = '0.5.0';
-
-	/**
 	 * Default request URI used between explicit route calls.
 	 */
 	private const DEFAULT_REQUEST_URI = '/wp-json/wc/store/v1/cart';
+
+	/**
+	 * Plugin version stamped into snapshots written under test.
+	 *
+	 * Reads the constant at call time rather than copying it into a class
+	 * constant, which would resolve at class-compile time and could see a
+	 * stale value depending on bootstrap order.
+	 */
+	protected function plugin_version(): string {
+		return (string) UMC_VERSION;
+	}
 
 	/**
 	 * Every hook the plugin graph registers, cleared before and after each test.
@@ -265,7 +271,7 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 		// this exact callback so its order-currency rule sees the original set.
 		$this->gateway_compat = new GatewayCompatibility( $this->context );
 		$this->gateway_compat->register();
-		( new OrderSnapshot( $this->context, $settings, self::PLUGIN_VERSION ) )->register();
+		( new OrderSnapshot( $this->context, $settings, $this->plugin_version() ) )->register();
 
 		$reader              = new OrderSnapshotReader();
 		$resolver            = new HistoricalFormattingResolver( $registry );
@@ -290,7 +296,7 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 	 * @param Settings             $settings      Settings store.
 	 */
 	protected function register_store_api_services( CurrencyContext $context, OrderCurrencyContext $order_context, Settings $settings ): void {
-		$snapshot = new OrderSnapshot( $context, $settings, self::PLUGIN_VERSION );
+		$snapshot = new OrderSnapshot( $context, $settings, $this->plugin_version() );
 
 		( new CheckoutSnapshotAdapter( $snapshot ) )->register();
 		( new OrderCurrencyLock( $order_context, $this->gateway_compat ) )->register();
