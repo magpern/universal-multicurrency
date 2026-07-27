@@ -53,7 +53,7 @@ is unit-testable without a bootstrap. It never registers hooks.
 | Class | Contract |
 |---|---|
 | `Currency` | Immutable value object. Code validated as `^[A-Z]{3}$` (format only, not ISO-4217 membership — WooCommerce allows custom codes). Decimals 0–4. Position one of `left`, `right`, `left_space`, `right_space`. |
-| `Settings` | Sole owner of `umc_settings`. `defaults()`/`sanitize()` are pure and never throw; sanitize cleans or drops invalid input (invalid decimals fall back to 2, unusable rates are blanked while the row is kept). Constructible from in-memory data for testing. |
+| `Settings` | Sole owner of `umc_settings`. `defaults()`/`sanitize()` are pure and never throw; sanitize cleans or drops invalid input (invalid decimals fall back to 2, unusable rates are blanked while the row is kept). Constructible from in-memory data for testing. On first load from the option, {@see SettingsUpgrader} may migrate legacy schema version 0 stores to version 1, normalize through `sanitize()`, and persist only when the stored value changes. |
 | `RateProvider` | The only rate abstraction (an implementation seam for future automatic rates). `get_rate(base, target)` returns `'1'` for same-currency, a positive decimal string, or `null`. |
 | `ManualRateProvider` | Reads admin-entered rates from `Settings`; performs no arithmetic. |
 | `Converter` | `convert(amount, target)` and the pure static `apply_rate()` / `round_to_string()`. Rounds half-up to the target decimals; base target is a rate-1 no-op. See ADR-0002. |
@@ -62,6 +62,34 @@ is unit-testable without a bootstrap. It never registers hooks.
 Exceptions live in `UMC\Exceptions` and all implement the marker interface
 `UMC\Exceptions\Exception` for catch-all handling, while extending the most
 fitting SPL type (`InvalidArgumentException` / `RuntimeException`).
+
+### Settings schema upgrade (Milestone 7)
+
+`Settings::SCHEMA_VERSION` is **1** and must not be bumped unless a genuine
+settings shape change requires it. There is no artificial version 2 in production.
+
+Legacy stores (schema version **0**) persisted only a `currencies` array inside
+`umc_settings`, with no explicit `schema_version` key. The sole production
+migration (`SettingsUpgrader::migrate_0_to_1`) introduces
+`schema_version: 1` and copies the currency rows unchanged; {@see Settings::sanitize()}
+then produces the canonical row shape.
+
+`SettingsUpgrader` responsibilities:
+
+- parse the stored schema version (missing/malformed → 0)
+- reject unsupported **future** versions without persisting partial results
+- apply migrations in ascending target-version order
+- sanitize through `Settings::sanitize()`
+- persist only when migration or normalization changes the stored option value
+- remain idempotent (`v1 → v1` performs no migration and avoids writes when already canonical)
+
+Future migrations register in `SettingsUpgrader::production_migrations()` keyed by
+the version they produce. Chaining is proven in unit tests via injected migration
+maps (for example `0 → 1 → 2 → 3`) without exposing fake versions in production.
+
+When the option is **absent**, `Settings::get()` returns defaults without writing.
+When upgrade fails, in-memory callers receive defaults and the stored option is
+left untouched.
 
 ## Storefront integration layer (Milestone 2)
 
