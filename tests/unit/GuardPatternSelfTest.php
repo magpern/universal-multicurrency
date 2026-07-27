@@ -22,6 +22,7 @@ final class GuardPatternSelfTest extends TestCase {
 		$file = tempnam( sys_get_temp_dir(), 'umc-guard-' );
 		$this->assertNotFalse( $file );
 
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Ephemeral guard-pattern fixture outside the repo tree.
 		file_put_contents( $file, "<?php\nclass Converter {}\n" );
 
 		try {
@@ -33,6 +34,7 @@ final class GuardPatternSelfTest extends TestCase {
 			);
 		} finally {
 			if ( is_string( $file ) ) {
+				// phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- Removes the ephemeral guard-pattern fixture.
 				unlink( $file );
 			}
 		}
@@ -42,6 +44,7 @@ final class GuardPatternSelfTest extends TestCase {
 		$file = tempnam( sys_get_temp_dir(), 'umc-guard-' );
 		$this->assertNotFalse( $file );
 
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Ephemeral guard-pattern fixture outside the repo tree.
 		file_put_contents( $file, "<?php\n// clean\n" );
 
 		try {
@@ -53,6 +56,7 @@ final class GuardPatternSelfTest extends TestCase {
 			);
 		} finally {
 			if ( is_string( $file ) ) {
+				// phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- Removes the ephemeral guard-pattern fixture.
 				unlink( $file );
 			}
 		}

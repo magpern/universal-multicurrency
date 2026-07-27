@@ -136,7 +136,7 @@ final class NoticeDismissalIntegrationTest extends WP_UnitTestCase {
 		$_GET[ NoticeDismissal::QUERY_ARG ] = $submitted;
 		$_GET['_wpnonce']                   = wp_create_nonce( 'umc_dismiss_' . $submitted );
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Harness simulates a signed dismiss request.
-		$_REQUEST                           = array_merge( $_REQUEST, $_GET );
+		$_REQUEST = array_merge( $_REQUEST, $_GET );
 
 		return $this->dismissal()->try_dismiss_from_request();
 	}
