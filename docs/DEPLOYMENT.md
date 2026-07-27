@@ -547,3 +547,55 @@ Follow [`docs/MIGRATION.md`](MIGRATION.md) in full. Summary:
 - No automatic import from FOX/WOOCS, CURCY, WPML, YayCurrency, or any third-party switcher.
 - UMC CSV format is specified for possible future tooling only — no parser or admin UI in RC.
 - Historical order metadata and WooCommerce order totals are never re-converted.
+
+---
+
+## Milestone 7 — translation readiness (Release Candidate)
+
+### Summary
+
+Completes i18n audit for merchant-facing strings, adds canonical POT template,
+`load_plugin_textdomain()`, translator comments on ambiguous placeholders, and
+automated POT drift protection. No JavaScript shipped; RTL audit documented only.
+
+### Files created
+
+| Path | Purpose |
+|---|---|
+| `languages/universal-multicurrency.pot` | Canonical gettext template |
+| `bin/make-pot.sh` | Deterministic POT generation and `--check` drift guard |
+| `docs/TRANSLATION.md` | Text domain, POT workflow, JS status, RTL audit |
+| `tests/unit/TranslationReadinessTest.php` | Domain/POT/JS/RTL documentation guards |
+
+### Files modified
+
+| Path | Change |
+|---|---|
+| `src/Diagnostics/ConflictNotice.php` | i18n for evidence phrases and list conjunctions |
+| `src/Admin/OrderCurrencyMetaBox.php` | i18n for UTC label and manual rate source |
+| `src/SettingsUpgradeResult.php` | i18n for unsupported schema message |
+| `src/Plugin.php` | `load_plugin_textdomain()` on `init` |
+| `composer.json` | `make-pot` / `make-pot:check` scripts |
+| `.github/workflows/ci.yml` | `pot` job |
+| `bin/build-zip.sh` | Include `languages/` in release zip |
+| `docs/ROADMAP.md`, `README.md`, `CLAUDE.md`, `docs/TEST_STRATEGY.md` | Translation pointers |
+
+### New options / DB changes
+
+None.
+
+### Deployment sequence
+
+1. Deploy as usual; no settings migration.
+2. Translators may add `languages/universal-multicurrency-{locale}.mo` alongside the plugin.
+3. No runtime behaviour change for English-only stores.
+
+### Rollback
+
+Safe to prior release; `.mo` files from this release can remain harmlessly.
+
+### Known limitations (M7 translation)
+
+- No bundled locale `.mo` files in RC — POT only.
+- RTL audit documented; no dedicated `rtl.css` in RC.
+- No JavaScript i18n (no shipped JS).

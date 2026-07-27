@@ -259,3 +259,13 @@ both flows.
 
 Fee conversion (opt-in only). A no-reload in-place currency switch, which would
 require shipping JavaScript.
+
+## Milestone 7 — translation readiness (Release Candidate)
+
+### Guards
+
+- **`tests/unit/TranslationReadinessTest.php`** — canonical text domain (`universal-multicurrency`), plugin header agreement, `load_plugin_textdomain()` registration, representative POT msgids, exclusion of internal identifiers as msgids, no shipped JavaScript files, translation documentation contract, and **`composer make-pot:check`** drift protection (regenerate-and-diff via `bin/make-pot.sh`).
+- **PHPCS `WordPress.WP.I18n`** — wrong or missing text domain in PHP source.
+- **CI `pot` job** — runs `composer make-pot:check` on every pull request.
+
+POT headers strip wall-clock fields (`POT-Creation-Date`, `PO-Revision-Date`, `X-Generator`) so diffs are deterministic. See [`docs/TRANSLATION.md`](TRANSLATION.md) for contributor workflow and the RTL audit (documentation only — no mandatory RTL CSS fixes in RC).

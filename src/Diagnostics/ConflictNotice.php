@@ -364,17 +364,41 @@ final class ConflictNotice {
 	public static function evidence_phrase( string $kind, string $needle ): string {
 		switch ( $kind ) {
 			case SignatureKind::PLUGIN_PATH:
-				return 'the plugin "' . $needle . '" is active';
+				return sprintf(
+					/* translators: %s: plugin bootstrap path relative to wp-content/plugins. */
+					__( 'the plugin "%s" is active', 'universal-multicurrency' ),
+					$needle
+				);
 			case SignatureKind::CLASS_NAME:
-				return 'the class "' . $needle . '" exists';
+				return sprintf(
+					/* translators: %s: PHP class name detected at runtime. */
+					__( 'the class "%s" exists', 'universal-multicurrency' ),
+					$needle
+				);
 			case SignatureKind::FUNCTION:
-				return 'the function "' . $needle . '" exists';
+				return sprintf(
+					/* translators: %s: PHP function name detected at runtime. */
+					__( 'the function "%s" exists', 'universal-multicurrency' ),
+					$needle
+				);
 			case SignatureKind::CONSTANT:
-				return 'the constant "' . $needle . '" is defined';
+				return sprintf(
+					/* translators: %s: PHP constant name detected at runtime. */
+					__( 'the constant "%s" is defined', 'universal-multicurrency' ),
+					$needle
+				);
 			case SignatureKind::SHORTCODE:
-				return 'the shortcode "' . $needle . '" is registered';
+				return sprintf(
+					/* translators: %s: WordPress shortcode tag. */
+					__( 'the shortcode "%s" is registered', 'universal-multicurrency' ),
+					$needle
+				);
 			case SignatureKind::HOOK:
-				return 'the hook "' . $needle . '" is registered';
+				return sprintf(
+					/* translators: %s: WordPress hook name. */
+					__( 'the hook "%s" is registered', 'universal-multicurrency' ),
+					$needle
+				);
 			default:
 				return '';
 		}
@@ -417,7 +441,7 @@ final class ConflictNotice {
 
 		$last = array_pop( $phrases );
 
-		return implode( '; ', $phrases ) . '; and ' . $last;
+		return implode( '; ', $phrases ) . '; ' . __( 'and', 'universal-multicurrency' ) . ' ' . $last;
 	}
 
 	/**
@@ -706,11 +730,11 @@ final class ConflictNotice {
 		}
 
 		if ( 2 === count( $labels ) ) {
-			return $labels[0] . ' and ' . $labels[1];
+			return $labels[0] . ' ' . __( 'and', 'universal-multicurrency' ) . ' ' . $labels[1];
 		}
 
 		$last = array_pop( $labels );
 
-		return implode( ', ', $labels ) . ', and ' . $last;
+		return implode( ', ', $labels ) . ', ' . __( 'and', 'universal-multicurrency' ) . ' ' . $last;
 	}
 }

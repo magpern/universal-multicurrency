@@ -28,6 +28,32 @@ if ( ! function_exists( 'get_current_screen' ) ) {
 	}
 }
 
+if ( ! function_exists( '__' ) ) {
+	/**
+	 * Identity translation stub for unit tests without WordPress loaded.
+	 *
+	 * @param string $text   Source string.
+	 * @param string $domain Text domain (ignored).
+	 */
+	function __( $text, $domain = 'default' ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound, Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		return $text;
+	}
+}
+
+if ( ! function_exists( '_n' ) ) {
+	/**
+	 * Minimal plural stub for unit tests without WordPress loaded.
+	 *
+	 * @param string $single Singular string.
+	 * @param string $plural Plural string.
+	 * @param int    $number Item count.
+	 * @param string $domain Text domain (ignored).
+	 */
+	function _n( $single, $plural, $number, $domain = 'default' ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound, Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		return 1 === (int) $number ? $single : $plural;
+	}
+}
+
 // Test doubles never match *Test.php, so PHPUnit's directory-based
 // discovery never loads them; required explicitly, matching how
 // tests/integration/bootstrap.php loads StoreApiTestCase.

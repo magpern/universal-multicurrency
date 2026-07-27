@@ -30,6 +30,7 @@ Upload and activate through WordPress, or symlink the plugin directory into
 ```bash
 composer install
 composer phpcs
+composer make-pot:check
 composer test:unit
 composer test:integration   # needs MySQL + tests/bin/install-wp.sh
 composer test:mutation      # Diagnostics scorer; needs PCOV
@@ -54,6 +55,7 @@ detectors.
 | [`docs/TEST_STRATEGY.md`](docs/TEST_STRATEGY.md) | Unit, integration, guards, mutation |
 | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Per-milestone deploy and rollback record |
 | [`docs/MIGRATION.md`](docs/MIGRATION.md) | Manual merchant cut-over from another switcher (no foreign import) |
+| [`docs/TRANSLATION.md`](docs/TRANSLATION.md) | Text domain, POT workflow, JS/RTL translation status |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | Milestone status |
 | [`docs/adr/`](docs/adr/) | Architecture decision records |
 

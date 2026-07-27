@@ -25,6 +25,8 @@
 - Naming: namespace `UMC\`, prefix `umc_`, textdomain `universal-multicurrency`.
 - Minimum versions: see `docs/COMPATIBILITY.md` (enforced by
   `CompatibilityMatrixTest` — bump header, `UMC_VERSION`, and that doc together).
+- Translations: text domain `universal-multicurrency`; regenerate POT with
+  `composer make-pot` (see `docs/TRANSLATION.md`).
 - Never deactivate, modify, or call into another plugin — detection is
   observation only (ADR-0007). Merchant cut-over from another switcher is
   manual only — see `docs/MIGRATION.md` (ADR-0003).
@@ -41,7 +43,8 @@
 
 - Checks: `composer phpcs`, `composer test:unit`, `composer test:integration`
   (integration needs MySQL and `tests/bin/install-wp.sh`; see
-  `.github/workflows/ci.yml` for the reference setup). When Diagnostics code
+  `.github/workflows/ci.yml` for the reference setup). After changing user-facing
+  strings, run `composer make-pot` and `composer make-pot:check`. When Diagnostics code
   changes, `composer test:mutation` runs Infection over the unit suite (PCOV
   required; thresholds in `infection.json5`).
 - Machine-specific dev-environment notes belong in `CLAUDE.local.md`

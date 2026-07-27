@@ -60,7 +60,8 @@ final class SettingsUpgradeResult {
 			Settings::defaults(),
 			false,
 			sprintf(
-				'Unsupported settings schema version %1$d (current plugin supports up to %2$d).',
+				/* translators: 1: stored settings schema version, 2: highest schema version supported by this plugin release. */
+				__( 'Unsupported settings schema version %1$d (current plugin supports up to %2$d).', 'universal-multicurrency' ),
 				$stored_version,
 				$target_version
 			),

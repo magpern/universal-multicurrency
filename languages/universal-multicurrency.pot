@@ -1,0 +1,461 @@
+# Copyright (C) 2026 magpern
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Universal Multicurrency for WooCommerce 0.6.0\n"
+"Report-Msgid-Bugs-To: https://github.com/magpern/universal-multicurrency/issues\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Domain: universal-multicurrency\n"
+
+#. Plugin Name of the plugin
+#: universal-multicurrency.php
+msgid "Universal Multicurrency for WooCommerce"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: universal-multicurrency.php
+msgid "https://github.com/magpern/universal-multicurrency"
+msgstr ""
+
+#. Description of the plugin
+#: universal-multicurrency.php
+msgid "Unlimited currencies with manual exchange rates. WooCommerce remains the single source of truth for products and inventory; currency affects monetary values only."
+msgstr ""
+
+#. Author of the plugin
+#: universal-multicurrency.php
+msgid "magpern"
+msgstr ""
+
+#: src/Admin/CurrencyTableField.php:76
+msgid "Currencies"
+msgstr ""
+
+#: src/Admin/CurrencyTableField.php:79
+msgid "Add currencies with a manual exchange rate. A rate means: 1 base unit = rate target units. Leave a row blank to ignore it."
+msgstr ""
+
+#: src/Admin/CurrencyTableField.php:84
+msgid "Enabled"
+msgstr ""
+
+#: src/Admin/CurrencyTableField.php:85
+msgid "Code"
+msgstr ""
+
+#: src/Admin/CurrencyTableField.php:86
+#: src/Admin/OrderCurrencyMetaBox.php:226
+msgid "Symbol"
+msgstr ""
+
+#: src/Admin/CurrencyTableField.php:87
+msgid "Position"
+msgstr ""
+
+#: src/Admin/CurrencyTableField.php:88
+#: src/Admin/OrderCurrencyMetaBox.php:220
+msgid "Decimals"
+msgstr ""
+
+#: src/Admin/CurrencyTableField.php:89
+msgid "Rate"
+msgstr ""
+
+#: src/Admin/CurrencyTableField.php:139
+msgid "Always"
+msgstr ""
+
+#: src/Admin/CurrencyTableField.php:141
+msgid "Base currency (configured in WooCommerce → Settings → General)"
+msgstr ""
+
+#: src/Admin/CurrencyTableField.php:193
+msgid "Left"
+msgstr ""
+
+#: src/Admin/CurrencyTableField.php:194
+msgid "Right"
+msgstr ""
+
+#: src/Admin/CurrencyTableField.php:195
+msgid "Left with space"
+msgstr ""
+
+#: src/Admin/CurrencyTableField.php:196
+msgid "Right with space"
+msgstr ""
+
+#: src/Admin/OrderCurrencyMetaBox.php:70
+#: src/Admin/OrderCurrencyMetaBox.php:80
+msgid "Currency & Exchange Rate"
+msgstr ""
+
+#: src/Admin/OrderCurrencyMetaBox.php:179
+msgid "This order was created before the Universal Multicurrency plugin was installed. No snapshot metadata is available."
+msgstr ""
+
+#: src/Admin/OrderCurrencyMetaBox.php:186
+msgid "Snapshot Version"
+msgstr ""
+
+#: src/Admin/OrderCurrencyMetaBox.php:192
+msgid "Base Currency"
+msgstr ""
+
+#: src/Admin/OrderCurrencyMetaBox.php:197
+msgid "Order Currency"
+msgstr ""
+
+#: src/Admin/OrderCurrencyMetaBox.php:202
+msgid "Exchange Rate"
+msgstr ""
+
+#: src/Admin/OrderCurrencyMetaBox.php:208
+msgid "Rate Set At"
+msgstr ""
+
+#: src/Admin/OrderCurrencyMetaBox.php:214
+msgid "Rate Source"
+msgstr ""
+
+#: src/Admin/OrderCurrencyMetaBox.php:232
+msgid "Plugin Version"
+msgstr ""
+
+#: src/Admin/OrderCurrencyMetaBox.php:238
+msgid "Rate Identity"
+msgstr ""
+
+#. translators: %s: UTC timestamp formatted as Y-m-d H:i:s.
+#: src/Admin/OrderCurrencyMetaBox.php:257
+#, php-format
+msgid "%s UTC"
+msgstr ""
+
+#: src/Admin/OrderCurrencyMetaBox.php:269
+msgid "Manual"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:49
+#: src/Admin/SettingsPage.php:71
+msgid "Multicurrency"
+msgstr ""
+
+#. translators: %s: plugin bootstrap path relative to wp-content/plugins.
+#: src/Diagnostics/ConflictNotice.php:369
+#, php-format
+msgid "the plugin \"%s\" is active"
+msgstr ""
+
+#. translators: %s: PHP class name detected at runtime.
+#: src/Diagnostics/ConflictNotice.php:375
+#, php-format
+msgid "the class \"%s\" exists"
+msgstr ""
+
+#. translators: %s: PHP function name detected at runtime.
+#: src/Diagnostics/ConflictNotice.php:381
+#, php-format
+msgid "the function \"%s\" exists"
+msgstr ""
+
+#. translators: %s: PHP constant name detected at runtime.
+#: src/Diagnostics/ConflictNotice.php:387
+#, php-format
+msgid "the constant \"%s\" is defined"
+msgstr ""
+
+#. translators: %s: WordPress shortcode tag.
+#: src/Diagnostics/ConflictNotice.php:393
+#, php-format
+msgid "the shortcode \"%s\" is registered"
+msgstr ""
+
+#. translators: %s: WordPress hook name.
+#: src/Diagnostics/ConflictNotice.php:399
+#, php-format
+msgid "the hook \"%s\" is registered"
+msgstr ""
+
+#: src/Diagnostics/ConflictNotice.php:444
+#: src/Diagnostics/ConflictNotice.php:733
+#: src/Diagnostics/ConflictNotice.php:738
+#: src/Diagnostics/SiteHealthReport.php:634
+#: src/Diagnostics/SiteHealthReport.php:639
+msgid "and"
+msgstr ""
+
+#: src/Diagnostics/ConflictNotice.php:568
+msgid "Review multicurrency settings"
+msgstr ""
+
+#: src/Diagnostics/ConflictNotice.php:573
+msgid "Dismiss this notice"
+msgstr ""
+
+#. translators: %s: detected third-party currency switcher plugin name(s).
+#: src/Diagnostics/ConflictNotice.php:617
+#, php-format
+msgid "Another currency switcher is active. Universal Multicurrency has detected %s, which also converts WooCommerce prices."
+msgstr ""
+
+#: src/Diagnostics/ConflictNotice.php:624
+msgid "Why this is unsafe."
+msgstr ""
+
+#: src/Diagnostics/ConflictNotice.php:627
+msgid "Two plugins converting the same price multiply their rates. WooCommerce reads a product's price once, and each switcher converts whatever the previous one returned. Which runs first depends on hook priority, so the result can differ between the catalogue, the cart, and the order that is finally saved."
+msgstr ""
+
+#: src/Diagnostics/ConflictNotice.php:634
+msgid "What you may see."
+msgstr ""
+
+#: src/Diagnostics/ConflictNotice.php:637
+msgid "Prices that differ between the shop page and the cart; totals that change on reload; orders stored with a currency or rate the shopper never saw; a payment gateway charging in a different currency to the order; refunds that do not reconcile against the original total."
+msgstr ""
+
+#: src/Diagnostics/ConflictNotice.php:644
+msgid "How to resolve."
+msgstr ""
+
+#: src/Diagnostics/ConflictNotice.php:648
+msgid "Keep one. Deactivate the other switcher, then clear your object cache and WooCommerce transients. Existing orders are unaffected — each stores its own currency and exchange rate permanently."
+msgstr ""
+
+#: src/Diagnostics/ConflictNotice.php:653
+msgid "Ask an administrator to deactivate the other switcher, then clear your object cache and WooCommerce transients. Existing orders are unaffected — each stores its own currency and exchange rate permanently."
+msgstr ""
+
+#: src/Diagnostics/ConflictNotice.php:661
+msgid "Contact your network administrator if you cannot deactivate plugins yourself."
+msgstr ""
+
+#: src/Diagnostics/ConflictNotice.php:665
+msgid "Universal Multicurrency will not change, disable, or deactivate any other plugin."
+msgstr ""
+
+#: src/Diagnostics/ConflictNotice.php:699
+msgid "Detected because:"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:90
+msgid "Currency switcher conflicts"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:94
+msgid "Universal Multicurrency environment"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:171
+msgid "No conflicting currency switchers detected"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:173
+msgid "Universal Multicurrency did not detect another currency switcher on this site."
+msgstr ""
+
+#. translators: %s: comma-separated list of detected switcher labels
+#: src/Diagnostics/SiteHealthReport.php:191
+#, php-format
+msgid "Universal Multicurrency detected a conflicting currency switcher: %s."
+msgid_plural "Universal Multicurrency detected conflicting currency switchers: %s."
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/Diagnostics/SiteHealthReport.php:201
+msgid "The evidence is weak and may be a false positive. Review the Multicurrency settings tab if prices look wrong."
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:206
+msgid "Deactivate the other switcher to avoid multiplied exchange rates. Universal Multicurrency will not deactivate it for you."
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:211
+msgid "Running two currency switchers can multiply exchange rates and corrupt cart and order totals. Deactivate the other switcher immediately."
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:218
+msgid "Conflicting currency switcher detected"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:220
+msgid "Possible currency switcher conflict"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:221
+msgid "Weak currency switcher signal detected"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:290
+msgid "Environment meets Universal Multicurrency requirements"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:292
+msgid "PHP, WordPress, WooCommerce, and High-Performance Order Storage meet the supported range for this plugin."
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:307
+msgid "Environment is below the supported minimum"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:308
+msgid "Environment should be reviewed"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:471
+#: src/Diagnostics/SiteHealthReport.php:659
+msgid "Universal Multicurrency"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:472
+msgid "Passive compatibility and environment diagnostics for support requests."
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:475
+msgid "Plugin version"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:479
+msgid "Base currency"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:483
+msgid "Currencies configured"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:487
+msgid "Currencies enabled with a rate"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:491
+msgid "HPOS enabled"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:492
+msgid "Yes"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:492
+msgid "No"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:495
+msgid "Settings schema version"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:499
+msgid "Declared minimum PHP"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:503
+msgid "Declared minimum WordPress"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:507
+msgid "Declared minimum WooCommerce"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:511
+msgid "Running PHP"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:515
+msgid "Running WordPress"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:519
+msgid "Running WooCommerce"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:523
+msgid "Conflicts detected"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:527
+msgid "Store API conversion"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:528
+msgid "Active"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:541
+msgid "None"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:576
+msgid "PHP is below the minimum version required by Universal Multicurrency."
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:580
+msgid "WordPress is below the minimum version required by Universal Multicurrency."
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:584
+msgid "WooCommerce is below the minimum version required by Universal Multicurrency."
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:588
+msgid "PHP is newer than the version Universal Multicurrency has tested up to."
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:592
+msgid "WordPress is newer than the version Universal Multicurrency has tested up to."
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:596
+msgid "WooCommerce is newer than the version Universal Multicurrency has tested up to."
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:602
+msgid "One or more environment version strings could not be parsed."
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:606
+msgid "This store is below a future minimum version announced in the compatibility documentation."
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:610
+msgid "High-Performance Order Storage (HPOS) is not enabled. Universal Multicurrency supports legacy order storage, but HPOS is recommended."
+msgstr ""
+
+#: src/Frontend/Switcher.php:146
+msgid "Currency"
+msgstr ""
+
+#. translators: %s: active currency code.
+#: src/Integration/GatewayCompatibility.php:174
+#, php-format
+msgid "No payment method is available for %s. Please choose a different currency to continue."
+msgstr ""
+
+#. translators: 1: stored settings schema version, 2: highest schema version supported by this plugin release.
+#: src/SettingsUpgradeResult.php:64
+#, php-format
+msgid "Unsupported settings schema version %1$d (current plugin supports up to %2$d)."
+msgstr ""
+
+#: src/StoreApi/CartExtensionData.php:94
+msgid "Currency code the cart is presented in."
+msgstr ""
+
+#: src/StoreApi/CartExtensionData.php:99
+msgid "Currency code prices are authored in."
+msgstr ""
+
+#: src/StoreApi/CartExtensionData.php:104
+msgid "Currency codes the shopper may choose."
+msgstr ""
+
+#: universal-multicurrency.php:33
+msgid "Universal Multicurrency requires PHP 8.1 or newer and is inactive."
+msgstr ""
+
+#: universal-multicurrency.php:69
+msgid "Universal Multicurrency requires WooCommerce to be installed and active."
+msgstr ""

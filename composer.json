@@ -28,6 +28,8 @@
     "scripts": {
         "phpcs": "phpcs",
         "phpcbf": "phpcbf",
+        "make-pot": "bash bin/make-pot.sh",
+        "make-pot:check": "bash bin/make-pot.sh --check",
         "test:unit": "phpunit -c phpunit.xml.dist",
         "test:integration": "phpunit -c phpunit-integration.xml.dist",
         "test:mutation": "infection --threads=1"

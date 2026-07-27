@@ -30,8 +30,8 @@
       Optional UMC CSV format specified for future tooling only (no RC import UI).
     - **Uninstall audit** — **shipped (M7):** [`PERSISTED_DATA.md`](PERSISTED_DATA.md),
       [`ADR-0009`](adr/0009-uninstall-retention-policy.md), executable guards
-    - **Translation readiness** — plugin-wide i18n audit, `.pot` generation,
-      translator comments, RTL/locale review
+    - **Translation readiness** — **shipped (M7):** [`docs/TRANSLATION.md`](TRANSLATION.md)
+      (i18n audit, `languages/universal-multicurrency.pot`, CI drift guard, RTL audit)
     - **Whole-plugin security review** — M2–M5 surfaces (price filters, Store
       API extension data, order snapshot writes, switcher redirect), not only
       Diagnostics

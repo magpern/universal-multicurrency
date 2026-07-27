@@ -41,6 +41,21 @@ jobs:
       - run: composer install --prefer-dist --no-progress
       - run: composer phpcs
 
+  pot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: Install WP-CLI
+        run: |
+          curl -sSLo wp-cli.phar https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          chmod +x wp-cli.phar
+          sudo mv wp-cli.phar /usr/local/bin/wp
+      - run: composer make-pot:check
+
   unit:
     runs-on: ubuntu-latest
     strategy:
