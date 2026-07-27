@@ -130,19 +130,45 @@ final class StorefrontGuardTest extends WP_UnitTestCase {
 		);
 	}
 
-	public function test_uninstall_never_deletes_order_snapshot_meta(): void {
+	public function test_uninstall_policy_invariants(): void {
 		$src       = dirname( ( new \ReflectionClass( Converter::class ) )->getFileName() );
 		$uninstall = dirname( $src ) . '/uninstall.php';
 
 		$this->assertFileExists( $uninstall );
+
 		$source = (string) file_get_contents( $uninstall );
 
-		// The permanent _umc_* order snapshot must never be deleted on uninstall:
-		// no meta-deletion calls and no direct SQL — only the settings option goes.
-		$this->assertStringNotContainsString( 'delete_post_meta', $source );
-		$this->assertStringNotContainsString( 'delete_metadata', $source );
-		$this->assertStringNotContainsString( '$wpdb', $source );
-		$this->assertStringContainsString( "delete_option( 'umc_settings' )", $source );
+		foreach (
+			array(
+				'delete_post_meta',
+				'delete_metadata',
+				'delete_user_meta',
+				'$wpdb',
+			) as $forbidden
+		) {
+			$this->assertStringNotContainsString(
+				$forbidden,
+				$source,
+				'uninstall.php must not delete commerce or user metadata (ADR-0009).'
+			);
+		}
+
+		$this->assertSame(
+			\UMC\PersistedKeys::uninstall_deleted_option_keys(),
+			$this->extract_delete_option_keys( $source ),
+			'uninstall.php must delete exactly the contracted option keys.'
+		);
+	}
+
+	/**
+	 * @return list<string>
+	 */
+	private function extract_delete_option_keys( string $source ): array {
+		if ( ! preg_match_all( "/delete_option\s*\(\s*['\"]([^'\"]+)['\"]/", $source, $matches ) ) {
+			return array();
+		}
+
+		return array_values( $matches[1] );
 	}
 
 	/**

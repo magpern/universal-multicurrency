@@ -26,7 +26,7 @@ final class PersistedKeys {
 	/**
 	 * Bump when the inventory shape or membership changes.
 	 */
-	public const INVENTORY_VERSION = 1;
+	public const INVENTORY_VERSION = 2;
 
 	/**
 	 * WordPress options written by the plugin.
@@ -136,6 +136,38 @@ final class PersistedKeys {
 	}
 
 	/**
+	 * WordPress options removed when the plugin is uninstalled.
+	 *
+	 * @return list<string>
+	 */
+	public static function uninstall_deleted_option_keys(): array {
+		return self::option_keys();
+	}
+
+	/**
+	 * User metadata keys intentionally preserved on uninstall.
+	 *
+	 * @return list<string>
+	 */
+	public static function uninstall_preserved_user_meta_keys(): array {
+		return self::user_meta_keys();
+	}
+
+	/**
+	 * Uninstall contract export for documentation drift tests.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public static function uninstall_policy(): array {
+		return array(
+			'delete_options'       => self::uninstall_deleted_option_keys(),
+			'preserve_order_meta'  => self::order_meta_keys(),
+			'preserve_refund_meta' => self::refund_meta_keys(),
+			'preserve_user_meta'   => self::uninstall_preserved_user_meta_keys(),
+		);
+	}
+
+	/**
 	 * Machine-readable inventory export for documentation drift tests.
 	 *
 	 * @return array<string, mixed>
@@ -152,6 +184,7 @@ final class PersistedKeys {
 			'store_api_extension_namespaces' => self::store_api_extension_namespaces(),
 			'transients'                     => self::transient_keys(),
 			'object_cache'                   => self::object_cache_keys(),
+			'uninstall_policy'               => self::uninstall_policy(),
 		);
 	}
 }

@@ -8,16 +8,17 @@ session entries, cookies).
 **Drift guard:** `tests/unit/PersistedKeysInventoryTest.php` binds the PHP
 inventory, the implementation constants, and the machine-readable block below.
 
-Uninstall policy for each surface is documented here for reference; the
-**approved uninstall behaviour** is finalized in Milestone 7 Commit 2.
+**Uninstall policy:** [`docs/adr/0009-uninstall-retention-policy.md`](adr/0009-uninstall-retention-policy.md)
+(ADR-0009). Guards: `UninstallPolicyGuardTest`, `UninstallPolicyTest`,
+`StorefrontGuardTest::test_uninstall_policy_invariants`.
 
 ---
 
 ## WordPress options
 
-| Key | Owner | Contents | Uninstall (current) |
+| Key | Owner | Contents | Uninstall |
 |---|---|---|---|
-| `umc_settings` | `Settings` | Plugin configuration: `schema_version`, enabled currencies, manual rates, formatting per currency | **Deleted** by [`uninstall.php`](../uninstall.php) |
+| `umc_settings` | `Settings` | Plugin configuration: `schema_version`, enabled currencies, manual rates, formatting per currency | **Deleted** (ADR-0009) |
 
 The store **base currency** lives in WooCommerce's `woocommerce_currency` option
 only. It is never duplicated into `umc_settings` (see ADR-0003).
@@ -61,9 +62,9 @@ Writer: `Order\RefundSnapshot`.
 
 ## User metadata
 
-| Key | Owner | Contents | Uninstall (current) |
+| Key | Owner | Contents | Uninstall |
 |---|---|---|---|
-| `umc_dismissed_notices` | `Diagnostics\NoticeDismissal` | Per-user map of dismissed conflict-notice fingerprints (cap 20, 180-day expiry) | **Not deleted** (M6 D4 trade-off; M7 Commit 2 will document the approved policy) |
+| `umc_dismissed_notices` | `Diagnostics\NoticeDismissal` | Per-user map of dismissed conflict-notice fingerprints (cap 20, 180-day expiry) | **Preserved** (ADR-0009) |
 
 This is the first non-order data persisted outside `umc_settings` (ADR-0007).
 
@@ -116,6 +117,26 @@ that cache per currency. That value is not a standalone persisted key.
 
 ---
 
+## Uninstall policy (ADR-0009)
+
+[`uninstall.php`](../uninstall.php) implements a narrow delete contract:
+
+| Surface | On uninstall |
+|---|---|
+| `umc_settings` option | **Deleted** |
+| `_umc_*` order meta | **Preserved forever** |
+| `_umc_parent_*` refund meta | **Preserved forever** |
+| `umc_dismissed_notices` user meta | **Preserved** |
+| WC session keys | Not targeted (WC session lifecycle) |
+| Cookies | Not targeted (browser lifecycle) |
+| Store API `umc` extension | Not persisted |
+
+Rationale: commerce audit data is permanent; plugin configuration is ephemeral;
+dismissal rows are harmless orphans. See
+[ADR-0009](adr/0009-uninstall-retention-policy.md).
+
+---
+
 ## Machine-readable inventory
 
 The block below is parsed by `PersistedKeysInventoryTest`. It must stay in sync
@@ -123,7 +144,7 @@ with `PersistedKeys::inventory()` — never edit one without the other.
 
 ```umc:persisted-inventory
 {
-  "inventory_version": 1,
+  "inventory_version": 2,
   "options": [
     "umc_settings"
   ],
@@ -156,6 +177,29 @@ with `PersistedKeys::inventory()` — never edit one without the other.
     "umc"
   ],
   "transients": [],
-  "object_cache": []
+  "object_cache": [],
+  "uninstall_policy": {
+    "delete_options": [
+      "umc_settings"
+    ],
+    "preserve_order_meta": [
+      "_umc_base_currency",
+      "_umc_transaction_currency",
+      "_umc_exchange_rate",
+      "_umc_rate_timestamp",
+      "_umc_rate_source",
+      "_umc_plugin_version",
+      "_umc_rate_identity",
+      "_umc_snapshot_version",
+      "_umc_transaction_decimals"
+    ],
+    "preserve_refund_meta": [
+      "_umc_parent_transaction_currency",
+      "_umc_parent_rate_identity"
+    ],
+    "preserve_user_meta": [
+      "umc_dismissed_notices"
+    ]
+  }
 }
 ```
