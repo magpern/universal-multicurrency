@@ -62,6 +62,7 @@ final class PerformanceGuardTest extends TestCase {
 				'CEILING_CURRENCY_RESOLUTION_WRITES',
 				'CEILING_DIAGNOSTICS_QUERY_DELTA',
 				'CEILING_STORE_API_CART_QUERY_DELTA',
+				'CEILING_RATE_UPDATE_NOT_MODIFIED_WRITES',
 			) as $name
 		) {
 			$this->assertStringContainsString( $name, $source, 'Missing enforced ceiling constant ' . $name );

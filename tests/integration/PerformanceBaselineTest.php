@@ -18,7 +18,13 @@ use UMC\Order\OrderSnapshot;
 use UMC\Order\OrderSnapshotReader;
 use UMC\Order\RefundSnapshot;
 use UMC\Plugin;
+use UMC\Rates\ExchangeRateStore;
+use UMC\Rates\Http\HttpResponse;
+use UMC\Rates\Providers\FrankfurterRateSource;
+use UMC\Rates\RateUpdateService;
+use UMC\Rates\RateUpdateState;
 use UMC\Settings;
+use UMC\Tests\Support\FakeHttpTransport;
 use UMC\Tests\Support\PerformanceMetrics;
 use UMC\Tests\Support\SourceGuardTrait;
 use WC_Order;
@@ -79,6 +85,8 @@ final class PerformanceBaselineTest extends WP_UnitTestCase {
 	public const CEILING_CHECKOUT_SNAPSHOT_HOOKS = 1;
 
 	public const CEILING_CART_EXTENSION_CALLBACKS = 1;
+
+	public const CEILING_RATE_UPDATE_NOT_MODIFIED_WRITES = 0;
 
 	public function set_up(): void {
 		parent::set_up();
@@ -523,6 +531,51 @@ final class PerformanceBaselineTest extends WP_UnitTestCase {
 			'Uninstall must not delete dismissal user meta.'
 		);
 		$this->assertSame( $stored, get_user_meta( $user_id, 'umc_dismissed_notices', true ) );
+	}
+
+	public function test_not_modified_rate_update_performs_no_settings_write(): void {
+		$settings             = new Settings(
+			array(
+				'rate_mode'  => Settings::RATE_MODE_AUTOMATIC,
+				'currencies' => array(
+					'SEK' => array(
+						'enabled'         => true,
+						'provider_rate'   => '10.00',
+						'rate_updated_at' => 1_700_000_000,
+						'rate_mode'       => Settings::RATE_MODE_AUTOMATIC,
+					),
+				),
+			)
+		);
+		$before_provider_rate = $settings->get_currency_config( 'SEK' )['provider_rate'] ?? '';
+		$before_effective     = $settings->get_rate( 'SEK' );
+
+		$transport = new FakeHttpTransport();
+		$transport->register(
+			'https://api.frankfurter.dev/v1/latest?base=EUR&symbols=SEK',
+			new HttpResponse( 304, array(), '' )
+		);
+
+		$store   = new ExchangeRateStore( $settings, new RateUpdateState(), 'EUR', 'baseline-lock' );
+		$service = new RateUpdateService(
+			new FrankfurterRateSource( $transport ),
+			$store,
+			'EUR'
+		);
+
+		$this->start_umc_settings_option_metrics();
+
+		$result = $service->update();
+
+		$this->assertTrue( $result->is_not_modified() );
+		$this->assertSame(
+			self::CEILING_RATE_UPDATE_NOT_MODIFIED_WRITES,
+			$this->umc_settings_option_write_count,
+			'HTTP 304 rate update must not write umc_settings.'
+		);
+		$this->assertSame( $before_provider_rate, $settings->get_currency_config( 'SEK' )['provider_rate'] ?? '' );
+		$this->assertSame( $before_effective, $settings->get_rate( 'SEK' ) );
+		$this->assertSame( RateUpdateState::STATUS_SUCCESS, $store->get_operational_status( 'SEK' )->last_status() );
 	}
 
 	public function test_baseline_documentation_lists_enforced_ceilings(): void {

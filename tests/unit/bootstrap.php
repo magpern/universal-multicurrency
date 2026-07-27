@@ -8,6 +8,11 @@
 declare( strict_types=1 );
 
 require_once dirname( __DIR__, 2 ) . '/vendor/autoload.php';
+require_once dirname( __DIR__ ) . '/Support/OptionWriteMetrics.php';
+
+use UMC\Rates\RateUpdateState;
+use UMC\Settings;
+use UMC\Tests\Support\OptionWriteMetrics;
 
 if ( ! defined( 'UMC_VERSION' ) ) {
 	define( 'UMC_VERSION', '0.0.0-test' );
@@ -16,6 +21,12 @@ if ( ! defined( 'UMC_VERSION' ) ) {
 if ( ! function_exists( 'apply_filters' ) ) {
 	function apply_filters( $tag, $value ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
 		return $value;
+	}
+}
+
+if ( ! function_exists( 'do_action' ) ) {
+	function do_action( ...$args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed, WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound
+		unset( $args );
 	}
 }
 
@@ -54,6 +65,14 @@ if ( ! function_exists( 'get_option' ) ) {
 
 if ( ! function_exists( 'update_option' ) ) {
 	function update_option( $option, $value ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound, Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		if ( Settings::OPTION === $option ) {
+			OptionWriteMetrics::record_settings_write();
+		}
+
+		if ( RateUpdateState::OPTION === $option ) {
+			OptionWriteMetrics::record_rate_state_write();
+		}
+
 		return true;
 	}
 }
