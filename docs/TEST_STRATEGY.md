@@ -294,3 +294,13 @@ Established **after** Commit 6 security stabilization so ceilings reflect final 
 Baseline record: [`docs/PERFORMANCE_BASELINES.md`](PERFORMANCE_BASELINES.md).
 
 **No wall-clock assertions:** performance checks use query-count and write-count deltas only.
+
+## Milestone 7 — release audit (Release Candidate)
+
+### Guards
+
+- **`composer release-audit`** / **`bin/release-audit.sh`** — PHPCS, unit release-audit guards, security/performance/persisted-data subsets, POT drift, `composer audit`, production ZIP build + `ReleaseZipInspector`.
+- **`tests/unit/ReleaseAuditTest.php`** (`@group release-audit`) — repository hygiene, foreign-coupling scan, metadata consistency, settings schema, security/performance document gates, CI job presence, ZIP inspection when `UMC_RELEASE_ZIP` is set.
+- **CI `release-audit` job** — runs the canonical command on every pull request.
+
+Audit record: [`docs/RELEASE_AUDIT.md`](RELEASE_AUDIT.md). **Zero unresolved release blockers** required before Commit 10.

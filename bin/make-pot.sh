@@ -26,17 +26,40 @@ normalize_pot() {
 		"$file"
 }
 
+ensure_wp_cli() {
+	if command -v wp >/dev/null 2>&1; then
+		return 0
+	fi
+
+	if ! command -v curl >/dev/null 2>&1; then
+		return 1
+	fi
+
+	curl -sSLo /tmp/wp-cli.phar https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+	chmod +x /tmp/wp-cli.phar
+	export PATH="/tmp:${PATH}"
+	ln -sf /tmp/wp-cli.phar /tmp/wp
+}
+
 run_make_pot() {
 	local dest="$1"
+
+	ensure_wp_cli || true
 
 	if command -v wp >/dev/null 2>&1; then
 		if wp i18n make-pot "$ROOT" "$dest" \
 			--domain="$DOMAIN" \
 			--exclude=vendor,tests,docs,dist,docs/plans \
 			--slug=universal-multicurrency \
+			--allow-root \
 			--headers='{"Report-Msgid-Bugs-To":"https://github.com/magpern/universal-multicurrency/issues"}'; then
 			return
 		fi
+	fi
+
+	if ! command -v docker >/dev/null 2>&1; then
+		echo "wp i18n make-pot failed and docker is unavailable for fallback" >&2
+		exit 1
 	fi
 
 	docker run --rm -u "$(id -u):$(id -g)" \
@@ -46,6 +69,7 @@ run_make_pot() {
 			--domain="$DOMAIN" \
 			--exclude=vendor,tests,docs,dist,docs/plans \
 			--slug=universal-multicurrency \
+			--allow-root \
 			--headers='{"Report-Msgid-Bugs-To":"https://github.com/magpern/universal-multicurrency/issues"}'
 }
 
