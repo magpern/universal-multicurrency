@@ -187,20 +187,26 @@ Fees are **not** converted (disabled by decision; opt-in only via `umc_convert_f
 so `woocommerce_cart_calculate_fees` carries no plugin callback. No stock hooks,
 ever. Order-status hooks carry no callback either.
 
+Milestone 6 adds: no `deactivate_plugins` or related deactivation APIs; no
+frontend conflict notice; no JavaScript or other frontend assets for diagnostics.
+
 No JavaScript is registered. The Cart and Checkout blocks are served entirely by
 server-side conversion, so there is no `IntegrationInterface`, no
 `woocommerce_blocks_*_block_registration` callback and no `registerCheckoutFilters`
 usage; currency switching reloads the page, which makes block data refetch on its
 own.
 
-Guard tests (`StorefrontGuardTest`, `StoreApiHooksStructureTest`) assert that no
-plugin-origin callbacks land on the fee, stock or order-status hooks; that Store
-API registration stays inside `src/StoreApi`; that only the seam uses the
-`Converter`; that only the snapshot writers stage order metadata; that nothing
-stamps the order currency; that Store API code raises no session notices; that
-only the Store API adapter saves an order; that no frontend assets are
-registered; that no `$wpdb`/SQL is used; and that no broad exception is
-swallowed.
+Guard tests (`StorefrontGuardTest`, `StoreApiHooksStructureTest`,
+`DiagnosticsGuardTest`) assert that no plugin-origin callbacks land on the fee,
+stock or order-status hooks; that Store API registration stays inside
+`src/StoreApi`; that only the seam uses the `Converter`; that only the snapshot
+writers stage order metadata; that nothing stamps the order currency; that Store
+API code raises no session notices; that only the Store API adapter saves an
+order; that no frontend assets are registered; that no `$wpdb`/SQL is used; that
+no broad exception is swallowed; and that Diagnostics stays inside
+`src/Diagnostics/`, never reaches the money path or storefront, never
+auto-deactivates plugins, and registers only the seven admin hooks listed in
+the Milestone 6 section.
 
 ## Milestone 5 — Store API and Blocks
 
@@ -212,6 +218,22 @@ swallowed.
 | `woocommerce_store_api_cart_update_order_from_request` | action (10) | `StoreApi\CheckoutSnapshotAdapter` | A draft order is re-synced from the cart on every mutating cart request, restamping its currency. Realigns the snapshot while the order is unpaid. Fires after WooCommerce's own save, so this callback saves. |
 | `rest_request_before_callbacks` / `rest_request_after_callbacks` | filter (10) | `StoreApi\OrderCurrencyLock` | Brackets `/order/{id}` and `/checkout/{id}` so a stored order is reported in its own currency, and gateways are filtered by it rather than by the session. |
 | `woocommerce_store_api_register_endpoint_data` | API call | `StoreApi\CartExtensionData` | Publishes currency state — active code, base code, selectable codes — under the `umc` namespace on the cart endpoint. No amounts and no exchange rate. |
+
+## Milestone 6 — compatibility and diagnostics
+
+Registered only when `is_admin()` and not during AJAX, cron, or WP-CLI.
+Evaluation is lazy at `admin_notices` (or the first Site Health callback that
+needs findings). No WooCommerce storefront, Store API, or REST hooks.
+
+| Hook | Prio | Owner | Why |
+|---|---|---|---|
+| `admin_notices` | 10 | `Diagnostics\ConflictNotice::render()` | Dashboard conflict notice when findings match screen + confidence rules. |
+| `network_admin_notices` | 10 | `Diagnostics\ConflictNotice::render_network()` | Multisite network-admin variant with network-administrator guidance. |
+| `deactivated_plugin` | 10 | `Diagnostics\ConflictNotice::suppress()` | Suppresses one residual notice on the deactivation confirmation screen (PHP cannot undeclare classes until the next request). |
+| `admin_init` | 10 | `Diagnostics\NoticeDismissal::maybe_dismiss()` | Nonce'd GET dismiss handler; redirects with query args stripped on success. |
+| `site_status_tests` | 10 | `Diagnostics\SiteHealthReport::tests()` | Registers direct tests for conflicts and environment (gated on `activate_plugins`). |
+| `debug_information` | 10 | `Diagnostics\SiteHealthReport::debug()` | Adds the `universal-multicurrency` debug section (gated on `activate_plugins`). |
+| `woocommerce_admin_field_umc_conflict` | 10 | `Diagnostics\ConflictNotice::render_settings_field()` | Long-form evidence list on the Multicurrency settings tab; never dismissible. |
 
 ## Filters and actions the plugin provides
 
@@ -232,6 +254,10 @@ swallowed.
 | `umc_order_pay_locked_currency` (action) | `($currency, $order)` | 0.4.0 | Fires when the order-pay endpoint locks a specific order's currency. |
 | `umc_refund_snapshot_created` (action) | `($refund, $meta, $snapshot)` | 0.4.0 | Fires after refund audit metadata is staged on a refund. |
 | `umc_order_audit_view_model` (filter) | `($view, $snapshot, $order)` | 0.4.0 | Filter the order currency audit meta-box view model. |
+| `umc_order_snapshot_refreshed` (action) | `($order, $previous, $meta)` | 0.5.0 | Fires when an unpaid Store API draft's snapshot is rewritten for a new currency or rate. |
+| `umc_conflict_detectors` (filter) | `($detectors)` | 0.6.0 | Append runtime detector rows (data-only arrays); output passes through `DetectorRegistry::sanitize()`. Built-ins come from `DetectorManifest`. |
+| `umc_conflict_notice_view_model` (filter) | `($view, $findings, $screen_id, $fingerprint)` | 0.6.0 | Filter the dashboard/network admin notice view model before render. |
+| `umc_conflict_settings_view_model` (filter) | `($view, $findings, $can_activate_plugins)` | 0.6.0 | Filter the Multicurrency settings-tab conflict panel view model before render. |
 
 Note: `umc_convert_fee` is documented for integrations but **not wired** in
 Milestone 3 — no fee conversion ships enabled.

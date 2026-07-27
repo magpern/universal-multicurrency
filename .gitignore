@@ -3,6 +3,7 @@
 /tests/tmp/
 /dist/
 .phpunit.result.cache
+/.infection/
 
 # Proprietary-product screenshots kept local only (UI inspiration; not for distribution)
 /references/

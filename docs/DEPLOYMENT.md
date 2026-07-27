@@ -387,3 +387,106 @@ currency. A no-compatible-gateway error notice raised on a storefront request ca
 still surface as a Store API cart error on a later request, because WooCommerce
 stores notices in the session and converts error notices into cart errors; the
 plugin no longer creates such notices during REST requests.
+
+## Milestone 6 — compatibility & diagnostics (v0.6.0)
+
+### Summary
+
+Adds passive detection of conflicting currency switchers with confidence
+grading, administrative notices (dashboard, plugins screen, Multicurrency
+settings tab), per-user dismissal, Site Health direct tests, and a debug
+section. Introduces the five-leg supported-version CI matrix and
+`docs/COMPATIBILITY.md` as the authoritative version source. Detection never
+deactivates, modifies, or calls into another plugin and never affects monetary
+behaviour on any surface.
+
+### Files created
+
+| Path | Purpose |
+|---|---|
+| `src/Diagnostics/*` | Full diagnostics layer (14 classes) |
+| `docs/COMPATIBILITY.md` | Version matrix, detector governance, Site Health behaviour |
+| `docs/adr/0007-passive-conflict-detection.md` | Passive observation vs coupling (ADR-0003 reconciliation) |
+| `docs/adr/0008-version-support-policy.md` | Four-tier policy and CI matrix rules |
+| `tests/unit/Diagnostics/*` | Pure scoring, registry, version policy unit tests |
+| `tests/integration/Diagnostics/*` | Notice, Site Health, detector integration tests |
+| `tests/integration/DiagnosticsGuardTest.php` | I1–I7 structural guards |
+| `tests/Support/SourceGuardTrait.php` | Shared guard helpers |
+| `tests/unit/CompatibilityMatrixTest.php` | Drift test binding all version sources |
+| `tests/unit/CiMatrixGuardTest.php` | No version_compare gating; matrix shape guards |
+| `infection.json5` | Scoped mutation testing for Diagnostics scorer |
+
+### Files modified
+
+| Path | Change |
+|---|---|
+| `src/Plugin.php` | Register `Diagnostics` behind admin gate |
+| `src/Admin/SettingsPage.php` | Prepend `umc_conflict` field type |
+| `.github/workflows/ci.yml` | Five integration legs, unit PHP matrix, mutation job |
+| `docs/ARCHITECTURE.md` | Diagnostics layer + I1–I7 |
+| `docs/HOOKS.md` | M6 admin hooks + provided filters |
+| `docs/ROADMAP.md` | Item 6 shipped; item 7 objectives expanded |
+| `docs/TEST_STRATEGY.md` | M6 invariants, version matrix, mutation scope |
+| `docs/PRODUCT_REQUIREMENTS.md` | Compatibility section + non-goals |
+| `docs/adr/0003-*.md` | ADR-0007 amendment pointer |
+| `README.md`, `CLAUDE.md` | Front page and workflow pointers |
+| `universal-multicurrency.php` | Version → 0.6.0 |
+
+### New hooks registered
+
+Seven admin-only hooks at priority 10 — see `docs/HOOKS.md § Milestone 6`.
+No storefront, Store API, REST, cron, or CLI hooks.
+
+### New public filters / actions
+
+Filters: `umc_conflict_detectors`, `umc_conflict_notice_view_model`,
+`umc_conflict_settings_view_model`.
+
+### New user meta — `umc_dismissed_notices`
+
+The first non-order data the plugin persists outside `umc_settings`. Map of
+conflict fingerprint → dismissed-at timestamp; capped at 20 entries with
+180-day expiry. **Deliberately not cleaned up on uninstall** — orphaned rows
+are harmless and keyed by fingerprint.
+
+### New options / DB changes
+
+None. No new plugin option; `umc_settings` schema unchanged; no migrations.
+
+### Tests / CI
+
+PHPCS clean. Unit, integration, and mutation suites green at commit time (see
+Milestone 6 closure report for final counts). Integration HPOS-enabled;
+`floor` leg excludes `@group wc-order-route-unavailable` (8 tests).
+
+### Deployment sequence
+
+1. Enter a controlled-deployment / low-traffic state.
+2. Back up plugin files and the database.
+3. Build the plugin zip and deploy it; activate/upgrade to **0.6.0**.
+4. Migrations: none.
+5. Confirm no other currency switcher is active (or plan to deactivate it).
+6. Clear the persistent object cache and page cache if used.
+7. Check **Tools → Site Health** — both Universal Multicurrency tests should
+   report `good` when no conflict exists; environment test confirms HPOS.
+8. Open **WooCommerce → Settings → Multicurrency** — no conflict panel when
+   alone; with a conflicting plugin active, the long-form evidence list appears.
+9. Verify storefront, cart, checkout (classic and blocks), and an existing order
+   — behaviour unchanged from v0.5.0 when no conflict is present.
+10. Record the deployed commit and verification result here.
+
+### Rollback
+
+Downgrade to v0.5.0. No schema change. Order snapshots and `umc_settings`
+unchanged. Orphaned `umc_dismissed_notices` user meta may remain — cosmetic only.
+Conflict detection and Site Health tests disappear; monetary behaviour identical
+to v0.5.0.
+
+### Known limitations (M6)
+
+Built-in detectors cover four verified switchers (FOX/WOOCS, CURCY, WCML,
+YayCurrency). Community-submitted built-in labels and automatic remediation are
+explicit non-goals. Dismissal is per user and per fingerprint — other
+administrators still see active conflicts. One residual notice may appear on the
+plugin deactivation confirmation screen until the next request (PHP cannot
+undeclare classes mid-request).

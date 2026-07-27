@@ -21,6 +21,8 @@ use WP_UnitTestCase;
  */
 final class StorefrontGuardTest extends WP_UnitTestCase {
 
+	use \UMC\Tests\Support\SourceGuardTrait;
+
 	/**
 	 * Hooks that remain out of scope: fees are disabled and stock is never
 	 * touched. woocommerce_create_refund is released to M4 (RefundSnapshot);
@@ -392,83 +394,5 @@ final class StorefrontGuardTest extends WP_UnitTestCase {
 		}
 
 		return $files;
-	}
-
-	/**
-	 * Asserts that a regex matches none of the given source files.
-	 *
-	 * @param array<int, string> $files   Absolute file paths.
-	 * @param string             $pattern PCRE pattern.
-	 * @param string             $message Assertion message.
-	 */
-	private function assert_pattern_absent_from( array $files, string $pattern, string $message ): void {
-		$offenders = array();
-
-		foreach ( $files as $file ) {
-			if ( 1 === preg_match( $pattern, (string) file_get_contents( $file ) ) ) {
-				$offenders[] = basename( $file );
-			}
-		}
-
-		$this->assertSame( array(), $offenders, $message );
-	}
-
-	/**
-	 * Absolute paths of every PHP file under the plugin's src/ directory.
-	 *
-	 * @return array<int, string>
-	 */
-	private function umc_source_files(): array {
-		$src = dirname( ( new \ReflectionClass( Converter::class ) )->getFileName() );
-
-		$iterator = new \RecursiveIteratorIterator(
-			new \RecursiveDirectoryIterator( $src, \FilesystemIterator::SKIP_DOTS )
-		);
-
-		$files = array();
-
-		foreach ( $iterator as $file ) {
-			if ( $file->isFile() && 'php' === $file->getExtension() ) {
-				$files[] = $file->getPathname();
-			}
-		}
-
-		return $files;
-	}
-
-	/**
-	 * Descriptions of callbacks on a hook that originate from this plugin.
-	 *
-	 * @param string $hook Hook name.
-	 * @return array<int, string>
-	 */
-	private function umc_callbacks_on( string $hook ): array {
-		global $wp_filter;
-
-		if ( ! isset( $wp_filter[ $hook ] ) ) {
-			return array();
-		}
-
-		$found = array();
-
-		foreach ( $wp_filter[ $hook ]->callbacks as $callbacks ) {
-			foreach ( $callbacks as $callback ) {
-				$function = $callback['function'];
-
-				if ( is_array( $function ) ) {
-					$class = is_object( $function[0] ) ? get_class( $function[0] ) : (string) $function[0];
-					if ( 0 === strpos( $class, 'UMC\\' ) ) {
-						$found[] = "{$class}::{$function[1]}";
-					}
-				} elseif ( $function instanceof \Closure ) {
-					$file = ( new \ReflectionFunction( $function ) )->getFileName();
-					if ( is_string( $file ) && false !== strpos( $file, '/universal-multicurrency/src/' ) ) {
-						$found[] = "closure:{$file}";
-					}
-				}
-			}
-		}
-
-		return $found;
 	}
 }

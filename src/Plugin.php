@@ -11,6 +11,7 @@ namespace UMC;
 
 use UMC\Admin\OrderCurrencyMetaBox;
 use UMC\Admin\SettingsPage;
+use UMC\Diagnostics\Diagnostics;
 use UMC\Cart\CartRecalculation;
 use UMC\Frontend\Switcher;
 use UMC\Integration\CouponConversion;
@@ -161,6 +162,13 @@ final class Plugin {
 				( new OrderCurrencyMetaBox( $reader, $resolver ) )->register();
 			}
 		);
+
+		// M6 diagnostics: admin-only, no price/cart/currency hooks. Conditional
+		// registration cannot perturb the variation-price cache key because
+		// Diagnostics attaches no WooCommerce filters.
+		if ( is_admin() && ! wp_doing_ajax() && ! wp_doing_cron() && ! ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+			( new Diagnostics() )->register();
+		}
 	}
 
 	/**

@@ -23,7 +23,12 @@
   committed code, and never commit this project's files into any surrounding
   repository.
 - Naming: namespace `UMC\`, prefix `umc_`, textdomain `universal-multicurrency`.
-- Minimum versions: PHP 8.1, WordPress 6.5, WooCommerce 8.2.
+- Minimum versions: see `docs/COMPATIBILITY.md` (enforced by
+  `CompatibilityMatrixTest` — bump header, `UMC_VERSION`, and that doc together).
+- Never deactivate, modify, or call into another plugin — detection is
+  observation only (ADR-0007).
+- **Only `src/Diagnostics/` may know a third-party plugin exists; only
+  `DetectorManifest.php` may name one** (invariant I1).
 - Order data only through `WC_Order` CRUD (HPOS-safe) — never post meta or
   direct SQL. Never hook stock filters or write stock meta, not even as
   pass-throughs.
@@ -35,8 +40,13 @@
 
 - Checks: `composer phpcs`, `composer test:unit`, `composer test:integration`
   (integration needs MySQL and `tests/bin/install-wp.sh`; see
-  `.github/workflows/ci.yml` for the reference setup).
+  `.github/workflows/ci.yml` for the reference setup). When Diagnostics code
+  changes, `composer test:mutation` runs Infection over the unit suite (PCOV
+  required; thresholds in `infection.json5`).
 - Machine-specific dev-environment notes belong in `CLAUDE.local.md`
   (gitignored) — never in this file.
-- Release: bump the `Version:` plugin header, tag `vX.Y.Z` matching it, push
+- Release: bump the `Version:` plugin header, `UMC_VERSION`, and
+  `docs/COMPATIBILITY.md` together; tag `vX.Y.Z` matching the header, push
   the tag. The Release workflow builds and publishes the installable zip.
+- Adding or removing a built-in detector follows the governance checklist in
+  `docs/COMPATIBILITY.md § Detection`.
