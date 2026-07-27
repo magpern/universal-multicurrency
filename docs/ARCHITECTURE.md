@@ -15,7 +15,9 @@ none of their classes, functions, constants, options, cookies or sessions. All
 persisted state lives in the plugin's own `umc_settings` option (plus permanent
 order snapshot meta in later milestones). The authoritative inventory of every
 key is [`docs/PERSISTED_DATA.md`](PERSISTED_DATA.md), enforced by
-`PersistedKeys` and `PersistedKeysInventoryTest`. See ADR-0003.
+`PersistedKeys` and `PersistedKeysInventoryTest`. Merchant migration from
+another currency switcher is documented in [`docs/MIGRATION.md`](MIGRATION.md)
+(manual path only; no foreign import). See ADR-0003.
 
 ## Layers
 

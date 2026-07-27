@@ -24,11 +24,12 @@
     built-in detector labels without maintainer verification; automatic
     remediation of any kind.
 7.  Release candidate — **not closed by v0.6.0.** Remaining objectives:
-    - **Migration handling** — upgrade paths, schema-version bumps, and the
-      story for stores arriving from another switcher
-    - **Uninstall audit** — inventory every key the plugin has ever written;
-      decision on orphaned dismissal meta; tighten the structural guard to pin
-      the real invariant (no `_umc_*` order meta deleted)
+    - **Migration handling** — **merchant playbook shipped:**
+      [`docs/MIGRATION.md`](MIGRATION.md) (manual cut-over; ADR-0003/0007; no
+      foreign import). Internal settings schema 0→1 upgrade (`SettingsUpgrader`).
+      Optional UMC CSV format specified for future tooling only (no RC import UI).
+    - **Uninstall audit** — **shipped (M7):** [`PERSISTED_DATA.md`](PERSISTED_DATA.md),
+      [`ADR-0009`](adr/0009-uninstall-retention-policy.md), executable guards
     - **Translation readiness** — plugin-wide i18n audit, `.pot` generation,
       translator comments, RTL/locale review
     - **Whole-plugin security review** — M2–M5 surfaces (price filters, Store

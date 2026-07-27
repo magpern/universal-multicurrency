@@ -26,7 +26,8 @@
 - Minimum versions: see `docs/COMPATIBILITY.md` (enforced by
   `CompatibilityMatrixTest` — bump header, `UMC_VERSION`, and that doc together).
 - Never deactivate, modify, or call into another plugin — detection is
-  observation only (ADR-0007).
+  observation only (ADR-0007). Merchant cut-over from another switcher is
+  manual only — see `docs/MIGRATION.md` (ADR-0003).
 - **Only `src/Diagnostics/` may know a third-party plugin exists; only
   `DetectorManifest.php` may name one** (invariant I1).
 - Order data only through `WC_Order` CRUD (HPOS-safe) — never post meta or

@@ -490,3 +490,60 @@ explicit non-goals. Dismissal is per user and per fingerprint — other
 administrators still see active conflicts. One residual notice may appear on the
 plugin deactivation confirmation screen until the next request (PHP cannot
 undeclare classes mid-request).
+
+---
+
+## Milestone 7 — merchant migration documentation (Release Candidate)
+
+### Summary
+
+Documents the **manual** merchant cut-over path from another currency switcher.
+No runtime migration, foreign import, CSV parser, or admin import UI is added.
+Internal `umc_settings` schema 0→1 upgrade (`SettingsUpgrader`) was shipped in
+an earlier M7 commit; it never reads foreign plugin data.
+
+### Files created
+
+| Path | Purpose |
+|---|---|
+| `docs/MIGRATION.md` | Merchant migration playbook, checklist, FAQ, UMC CSV format spec (future only) |
+| `tests/unit/MigrationDocumentationTest.php` | Structural guard binding migration docs to ADR policy |
+
+### Files modified
+
+| Path | Change |
+|---|---|
+| `docs/ARCHITECTURE.md` | Link to `MIGRATION.md` |
+| `docs/COMPATIBILITY.md` | Supported/unsupported migration matrix |
+| `docs/ROADMAP.md` | Item 7 migration playbook progress |
+| `docs/DEPLOYMENT.md` | This record |
+| `README.md` | Documentation table entry |
+
+### New options / DB changes
+
+None. No schema version bump. No migrations beyond existing `SettingsUpgrader` 0→1.
+
+### Deployment sequence (stores arriving from another switcher)
+
+Follow [`docs/MIGRATION.md`](MIGRATION.md) in full. Summary:
+
+1. Backup database and plugin files; rehearse on staging.
+2. Export old switcher currencies/rates to a spreadsheet from its admin UI.
+3. Deactivate the old switcher — never run two runtime converters on live traffic.
+4. Install/activate UMC; recreate currencies and rates manually in WooCommerce → Settings → Multicurrency.
+5. Flush object/page cache; run the verification checklist in `MIGRATION.md`.
+6. Cut over production; record deployed commit here.
+
+### Rollback
+
+| Action | Effect |
+|---|---|
+| Roll back UMC plugin zip | Prior behaviour; `_umc_*` order meta **preserved** |
+| Re-enable old switcher | Deactivate UMC first; re-test on staging |
+| Uninstall UMC | Deletes `umc_settings` only (ADR-0009) |
+
+### Known limitations (M7 migration docs)
+
+- No automatic import from FOX/WOOCS, CURCY, WPML, YayCurrency, or any third-party switcher.
+- UMC CSV format is specified for possible future tooling only — no parser or admin UI in RC.
+- Historical order metadata and WooCommerce order totals are never re-converted.

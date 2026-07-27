@@ -12,6 +12,9 @@ inventory, the implementation constants, and the machine-readable block below.
 (ADR-0009). Guards: `UninstallPolicyGuardTest`, `UninstallPolicyTest`,
 `StorefrontGuardTest::test_uninstall_policy_invariants`.
 
+**Merchant migration:** [`docs/MIGRATION.md`](MIGRATION.md) — manual cut-over only;
+no foreign import (ADR-0003, ADR-0007).
+
 ---
 
 ## WordPress options

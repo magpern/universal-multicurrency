@@ -53,6 +53,7 @@ detectors.
 | [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md) | Version matrix and detector governance |
 | [`docs/TEST_STRATEGY.md`](docs/TEST_STRATEGY.md) | Unit, integration, guards, mutation |
 | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Per-milestone deploy and rollback record |
+| [`docs/MIGRATION.md`](docs/MIGRATION.md) | Manual merchant cut-over from another switcher (no foreign import) |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | Milestone status |
 | [`docs/adr/`](docs/adr/) | Architecture decision records |
 
