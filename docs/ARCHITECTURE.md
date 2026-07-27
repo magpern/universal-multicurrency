@@ -13,7 +13,9 @@ The plugin is fully standalone. Its only plugin dependency is WooCommerce
 FOX / WOOCS / WooCommerce Currency Switcher or any helper plugin, and reads
 none of their classes, functions, constants, options, cookies or sessions. All
 persisted state lives in the plugin's own `umc_settings` option (plus permanent
-order snapshot meta in later milestones). See ADR-0003.
+order snapshot meta in later milestones). The authoritative inventory of every
+key is [`docs/PERSISTED_DATA.md`](PERSISTED_DATA.md), enforced by
+`PersistedKeys` and `PersistedKeysInventoryTest`. See ADR-0003.
 
 ## Layers
 
