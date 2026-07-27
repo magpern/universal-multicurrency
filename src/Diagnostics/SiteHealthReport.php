@@ -388,10 +388,6 @@ final class SiteHealthReport {
 			'wc_tested' => '10.9',
 		);
 
-		if ( ! defined( 'UMC_PLUGIN_FILE' ) ) {
-			return $defaults;
-		}
-
 		$header = \get_file_data(
 			UMC_PLUGIN_FILE,
 			array(
@@ -421,7 +417,7 @@ final class SiteHealthReport {
 		return array(
 			'php' => PHP_VERSION,
 			'wp'  => isset( $wp_version ) ? (string) $wp_version : '',
-			'wc'  => defined( 'WC_VERSION' ) ? (string) WC_VERSION : '',
+			'wc'  => (string) WC_VERSION,
 		);
 	}
 
@@ -429,8 +425,7 @@ final class SiteHealthReport {
 	 * Whether WooCommerce HPOS (custom order tables) is enabled.
 	 */
 	public static function is_hpos_enabled(): bool {
-		return class_exists( \Automattic\WooCommerce\Utilities\OrderUtil::class )
-			&& \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
+		return \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
 	}
 
 	/**
@@ -470,9 +465,7 @@ final class SiteHealthReport {
 		$settings  = new Settings();
 		$counts    = self::currency_counts( $settings->get_currencies() );
 		$findings  = self::conflicts_detected_rows( $this->detector->findings() );
-		$base_code = function_exists( 'get_woocommerce_currency' )
-			? strtoupper( (string) \get_woocommerce_currency() )
-			: '';
+		$base_code = strtoupper( (string) \get_woocommerce_currency() );
 
 		return array(
 			'label'       => \__( 'Universal Multicurrency', 'universal-multicurrency' ),
@@ -480,7 +473,7 @@ final class SiteHealthReport {
 			'fields'      => array(
 				'plugin_version'               => array(
 					'label' => \__( 'Plugin version', 'universal-multicurrency' ),
-					'value' => defined( 'UMC_VERSION' ) ? (string) UMC_VERSION : '',
+					'value' => (string) UMC_VERSION,
 				),
 				'base_currency'                => array(
 					'label' => \__( 'Base currency', 'universal-multicurrency' ),
@@ -532,9 +525,7 @@ final class SiteHealthReport {
 				),
 				'store_api_conversion'         => array(
 					'label' => \__( 'Store API conversion', 'universal-multicurrency' ),
-					'value' => defined( 'WC_VERSION' )
-						? \__( 'Active', 'universal-multicurrency' )
-						: \__( 'Unavailable', 'universal-multicurrency' ),
+					'value' => \__( 'Active', 'universal-multicurrency' ),
 				),
 			),
 		);

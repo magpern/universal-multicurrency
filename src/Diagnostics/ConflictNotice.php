@@ -209,25 +209,23 @@ final class ConflictNotice {
 			'settings_url' => 'admin.php?page=wc-settings&tab=umc',
 		);
 
-		if ( \function_exists( 'apply_filters' ) ) {
-			/**
-			 * Filters the conflict notice view model before it is rendered.
-			 *
-			 * @since 0.6.0
-			 *
-			 * @param array<string, mixed>  $view       View model.
-			 * @param array<int, Finding>   $findings   Scored findings.
-			 * @param string                $screen_id  Current admin screen id.
-			 * @param bool                  $is_network Whether the notice renders in network admin.
-			 */
-			$view = (array) \apply_filters(
-				'umc_conflict_notice_view_model',
-				$view,
-				$findings,
-				$screen_id,
-				$is_network
-			);
-		}
+		/**
+		 * Filters the conflict notice view model before it is rendered.
+		 *
+		 * @since 0.6.0
+		 *
+		 * @param array<string, mixed>  $view       View model.
+		 * @param array<int, Finding>   $findings   Scored findings.
+		 * @param string                $screen_id  Current admin screen id.
+		 * @param bool                  $is_network Whether the notice renders in network admin.
+		 */
+		$view = (array) \apply_filters(
+			'umc_conflict_notice_view_model',
+			$view,
+			$findings,
+			$screen_id,
+			$is_network
+		);
 
 		return $view;
 	}
@@ -292,23 +290,21 @@ final class ConflictNotice {
 			'messages'             => array_fill_keys( self::MESSAGE_KEYS, true ),
 		);
 
-		if ( \function_exists( 'apply_filters' ) ) {
-			/**
-			 * Filters the settings-tab conflict view model before it is rendered.
-			 *
-			 * @since 0.6.0
-			 *
-			 * @param array<string, mixed> $view                 View model.
-			 * @param array<int, Finding>  $findings             Scored findings.
-			 * @param bool                   $can_activate_plugins Whether the viewer may deactivate plugins.
-			 */
-			$view = (array) \apply_filters(
-				'umc_conflict_settings_view_model',
-				$view,
-				$findings,
-				$can_activate_plugins
-			);
-		}
+		/**
+		 * Filters the settings-tab conflict view model before it is rendered.
+		 *
+		 * @since 0.6.0
+		 *
+		 * @param array<string, mixed> $view                 View model.
+		 * @param array<int, Finding>  $findings             Scored findings.
+		 * @param bool                   $can_activate_plugins Whether the viewer may deactivate plugins.
+		 */
+		$view = (array) \apply_filters(
+			'umc_conflict_settings_view_model',
+			$view,
+			$findings,
+			$can_activate_plugins
+		);
 
 		return $view;
 	}
@@ -501,11 +497,7 @@ final class ConflictNotice {
 	 * Reads the current admin screen id when available.
 	 */
 	private function current_screen_id(): string {
-		if ( ! function_exists( 'get_current_screen' ) ) {
-			return '';
-		}
-
-		$screen = get_current_screen();
+		$screen = \get_current_screen();
 
 		if ( ! $screen instanceof \WP_Screen ) {
 			return '';

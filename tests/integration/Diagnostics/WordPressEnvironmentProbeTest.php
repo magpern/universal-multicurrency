@@ -19,6 +19,11 @@ use WP_UnitTestCase;
  */
 final class WordPressEnvironmentProbeTest extends WP_UnitTestCase {
 
+	/**
+	 * Probe under test.
+	 *
+	 * @var WordPressEnvironmentProbe
+	 */
 	private WordPressEnvironmentProbe $probe;
 
 	protected function setUp(): void {

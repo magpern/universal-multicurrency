@@ -24,6 +24,8 @@ final class WordPressEnvironmentProbe implements EnvironmentProbe {
 	private ?array $active_paths = null;
 
 	/**
+	 * Evaluates every requested signature against the host environment.
+	 *
 	 * @param array<int, Signature> $signatures Signatures to evaluate.
 	 *
 	 * @return array<string, bool> Keyed by {@see Signature::key()}.
@@ -40,6 +42,8 @@ final class WordPressEnvironmentProbe implements EnvironmentProbe {
 
 	/**
 	 * Answers whether one signature is present in the host environment.
+	 *
+	 * @param Signature $signature Signature to probe.
 	 */
 	private function is_present( Signature $signature ): bool {
 		switch ( $signature->kind() ) {
@@ -61,6 +65,8 @@ final class WordPressEnvironmentProbe implements EnvironmentProbe {
 	}
 
 	/**
+	 * Builds the memoized active-plugin path set for this request.
+	 *
 	 * @return array<string, true> Active plugin bootstrap paths keyed for O(1) lookup.
 	 */
 	private function active_plugin_paths(): array {
@@ -97,16 +103,31 @@ final class WordPressEnvironmentProbe implements EnvironmentProbe {
 		return $paths;
 	}
 
+	/**
+	 * Whether an active plugin bootstrap path matches the needle.
+	 *
+	 * @param string $needle Plugin bootstrap path.
+	 */
 	private function has_active_plugin_path( string $needle ): bool {
 		return isset( $this->active_plugin_paths()[ $needle ] );
 	}
 
+	/**
+	 * Whether a shortcode tag is registered in the global registry.
+	 *
+	 * @param string $needle Shortcode tag.
+	 */
 	private function has_registered_shortcode( string $needle ): bool {
 		global $shortcode_tags;
 
 		return is_array( $shortcode_tags ) && isset( $shortcode_tags[ $needle ] );
 	}
 
+	/**
+	 * Whether a hook name is registered in the global filter registry.
+	 *
+	 * @param string $needle Hook name.
+	 */
 	private function has_registered_hook( string $needle ): bool {
 		global $wp_filter;
 

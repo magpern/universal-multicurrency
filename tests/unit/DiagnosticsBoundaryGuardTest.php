@@ -18,11 +18,9 @@ use RecursiveIteratorIterator;
 
 /**
  * This is a scoped subset of the full guard suite the architecture plan
- * designs for `tests/integration/DiagnosticsGuardTest.php` (a later
- * commit): the three checks the Milestone 6 scoring-core commit needs
- * immediately, kept WordPress-free since nothing in `src/Diagnostics/` yet
- * touches WordPress. Each assertion was verified to fail when the
- * condition it guards is violated, not merely to pass today.
+ * designs for `tests/integration/DiagnosticsGuardTest.php` (Commit 14): the
+ * WordPress-free subset that can run without a bootstrap. The integration
+ * suite owns the full §13 guard table.
  */
 final class DiagnosticsBoundaryGuardTest extends TestCase {
 

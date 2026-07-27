@@ -16,6 +16,8 @@ namespace UMC\Diagnostics;
 interface DetectorCatalog {
 
 	/**
+	 * Returns hydrated detectors in registry order.
+	 *
 	 * @return array<int, Detector> Ordered by id ascending.
 	 */
 	public function detectors(): array;

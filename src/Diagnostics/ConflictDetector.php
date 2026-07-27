@@ -17,10 +17,25 @@ namespace UMC\Diagnostics;
  */
 final class ConflictDetector {
 
+	/**
+	 * Read-only detector catalog.
+	 *
+	 * @var DetectorCatalog
+	 */
 	private DetectorCatalog $registry;
 
+	/**
+	 * Single-pass environment observer.
+	 *
+	 * @var EnvironmentProbe
+	 */
 	private EnvironmentProbe $probe;
 
+	/**
+	 * Pure scoring engine.
+	 *
+	 * @var ConflictScorer
+	 */
 	private ConflictScorer $scorer;
 
 	/**
@@ -37,6 +52,13 @@ final class ConflictDetector {
 	 */
 	private ?array $evidence = null;
 
+	/**
+	 * Creates a detector wired to the given registry, probe, and scorer.
+	 *
+	 * @param DetectorCatalog  $registry Detector catalog.
+	 * @param EnvironmentProbe $probe    Environment observer.
+	 * @param ConflictScorer   $scorer   Scoring engine.
+	 */
 	public function __construct(
 		DetectorCatalog $registry,
 		EnvironmentProbe $probe,
@@ -109,6 +131,8 @@ final class ConflictDetector {
 	}
 
 	/**
+	 * Flattens detector signatures into a stable, deduplicated list.
+	 *
 	 * @param array<int, Detector> $detectors Hydrated detectors in registry order.
 	 *
 	 * @return array<int, Signature>
@@ -128,6 +152,8 @@ final class ConflictDetector {
 	}
 
 	/**
+	 * Returns the strongest confidence label among the scored findings.
+	 *
 	 * @param array<int, Finding> $findings Scored findings.
 	 */
 	private function highest_confidence( array $findings ): string {
@@ -142,11 +168,10 @@ final class ConflictDetector {
 		return $highest;
 	}
 
+	/**
+	 * Returns the plugin major.minor version used in dismissal fingerprints.
+	 */
 	private function major_minor_version(): string {
-		if ( ! defined( 'UMC_VERSION' ) ) {
-			return '0.0';
-		}
-
 		$version = (string) UMC_VERSION;
 
 		if ( 1 === preg_match( '/^(\d+\.\d+)/', $version, $match ) ) {

@@ -114,6 +114,27 @@ the order currency; Store API code raises no session notices; only the Store API
 adapter saves an order; no frontend assets are registered. Each was verified to
 fail when violated, not merely to pass today.
 
+M6 adds Diagnostics guards (`tests/integration/DiagnosticsGuardTest.php`):
+`src/Diagnostics/` stays inert to conversion and rate reading; only
+`NoticeDismissal.php` reads request input or persists user meta; only
+`WordPressEnvironmentProbe.php` reads `active_plugins` / `active_sitewide_plugins`;
+registry probes stay in the probe; detection types never leak outside
+`src/Diagnostics/` except the `Plugin.php` seam; third-party identifiers stay in
+`DetectorManifest.php`; no auto-deactivation; no Store API / asset hooks; and
+detection never writes `umc_settings` or mutates `active_plugins`. The admin hook
+surface is exactly:
+
+- `admin_notices`
+- `network_admin_notices`
+- `deactivated_plugin`
+- `admin_init`
+- `site_status_tests`
+- `debug_information`
+- `woocommerce_admin_field_umc_conflict`
+
+Performance assertions use `$wpdb->num_queries` deltas only — never wall-clock timing.
+Each guard was verified to fail when violated, not merely to pass today.
+
 ## Store API and Blocks (Milestone 5)
 
 `tests/integration/StoreApi/` drives real `/wc/store/v1` routes through
