@@ -55,17 +55,27 @@ final class OrderCurrencyMetaBox {
 	}
 
 	/**
-	 * Registers the meta box.
+	 * Registers the meta box on the standard admin hook.
 	 */
 	public function register(): void {
-		// Only register in admin context.
 		if ( ! is_admin() ) {
+			return;
+		}
+
+		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ) );
+	}
+
+	/**
+	 * Adds the read-only audit box to HPOS and legacy order screens.
+	 */
+	public function add_meta_boxes(): void {
+		if ( ! function_exists( 'add_meta_box' ) ) {
 			return;
 		}
 
 		// Register for HPOS screen.
 		$hpos_screen = \Automattic\WooCommerce\Utilities\OrderUtil::get_order_admin_screen();
-		add_meta_box(
+		\add_meta_box(
 			'umc_order_currency',
 			esc_html__( 'Currency & Exchange Rate', 'universal-multicurrency' ),
 			array( $this, 'render' ),
@@ -75,7 +85,7 @@ final class OrderCurrencyMetaBox {
 		);
 
 		// Also register for legacy post-type (backwards compatibility).
-		add_meta_box(
+		\add_meta_box(
 			'umc_order_currency',
 			esc_html__( 'Currency & Exchange Rate', 'universal-multicurrency' ),
 			array( $this, 'render' ),
