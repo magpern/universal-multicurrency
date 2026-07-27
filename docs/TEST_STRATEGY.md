@@ -279,3 +279,18 @@ POT headers strip wall-clock fields (`POT-Creation-Date`, `PO-Revision-Date`, `X
 - Existing **`StorefrontGuardTest`**, **`DiagnosticsGuardTest`**, **`UninstallPolicyTest`**, and PHPCS enforce carry-forward boundaries.
 
 Audit record: [`docs/SECURITY_REVIEW.md`](SECURITY_REVIEW.md). **Zero unresolved Critical/High findings** at Commit 6.
+
+## Milestone 7 — performance baselines (Release Candidate)
+
+Established **after** Commit 6 security stabilization so ceilings reflect final execution paths.
+
+### Guards
+
+- **`tests/integration/PerformanceBaselineTest.php`** (`@group performance`) — settings read/write ceilings, currency-resolution write freedom, plugin init idempotency, diagnostics query delta, storefront/cart/Store API read-only behaviour, order/refund snapshot counts, uninstall delete contract, hook registration uniqueness.
+- **`tests/unit/PerformanceBaselineTest.php`** — in-memory `Settings` idempotency and upgrader persist-once semantics.
+- **`tests/unit/PerformanceGuardTest.php`** — forbids transients/object-cache calls in `src/`; verifies baseline documentation and ceiling constants.
+- Existing **`SettingsUpgradeIntegrationTest`**, **`DiagnosticsGuardTest`**, and **`StorefrontGuardTest`** carry forward overlapping invariants.
+
+Baseline record: [`docs/PERFORMANCE_BASELINES.md`](PERFORMANCE_BASELINES.md).
+
+**No wall-clock assertions:** performance checks use query-count and write-count deltas only.

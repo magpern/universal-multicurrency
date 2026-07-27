@@ -34,8 +34,8 @@
       (i18n audit, `languages/universal-multicurrency.pot`, CI drift guard, RTL audit)
     - **Whole-plugin security review** — **shipped (M7):** [`SECURITY_REVIEW.md`](SECURITY_REVIEW.md),
       `SecuritySourceGuardTest`, `SecurityBehaviourTest`; zero open Critical/High findings
-    - **Performance baseline** — catalogue query counts, cart recalculation
-      cost, Store API timing, object-cache behaviour under load
+    - **Performance baseline** — **shipped (M7):** [`PERFORMANCE_BASELINES.md`](PERFORMANCE_BASELINES.md),
+      query/write-count guards (`PerformanceBaselineTest`, `PerformanceGuardTest`); no wall-clock CI gates
 
 Future: Auto rates, GeoIP, reporting, APIs.
 
