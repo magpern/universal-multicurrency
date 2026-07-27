@@ -63,6 +63,10 @@ final class SettingsPage extends WC_Settings_Page {
 	public function get_settings(): array {
 		return array(
 			array(
+				'type' => 'umc_conflict',
+				'id'   => 'umc_conflict_notice',
+			),
+			array(
 				'type' => 'title',
 				'name' => __( 'Multicurrency', 'universal-multicurrency' ),
 				'id'   => 'umc_settings_title',

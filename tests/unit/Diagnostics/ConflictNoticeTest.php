@@ -15,6 +15,8 @@ use UMC\Diagnostics\ConflictDetector;
 use UMC\Diagnostics\ConflictNotice;
 use UMC\Diagnostics\ConflictScorer;
 use UMC\Diagnostics\Finding;
+use UMC\Diagnostics\Signature;
+use UMC\Diagnostics\SignatureKind;
 use UMC\Tests\Unit\Doubles\ArrayEnvironmentProbe;
 use UMC\Tests\Unit\Doubles\StaticDetectorRegistry;
 
@@ -157,5 +159,96 @@ final class ConflictNoticeTest extends TestCase {
 	 */
 	public function test_should_show_on_screen( string $confidence, string $screen_id, bool $expected ): void {
 		$this->assertSame( $expected, ConflictNotice::should_show_on_screen( $confidence, $screen_id ) );
+	}
+
+	public function test_settings_view_model_includes_matched_evidence_only(): void {
+		$finding = new Finding(
+			'fixture-a',
+			'Fixture Switcher A',
+			Confidence::THRESHOLD_HIGH,
+			Confidence::HIGH,
+			array(
+				new Signature( SignatureKind::PLUGIN_PATH, 'fixture-a/index.php', 60 ),
+				new Signature( SignatureKind::CLASS_NAME, 'Fixture_A', 40 ),
+			)
+		);
+
+		$view = $this->notice()->settings_view_model( array( $finding ), true );
+
+		$this->assertIsArray( $view );
+		$this->assertSame( 'settings', $view['surface'] );
+		$this->assertSame( 'notice', $view['render_mode'] );
+		$this->assertSame( 'notice notice-error inline', $view['notice_class'] );
+		$this->assertSame(
+			array(
+				array(
+					'kind'   => SignatureKind::PLUGIN_PATH,
+					'needle' => 'fixture-a/index.php',
+				),
+				array(
+					'kind'   => SignatureKind::CLASS_NAME,
+					'needle' => 'Fixture_A',
+				),
+			),
+			$view['findings'][0]['evidence']
+		);
+	}
+
+	public function test_settings_view_model_low_uses_description_mode(): void {
+		$finding = new Finding(
+			'leftover',
+			'Leftover Constant',
+			Confidence::THRESHOLD_LOW,
+			Confidence::LOW,
+			array(
+				new Signature( SignatureKind::CONSTANT, 'FOREIGN_CURRENCY_VERSION', 25 ),
+			)
+		);
+
+		$view = $this->notice()->settings_view_model( array( $finding ), false );
+
+		$this->assertIsArray( $view );
+		$this->assertSame( Confidence::LOW, $view['confidence'] );
+		$this->assertSame( 'description', $view['render_mode'] );
+		$this->assertSame( '', $view['notice_class'] );
+		$this->assertFalse( $view['can_activate_plugins'] );
+	}
+
+	/**
+	 * @return array<string, array{0: string, 1: string}>
+	 */
+	public function settings_notice_class_provider(): array {
+		return array(
+			'high'   => array( Confidence::HIGH, 'notice notice-error inline' ),
+			'medium' => array( Confidence::MEDIUM, 'notice notice-warning inline' ),
+			'low'    => array( Confidence::LOW, '' ),
+		);
+	}
+
+	/**
+	 * @dataProvider settings_notice_class_provider
+	 */
+	public function test_settings_notice_class( string $confidence, string $expected ): void {
+		$this->assertSame( $expected, ConflictNotice::settings_notice_class( $confidence ) );
+	}
+
+	public function test_format_evidence_sentence_joins_matched_phrases(): void {
+		$sentence = ConflictNotice::format_evidence_sentence(
+			array(
+				array(
+					'kind'   => SignatureKind::PLUGIN_PATH,
+					'needle' => 'fixture-a/index.php',
+				),
+				array(
+					'kind'   => SignatureKind::CLASS_NAME,
+					'needle' => 'Fixture_A',
+				),
+			)
+		);
+
+		$this->assertSame(
+			'the plugin "fixture-a/index.php" is active; and the class "Fixture_A" exists',
+			$sentence
+		);
 	}
 }

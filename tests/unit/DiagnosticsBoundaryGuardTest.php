@@ -212,6 +212,13 @@ final class DiagnosticsBoundaryGuardTest extends TestCase {
 		);
 	}
 
+	public function test_settings_page_does_not_reference_diagnostics(): void {
+		$source = (string) file_get_contents( $this->src_root() . '/Admin/SettingsPage.php' );
+
+		$this->assertDoesNotMatchRegularExpression( '/UMC\\\\Diagnostics|Diagnostics\\\\/', $source );
+		$this->assertStringContainsString( "'umc_conflict'", $source );
+	}
+
 	public function test_probe_code_does_not_read_foreign_runtime_state(): void {
 		$probe_files = array_filter(
 			$this->source_files( 'Diagnostics' ),

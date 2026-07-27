@@ -92,6 +92,7 @@ final class ConflictNotice {
 		\add_action( 'admin_notices', array( $this, 'render' ), 10 );
 		\add_action( 'network_admin_notices', array( $this, 'render_network' ), 10 );
 		\add_action( 'deactivated_plugin', array( $this, 'suppress' ), 10 );
+		\add_action( 'woocommerce_admin_field_umc_conflict', array( $this, 'render_settings_field' ), 10, 1 );
 	}
 
 	/**
@@ -232,6 +233,198 @@ final class ConflictNotice {
 	}
 
 	/**
+	 * Builds the settings-tab view model from scored findings.
+	 *
+	 * Unlike the dashboard surface, LOW findings render here as a plain
+	 * description line and dismissal never applies.
+	 *
+	 * @param array<int, Finding> $findings              Scored findings from the detector.
+	 * @param bool                $can_activate_plugins Whether the viewer may deactivate plugins.
+	 *
+	 * @return array<string, mixed>|null Null when there is nothing to report.
+	 */
+	public function settings_view_model( array $findings, bool $can_activate_plugins ): ?array {
+		if ( array() === $findings ) {
+			return null;
+		}
+
+		$labels       = array();
+		$finding_rows = array();
+
+		foreach ( $findings as $finding ) {
+			if ( ! $finding instanceof Finding ) {
+				continue;
+			}
+
+			$labels[] = $finding->label();
+
+			$evidence = array();
+
+			foreach ( $finding->matched() as $signature ) {
+				$evidence[] = array(
+					'kind'   => $signature->kind(),
+					'needle' => $signature->needle(),
+				);
+			}
+
+			$finding_rows[] = array(
+				'id'         => $finding->id(),
+				'label'      => $finding->label(),
+				'confidence' => $finding->confidence(),
+				'evidence'   => $evidence,
+			);
+		}
+
+		if ( array() === $finding_rows ) {
+			return null;
+		}
+
+		$highest = self::highest_confidence( $findings );
+
+		$view = array(
+			'surface'              => 'settings',
+			'confidence'           => $highest,
+			'notice_class'         => self::settings_notice_class( $highest ),
+			'render_mode'          => Confidence::LOW === $highest ? 'description' : 'notice',
+			'findings'             => $finding_rows,
+			'labels'               => $labels,
+			'can_activate_plugins' => $can_activate_plugins,
+			'messages'             => array_fill_keys( self::MESSAGE_KEYS, true ),
+		);
+
+		if ( \function_exists( 'apply_filters' ) ) {
+			/**
+			 * Filters the settings-tab conflict view model before it is rendered.
+			 *
+			 * @since 0.6.0
+			 *
+			 * @param array<string, mixed> $view                 View model.
+			 * @param array<int, Finding>  $findings             Scored findings.
+			 * @param bool                   $can_activate_plugins Whether the viewer may deactivate plugins.
+			 */
+			$view = (array) \apply_filters(
+				'umc_conflict_settings_view_model',
+				$view,
+				$findings,
+				$can_activate_plugins
+			);
+		}
+
+		return $view;
+	}
+
+	/**
+	 * Renders the custom WooCommerce settings field on the Multicurrency tab.
+	 *
+	 * WooCommerce already gates the page on `manage_woocommerce`; this surface
+	 * does not double-gate read access and is never dismissible.
+	 *
+	 * @param array<string, mixed> $value Field definition from {@see \UMC\Admin\SettingsPage::get_settings()}.
+	 */
+	public function render_settings_field( array $value ): void {
+		unset( $value );
+
+		if ( $this->suppress ) {
+			return;
+		}
+
+		$view = $this->settings_view_model(
+			$this->detector->findings(),
+			\current_user_can( 'activate_plugins' )
+		);
+
+		if ( null === $view ) {
+			return;
+		}
+
+		$this->render_settings_view( $view );
+	}
+
+	/**
+	 * Maps a confidence level to the inline notice class on the settings tab.
+	 *
+	 * @param string $confidence Confidence level.
+	 */
+	public static function settings_notice_class( string $confidence ): string {
+		if ( Confidence::HIGH === $confidence ) {
+			return 'notice notice-error inline';
+		}
+
+		if ( Confidence::MEDIUM === $confidence ) {
+			return 'notice notice-warning inline';
+		}
+
+		return '';
+	}
+
+	/**
+	 * Builds a human-readable evidence phrase for one matched signature.
+	 *
+	 * Only matched needles are ever disclosed; values are never read or shown.
+	 *
+	 * @param string $kind   Signature kind {@see SignatureKind}.
+	 * @param string $needle Matched identifier.
+	 */
+	public static function evidence_phrase( string $kind, string $needle ): string {
+		switch ( $kind ) {
+			case SignatureKind::PLUGIN_PATH:
+				return 'the plugin "' . $needle . '" is active';
+			case SignatureKind::CLASS_NAME:
+				return 'the class "' . $needle . '" exists';
+			case SignatureKind::FUNCTION:
+				return 'the function "' . $needle . '" exists';
+			case SignatureKind::CONSTANT:
+				return 'the constant "' . $needle . '" is defined';
+			case SignatureKind::SHORTCODE:
+				return 'the shortcode "' . $needle . '" is registered';
+			case SignatureKind::HOOK:
+				return 'the hook "' . $needle . '" is registered';
+			default:
+				return '';
+		}
+	}
+
+	/**
+	 * Joins matched-signature phrases for one finding into a settings-tab sentence.
+	 *
+	 * @param array<int, array{kind: string, needle: string}> $evidence Matched signature rows.
+	 */
+	public static function format_evidence_sentence( array $evidence ): string {
+		$phrases = array();
+
+		foreach ( $evidence as $row ) {
+			if ( ! is_array( $row ) ) {
+				continue;
+			}
+
+			$kind   = isset( $row['kind'] ) ? (string) $row['kind'] : '';
+			$needle = isset( $row['needle'] ) ? (string) $row['needle'] : '';
+
+			if ( '' === $kind || '' === $needle ) {
+				continue;
+			}
+
+			$phrase = self::evidence_phrase( $kind, $needle );
+
+			if ( '' !== $phrase ) {
+				$phrases[] = $phrase;
+			}
+		}
+
+		if ( array() === $phrases ) {
+			return '';
+		}
+
+		if ( 1 === count( $phrases ) ) {
+			return $phrases[0];
+		}
+
+		$last = array_pop( $phrases );
+
+		return implode( '; ', $phrases ) . '; and ' . $last;
+	}
+
+	/**
 	 * Whether a notice at `$confidence` should appear on `$screen_id`.
 	 *
 	 * @param string $confidence Highest finding confidence.
@@ -353,53 +546,7 @@ final class ConflictNotice {
 
 		?>
 		<div class="<?php echo \esc_attr( $notice_class ); ?> umc-conflict-notice"<?php echo $dismissible ? ' data-umc-conflict-dismissible="1"' : ''; ?>>
-			<p>
-				<strong>
-					<?php
-					\printf(
-						/* translators: %s: detected third-party currency switcher plugin name(s). */
-						\esc_html__( 'Another currency switcher is active. Universal Multicurrency has detected %s, which also converts WooCommerce prices.', 'universal-multicurrency' ),
-						\esc_html( $plugin_list )
-					);
-					?>
-				</strong>
-			</p>
-			<p>
-				<strong><?php \esc_html_e( 'Why this is unsafe.', 'universal-multicurrency' ); ?></strong>
-				<?php
-				echo ' ';
-				\esc_html_e(
-					'Two plugins converting the same price multiply their rates. WooCommerce reads a product\'s price once, and each switcher converts whatever the previous one returned. Which runs first depends on hook priority, so the result can differ between the catalogue, the cart, and the order that is finally saved.',
-					'universal-multicurrency'
-				);
-				?>
-			</p>
-			<p>
-				<strong><?php \esc_html_e( 'What you may see.', 'universal-multicurrency' ); ?></strong>
-				<?php
-				echo ' ';
-				\esc_html_e(
-					'Prices that differ between the shop page and the cart; totals that change on reload; orders stored with a currency or rate the shopper never saw; a payment gateway charging in a different currency to the order; refunds that do not reconcile against the original total.',
-					'universal-multicurrency'
-				);
-				?>
-			</p>
-			<p>
-				<strong><?php \esc_html_e( 'How to resolve.', 'universal-multicurrency' ); ?></strong>
-				<?php
-				echo ' ';
-				\esc_html_e(
-					'Keep one. Deactivate the other switcher, then clear your object cache and WooCommerce transients. Existing orders are unaffected — each stores its own currency and exchange rate permanently.',
-					'universal-multicurrency'
-				);
-
-				if ( $is_network ) {
-					echo ' ';
-					\esc_html_e( 'Contact your network administrator if you cannot deactivate plugins yourself.', 'universal-multicurrency' );
-				}
-				?>
-			</p>
-			<p><?php \esc_html_e( 'Universal Multicurrency will not change, disable, or deactivate any other plugin.', 'universal-multicurrency' ); ?></p>
+			<?php $this->render_conflict_copy( $plugin_list, $is_network, true ); ?>
 			<p>
 				<a href="<?php echo \esc_url( $settings_url ); ?>">
 					<?php \esc_html_e( 'Review multicurrency settings', 'universal-multicurrency' ); ?>
@@ -411,6 +558,134 @@ final class ConflictNotice {
 					</a>
 				<?php endif; ?>
 			</p>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Renders the settings-tab conflict panel from a view model.
+	 *
+	 * @param array<string, mixed> $view View model from {@see self::settings_view_model()}.
+	 */
+	private function render_settings_view( array $view ): void {
+		$labels               = isset( $view['labels'] ) && is_array( $view['labels'] ) ? $view['labels'] : array();
+		$findings             = isset( $view['findings'] ) && is_array( $view['findings'] ) ? $view['findings'] : array();
+		$render_mode          = isset( $view['render_mode'] ) ? (string) $view['render_mode'] : 'notice';
+		$notice_class         = isset( $view['notice_class'] ) ? (string) $view['notice_class'] : '';
+		$can_activate_plugins = ! empty( $view['can_activate_plugins'] );
+		$plugin_list          = $this->format_plugin_list( $labels );
+		$wrapper_class        = 'description' === $render_mode ? 'description' : $notice_class . ' umc-conflict-notice umc-conflict-notice--settings';
+
+		?>
+		<div class="<?php echo \esc_attr( $wrapper_class ); ?>">
+			<?php $this->render_conflict_copy( $plugin_list, false, $can_activate_plugins ); ?>
+			<?php $this->render_evidence_list( $findings ); ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Renders the shared four-beat copy and disclaimer.
+	 *
+	 * @param string $plugin_list          Formatted plugin label list.
+	 * @param bool   $is_network           Whether the network-admin variant is shown.
+	 * @param bool   $can_activate_plugins Whether deactivation instructions may be shown.
+	 */
+	private function render_conflict_copy( string $plugin_list, bool $is_network, bool $can_activate_plugins ): void {
+		?>
+		<p>
+			<strong>
+				<?php
+				\printf(
+					/* translators: %s: detected third-party currency switcher plugin name(s). */
+					\esc_html__( 'Another currency switcher is active. Universal Multicurrency has detected %s, which also converts WooCommerce prices.', 'universal-multicurrency' ),
+					\esc_html( $plugin_list )
+				);
+				?>
+			</strong>
+		</p>
+		<p>
+			<strong><?php \esc_html_e( 'Why this is unsafe.', 'universal-multicurrency' ); ?></strong>
+			<?php
+			echo ' ';
+			\esc_html_e(
+				'Two plugins converting the same price multiply their rates. WooCommerce reads a product\'s price once, and each switcher converts whatever the previous one returned. Which runs first depends on hook priority, so the result can differ between the catalogue, the cart, and the order that is finally saved.',
+				'universal-multicurrency'
+			);
+			?>
+		</p>
+		<p>
+			<strong><?php \esc_html_e( 'What you may see.', 'universal-multicurrency' ); ?></strong>
+			<?php
+			echo ' ';
+			\esc_html_e(
+				'Prices that differ between the shop page and the cart; totals that change on reload; orders stored with a currency or rate the shopper never saw; a payment gateway charging in a different currency to the order; refunds that do not reconcile against the original total.',
+				'universal-multicurrency'
+			);
+			?>
+		</p>
+		<p>
+			<strong><?php \esc_html_e( 'How to resolve.', 'universal-multicurrency' ); ?></strong>
+			<?php
+			echo ' ';
+			if ( $can_activate_plugins ) {
+				\esc_html_e(
+					'Keep one. Deactivate the other switcher, then clear your object cache and WooCommerce transients. Existing orders are unaffected — each stores its own currency and exchange rate permanently.',
+					'universal-multicurrency'
+				);
+			} else {
+				\esc_html_e(
+					'Ask an administrator to deactivate the other switcher, then clear your object cache and WooCommerce transients. Existing orders are unaffected — each stores its own currency and exchange rate permanently.',
+					'universal-multicurrency'
+				);
+			}
+
+			if ( $is_network ) {
+				echo ' ';
+				\esc_html_e( 'Contact your network administrator if you cannot deactivate plugins yourself.', 'universal-multicurrency' );
+			}
+			?>
+		</p>
+		<p><?php \esc_html_e( 'Universal Multicurrency will not change, disable, or deactivate any other plugin.', 'universal-multicurrency' ); ?></p>
+		<?php
+	}
+
+	/**
+	 * Renders matched-signature evidence for each finding.
+	 *
+	 * @param array<int, array<string, mixed>> $findings Finding rows from the settings view model.
+	 */
+	private function render_evidence_list( array $findings ): void {
+		if ( array() === $findings ) {
+			return;
+		}
+
+		?>
+		<div class="umc-conflict-evidence">
+			<?php foreach ( $findings as $finding ) : ?>
+				<?php
+				if ( ! is_array( $finding ) ) {
+					continue;
+				}
+
+				$label    = isset( $finding['label'] ) ? (string) $finding['label'] : '';
+				$evidence = isset( $finding['evidence'] ) && is_array( $finding['evidence'] ) ? $finding['evidence'] : array();
+				$sentence = self::format_evidence_sentence( $evidence );
+
+				if ( '' === $label || '' === $sentence ) {
+					continue;
+				}
+				?>
+				<p>
+					<strong><?php echo \esc_html( $label ); ?></strong>
+					<?php
+					echo ' — ';
+					\esc_html_e( 'Detected because:', 'universal-multicurrency' );
+					echo ' ';
+					echo \esc_html( $sentence );
+					?>
+				</p>
+			<?php endforeach; ?>
 		</div>
 		<?php
 	}
