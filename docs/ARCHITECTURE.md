@@ -219,3 +219,44 @@ one part of the money identity WooCommerce reads without a filter.
 No JavaScript ships. Switching currency reloads the page, which makes every block
 refetch on its own; an in-place switch would belong on `POST /cart/extensions`
 under the same namespace. See ADR-0006.
+
+## Diagnostics layer (Milestone 6)
+
+Milestone 6 adds passive compatibility observation: detect other currency
+switchers, grade evidence, and warn administrators — without deactivating,
+modifying, or calling into another plugin, and without affecting monetary
+behaviour anywhere. Detection is one-way observation from the host environment
+outward through admin surfaces only. See ADR-0007 and ADR-0008.
+
+| Class | Deps | Responsibility |
+|---|---|---|
+| `Diagnostics\Diagnostics` | — | Sub-composition root; the only Diagnostics class `Plugin.php` names |
+| `Diagnostics\DetectorManifest` | — | Built-in detector data; the only file that may name a third-party product |
+| `Diagnostics\DetectorRegistry` | — | Applies `umc_conflict_detectors`, sanitises, hydrates `Detector[]` |
+| `Diagnostics\Detector` / `Signature` | — | Immutable value objects |
+| `Diagnostics\SignatureKind` / `Confidence` | — | Kind weights and confidence thresholds |
+| `Diagnostics\Finding` | — | Scored result: id, label, score, confidence, matched signatures |
+| `Diagnostics\EnvironmentProbe` | — | Interface: evaluate signatures → evidence map |
+| `Diagnostics\WordPressEnvironmentProbe` | — | The only file that reads WP registries and symbol tables |
+| `Diagnostics\ConflictScorer` | — | Pure scoring over detectors + evidence |
+| `Diagnostics\VersionPolicy` | — | Pure version-axis classification for Site Health |
+| `Diagnostics\ConflictDetector` | `EnvironmentProbe`, `ConflictScorer`, `DetectorRegistry` | Probe → memo → score; supplies fingerprint |
+| `Diagnostics\ConflictNotice` | `ConflictDetector`, `NoticeDismissal` | Dashboard/network notices + settings-tab field render |
+| `Diagnostics\NoticeDismissal` | `ConflictDetector` | The only Diagnostics class that writes persistent state (user meta) |
+| `Diagnostics\SiteHealthReport` | `ConflictDetector`, `VersionPolicy` | Site Health direct tests + debug section |
+
+`Plugin.php` registers `Diagnostics` only when `is_admin()` and not during AJAX,
+cron, or WP-CLI. Evaluation is lazy at `admin_notices`; request-scoped memoization
+inside `ConflictDetector` is the only cache. `SettingsPage` prepends a field of
+type `umc_conflict` to its settings array; Diagnostics registers the renderer —
+no class reference crosses the Admin boundary.
+
+### Invariants
+
+1. **`src/Diagnostics/` is the only namespace permitted to know that third-party plugins exist.** Within it, `DetectorManifest.php` is the only file permitted to name one.
+2. **No other subsystem may reference a detector class** — not by name, namespace, or string outside Diagnostics (except the `Plugin.php` seam).
+3. **Conversion, pricing, Store API, snapshots, historical order services, and admin order services remain completely unaware that third-party plugins exist.** They are not passed findings and cannot behave differently because of one.
+4. **Compatibility information flows only outward through the Diagnostics public surface** — rendered notices, Site Health tests, the debug section, and the `umc_conflict_*` view-model filters. There is no inward path.
+5. **A merchant warning can never influence monetary behaviour.** No price, rate, cart total, coupon, shipping cost, tax, gateway availability, order, refund, or snapshot may differ because a conflict was detected, graded, rendered, or dismissed.
+6. **Detection observes; it never acts.** No plugin is activated, deactivated, modified, or configured; no plugin option is written; no foreign data is read beyond passive existence checks.
+7. **Detection is free everywhere it is not needed.** Zero hooks, zero probes, zero queries, and zero autoloaded Diagnostics classes on frontend, Store API, REST, AJAX, cron, and CLI requests.

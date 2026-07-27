@@ -171,9 +171,9 @@ if it fails:
 | `mixed-wp-floor` | 8.3 | 6.5.8 | 10.9.4 | Isolates the WordPress axis: floor WordPress against otherwise-current PHP/WooCommerce. Without this leg, a `floor` failure could not be attributed to the PHP axis or the WordPress axis. |
 | `ceiling` | 8.4 | 7.0.2 | latest (floating; observed 11.0.0-beta.2) | Early warning on upstream drift. Non-blocking — see § Ceiling / early-warning. |
 
-All five ran cleanly in this milestone's verification: `floor` at 230 of 238
+All five ran cleanly in this milestone's verification: `floor` at 307 of 315
 tests (see § The floor's Store API order-route exclusion for the other 8);
-every other leg at the full 238.
+every other leg at the full 315.
 
 ## WooCommerce feature surfaces
 
@@ -260,19 +260,123 @@ active plugin paths, declared classes (`class_exists( $name, false )`),
 defined constants (`defined()`, never `constant()`), registered functions,
 shortcodes, and hooks (`isset( $wp_filter[ $tag ] )`, never
 `apply_filters()`). It never reads another plugin's options, cookies,
-sessions, rates, or selected currency.
+sessions, rates, or selected currency. See ADR-0007.
 
 Built-in detectors live in `DetectorManifest.php` — the only file permitted
 to name a third-party product. Sites may add runtime rows through the
 `umc_conflict_detectors` filter; those rows pass through the same sanitiser
 as the built-ins and are never merged into the manifest automatically.
 
-Detector lifecycle governance (ownership, the five admission checks, removal
-rules, weight review, and false-positive handling) is specified in the
-Milestone 6 architecture plan and will move into ADR-0007 in a later commit.
-Every manifest change must ship with the matching row in § Known incompatible,
-verified signature evidence in tests, and a release-note entry when
-merchant-visible behaviour changes.
+### Detector lifecycle governance
+
+`DetectorManifest` is a governance surface: it is where the project asserts,
+in public and in shipped code, that another vendor's plugin conflicts with
+this one. Those assertions need an owner and a process.
+
+#### Ownership
+
+| Asset | Owner | Change vehicle |
+|---|---|---|
+| Built-in detector rows | The plugin maintainer, exclusively | A PR that satisfies the admission checklist below |
+| Weight schedule (`SignatureKind::DEFAULT_WEIGHTS`) and thresholds (`Confidence::THRESHOLD_*`) | The plugin maintainer | A PR that also updates the scoring sanity table in ADR-0007 if the reasoning changes |
+| Third-party detector rows | The site or plugin adding them, at runtime | `umc_conflict_detectors`. Never merged into the manifest |
+| The `Incompatible` label for a plugin | The plugin maintainer | `docs/COMPATIBILITY.md § Known incompatible`, atomically with the detector row — the drift test asserts bi-directional agreement |
+
+The filter exists so a site can describe its own environment without waiting
+for a release; the manifest exists so the project can make a claim it is
+prepared to defend. Merging a filter-supplied detector into the manifest is a
+maintainer decision requiring the full checklist, never a courtesy.
+
+#### When a detector may be added
+
+All five must hold. A report alone is never sufficient.
+
+1. **A reproduction exists** — a named failure mode observed with both plugins
+   active, recorded in § Known incompatible with the versions of both plugins
+   and the date.
+2. **The conflict is structural, not configurable** — the two plugins cannot
+   coexist correctly under any settings. A plugin that merely can be
+   misconfigured into a conflict belongs in § Reported, unverified, not in the
+   manifest.
+3. **Every needle is verified against that plugin's actual distributed source**,
+   at a recorded version — not inferred from documentation or another
+   detector's naming pattern.
+4. **MQ1 and MQ2 both hold** — at least one `plugin_path` signature, and ≥
+   MEDIUM reachable from symbol evidence alone.
+5. **MQ3 holds against the whole manifest** — no needle collides with an
+   existing detector.
+
+#### When a detector may be removed or demoted
+
+| Trigger | Action |
+|---|---|
+| Upstream ships a verified fix | Demote to *Works with* in the doc. Keep the detector row, annotated with the fix version; narrow to the affected version range if signatures permit |
+| Target plugin withdrawn or abandoned | Remove the row and doc entry in the same commit; record in release notes |
+| A needle produces false positives | Remove that needle, not the detector — then re-check MQ1/MQ2. If they no longer hold, remove the detector entirely |
+| A needle no longer matches any shipped version | Remove it as dead weight at the next touch |
+
+A detector is never removed merely because it has stopped firing in the wild.
+
+#### How weights and thresholds are reviewed
+
+- **Per-kind default weights** change only if the general evidential argument in
+  ADR-0007 changes. Guard G6 makes plugin-specific tuning impossible.
+- **Per-signature overrides** (clamped 1..60) are the correct instrument for one
+  unusually distinctive or weak needle. Overrides must carry an inline comment and
+  must not move a detector across a confidence threshold on their own.
+- **Thresholds** (60/30/10) are frozen by ADR-0007. Changing them requires an ADR
+  amendment and a re-run of the scoring sanity table.
+
+#### How false positives are handled
+
+A false positive is a priority defect — more urgent than a false negative.
+
+1. Reproduce and record the exact evidence set (`Finding::matched()`).
+2. Add a **failing unit test** against `ConflictScorer` before changing anything.
+3. Fix by **removing or narrowing the offending needle** — never by raising a
+   threshold.
+4. Re-verify MQ1–MQ3 for the affected detector.
+5. If the fix lowers confidence for a real conflict, say so in the release notes.
+
+#### Required with every detector change
+
+| Artefact | Required when |
+|---|---|
+| Unit tests — new or corrected evidence combination plus negative control | Always |
+| Integration test — new probe path not already covered by fixture tests | New evidence *kind* only |
+| Runtime evidence — verified source reference in the commit message | Always |
+| `docs/COMPATIBILITY.md` row — added, demoted, or removed in the same commit | Always |
+| Release-note entry | Whenever merchant-visible behaviour changes |
+
+### Notice dismissal
+
+Dashboard conflict notices may be dismissed per user via a nonce'd GET link on
+`admin_init` (`?umc-dismiss=<fingerprint>`). Dismissals persist in user meta
+`umc_dismissed_notices` (max 20 entries, 180-day expiry). The fingerprint
+includes the plugin major.minor version.
+
+HIGH conflicts on `plugins.php` and the Multicurrency settings tab (`tab=umc`)
+are never dismissible. MEDIUM and LOW follow screen scoping in
+`ConflictNotice::should_show_on_screen()`. Shop managers without
+`activate_plugins` see the settings-tab warning without deactivation
+instructions. Dismissal does not affect Site Health — tests recompute from live
+state. User meta is not removed on uninstall (documented trade-off).
+
+### Site Health
+
+When the viewer has `activate_plugins`, Universal Multicurrency registers two
+direct Site Health tests and a debug section:
+
+| Test id | Label | Mapping |
+|---|---|---|
+| `umc_conflicts` | Currency switcher conflicts | No findings → `good`; LOW → `good` with hedged copy; MEDIUM → `recommended`; HIGH → `critical` |
+| `umc_environment` | Universal Multicurrency environment | Below declared floor on any axis → `critical`; above tested or unparseable → `recommended`; HPOS disabled → `critical`; otherwise `good` |
+
+The debug section (`universal-multicurrency`) lists detected findings and
+environment axis classifications. It never emits the full manifest or unmatched
+needles. Both callbacks return empty when the viewer lacks `activate_plugins`.
+
+See ADR-0008 for version classification rules.
 
 ## Environment requirements
 

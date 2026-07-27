@@ -4,6 +4,9 @@
 
 Accepted.
 
+**Amended by:** ADR-0007 (v0.6.0) — observation of the host environment is
+defined there and is not the runtime coupling this ADR forbids.
+
 ## Context
 
 An earlier helper plugin ("MP WOOCS Browse Currency") was built as an extension
@@ -28,7 +31,7 @@ them.
 - **Future requirement:** when another known multicurrency plugin (e.g.
   FOX/WOOCS) is active alongside this one, show a dismissible administrative
   conflict warning. The plugin must **never** automatically deactivate another
-  plugin. (Scheduled for the Compatibility milestone; see ROADMAP.)
+  plugin. (Delivered in v0.6.0; see ADR-0007.)
 - The provisional name "Universal Multicurrency" may change before commercial
   release. New user-facing branding strings are kept to the minimum required
   (plugin header, unavoidable notices) until the final name is chosen; the

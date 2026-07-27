@@ -135,6 +135,71 @@ surface is exactly:
 Performance assertions use `$wpdb->num_queries` deltas only — never wall-clock timing.
 Each guard was verified to fail when violated, not merely to pass today.
 
+## Milestone 6 invariants under test
+
+Exercised through unit tests under `tests/unit/Diagnostics/`, integration tests
+under `tests/integration/Diagnostics/`, `DiagnosticsGuardTest`, and
+`CompatibilityMatrixTest`.
+
+### Conflict detection and scoring
+
+Built-in detectors match install-wp.sh fixtures; third-party rows via
+`umc_conflict_detectors` pass through the same sanitiser. `ConflictScorer`
+property tests cover monotonicity, threshold boundaries, and deterministic
+ordering. `class_exists( …, false )` is asserted at source level (G8b).
+False-positive controls: weak evidence alone caps at LOW; `plugin_path` alone
+reaches HIGH.
+
+### Notice dismissal
+
+Nonce'd GET dismiss persists fingerprint in user meta; cap (20) and expiry (180
+days) enforced in `NoticeDismissal::sanitize_storage()`. Dismissal is per user;
+fingerprint change re-surfaces the notice. HIGH on `plugins.php` and the
+settings tab is non-dismissible. Redirect strips query args. Shop managers see
+settings-tab copy without deactivation instructions.
+
+### Site Health
+
+Conflict test maps confidence → `good` / `recommended` / `critical`.
+Environment test classifies PHP, WordPress, and WooCommerce axes via
+`VersionPolicy`; HPOS disabled → critical. Debug section gated on
+`activate_plugins`; emits detected findings only, never the full manifest.
+
+### Diagnostics structural guards
+
+`DiagnosticsGuardTest` and `DiagnosticsBoundaryGuardTest` enforce I1–I7:
+Diagnostics inert on storefront and Store API; no `$wpdb`/SQL in Diagnostics;
+no foreign option reads; no deactivation APIs; detection types confined to
+`src/Diagnostics/`; third-party names only in `DetectorManifest.php`; exactly
+seven admin hooks; no mutation of `umc_settings` or `active_plugins`.
+
+### Version matrix drift
+
+`CompatibilityMatrixTest` binds the plugin header, `UMC_VERSION`,
+`composer.json`, `phpcs.xml.dist`, CI workflow, `CLAUDE.md`, and
+`DetectorManifest` to `docs/COMPATIBILITY.md`. `CiMatrixGuardTest` forbids
+`version_compare( WC_VERSION, … )` for test gating. `OrderRouteGroupGuardTest`
+asserts exactly eight `@group wc-order-route-unavailable` tests.
+
+## Version matrix
+
+Five integration legs exercise the corners of the supported box plus axis
+isolation (`floor`, `current`, `mixed-php-floor`, `mixed-wp-floor`, `ceiling`).
+See `docs/COMPATIBILITY.md` and ADR-0008.
+
+**Floor policy:** the `floor` leg runs 307 of 315 integration tests, excluding
+eight Store API order-route tests when a live REST route-table probe shows
+`Order` / `CheckoutOrder` routes absent — never via WooCommerce version compare.
+
+**Capability-probe-not-version-compare:** structural guards assert no
+`version_compare( WC_VERSION, … )` under `tests/` for CI gating.
+
+**No wall-clock assertions:** performance checks use query-count deltas only.
+
+**Infection scope:** unit suite only; `src/Diagnostics/` with presentation,
+registry, manifest, and VO files excluded; thresholds MSI 85% / covered 95%
+on `ConflictScorer` and `VersionPolicy` only.
+
 ## Mutation testing (Diagnostics scorer)
 
 Infection runs over `src/Diagnostics/` with the **unit suite only** — integration

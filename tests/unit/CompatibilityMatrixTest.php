@@ -308,10 +308,11 @@ final class CompatibilityMatrixTest extends TestCase {
 	}
 
 	public function test_php_floor_matches_claude_md(): void {
-		$this->assertStringContainsString(
-			'PHP ' . $this->doc_matrix()['PHP']['min'],
-			$this->claude_md_source()
-		);
+		$source = $this->claude_md_source();
+
+		$this->assertStringContainsString( 'docs/COMPATIBILITY.md', $source );
+		$this->assertStringContainsString( 'CompatibilityMatrixTest', $source );
+		$this->assertStringNotContainsString( 'PHP ' . $this->doc_matrix()['PHP']['min'], $source );
 	}
 
 	public function test_php_ceiling_does_not_affect_the_declared_floor(): void {
@@ -353,9 +354,12 @@ final class CompatibilityMatrixTest extends TestCase {
 	}
 
 	public function test_wordpress_floor_matches_claude_md(): void {
-		$this->assertStringContainsString(
+		$source = $this->claude_md_source();
+
+		$this->assertStringContainsString( 'docs/COMPATIBILITY.md', $source );
+		$this->assertStringNotContainsString(
 			'WordPress ' . $this->doc_matrix()['WordPress']['min'],
-			$this->claude_md_source()
+			$source
 		);
 	}
 
@@ -458,9 +462,12 @@ final class CompatibilityMatrixTest extends TestCase {
 	}
 
 	public function test_woocommerce_floor_matches_claude_md(): void {
-		$this->assertStringContainsString(
+		$source = $this->claude_md_source();
+
+		$this->assertStringContainsString( 'docs/COMPATIBILITY.md', $source );
+		$this->assertStringNotContainsString(
 			'WooCommerce ' . $this->doc_matrix()['WooCommerce']['min'],
-			$this->claude_md_source()
+			$source
 		);
 	}
 
