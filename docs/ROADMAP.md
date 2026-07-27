@@ -23,7 +23,7 @@
     **Deferred from this line (explicit non-goals):** community-submitted
     built-in detector labels without maintainer verification; automatic
     remediation of any kind.
-7.  Release candidate (**v0.7.0**) — **complete** in this repository.
+7.  Release candidate (**v0.7.0**) — **complete and released**.
 
     | Milestone 7 work item | Status |
     |---|---|
@@ -38,12 +38,12 @@
     | Documentation synchronization | **Complete** — `readme.txt`, aligned doc set |
     | Version bump and RC closure | **Complete** — repository prepared for **v0.7.0** |
 
-    **Resulting release candidate:** **v0.7.0** (`UMC_VERSION` and plugin header).
+    **Resulting release candidate:** **v0.7.0** — tagged and released; superseded
+    by v0.8.0.
 
-    **Not yet performed:** Git tag `v0.7.0`, GitHub release publication, branch
-    merge, or pull-request closure — pending explicit approval after review.
+8.  Automatic exchange rates (**v0.8.0**) — **complete and released**.
 
-8.  Automatic exchange rates (**v0.8.0**) — **complete** in this repository.
+    ### Shipped in v0.8.0
 
     | Milestone 8 work item | Status |
     |---|---|
@@ -52,16 +52,43 @@
     | Operational state separation (ADR-0012) | **Complete** |
     | Conditional HTTP caching (ADR-0013) | **Complete** |
     | Frankfurter provider, admin UI, Site Health | **Complete** |
+    | Settings schema v2 and the v1 → v2 migration | **Complete** |
 
-    **Resulting release:** **v0.8.0** (`UMC_VERSION` and plugin header).
+    **Released as:** **v0.8.0** (`UMC_VERSION`, plugin header, readme Stable
+    tag). Git tag `v0.8.0` created and the GitHub release published.
+
+    ### Post-release hardening (completed after v0.8.0)
+
+    Corrective work from the Milestone 8 review, closed without a version bump:
+
+    | Item | Status |
+    |---|---|
+    | Reschedule recurring updates when `rate_update_interval` changes | **Complete** — `0eee862` |
+    | Bump `rate_updated_at` on merchant rate edits | **Complete** — `b826481` |
+    | v1 → v2 conversion-fidelity regression test | **Complete** — `137f129` |
+    | `CEILING_RATE_UPDATE_NOT_MODIFIED_WRITES` 304 write ceiling | **Complete** — `88bfa44` |
+    | Site Health rate diagnostics integration coverage | **Complete** |
+    | `admin_post_umc_update_rates` round-trip integration coverage | **Complete** |
+    | Milestone 8 documentation synchronization | **Complete** |
+
+    **Open Milestone 8 review findings: none.** See
+    [`RELEASE_AUDIT.md`](RELEASE_AUDIT.md) § Post-release review findings.
 
     **Deferred from this line (explicit non-goals):** WP-CLI commands
     (`wp umc rates update|status|…`) — service layers are CLI-ready; a future
-    milestone can add a thin command wrapper without redesign.
+    milestone can add a thin command wrapper without redesign. Additional rate
+    providers beyond Frankfurter; historical rate storage; per-currency
+    provider selection.
 
-    **Not yet performed:** Git tag `v0.8.0`, GitHub release publication — pending explicit approval after review.
+## Future milestones — not started, not implemented
 
-Future: GeoIP, reporting, APIs.
+None of the following exists in the codebase today:
+
+- Additional exchange-rate providers and per-currency provider selection
+- WP-CLI command surface over the existing rate services
+- GeoIP-based currency suggestion
+- Multicurrency reporting and analytics
+- Public APIs beyond the documented hooks in [`HOOKS.md`](HOOKS.md)
 
 The plugin is standalone and replaces FOX/WOOCS and the old MP helper; only
 WooCommerce is a dependency (see docs/adr/0003).

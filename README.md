@@ -1,13 +1,13 @@
 # Universal Multicurrency for WooCommerce
 
-Unlimited currencies with manual exchange rates for WooCommerce. Products and
-inventory stay in the store's base currency; conversion happens at runtime on
-storefront, cart, checkout, and Store API surfaces. Orders carry a permanent
-exchange-rate snapshot.
+Unlimited currencies for WooCommerce, with manual rates or scheduled automatic
+rates from an exchange-rate provider. Products and inventory stay in the store's
+base currency; conversion happens at runtime on storefront, cart, checkout, and
+Store API surfaces. Orders carry a permanent exchange-rate snapshot.
 
-**Current release candidate:** **v0.7.0** (plugin header and `UMC_VERSION`).
-Milestone 7 is complete in this repository. Git tag `v0.7.0` and GitHub release
-publication remain pending explicit approval after review.
+**Current release:** **v0.8.0** (plugin header and `UMC_VERSION`) — automatic
+exchange rates. Milestone 8 shipped and its post-release review is closed; see
+[`docs/RELEASE_AUDIT.md`](docs/RELEASE_AUDIT.md).
 
 ## Invariants
 
@@ -19,6 +19,11 @@ publication remain pending explicit approval after review.
 - Compatibility detection observes only; never deactivates another plugin.
 - Merchant migration from another switcher is **manual only** — no foreign import
   (see `docs/MIGRATION.md`).
+- Only the raw provider quote is persisted; the effective rate (quote plus
+  merchant adjustment) is derived on read, never stored (ADR-0010).
+- Rate operations (`umc_rate_state`) never share an option with money-bearing
+  settings (`umc_settings`); a failed or unchanged fetch keeps the last known
+  rate (ADR-0012).
 
 ## Install
 
@@ -29,7 +34,7 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Produces `dist/universal-multicurrency-0.7.0.zip`. Upload and activate through
+Produces `dist/universal-multicurrency-0.8.0.zip`. Upload and activate through
 WordPress, or symlink the plugin directory into `wp-content/plugins/`.
 WooCommerce must be active first. The release zip includes `readme.txt`,
 production `src/`, `vendor/`, and `languages/universal-multicurrency.pot`.
@@ -66,6 +71,14 @@ CI legs, and passive conflict detectors.
 
 ## Changelog
 
+### 0.8.0 — Automatic exchange rates
+
+Provider abstraction with the Frankfurter source, Action Scheduler recurring
+updates, a manual "update now" action, conditional HTTP caching, separate
+operational rate state, per-currency merchant adjustments, settings schema v2,
+and Site Health rate diagnostics. Existing stores upgrade in manual mode with
+byte-identical conversion output.
+
 ### 0.7.0 — Release Candidate
 
 Persisted-data inventory, uninstall policy, settings upgrade framework (schema v1),
@@ -82,20 +95,20 @@ five-leg CI matrix, and `docs/COMPATIBILITY.md`.
 
 | Document | Contents |
 |---|---|
-| [`readme.txt`](readme.txt) | WordPress.org–oriented plugin readme (Stable tag 0.7.0) |
+| [`readme.txt`](readme.txt) | WordPress.org–oriented plugin readme (Stable tag 0.8.0) |
 | [`docs/PRODUCT_REQUIREMENTS.md`](docs/PRODUCT_REQUIREMENTS.md) | Goals and non-goals |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Layers, invariants, collaborators, RC governance |
-| [`docs/HOOKS.md`](docs/HOOKS.md) | Every WooCommerce hook registered |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Layers, invariants, collaborators, exchange-rate layer |
+| [`docs/HOOKS.md`](docs/HOOKS.md) | Every hook registered, and every extension point provided |
 | [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md) | Version matrix and detector governance |
 | [`docs/TEST_STRATEGY.md`](docs/TEST_STRATEGY.md) | Unit, integration, guards, mutation, release audit |
 | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Per-milestone deploy record and contributor commands |
 | [`docs/MIGRATION.md`](docs/MIGRATION.md) | Manual merchant cut-over (no foreign import) |
 | [`docs/PERSISTED_DATA.md`](docs/PERSISTED_DATA.md) | Persisted-key inventory and uninstall contract |
 | [`docs/TRANSLATION.md`](docs/TRANSLATION.md) | Text domain, POT workflow, JS/RTL translation status |
-| [`docs/SECURITY_REVIEW.md`](docs/SECURITY_REVIEW.md) | M7 security audit record and accepted residual risks |
+| [`docs/SECURITY_REVIEW.md`](docs/SECURITY_REVIEW.md) | Security audit record and accepted residual risks |
 | [`docs/PERFORMANCE_BASELINES.md`](docs/PERFORMANCE_BASELINES.md) | Deterministic performance ceilings |
 | [`docs/RELEASE_AUDIT.md`](docs/RELEASE_AUDIT.md) | Executable release-blocking audit record |
-| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Milestone status (Milestone 7 complete at v0.7.0 RC) |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Milestone status (Milestone 8 released at v0.8.0) |
 | [`docs/adr/`](docs/adr/) | Architecture decision records |
 
 ## License

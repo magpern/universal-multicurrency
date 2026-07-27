@@ -65,16 +65,23 @@ Exceptions live in `UMC\Exceptions` and all implement the marker interface
 `UMC\Exceptions\Exception` for catch-all handling, while extending the most
 fitting SPL type (`InvalidArgumentException` / `RuntimeException`).
 
-### Settings schema upgrade (Milestone 7)
+### Settings schema upgrade (Milestones 7–8)
 
-`Settings::SCHEMA_VERSION` is **1** and must not be bumped unless a genuine
-settings shape change requires it. There is no artificial version 2 in production.
+`Settings::SCHEMA_VERSION` is **2** and must not be bumped unless a genuine
+settings shape change requires it. Both production migrations exist because the
+stored shape actually changed; neither is an artificial bump.
 
 Legacy stores (schema version **0**) persisted only a `currencies` array inside
-`umc_settings`, with no explicit `schema_version` key. The sole production
-migration (`SettingsUpgrader::migrate_0_to_1`) introduces
-`schema_version: 1` and copies the currency rows unchanged; {@see Settings::sanitize()}
-then produces the canonical row shape.
+`umc_settings`, with no explicit `schema_version` key. `SettingsUpgrader::migrate_0_to_1`
+introduces `schema_version: 1` and copies the currency rows unchanged;
+{@see Settings::sanitize()} then produces the canonical row shape.
+
+`SettingsUpgrader::migrate_1_to_2` introduces the automatic-rate shape: the
+per-currency `rate` key becomes `manual_rate`, and the global keys `rate_mode`,
+`rate_provider`, `rate_update_interval`, and `rate_max_age_hours` gain defaults.
+Upgraded stores stay in **manual** mode, so conversion output is unchanged across
+the boundary — proven byte-for-byte by `tests/unit/SettingsMigrationFidelityTest.php`.
+See [`MIGRATION.md`](MIGRATION.md) § Internal settings schema migrations.
 
 `SettingsUpgrader` responsibilities:
 
@@ -305,7 +312,7 @@ changing monetary behaviour. Authoritative records:
 | Persisted-key inventory | [`PERSISTED_DATA.md`](PERSISTED_DATA.md), `PersistedKeys`, `PersistedKeysInventoryTest` |
 | Uninstall retention | ADR-0009, `uninstall.php`, `UninstallPolicyGuardTest` |
 | Manual merchant migration only | [`MIGRATION.md`](MIGRATION.md) — no foreign import, no RC CSV parser |
-| Settings schema | `Settings::SCHEMA_VERSION === 1`; sole production migration v0→v1 via `SettingsUpgrader`; no artificial v2 |
+| Settings schema | `Settings::SCHEMA_VERSION === 2`; production migrations v0→v1 and v1→v2 via `SettingsUpgrader` |
 | Translation readiness | [`TRANSLATION.md`](TRANSLATION.md), `languages/universal-multicurrency.pot`, `composer make-pot:check` |
 | Security audit | [`SECURITY_REVIEW.md`](SECURITY_REVIEW.md) — zero open Critical/High; accepted M/L risks documented |
 | Performance baselines | [`PERFORMANCE_BASELINES.md`](PERFORMANCE_BASELINES.md) — deterministic query/write ceilings only |
@@ -316,6 +323,93 @@ boundary so corrupt stored options fail closed to defaults without persisting
 partial migrations. `StorefrontGuardTest` allowlists only `SettingsUpgrader.php`
 for that pattern.
 
-Plugin version is **0.7.0** (Release Candidate). Milestone 7 is complete in this
-repository. Git tag and GitHub release publication remain pending explicit
-approval after review.
+## Exchange rate layer (Milestone 8)
+
+Milestone 8 makes exchange rates fetchable from an external provider without
+changing how conversion reads a rate. `ManualRateProvider` and `Converter` are
+untouched: the money path still asks `Settings` for a currency's rate. What is
+new is *where that number comes from* and *what is allowed to persist*.
+
+Two rules shape the whole layer:
+
+- **Derive, don't persist** (ADR-0010). Only the raw provider quote is stored.
+  The **effective** rate — provider or manual quote plus the merchant
+  adjustment — is recomputed by `RateResolver` on every read and is never
+  written to any option. There is exactly one rate arithmetic definition.
+- **Configuration and operations are separate options** (ADR-0012).
+  `umc_settings` holds money-bearing merchant configuration.
+  `umc_rate_state` holds volatile operational facts — last fetch time, last
+  status, consecutive failures, bounded failure history, the update lock, and
+  provider cache validators. A failed or unchanged fetch touches only the
+  latter.
+
+### Collaborators
+
+| Class | Deps | Responsibility |
+|---|---|---|
+| `Rates\ExchangeRateSource` | — | Provider contract: `id()`, `label()`, capability probes, and `fetch( base, targets, ?previous )` returning one `RateFetchResult` for the whole batch. Distinct from `RateProvider`, which resolves rates for conversion at runtime. |
+| `Rates\Providers\FrankfurterRateSource` | `Http\HttpTransport` | The shipped provider. One batch request per update; parses quotes through `Settings::normalize_rate()`; maps HTTP 304 to `RateFetchResult::not_modified()` and any other non-2xx or malformed body to a total failure. Injectable transport keeps every test offline. |
+| `Rates\Http\HttpTransport` / `WordPressHttpTransport` | — | Narrow outbound seam over `wp_remote_get()`, normalized into `HttpResponse` (status, lowercase headers, body, transport-error flag). |
+| `Rates\RateQuote` | — | Immutable `base → target` quote as a decimal string. |
+| `Rates\RateFetchResult` | `RateQuote`, `ProviderMetadata` | Immutable batch outcome: quotes, per-currency failures, metadata, fetch timestamp, and the mutually exclusive predicates `is_not_modified()`, `is_partial_failure()`, `is_total_failure()`. |
+| `Rates\ProviderMetadata` | — | Immutable cache validators and provenance (schema version, provider id, quote date, `ETag`, `Last-Modified`). Stored in `umc_rate_state`, never in `umc_settings`. |
+| `Rates\RateResolver` | — | Pure derivation of the effective rate from mode, manual rate, provider rate, and merchant adjustment. The only place adjustment arithmetic exists. |
+| `Rates\RateConfiguration` | `RateUpdateInterval` | Immutable snapshot of the global rate settings, including `is_automatic_enabled()`. |
+| `Rates\RateUpdateInterval` | — | Validated ISO-8601 recurrence (`PT6H`, `PT12H`, `P1D`, `P3D`, `P1W`) with a seconds accessor. |
+| `Rates\RateUpdateState` | — | Sole sanitizer/defaults owner for `umc_rate_state`, plus the TTL-bounded update lock. |
+| `Rates\ExchangeRateStore` | `Settings`, `RateUpdateState` | **The persistence boundary.** The only class that writes provider rates into `umc_settings` or writes `umc_rate_state`. Applies a `RateFetchResult`, exposes the automatic-currency set, operational status per currency, and lock acquire/release. |
+| `Rates\RateUpdateService` | `ExchangeRateSource`, `ExchangeRateStore` | Orchestration only: acquire the lock, resolve targets, fetch **once**, hand the result to the store, fire `umc_rate_fetch_completed`, release the lock in `finally`. Holds no persistence logic. |
+| `Rates\Scheduler` | `ExchangeRateStore`, `RateUpdateService` | Action Scheduler integration on hook `umc_run_rate_update` (ADR-0011). Reconciles the pending recurrence against `rate_update_interval` on `init` and on `umc_settings_saved`; unschedules entirely when automatic mode is off. |
+| `Rates\RateStatusEvaluator` | `Settings`, `ExchangeRateStore` | Pure status derivation (`ok`, `stale`, `failed`, `never`) for admin badges and Site Health. |
+| `Admin\RateUpdateController` | `RateUpdateService` | `admin_post_umc_update_rates`: capability + nonce, then one synchronous update, then a redirect carrying a flash notice. |
+
+### Write paths
+
+```
+Scheduler::run()  ─┐
+                   ├─> RateUpdateService::update()
+RateUpdateController::handle() ─┘        │
+                                         ├─ ExchangeRateStore::try_acquire_lock()   → umc_rate_state
+                                         ├─ ExchangeRateSource::fetch()             → no writes
+                                         ├─ ExchangeRateStore::apply_fetch_result()
+                                         │     ├─ success/partial → umc_settings (provider_rate, rate_updated_at)
+                                         │     │                  + umc_rate_state
+                                         │     ├─ not_modified    → umc_rate_state ONLY
+                                         │     └─ total failure   → umc_rate_state ONLY
+                                         └─ ExchangeRateStore::release_lock()       → umc_rate_state
+```
+
+Money-bearing settings are written **before** operational state, so a failure
+while recording operational facts can never lose a rate the provider returned
+(`ExchangeRateStoreTest`).
+
+### Conditional HTTP
+
+`ExchangeRateStore` hands the previous batch's `ProviderMetadata` back to the
+provider, which sends `If-None-Match` / `If-Modified-Since`. A **304** means
+nothing money-bearing changed, so the 304 path writes operational state only and
+performs zero `umc_settings` writes — enforced by
+`CEILING_RATE_UPDATE_NOT_MODIFIED_WRITES` (see
+[`PERFORMANCE_BASELINES.md`](PERFORMANCE_BASELINES.md)). A provider that ignores
+conditional headers simply never returns 304; there is no new failure mode
+(ADR-0013).
+
+### Invariants
+
+1. **`ExchangeRateStore` is the only writer** of `umc_rate_state` and the only
+   writer of provider rates into `umc_settings`. Providers, the service, the
+   scheduler, and the admin controller never call `Settings::save()`.
+2. **Effective rates are never persisted.** Only `manual_rate`, `provider_rate`,
+   and `merchant_adjustment` are stored; `RateResolver` derives the rest.
+3. **One provider call per update.** The lock is TTL-bounded and released in a
+   `finally`, so a fatal fetch cannot strand it.
+4. **A failed or unchanged fetch never destroys a known-good rate.** Last-known
+   values stay in `umc_settings`; only status and failure counters move.
+5. **Diagnostics read last-known state.** `umc_rate_health` and the debug
+   counters issue no HTTP request and expose counts only — never a rate value,
+   provider URL, cache validator, or provider error string.
+6. **The storefront money path is unaware of providers.** Conversion reads
+   `Settings`; no storefront request fetches, schedules, or writes rates.
+
+Plugin version is **0.8.0**. Milestone 8 shipped and its post-release review is
+closed; see [`RELEASE_AUDIT.md`](RELEASE_AUDIT.md) and [`ROADMAP.md`](ROADMAP.md).

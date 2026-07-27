@@ -16,11 +16,15 @@ final class OptionWriteMetrics {
 
 	/**
 	 * Attempted writes of the merchant settings option.
+	 *
+	 * @var int
 	 */
 	public static int $umc_settings_writes = 0;
 
 	/**
 	 * Attempted writes of the operational rate-state option.
+	 *
+	 * @var int
 	 */
 	public static int $umc_rate_state_writes = 0;
 
@@ -28,8 +32,8 @@ final class OptionWriteMetrics {
 	 * Resets all counters.
 	 */
 	public static function reset(): void {
-		self::$umc_settings_writes    = 0;
-		self::$umc_rate_state_writes  = 0;
+		self::$umc_settings_writes   = 0;
+		self::$umc_rate_state_writes = 0;
 	}
 
 	/**

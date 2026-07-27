@@ -1,14 +1,15 @@
 # Release audit — Milestone 8 (v0.8.0)
 
 Executable release-blocking gate for Universal Multicurrency **v0.8.0**. This
-document records scope, criteria, commands, audit results, and the Release
-Candidate closure state.
+document records scope, criteria, commands, audit results, and the Milestone 8
+closure state.
 
 **Governing question:** If we published this release tomorrow, is there anything
 left in the repository that clearly should not ship?
 
-**Repository status:** prepared for **v0.8.0**. Git tag and GitHub release
-publication are **not yet created** — pending explicit approval after review.
+**Repository status:** **released as v0.8.0**. The automatic-exchange-rate
+milestone shipped, and the post-release review findings recorded below are all
+closed. Milestone 9 has not started.
 
 ---
 
@@ -23,13 +24,92 @@ publication are **not yet created** — pending explicit approval after review.
 | Unresolved Critical security findings | **0** |
 | Unresolved High security findings | **0** |
 | Unresolved release blockers | **0** |
+| Open Milestone 8 review findings | **0** |
 | Deterministic performance gates | **Passing** |
 | POT drift | **Passing** |
 | Dependency audit (`composer audit`) | **Passing** |
 | Package inspection | **Passing** |
-| Git tag `v0.8.0` | **Not yet created** |
-| GitHub release publication | **Pending explicit approval** |
-| Milestone 8 | **Complete** in repository |
+| Git tag `v0.8.0` | **Created** |
+| GitHub release `v0.8.0` | **Published** |
+| Milestone 8 | **Complete** — released and review-closed |
+
+---
+
+## Milestone 8 shipped scope
+
+Automatic exchange-rate provisioning, delivered in v0.8.0 and unchanged since:
+
+| Capability | Implementation |
+|---|---|
+| Provider abstraction | `Rates\ExchangeRateSource`; selected by `rate_provider` through the `umc_exchange_rate_sources` filter (ADR-0010) |
+| Frankfurter provider | `Rates\Providers\FrankfurterRateSource` over the injectable `Rates\Http\HttpTransport` |
+| Conditional HTTP | `If-None-Match` / `If-Modified-Since` from stored `ProviderMetadata`; HTTP 304 → `RateFetchResult::not_modified()` (ADR-0013) |
+| Persistence boundary | `Rates\ExchangeRateStore` — the only writer of provider rates and of `umc_rate_state` |
+| Operational state | `Rates\RateUpdateState` (`umc_rate_state`), separate from merchant configuration (ADR-0012) |
+| Orchestration | `Rates\RateUpdateService` — lock, fetch once, persist, fire `umc_rate_fetch_completed` |
+| Scheduling | `Rates\Scheduler` on Action Scheduler hook `umc_run_rate_update` (ADR-0011) |
+| Derived rates | `Rates\RateResolver` — effective rate derived on read, never persisted |
+| Admin surfaces | `Admin\ExchangeRateSettingsField`, `Admin\CurrencyTableField`, `Admin\RateUpdateController`, `Admin\RateFailureNotice` |
+| Diagnostics | `umc_rate_health` Site Health test plus two debug counters |
+
+---
+
+## Post-release review findings
+
+The Milestone 8 review was run against the frozen plan after release. Every
+finding is closed; each row names the commit that closed it.
+
+| # | Finding | Disposition | Commit |
+|---|---|---|---|
+| 1 | `Scheduler::ensure_scheduled()` returned early whenever any recurring action existed, so changing `rate_update_interval` never rescheduled | **Fixed** — schedule recurrence is compared against the configured interval; duplicates collapse to one | `0eee862` |
+| 2 | Admin saves preserved `rate_updated_at` when `manual_rate`, `merchant_adjustment`, or `rate_mode` changed, so merchant edits looked older than they were | **Fixed** — `CurrencyTableField::rate_inputs_changed()` bumps the timestamp on a real change | `b826481` |
+| 3 | No regression proof that the v1 → v2 migration leaves manual-mode conversion output byte-identical | **Covered by tests** — `tests/unit/SettingsMigrationFidelityTest.php` | `137f129` |
+| 4 | No named write ceiling proving an HTTP 304 update performs zero `umc_settings` writes | **Covered by tests** — `CEILING_RATE_UPDATE_NOT_MODIFIED_WRITES = 0`, enforced at unit, integration-baseline, and controller layers | `88bfa44`, this commit |
+| 5 | Site Health rate diagnostics had no behavioural integration coverage | **Covered by tests** — `tests/integration/Diagnostics/SiteHealthRateIntegrationTest.php` | this commit |
+| 6 | No round-trip test proving the admin update request reaches the real service and persistence boundary | **Covered by tests** — `tests/integration/Rates/RateUpdateControllerIntegrationTest.php` | this commit |
+| 7 | Documentation still described v0.8.0 as unreleased and carried Milestone 7 schema and version facts | **Documented** — this commit synchronizes RELEASE_AUDIT, ROADMAP, ARCHITECTURE, MIGRATION, SECURITY_REVIEW, HOOKS, PERFORMANCE_BASELINES | this commit |
+
+No production behaviour changed in findings 3–7; they are test and
+documentation closure only.
+
+---
+
+## Test coverage at closure
+
+| Suite | Command | Tests |
+|---|---|---|
+| Unit (no WordPress) | `composer test:unit` | 592 |
+| Integration (WordPress + WooCommerce, HPOS) | `composer test:integration` | 379 |
+| Performance ceilings | `--group performance` on both suites | 23 integration + 7 unit |
+
+Milestone 8 specific suites:
+
+- `tests/unit/Rates/` — provider parsing, fetch results, store write ordering, 304 write ceiling
+- `tests/unit/SettingsMigrationFidelityTest.php` — v1 → v2 conversion fidelity
+- `tests/integration/Rates/SchedulerIntegrationTest.php` — Action Scheduler interval reconciliation
+- `tests/integration/Rates/RateUpdateControllerIntegrationTest.php` — `admin_post_umc_update_rates` round trip
+- `tests/integration/Diagnostics/SiteHealthRateIntegrationTest.php` — `umc_rate_health` states
+- `tests/integration/CurrencyTableFieldRateTimestampTest.php` — merchant-edit timestamp semantics
+
+### Checks that depend on CI
+
+Integration and performance suites need a live WordPress install and a
+MySQL/MariaDB server. They run locally against **one** coordinate
+(PHP 8.1 / WP 7.0 / WC 10.9.4) using the harness in `tests/bin/install-wp.sh`.
+
+The following remain **CI-only** and are not claimed as locally executed:
+
+| Check | Why |
+|---|---|
+| Four remaining integration matrix legs (`floor`, `mixed-php-floor`, `mixed-wp-floor`, `ceiling`) | Each needs its own pinned PHP/WP/WC coordinate; only `current` is reproducible locally |
+| `composer audit` | Requires network access to the advisory database |
+| Mutation testing (`composer test:mutation`) | Runtime is impractical outside CI |
+
+`composer phpcs`, `composer test:unit`, `composer test:integration` (the
+`current` leg), both `--group performance` runs, `composer make-pot:check`, and
+`composer release-audit` — which includes the `composer install --no-dev` round
+trip, `bin/build-zip.sh`, and `bin/inspect-release-zip.php` — were executed
+locally at closure and passed.
 
 ---
 
@@ -84,14 +164,14 @@ Exit code **non-zero** when any release-blocking step fails.
 
 ## Release-blocking criteria
 
-| ID | Criterion | Result (v0.7.0 RC) |
+| ID | Criterion | Result (v0.8.0) |
 |---|---|---|
 | RB1 | No tracked secrets, dumps, caches, or `dist/` artifacts | **Pass** |
 | RB2 | `docs/plans/` remains untracked (local-only planning) | **Pass** |
 | RB3 | No foreign switcher runtime coupling outside allowlisted manifest | **Pass** |
 | RB4 | Plugin header, `UMC_VERSION`, readme Stable tag, text domain, PHP/WC metadata consistent | **Pass** |
-| RB5 | `Settings::SCHEMA_VERSION === 1`; single production migration | **Pass** |
-| RB6 | Persisted-key inventory matches docs + implementation | **Pass** |
+| RB5 | `Settings::SCHEMA_VERSION === 2`; production migrations v0 → v1 → v2 only | **Pass** |
+| RB6 | Persisted-key inventory matches docs + implementation (`umc_settings`, `umc_rate_state`, `umc_dismissed_notices`) | **Pass** |
 | RB7 | Uninstall deletes `umc_settings` only; preserves commerce + dismissal meta | **Pass** |
 | RB8 | `SECURITY_REVIEW.md`: zero open Critical/High | **Pass** |
 | RB9 | `PERFORMANCE_BASELINES.md` present; deterministic ceilings enforced | **Pass** |
@@ -132,10 +212,10 @@ needles remain confined to `Diagnostics/DetectorManifest.php` only.
 
 ## Metadata and compatibility
 
-| Field | Value (v0.7.0 RC) |
+| Field | Value (v0.8.0) |
 |---|---|
-| Plugin version (header + `UMC_VERSION`) | **0.7.0** |
-| readme.txt Stable tag | **0.7.0** |
+| Plugin version (header + `UMC_VERSION`) | **0.8.0** |
+| readme.txt Stable tag | **0.8.0** |
 | Text domain | `universal-multicurrency` |
 | Requires PHP | 8.1 |
 | Requires Plugins | woocommerce |
@@ -149,9 +229,10 @@ Compatibility matrix and CI legs: see [`COMPATIBILITY.md`](COMPATIBILITY.md).
 ## Persisted-data audit
 
 Authoritative registry: [`PERSISTED_DATA.md`](PERSISTED_DATA.md) +
-[`src/PersistedKeys.php`](../src/PersistedKeys.php) (`INVENTORY_VERSION = 2`).
+[`src/PersistedKeys.php`](../src/PersistedKeys.php) (`INVENTORY_VERSION = 3`).
 
-- All persisted keys registered and documented
+- All persisted keys registered and documented, including the Milestone 8
+  operational-state option `umc_rate_state`
 - No undocumented transients or object-cache keys
 - Uninstall policy matches ADR-0009
 
@@ -159,10 +240,13 @@ Authoritative registry: [`PERSISTED_DATA.md`](PERSISTED_DATA.md) +
 
 ## Settings upgrade audit
 
-- `Settings::SCHEMA_VERSION` remains **1**
-- Production migration map: **v0 → v1 only**
-- No artificial schema v2
+- `Settings::SCHEMA_VERSION` is **2**
+- Production migration map: **v0 → v1** and **v1 → v2**
+- v1 → v2 is a real schema change (renames `rate` to `manual_rate`, adds the
+  automatic-rate fields), not an artificial bump
 - Canonical reads avoid writes; failed migrations do not persist partial data
+- Conversion output is byte-identical across the v1 → v2 boundary in manual mode
+  (`tests/unit/SettingsMigrationFidelityTest.php`)
 - [`MIGRATION.md`](MIGRATION.md) documents manual-only migration (no foreign import)
 
 ---
@@ -183,10 +267,10 @@ Authoritative registry: [`PERSISTED_DATA.md`](PERSISTED_DATA.md) +
 
 | Check | Result |
 |---|---|
-| `docs/SECURITY_REVIEW.md` | Present |
+| `docs/SECURITY_REVIEW.md` | Present; covers the Milestone 8 provider and update surfaces |
 | Open Critical findings | 0 |
 | Open High findings | 0 |
-| Accepted Medium/Low documented | Yes (M1–M3, L1–L2) |
+| Accepted Medium/Low documented | Yes (M1–M4, L1–L2) |
 | `SecuritySourceGuardTest` | Enforced in release-audit script |
 | `composer audit` | Clean |
 
@@ -213,11 +297,11 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Expected artifact: **`dist/universal-multicurrency-0.7.0.zip`**
+Expected artifact: **`dist/universal-multicurrency-0.8.0.zip`**
 
 ### Included
 
-- `universal-multicurrency.php` (header Version **0.7.0**), `uninstall.php`, `readme.txt` (Stable tag **0.7.0**)
+- `universal-multicurrency.php` (header Version **0.8.0**), `uninstall.php`, `readme.txt` (Stable tag **0.8.0**)
 - `src/` production PHP
 - `vendor/autoload.php` (+ production autoload only)
 - `languages/universal-multicurrency.pot`
@@ -250,7 +334,7 @@ Integration matrix (five legs + ceiling early-warning) unchanged from M6/M7.
 | NB1 | No root `LICENSE` file; GPL declared in plugin header, `composer.json`, and `readme.txt` |
 | NB2 | Full five-leg integration matrix validated in CI, not re-run entirely in the local release-audit script |
 | NB3 | `docs/plans/` may exist locally but is classified non-shipping |
-| NB4 | Git tag and GitHub release publication intentionally deferred until post-review approval |
+| NB4 | WP-CLI rate commands are a deliberate Milestone 8 non-goal; the service layer is CLI-ready without redesign |
 
 ---
 

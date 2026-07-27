@@ -41,9 +41,73 @@ What must be **recreated manually**:
 - Enabled currencies and manual exchange rates in `umc_settings`
 - Per-currency formatting (symbol, position, decimals) in UMC settings
 
-UMC may **upgrade its own** legacy `umc_settings` shape (schema version 0 → 1)
-on first load after an plugin upgrade. That is unrelated to foreign switcher
-migration and never reads another plugin's data.
+UMC may **upgrade its own** legacy `umc_settings` shape on first load after a
+plugin upgrade (see [Internal settings schema migrations](#internal-settings-schema-migrations)).
+That is unrelated to foreign switcher migration and never reads another
+plugin's data.
+
+---
+
+## Internal settings schema migrations
+
+These run automatically inside UMC when it first reads `umc_settings` after an
+upgrade. They are **not** a foreign-switcher import: `SettingsUpgrader` only
+ever reads UMC's own option.
+
+`Settings::SCHEMA_VERSION` is **2**. Two production migrations exist, keyed by
+the version they produce, and are applied in ascending order:
+
+| From → To | Migration | Change |
+|---|---|---|
+| 0 → 1 | `SettingsUpgrader::migrate_0_to_1` | Adds `schema_version: 1`; currency rows copied unchanged |
+| 1 → 2 | `SettingsUpgrader::migrate_1_to_2` | Introduces the automatic-rate shape (below) |
+
+### What v1 → v2 changes
+
+| Field | Before (v1) | After (v2) |
+|---|---|---|
+| Per-currency rate | `rate` | Renamed to **`manual_rate`**, value carried across unchanged; the old `rate` key is removed |
+| Per-currency provider rate | *(absent)* | **`provider_rate`** initialized to `''` — no rate is invented, and no provider is contacted during migration |
+| Per-currency adjustment | *(absent)* | **`merchant_adjustment`** initialized to `'0'` (no markup or discount) |
+| Per-currency mode override | *(absent)* | **`rate_mode`** initialized to `''` (inherit the global mode) |
+| Global mode | *(absent)* | **`rate_mode`** defaults to **`manual`** |
+| Global provider | *(absent)* | `rate_provider` defaults to `frankfurter` |
+| Global interval | *(absent)* | `rate_update_interval` defaults to `P1D` |
+| Global staleness limit | *(absent)* | `rate_max_age_hours` defaults to `48` |
+| Schema marker | `schema_version: 1` | **`schema_version: 2`** |
+
+Defaults for the initialized per-currency fields come from
+`Settings::sanitize()`, which every migration result passes through.
+
+### Conversion-fidelity guarantee
+
+**An upgraded store converts money exactly as it did before the upgrade.**
+
+Because the global mode defaults to `manual`, no per-currency override is
+written, `provider_rate` starts empty and `merchant_adjustment` starts at `0`,
+`RateResolver` resolves the effective rate to the same `manual_rate` string the
+old `rate` key held. Nothing schedules a fetch until a merchant explicitly
+switches a currency, or the store, to automatic mode.
+
+This is enforced, not merely asserted:
+`tests/unit/SettingsMigrationFidelityTest.php` converts a representative set of
+amounts through `Converter` before and after `SettingsUpgrader::upgrade()` on a
+v1 fixture and requires **byte-identical** output, alongside the schema
+assertions above.
+
+### Failure behaviour
+
+- A stored version **newer** than `SCHEMA_VERSION` is rejected: callers receive
+  defaults in memory and the stored option is left untouched.
+- Any `Throwable` during migration fails closed the same way — partial
+  migrations are never persisted.
+- Reading an already-canonical store performs **no** write
+  (`CEILING_SETTINGS_WRITE_CANONICAL_LOAD`).
+
+Automatic-rate operational data (last fetch time, statuses, failure history,
+provider cache validators) lives in a **separate** option, `umc_rate_state`,
+which has its own defaults and is never part of a settings migration. See
+[`PERSISTED_DATA.md`](PERSISTED_DATA.md) and ADR-0012.
 
 ---
 
@@ -179,7 +243,8 @@ For version-specific rollback notes, see the deployed release section in
 | Scenario | Recommendation |
 |---|---|
 | Roll back UMC plugin files only | Safe to prior release zip; `_umc_*` order meta **remains** (permanent audit data) |
-| Roll back `umc_settings` | Restore from backup if you changed rates; schema v1 is additive-only today |
+| Roll back `umc_settings` | Restore from backup if you changed rates. Downgrading below the plugin version that wrote schema v2 is **not** supported: an older build parses `schema_version: 2` as an unsupported future version and falls back to defaults in memory without rewriting the option |
+| Roll back `umc_rate_state` | Safe to delete; it holds operational facts only and is rebuilt on the next update |
 | Re-enable old switcher | Deactivate UMC first; never run both; re-test totals on staging |
 | Uninstall UMC | Deletes `umc_settings` only; order/refund meta and dismissal user meta preserved (ADR-0009) |
 
@@ -304,7 +369,7 @@ Header row required. Column order fixed:
 | `symbol` | No (default empty) | `symbol` | Stripped of HTML tags |
 | `position` | No (default `left`) | `position` | One of `left`, `right`, `left_space`, `right_space` |
 | `decimals` | No (default `2`) | `decimals` | Integer 0–4 |
-| `rate` | Yes for non-base use | `rate` | Positive decimal string; empty or invalid → blanked |
+| `rate` | Yes for non-base use | `manual_rate` (schema v2; the column keeps its v1 name) | Positive decimal string; empty or invalid → blanked |
 | `rate_updated_at` | No (default `0`) | `rate_updated_at` | Non-negative Unix timestamp |
 
 Example:
@@ -361,6 +426,8 @@ must reject unknown versions rather than guess.
 | Item | Value |
 |---|---|
 | Introduced | Milestone 7 Release Candidate |
+| Last updated | Milestone 8 (v0.8.0) — schema v2 section added |
 | Policy | Manual migration only; ADR-0003 / ADR-0007 |
-| Settings schema | Internal 0→1 upgrade only (`SettingsUpgrader`); see [`ARCHITECTURE.md`](ARCHITECTURE.md) |
+| Settings schema | Internal 0→1 and 1→2 upgrades (`SettingsUpgrader`); see [`ARCHITECTURE.md`](ARCHITECTURE.md) |
+| Operational state | `umc_rate_state`, never migrated with settings; ADR-0012 |
 | Uninstall | [`ADR-0009`](adr/0009-uninstall-retention-policy.md) |

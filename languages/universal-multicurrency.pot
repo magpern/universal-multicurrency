@@ -93,46 +93,46 @@ msgstr ""
 msgid "Actions"
 msgstr ""
 
-#: src/Admin/CurrencyTableField.php:169
+#: src/Admin/CurrencyTableField.php:208
 msgid "Always"
 msgstr ""
 
-#: src/Admin/CurrencyTableField.php:171
+#: src/Admin/CurrencyTableField.php:210
 msgid "Base currency (configured in WooCommerce → Settings → General)"
 msgstr ""
 
-#: src/Admin/CurrencyTableField.php:217
+#: src/Admin/CurrencyTableField.php:256
 msgid "Update now"
 msgstr ""
 
-#: src/Admin/CurrencyTableField.php:277
+#: src/Admin/CurrencyTableField.php:316
 msgid "Inherit global"
 msgstr ""
 
-#: src/Admin/CurrencyTableField.php:278
+#: src/Admin/CurrencyTableField.php:317
 #: src/Admin/ExchangeRateSettingsField.php:68
 #: src/Admin/OrderCurrencyMetaBox.php:269
 msgid "Manual"
 msgstr ""
 
-#: src/Admin/CurrencyTableField.php:279
+#: src/Admin/CurrencyTableField.php:318
 #: src/Admin/ExchangeRateSettingsField.php:69
 msgid "Automatic"
 msgstr ""
 
-#: src/Admin/CurrencyTableField.php:304
+#: src/Admin/CurrencyTableField.php:343
 msgid "Left"
 msgstr ""
 
-#: src/Admin/CurrencyTableField.php:305
+#: src/Admin/CurrencyTableField.php:344
 msgid "Right"
 msgstr ""
 
-#: src/Admin/CurrencyTableField.php:306
+#: src/Admin/CurrencyTableField.php:345
 msgid "Left with space"
 msgstr ""
 
-#: src/Admin/CurrencyTableField.php:307
+#: src/Admin/CurrencyTableField.php:346
 msgid "Right with space"
 msgstr ""
 

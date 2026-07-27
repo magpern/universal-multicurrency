@@ -841,3 +841,86 @@ Settings schema remains v1.
 - Create and push Git tag `v0.7.0`
 - Publish GitHub release with `dist/universal-multicurrency-0.7.0.zip`
 - Merge `milestone-7-release-candidate` after approval
+
+All three completed; `v0.7.0` is tagged and released, and is superseded by
+**v0.8.0** below.
+
+---
+
+## Milestone 8 — automatic exchange rates (v0.8.0)
+
+### Summary
+
+Adds scheduled and merchant-triggered exchange-rate updates from an external
+provider. Conversion arithmetic is unchanged: `RateResolver` derives the
+effective rate on read and nothing new is written on the money path. See
+[`ARCHITECTURE.md`](ARCHITECTURE.md) § Exchange rate layer and ADR-0010 through
+ADR-0013.
+
+### What ships
+
+| Area | Change |
+|---|---|
+| Provider layer | `Rates\ExchangeRateSource` contract; `Providers\FrankfurterRateSource`; `Rates\Http\HttpTransport` + `WordPressHttpTransport` (the only outbound-HTTP class) |
+| Persistence boundary | `Rates\ExchangeRateStore` — the only writer of provider rates into `umc_settings` and of `umc_rate_state` |
+| Orchestration | `Rates\RateUpdateService` (lock → fetch → apply → release) and `Rates\Scheduler` on Action Scheduler hook `umc_run_rate_update` |
+| Admin | `Admin\ExchangeRateSettingsField`, rate columns in `Admin\CurrencyTableField`, `Admin\RateUpdateController` (`admin_post_umc_update_rates`), `Admin\RateFailureNotice` |
+| Diagnostics | `umc_rate_health` Site Health test and two `debug_information` counters |
+| Version | `0.8.0` in the plugin header, `UMC_VERSION`, and the `readme.txt` stable tag |
+
+### New persisted data
+
+| Option | Contents |
+|---|---|
+| `umc_settings` (schema **v2**) | Per currency: `manual_rate` (renamed from `rate`), `provider_rate`, `merchant_adjustment`, `rate_mode`. Global: `rate_mode`, `rate_provider`, `rate_update_interval`, `rate_max_age_hours` |
+| `umc_rate_state` (**new**) | Last fetch time, per-currency status, consecutive failures, bounded failure history, update lock, provider cache validators |
+
+`umc_rate_state` is operational only — it is never read on the conversion path
+and carries no money-bearing value. Inventory:
+[`PERSISTED_DATA.md`](PERSISTED_DATA.md).
+
+### Deployment sequence
+
+1. Run `composer release-audit` on the **0.8.0** tree.
+2. Build `dist/universal-multicurrency-0.8.0.zip` with `composer install --no-dev`
+   + `bin/build-zip.sh`.
+3. Deploy the zip. On first admin request `SettingsUpgrader` migrates
+   `umc_settings` from schema v1 to v2 in place.
+4. No merchant action is required: the global rate mode defaults to `manual`, so
+   nothing is fetched and no schedule is created until a merchant opts a currency
+   or the store into automatic mode.
+
+### Migration impact
+
+The v1 → v2 migration is conversion-neutral: `rate` becomes `manual_rate` with
+the same string value, `provider_rate` starts empty, `merchant_adjustment` starts
+at `0`, and every rate mode inherits `manual`. Enforced byte-for-byte by
+`tests/unit/SettingsMigrationFidelityTest.php`. Details:
+[`MIGRATION.md`](MIGRATION.md) § Internal settings schema migrations.
+
+### Rollback
+
+Downgrade to the **0.7.0** zip. Note that `umc_settings` stays at schema v2:
+0.7.0's `SettingsUpgrader` refuses a stored version newer than its own
+`SCHEMA_VERSION`, so it serves defaults in memory and leaves the option
+untouched. Nothing is corrupted, but the store loses its configured currencies
+until the v1 value is restored — take a copy of `umc_settings` before step 3
+above and restore it as part of any downgrade. Order snapshots and `_umc_*`
+meta are unaffected in either direction, so historical orders keep their
+recorded rate. `umc_rate_state` is inert to 0.7.0 and can be left in place.
+
+### Post-release corrections
+
+Shipped on `main` after the v0.8.0 tag, with no version bump — all are fixes to
+scheduling/timestamp behaviour plus test and documentation closure:
+
+| Commit | Change |
+|---|---|
+| `0eee862` | `Scheduler::ensure_scheduled()` compares the pending recurrence against `rate_update_interval` and reschedules on a mismatch |
+| `b826481` | `CurrencyTableField` bumps `rate_updated_at` when a merchant actually edits rate inputs |
+| `137f129` | v1 → v2 conversion-fidelity regression test |
+| `88bfa44` | `CEILING_RATE_UPDATE_NOT_MODIFIED_WRITES = 0` |
+| review closure | Site Health and controller round-trip integration tests; Milestone 8 documentation synchronization |
+
+A store already running v0.8.0 can take these by deploying a `main` build; there
+is no data change and no migration step.

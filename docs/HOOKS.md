@@ -235,6 +235,58 @@ needs findings). No WooCommerce storefront, Store API, or REST hooks.
 | `debug_information` | 10 | `Diagnostics\SiteHealthReport::debug()` | Adds the `universal-multicurrency` debug section (gated on `activate_plugins`). |
 | `woocommerce_admin_field_umc_conflict` | 10 | `Diagnostics\ConflictNotice::render_settings_field()` | Long-form evidence list on the Multicurrency settings tab; never dismissible. |
 
+## Milestone 8 — automatic exchange rates
+
+Rate services are wired at the composition root for every request type; only the
+admin surfaces are gated on `is_admin()`. Nothing here touches the storefront
+money path — conversion still reads `umc_settings` through `RateResolver`.
+
+### Scheduling (`Rates\Scheduler`)
+
+| Hook | Args | Prio | Owner | Why |
+|---|---|---|---|---|
+| `umc_run_rate_update` | — | 10 | `Scheduler::run()` | Action Scheduler callback for one recurring update. This is the plugin's own scheduled hook (`Scheduler::HOOK`); Action Scheduler owns the queue, WP-Cron is not used. |
+| `init` | — | 20 | `Scheduler::ensure_scheduled_on_init()` | Reconciles the recurring schedule with `rate_update_interval`, unless `umc_settings_saved` already ran this request. |
+| `umc_settings_saved` | — | 10 | `Scheduler::ensure_scheduled()` | Reschedules immediately when the merchant changes the interval or leaves automatic mode. |
+
+`ensure_scheduled()` compares the pending action's `get_recurrence()` against the
+configured interval and only unschedules/reschedules on a mismatch, on duplicate
+pending actions, or when automatic mode is off. Covered by
+`tests/integration/Rates/SchedulerIntegrationTest.php`.
+
+### Manual update request (`Admin\RateUpdateController`)
+
+| Hook | Args | Prio | Owner | Why |
+|---|---|---|---|---|
+| `admin_post_umc_update_rates` | — | 10 | `RateUpdateController::handle()` | Synchronous merchant-triggered refresh. Requires `manage_woocommerce` and `check_admin_referer( 'umc_update_rates' )`; answers with `wp_safe_redirect()` back to the settings tab carrying `umc_msg` / `umc_typ`. Registered only when `is_admin()`. |
+
+Links are rendered by `Admin\ExchangeRateSettingsField` (`scope=all`) and
+`Admin\CurrencyTableField` (`scope=single&code=XXX`), both nonced with
+`umc_update_rates`. Covered by
+`tests/integration/Rates/RateUpdateControllerIntegrationTest.php`.
+
+### Admin surfaces (`Admin\*`)
+
+| Hook | Args | Prio | Owner | Why |
+|---|---|---|---|---|
+| `woocommerce_admin_field_umc_exchange_rates` | `($field)` | 10 | `Admin\ExchangeRateSettingsField::render()` | Global rate mode, provider, interval, max age, and the "update now" control. |
+| `admin_notices` | — | 10 | `Admin\SettingsPage::maybe_render_notice()` | Renders the flash notice carried back by the controller redirect. |
+| `admin_notices` | — | 10 | `Admin\RateFailureNotice::render()` | Warns when an automatic currency has a recorded fetch failure. Registered only when `is_admin()`. |
+
+### Site Health (`Diagnostics\SiteHealthReport`)
+
+| Hook | Args | Prio | Owner | Why |
+|---|---|---|---|---|
+| `site_status_tests` | `($tests)` | 10 | `SiteHealthReport::tests()` | Adds the `umc_rate_health` direct test alongside the M6 conflict and environment tests (gated on `activate_plugins`). |
+| `debug_information` | `($info)` | 10 | `SiteHealthReport::debug()` | Adds `stale_automatic_rates` and `oldest_automatic_rate_age` to the existing debug section. Counters only — never a rate value, provider URL, or error string. |
+
+`umc_rate_health` reports **last-known operational state only**; it never issues
+an HTTP request. Severity: `critical` when automatic mode is enabled with no
+recurring action scheduled, when any automatic currency has a recorded failure,
+or when three or more are stale; `recommended` for one or two stale currencies;
+otherwise `good`. Covered by
+`tests/integration/Diagnostics/SiteHealthRateIntegrationTest.php`.
+
 ## Filters and actions the plugin provides
 
 | Filter / Action | Args | Since | Purpose |
@@ -258,6 +310,14 @@ needs findings). No WooCommerce storefront, Store API, or REST hooks.
 | `umc_conflict_detectors` (filter) | `($detectors)` | 0.6.0 | Append runtime detector rows (data-only arrays); output passes through `DetectorRegistry::sanitize()`. Built-ins come from `DetectorManifest`. |
 | `umc_conflict_notice_view_model` (filter) | `($view, $findings, $screen_id, $fingerprint)` | 0.6.0 | Filter the dashboard/network admin notice view model before render. |
 | `umc_conflict_settings_view_model` (filter) | `($view, $findings, $can_activate_plugins)` | 0.6.0 | Filter the Multicurrency settings-tab conflict panel view model before render. |
+| `umc_settings_saved` (action) | `()` | 0.8.0 | Fires after `Admin\SettingsPage` persists the Multicurrency tab. `Scheduler` listens to reconcile the recurring update. |
+| `umc_exchange_rate_sources` (filter) | `(ExchangeRateSource[] $sources)` | 0.8.0 | Register additional `UMC\Rates\ExchangeRateSource` implementations. `Plugin::resolve_rate_source()` selects the one whose `id()` matches `rate_provider`, falling back to Frankfurter. |
+| `umc_rate_fetch_completed` (action) | `(RateFetchResult $result)` | 0.8.0 | Fires after every fetch attempt — success, partial failure, total failure, and `not_modified` — once the store has persisted the outcome. |
 
 Note: `umc_convert_fee` is documented for integrations but **not wired** in
 Milestone 3 — no fee conversion ships enabled.
+
+Every entry in this table is verified against `src/` by
+`tests/unit/HooksDocumentationSyncTest.php`: each documented `umc_*` hook must
+exist in production code, and every `umc_*` hook fired or filtered in `src/`
+must appear here.

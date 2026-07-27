@@ -275,12 +275,10 @@ final class DocumentationSyncTest extends TestCase {
 		}
 	}
 
-	public function test_no_documentation_claims_git_tag_or_github_release_already_published(): void {
+	public function test_no_documentation_claims_an_unreleased_version_has_shipped(): void {
 		$forbidden = array(
-			'/Git tag `v0\.7\.0` has been/i',
-			'/GitHub release published/i',
-			'/release has been published/i',
-			'/tag v0\.7\.0 (?:has been|was) (?:created|pushed)/i',
+			'/`?v0\.9\.0`?[^\n]{0,60}(?:tagged|published|released|shipped)/i',
+			'/Milestone 9[^\n]{0,60}(?:complete|shipped|released)/i',
 		);
 
 		foreach ( self::PUBLICATION_CLAIM_SCAN_FILES as $file ) {
@@ -290,20 +288,50 @@ final class DocumentationSyncTest extends TestCase {
 				$this->assertDoesNotMatchRegularExpression(
 					$pattern,
 					$source,
-					$file . ' must not claim the tag or GitHub release already exists.'
+					$file . ' must not claim an unreleased version has shipped.'
 				);
 			}
 		}
 	}
 
-	public function test_release_audit_records_rc_closure_state(): void {
+	public function test_no_documentation_describes_milestone_eight_as_pending(): void {
+		$forbidden = array(
+			'/Git tag `?v0\.8\.0`?[^\n]{0,40}Not yet created/i',
+			'/v0\.8\.0[^\n]{0,60}pending explicit approval/i',
+			'/Milestone 8[^\n]{0,60}(?:pending|not yet)/i',
+		);
+
+		foreach (
+			array(
+				'README.md',
+				'docs/ROADMAP.md',
+				'docs/RELEASE_AUDIT.md',
+				'docs/ARCHITECTURE.md',
+			) as $file
+		) {
+			$source = $this->read( $file );
+
+			foreach ( $forbidden as $pattern ) {
+				$this->assertDoesNotMatchRegularExpression(
+					$pattern,
+					$source,
+					$file . ' must not describe the shipped Milestone 8 as pending.'
+				);
+			}
+		}
+	}
+
+	public function test_release_audit_records_milestone_eight_closure_state(): void {
 		$audit = $this->read( 'docs/RELEASE_AUDIT.md' );
 
 		$this->assertStringContainsString( 'Release Candidate closure record', $audit );
 		$this->assertStringContainsString( 'Version | **0.8.0**', $audit );
 		$this->assertStringContainsString( 'Unresolved release blockers | **0**', $audit );
-		$this->assertStringContainsString( 'Git tag `v0.8.0` | **Not yet created**', $audit );
+		$this->assertStringContainsString( 'Open Milestone 8 review findings | **0**', $audit );
+		$this->assertStringContainsString( 'Git tag `v0.8.0` | **Created**', $audit );
+		$this->assertStringContainsString( 'GitHub release `v0.8.0` | **Published**', $audit );
 		$this->assertStringContainsString( 'Milestone 8 | **Complete**', $audit );
+		$this->assertStringContainsString( '## Post-release review findings', $audit );
 	}
 
 	public function test_documented_composer_commands_exist(): void {
@@ -338,9 +366,72 @@ final class DocumentationSyncTest extends TestCase {
 
 			$this->assertStringContainsString( 'schema', $source, $file );
 			$this->assertStringContainsString( 'SettingsUpgrader', $source, $file );
+			$this->assertStringContainsString(
+				'Settings::SCHEMA_VERSION` is **2**',
+				$source,
+				$file . ' must state the current schema version.'
+			);
+			$this->assertStringContainsString( 'migrate_1_to_2', $source, $file );
 		}
 
 		$this->assertStringContainsString( 'schema_version', $this->read( 'docs/PERSISTED_DATA.md' ) );
+	}
+
+	public function test_migration_doc_describes_the_v1_to_v2_conversion_contract(): void {
+		$migration = $this->read( 'docs/MIGRATION.md' );
+
+		foreach (
+			array(
+				'manual_rate',
+				'provider_rate',
+				'merchant_adjustment',
+				'schema_version: 2',
+				'Conversion-fidelity guarantee',
+				'SettingsMigrationFidelityTest',
+			) as $needle
+		) {
+			$this->assertStringContainsString( $needle, $migration, 'MIGRATION.md must document: ' . $needle );
+		}
+	}
+
+	public function test_architecture_documents_the_automatic_rate_layer(): void {
+		$architecture = $this->read( 'docs/ARCHITECTURE.md' );
+
+		foreach (
+			array(
+				'ExchangeRateSource',
+				'ExchangeRateStore',
+				'RateResolver',
+				'ProviderMetadata',
+				'RateUpdateService',
+				'Scheduler',
+				'RateUpdateState',
+				'ADR-0010',
+				'ADR-0011',
+				'ADR-0012',
+				'ADR-0013',
+			) as $needle
+		) {
+			$this->assertStringContainsString( $needle, $architecture, 'ARCHITECTURE.md missing: ' . $needle );
+		}
+	}
+
+	public function test_security_review_covers_the_milestone_eight_surfaces(): void {
+		$security = $this->read( 'docs/SECURITY_REVIEW.md' );
+
+		foreach (
+			array(
+				'admin_post_umc_update_rates',
+				'manage_woocommerce',
+				'check_admin_referer',
+				'wp_safe_remote_get',
+				'Lock behaviour',
+				'Diagnostic redaction',
+				'Secret persistence',
+			) as $needle
+		) {
+			$this->assertStringContainsString( $needle, $security, 'SECURITY_REVIEW.md missing: ' . $needle );
+		}
 	}
 
 	public function test_persisted_data_documentation_matches_inventory(): void {

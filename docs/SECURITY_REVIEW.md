@@ -1,6 +1,7 @@
-# Security review — Milestone 7 Release Candidate
+# Security review
 
-Audit of Universal Multicurrency at Commit 6 (security). This document
+Audit of Universal Multicurrency, established at Milestone 7 Commit 6 and
+re-audited for the Milestone 8 automatic-rate surfaces (v0.8.0). This document
 summarizes verified posture; **executable guards enforce the invariants** listed
 here. See [`TEST_STRATEGY.md`](TEST_STRATEGY.md) § Milestone 7 security.
 
@@ -26,8 +27,102 @@ here. See [`TEST_STRATEGY.md`](TEST_STRATEGY.md) § Milestone 7 security.
 | HPOS order/refund meta | `Order/*` | CRUD-only guards; no `$wpdb` |
 | Passive detection | `Diagnostics/*` | ADR-0007; no foreign option reads |
 | Build / release zip | `bin/build-zip.sh` | Source guard; dev-deps rejection |
+| Manual rate update | `Admin/RateUpdateController.php` | `manage_woocommerce` + `check_admin_referer`; `RateUpdateControllerIntegrationTest` |
+| Outbound provider HTTP | `Rates/Http/WordPressHttpTransport.php`, `Rates/Providers/FrankfurterRateSource.php` | `wp_safe_remote_get()` only, confined by `RatesPersistenceGuardTest` |
+| Provider response handling | `Rates/Providers/FrankfurterRateSource.php` | Strict parsing + normalization; `FrankfurterRateSourceTest` |
+| Rate persistence boundary | `Rates/ExchangeRateStore.php`, `Rates/RateUpdateState.php` | Single-writer guard; `ExchangeRateStoreTest`, `RatesPersistenceGuardTest` |
+| Scheduled updates | `Rates/Scheduler.php` | Action Scheduler only; `SchedulerIntegrationTest` |
+| Rate diagnostics | `Diagnostics/SiteHealthReport.php`, `Admin/RateFailureNotice.php` | Counter-only output; `SiteHealthRateIntegrationTest` |
 
 No custom REST routes, AJAX handlers, or runtime filesystem writes exist in `src/`.
+
+---
+
+## Milestone 8 — automatic rate providers
+
+### Authorization on the manual update path
+
+`admin_post_umc_update_rates` is the only merchant-triggered write in this
+milestone. `RateUpdateController::handle()` enforces, in order:
+
+1. `current_user_can( 'manage_woocommerce' )`, otherwise `wp_die()` — the check
+   runs **before** nonce verification and before any provider call, so an
+   unauthorized request never reaches the network or the store;
+2. `check_admin_referer( 'umc_update_rates' )`;
+3. `sanitize_text_field( wp_unslash( … ) )` on `scope` and `code`, with `code`
+   upper-cased; an unknown code simply resolves to no automatic target.
+
+The response is a `wp_safe_redirect()` back to
+`admin.php?page=wc-settings&tab=umc` with a `rawurlencode`d flash message. Both
+entry points that render the link (`ExchangeRateSettingsField`,
+`CurrencyTableField`) nonce it with `wp_nonce_url( …, 'umc_update_rates' )`.
+
+Verified behaviourally: an unauthorized request performs zero provider calls,
+zero `umc_settings` writes, and leaves operational state at `never`; a request
+without a valid nonce is rejected the same way
+(`tests/integration/Rates/RateUpdateControllerIntegrationTest.php`).
+
+### Outbound HTTP
+
+| Control | Status |
+|---|---|
+| Request function | `wp_safe_remote_get()` only — SSRF protections and the `http_request_host_is_external` policy apply |
+| Confinement | `Rates/Http/WordPressHttpTransport.php` is the only production class that performs an outbound rate request |
+| Endpoint | Hard-coded `https://api.frankfurter.dev/v1/latest`; not merchant-configurable, so no stored URL can be poisoned |
+| Query construction | `rawurlencode()` on the base code and on the comma-joined, upper-cased, de-duplicated target list |
+| Timeout | 15 s, floored at 1 s |
+| Credentials | None — Frankfurter is unauthenticated. No API key field exists, so no secret is collected, persisted, logged, or rendered |
+| Transport errors | Collapsed to `HttpResponse( 0, [], '', true )`; the `WP_Error` message is never surfaced or stored |
+
+### Provider response handling
+
+Nothing from the response body reaches persistence unvalidated:
+
+- Non-2xx (other than 304) and non-JSON or `rates`-less bodies produce a total
+  failure with the fixed code `provider_unavailable` or `invalid_response`.
+- Each quote passes through `Settings::normalize_rate()`, which admits only a
+  finite positive decimal string; anything else is dropped as a per-currency
+  failure rather than persisted.
+- Currencies the merchant did not request are ignored — the store writes only
+  codes it asked for.
+- `ETag` and `Last-Modified` are capped at 200 characters before storage
+  (`HEADER_MAX_LENGTH`), bounding what an upstream can push into an option.
+- A total failure or an HTTP 304 never overwrites a known-good rate; only
+  operational counters move.
+
+### Lock behaviour
+
+`RateUpdateState` holds a TTL-bounded lock (`LOCK_TTL_SECONDS = 120`) in
+`umc_rate_state`. `RateUpdateService::update()` acquires it, and releases it in a
+`finally` block, so a fatal fetch cannot strand it; a concurrent caller receives
+`UpdateInProgressException`, which the controller renders as a "try again
+shortly" notice. The lock is a concurrency guard, **not** an authorization
+control — capability and nonce checks stand on their own ahead of it.
+
+### Diagnostic redaction
+
+`umc_rate_health` and the two debug fields report **derived counts and states**
+only: how many automatic currencies are stale, the oldest age in whole hours,
+and whether a failure or a missing schedule exists. They never emit a rate
+value, a merchant adjustment, the provider URL, an `ETag`, a `Last-Modified`
+value, or a stored error code. Persisted `last_error` values are a closed
+vocabulary of internal codes (`provider_unavailable`, `invalid_response`,
+`not_returned_by_provider`) — no upstream text is stored in the first place.
+`RateFailureNotice` prints currency codes only, escaped with `esc_html()`, and
+returns early without `manage_woocommerce`. Site Health surfaces are gated on
+`activate_plugins`.
+
+Asserted in `tests/integration/Diagnostics/SiteHealthRateIntegrationTest.php`,
+which fails if a provider rate, an error token, the provider host, or an `etag`
+string appears anywhere in the encoded test result or debug fields.
+
+### Secret persistence
+
+None. The shipped provider requires no credential, `umc_settings` has no key or
+token field, and `umc_rate_state` stores only timestamps, statuses, internal
+error codes, bounded cache validators, and the lock row. Confirmed against the
+inventory in [`PERSISTED_DATA.md`](PERSISTED_DATA.md). A future authenticated
+provider would be a **new** audit trigger.
 
 ---
 
@@ -51,6 +146,7 @@ No open critical findings at RC audit completion.
 | M1 | Currency switch GET | No CSRF nonce on `?currency=` | **Accepted.** Idempotent display preference only; allow-list validated; no privilege change | ADR-0003 pattern; `RequestGateTest` |
 | M2 | Guest cookie | Not HttpOnly (WooCommerce `wc_setcookie`) | **Accepted.** Client-readable currency code required for guest persistence; value is non-sensitive ISO code only | `CurrencySwitcher::persist()` review |
 | M3 | Filter hooks | Public filters can alter view models | **Accepted.** Site-owner trust boundary; settings URL now hardened (H2) | Documented in HOOKS.md |
+| M4 | `umc_exchange_rate_sources` | Another plugin can register an `ExchangeRateSource` and become the active provider when `rate_provider` matches its `id()` | **Accepted.** Site-owner trust boundary, identical to WooCommerce's own gateway/shipping registration model. Quotes from any source still pass `Settings::normalize_rate()` and are written only through `ExchangeRateStore`. | `Plugin::resolve_rate_source()`; `RatesPersistenceGuardTest` |
 
 ### Low — accepted
 
@@ -75,17 +171,23 @@ No open critical findings at RC audit completion.
 | WooCommerce settings save | `manage_woocommerce` (WC core) | `woocommerce-settings` (WC core) | `SettingsOptionTest` |
 | Notice dismissal | `activate_plugins` / `manage_network_plugins` | `check_admin_referer( 'umc_dismiss_' . $fingerprint )` | `NoticeDismissalIntegrationTest`, `SecurityBehaviourTest` |
 | Dashboard / plugins notices | `activate_plugins` | n/a (read) | `ConflictNoticeIntegrationTest` |
-| Site Health / debug | `activate_plugins` | n/a (read) | `SiteHealthIntegrationTest` |
+| Site Health / debug | `activate_plugins` | n/a (read) | `SiteHealthReportIntegrationTest`, `SiteHealthRateIntegrationTest` |
 | Currency switch | none (storefront) | none (by design, M1) | `RequestGateTest`, `SecurityBehaviourTest` |
+| Manual rate update | `manage_woocommerce` | `check_admin_referer( 'umc_update_rates' )` | `RateUpdateControllerIntegrationTest` |
+| Rate failure notice | `manage_woocommerce` | n/a (read) | `RateFailureNotice::render()` early return |
+| Scheduled rate update | n/a (Action Scheduler context) | n/a | `SchedulerIntegrationTest` |
 
 Unauthorized dismissal attempts do not write user meta (`SecurityBehaviourTest`).
+Unauthorized or unsigned rate-update attempts perform no provider call and no
+option write (`RateUpdateControllerIntegrationTest`).
 
 ---
 
 ## Sanitization and validation
 
-- Request input confined to five boundary classes (`SecuritySourceGuardTest`).
-- Settings sanitized via `Settings::sanitize()` (schema v1, bounded decimals/rates).
+- Request input confined to the boundary classes allowlisted by `SecuritySourceGuardTest` (which includes `Admin/RateUpdateController.php`).
+- Settings sanitized via `Settings::sanitize()` (schema v2; bounded decimals, rates, merchant adjustment clamped to ±50%, interval restricted to a fixed ISO-8601 set, max age 1–720 hours, provider restricted to the known identifier).
+- Operational state sanitized via `RateUpdateState::sanitize()` (bounded timestamps, closed status vocabulary, bounded failure history, capped cache validators).
 - Currency candidates normalized to `/^[A-Z]{3}$/` before resolution.
 - Notice dismissal fingerprints validated with `/^[a-f0-9]{16}$/` and `hash_equals()`.
 - Order-pay order IDs use `absint()`; order keys sanitized with `sanitize_text_field()`.
@@ -158,6 +260,14 @@ broad `catch ( Throwable | Exception )` probes elsewhere in `src/`.
 | `tests/unit/SecuritySourceGuardTest.php` | SQL, redirects, dangerous functions, debug output, request boundaries, options, filesystem, AJAX/REST, uninstall, build script, hardening markers |
 | `tests/integration/SecurityBehaviourTest.php` | Poisoned cookie/session, malformed query, wrong dismissal fingerprint, external settings URL rejection |
 
+### Executable guards added for Milestone 8
+
+| Guard | Scope |
+|---|---|
+| `tests/unit/Rates/RatesPersistenceGuardTest.php` | Only `RateUpdateState` writes `umc_rate_state`; only `RateUpdateState`/`ExchangeRateStore` read options inside `src/Rates/`; **all** outbound HTTP is confined to `WordPressHttpTransport`, which may use only `wp_safe_remote_get()`; the scheduler never names a provider |
+| `tests/integration/Rates/RateUpdateControllerIntegrationTest.php` | Capability and nonce enforcement on `admin_post_umc_update_rates`; no provider call and no option write on rejection |
+| `tests/integration/Diagnostics/SiteHealthRateIntegrationTest.php` | Rate values, error tokens, provider host, and cache validators absent from every diagnostic surface |
+
 Existing guards retained: `StorefrontGuardTest`, `DiagnosticsGuardTest`, `UninstallPolicyTest`, PHPCS.
 
 ---
@@ -176,8 +286,12 @@ See Medium/Low tables above. None expose authorization boundaries, order integri
 |---|---|
 | Critical | 0 |
 | High | 0 |
-| Medium (accepted) | 3 |
+| Medium (accepted) | 4 |
 | Low (accepted) | 2 |
+
+The Milestone 8 re-audit opened **no** Critical or High finding. It added one
+accepted Medium (M4, the provider-registration filter) and the surface
+documentation above.
 
 ---
 
@@ -185,6 +299,6 @@ See Medium/Low tables above. None expose authorization boundaries, order integri
 
 | Item | Value |
 |---|---|
-| Milestone | 7 Release Candidate — Commit 6 |
-| Related ADRs | 0003, 0007, 0009 |
-| Next audit trigger | Any new admin mutation, request handler, or persistence surface |
+| Milestone | 7 Release Candidate — Commit 6; re-audited for Milestone 8 (v0.8.0) |
+| Related ADRs | 0003, 0007, 0009, 0010, 0011, 0012, 0013 |
+| Next audit trigger | Any new admin mutation, request handler, persistence surface, or an authenticated rate provider |

@@ -589,6 +589,7 @@ final class PerformanceBaselineTest extends WP_UnitTestCase {
 				'CEILING_CURRENCY_RESOLUTION_WRITES',
 				'CEILING_DIAGNOSTICS_QUERY_DELTA',
 				'CEILING_STORE_API_CART_QUERY_DELTA',
+				'CEILING_RATE_UPDATE_NOT_MODIFIED_WRITES',
 			) as $constant
 		) {
 			$this->assertStringContainsString( $constant, $doc, 'PERFORMANCE_BASELINES.md must document ' . $constant );

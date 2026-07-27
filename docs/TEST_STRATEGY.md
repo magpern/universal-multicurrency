@@ -187,9 +187,10 @@ Five integration legs exercise the corners of the supported box plus axis
 isolation (`floor`, `current`, `mixed-php-floor`, `mixed-wp-floor`, `ceiling`).
 See `docs/COMPATIBILITY.md` and ADR-0008.
 
-**Floor policy:** the `floor` leg runs 307 of 315 integration tests, excluding
-eight Store API order-route tests when a live REST route-table probe shows
+**Floor policy:** the `floor` leg excludes the eight Store API order-route tests
+tagged `wc-order-route-unavailable` when a live REST route-table probe shows
 `Order` / `CheckoutOrder` routes absent — never via WooCommerce version compare.
+Every other leg runs the full suite.
 
 **Capability-probe-not-version-compare:** structural guards assert no
 `version_compare( WC_VERSION, … )` under `tests/` for CI gating.
@@ -313,11 +314,52 @@ Audit record: [`docs/RELEASE_AUDIT.md`](RELEASE_AUDIT.md). **Zero unresolved rel
 - **`tests/unit/MigrationDocumentationTest.php`** — migration playbook structure and cross-links.
 - **`tests/unit/ReleaseAuditTest.php`** — overlapping metadata and hygiene guards.
 
-Merchant readme: [`readme.txt`](../readme.txt) (Stable tag 0.7.0). Developer readme: [`README.md`](../README.md).
+Merchant readme: [`readme.txt`](../readme.txt). Developer readme: [`README.md`](../README.md).
 
 ## Milestone 7 — v0.7.0 RC finalization (Commit 10)
 
 ### Guards
 
-- **`DocumentationSyncTest`** — canonical version **0.7.0**, changelog entries, Milestone 7 complete, no pending-commit language, packaged ZIP metadata when `UMC_RELEASE_ZIP` is set.
-- **`ReleaseAuditTest`**, **`ReleaseZipInspector`**, **`composer release-audit`** — full RB1–RB15 gate at **0.7.0**.
+- **`DocumentationSyncTest`** — canonical version, changelog entries, milestone closure state, no pending-commit language, packaged ZIP metadata when `UMC_RELEASE_ZIP` is set.
+- **`ReleaseAuditTest`**, **`ReleaseZipInspector`**, **`composer release-audit`** — full RB1–RB15 gate.
+
+## Milestone 8 — automatic exchange rates (v0.8.0)
+
+Provider HTTP is **never** live in tests: `Rates\Http\HttpTransport` is injected,
+and `UMC\Tests\Support\FakeHttpTransport` returns canned `HttpResponse` objects
+including the 304 path.
+
+### Unit
+
+- **`tests/unit/Rates/`** — provider parsing and capability probes
+  (`FrankfurterRateSourceTest`), fetch-result predicates, quote and metadata
+  value objects, interval validation, effective-rate derivation
+  (`RateResolverTest`), merchant-adjustment policy, and store write ordering
+  (`ExchangeRateStoreTest`).
+- **`tests/unit/Rates/RateUpdateNotModifiedWriteCeilingTest.php`** — the
+  WordPress-free half of `CEILING_RATE_UPDATE_NOT_MODIFIED_WRITES`, counting
+  option writes through `UMC\Tests\Support\OptionWriteMetrics`.
+- **`tests/unit/SettingsMigrationFidelityTest.php`** — v1 → v2 conversion output
+  is byte-identical.
+- **`tests/unit/HooksDocumentationSyncTest.php`** — every `umc_*` hook in `src/`
+  is documented, and every documented hook exists.
+
+### Integration
+
+- **`tests/integration/Rates/SchedulerIntegrationTest.php`** — Action Scheduler
+  recurrence reconciliation, duplicate collapse, unscheduling on manual mode.
+- **`tests/integration/Rates/RateUpdateControllerIntegrationTest.php`** — the
+  `admin_post_umc_update_rates` round trip: success, 304, provider failure,
+  unauthorized, and unsigned requests.
+- **`tests/integration/Diagnostics/SiteHealthRateIntegrationTest.php`** — the
+  registered `umc_rate_health` test across healthy, never-fetched, unscheduled,
+  stale, escalated-stale, failed, and manual-mode states, plus redaction.
+- **`tests/integration/CurrencyTableFieldRateTimestampTest.php`** — merchant-edit
+  timestamp semantics.
+
+### Guards
+
+- **`tests/unit/Rates/RatesPersistenceGuardTest.php`** — single writer for
+  `umc_rate_state`, confined option reads inside `src/Rates/`, all outbound HTTP
+  inside `WordPressHttpTransport` using only `wp_safe_remote_get()`, and a
+  scheduler that never names a provider.
