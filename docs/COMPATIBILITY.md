@@ -253,6 +253,24 @@ asserts that bi-directional agreement on every pull request.
 No third-party reports have been reproduced and admitted under the detector
 governance checklist yet.
 
+## Migrating from another currency switcher
+
+Universal Multicurrency does **not** import, read, or migrate configuration from
+any other currency switcher. That is a deliberate architectural constraint
+(ADR-0003, ADR-0007), not a missing feature.
+
+| Supported | Unsupported |
+|---|---|
+| Manual cut-over using [`MIGRATION.md`](MIGRATION.md) | Automatic import from foreign plugin options or databases |
+| Deactivate old switcher, configure UMC manually | Running two runtime converters together |
+| Passive HIGH/MEDIUM conflict detection | UMC reading foreign sessions, cookies, or rates |
+| Historical WooCommerce orders/refunds unchanged | Mapping FOX/WOOCS/WPML export formats in core |
+| `_umc_*` order meta preserved on uninstall (ADR-0009) | Admin CSV import in the Release Candidate |
+
+The full checklist, deployment sequence, rollback notes, FAQ, and the optional
+future **UMC-native CSV format specification** (spec only — no parser in RC) live
+in [`MIGRATION.md`](MIGRATION.md).
+
 ## Detection
 
 Diagnostics observes the host environment using passive evidence only:

@@ -47,8 +47,8 @@ final class OrderSnapshotReader {
 		$rate_source          = (string) $order->get_meta( OrderSnapshot::META_RATE_SOURCE );
 		$plugin_version       = (string) $order->get_meta( OrderSnapshot::META_PLUGIN_VERSION );
 		$rate_identity        = (string) $order->get_meta( OrderSnapshot::META_RATE_IDENTITY );
-		$snapshot_version     = $order->get_meta( '_umc_snapshot_version' );
-		$stored_decimals_raw  = $order->get_meta( '_umc_transaction_decimals' );
+		$snapshot_version     = $order->get_meta( OrderSnapshot::META_SNAPSHOT_VERSION );
+		$stored_decimals_raw  = $order->get_meta( OrderSnapshot::META_TRANSACTION_DECIMALS );
 
 		// Convert types for classification.
 		$rate_timestamp  = '' !== (string) $rate_timestamp_raw ? (int) $rate_timestamp_raw : null;

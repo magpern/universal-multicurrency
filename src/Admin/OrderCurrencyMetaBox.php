@@ -11,6 +11,7 @@ namespace UMC\Admin;
 
 use UMC\Order\HistoricalFormattingResolver;
 use UMC\Order\OrderCurrencySnapshot;
+use UMC\Order\OrderSnapshot;
 use UMC\Order\OrderSnapshotReader;
 
 /**
@@ -205,13 +206,13 @@ final class OrderCurrencyMetaBox {
 						<?php if ( $view['rate_timestamp'] ) : ?>
 							<tr>
 								<td><strong><?php esc_html_e( 'Rate Set At', 'universal-multicurrency' ); ?></strong></td>
-								<td><?php echo esc_html( gmdate( 'Y-m-d H:i:s', $view['rate_timestamp'] ) ); ?> UTC</td>
+								<td><?php echo esc_html( $this->format_rate_timestamp( (int) $view['rate_timestamp'] ) ); ?></td>
 							</tr>
 						<?php endif; ?>
 						<?php if ( $view['rate_source'] ) : ?>
 							<tr>
 								<td><strong><?php esc_html_e( 'Rate Source', 'universal-multicurrency' ); ?></strong></td>
-								<td><?php echo esc_html( $view['rate_source'] ); ?></td>
+								<td><?php echo esc_html( $this->format_rate_source( (string) $view['rate_source'] ) ); ?></td>
 							</tr>
 						<?php endif; ?>
 						<?php if ( isset( $view['resolved_decimals'] ) ) : ?>
@@ -243,5 +244,31 @@ final class OrderCurrencyMetaBox {
 			<?php endif; ?>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Formats a snapshot timestamp for admin display.
+	 *
+	 * @param int $timestamp Unix timestamp (UTC).
+	 */
+	private function format_rate_timestamp( int $timestamp ): string {
+		return sprintf(
+			/* translators: %s: UTC timestamp formatted as Y-m-d H:i:s. */
+			__( '%s UTC', 'universal-multicurrency' ),
+			gmdate( 'Y-m-d H:i:s', $timestamp )
+		);
+	}
+
+	/**
+	 * Maps stored rate-source identifiers to merchant-facing labels.
+	 *
+	 * @param string $source Raw snapshot rate source value.
+	 */
+	private function format_rate_source( string $source ): string {
+		if ( OrderSnapshot::SOURCE_MANUAL === $source ) {
+			return __( 'Manual', 'universal-multicurrency' );
+		}
+
+		return $source;
 	}
 }

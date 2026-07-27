@@ -30,6 +30,7 @@ cp "$ROOT/universal-multicurrency.php" "$ROOT/uninstall.php" "$BUILD/"
 [ -f "$ROOT/LICENSE" ] && cp "$ROOT/LICENSE" "$BUILD/"
 cp -R "$ROOT/src" "$BUILD/src"
 cp -R "$ROOT/vendor" "$BUILD/vendor"
+[ -d "$ROOT/languages" ] && cp -R "$ROOT/languages" "$BUILD/languages"
 [ -d "$ROOT/assets" ] && cp -R "$ROOT/assets" "$BUILD/assets"
 
 ( cd "$DIST" && zip -rq "universal-multicurrency-${VERSION}.zip" universal-multicurrency )

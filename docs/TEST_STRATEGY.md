@@ -259,3 +259,65 @@ both flows.
 
 Fee conversion (opt-in only). A no-reload in-place currency switch, which would
 require shipping JavaScript.
+
+## Milestone 7 — translation readiness (Release Candidate)
+
+### Guards
+
+- **`tests/unit/TranslationReadinessTest.php`** — canonical text domain (`universal-multicurrency`), plugin header agreement, `load_plugin_textdomain()` registration, representative POT msgids, exclusion of internal identifiers as msgids, no shipped JavaScript files, translation documentation contract, and **`composer make-pot:check`** drift protection (regenerate-and-diff via `bin/make-pot.sh`).
+- **PHPCS `WordPress.WP.I18n`** — wrong or missing text domain in PHP source.
+- **CI `pot` job** — runs `composer make-pot:check` on every pull request.
+
+POT headers strip wall-clock fields (`POT-Creation-Date`, `PO-Revision-Date`, `X-Generator`) so diffs are deterministic. See [`docs/TRANSLATION.md`](TRANSLATION.md) for contributor workflow and the RTL audit (documentation only — no mandatory RTL CSS fixes in RC).
+
+## Milestone 7 — security audit (Release Candidate)
+
+### Guards
+
+- **`tests/unit/SecuritySourceGuardTest.php`** — static invariants: no `$wpdb`, safe redirects only, no dangerous functions or debug output, request superglobal boundaries, confined `get_option()` / `get_user_meta()`, no runtime filesystem writes, no custom AJAX/REST, uninstall contract, release zip exclusions, currency input normalization and settings URL hardening markers.
+- **`tests/integration/SecurityBehaviourTest.php`** — poisoned cookie/session/query handling, dismissal fingerprint mismatch, conflict-notice settings URL open-redirect rejection.
+- Existing **`StorefrontGuardTest`**, **`DiagnosticsGuardTest`**, **`UninstallPolicyTest`**, and PHPCS enforce carry-forward boundaries.
+
+Audit record: [`docs/SECURITY_REVIEW.md`](SECURITY_REVIEW.md). **Zero unresolved Critical/High findings** at Commit 6.
+
+## Milestone 7 — performance baselines (Release Candidate)
+
+Established **after** Commit 6 security stabilization so ceilings reflect final execution paths.
+
+### Guards
+
+- **`tests/integration/PerformanceBaselineTest.php`** (`@group performance`) — settings read/write ceilings, currency-resolution write freedom, plugin init idempotency, diagnostics query delta, storefront/cart/Store API read-only behaviour, order/refund snapshot counts, uninstall delete contract, hook registration uniqueness.
+- **`tests/unit/PerformanceBaselineTest.php`** — in-memory `Settings` idempotency and upgrader persist-once semantics.
+- **`tests/unit/PerformanceGuardTest.php`** — forbids transients/object-cache calls in `src/`; verifies baseline documentation and ceiling constants.
+- Existing **`SettingsUpgradeIntegrationTest`**, **`DiagnosticsGuardTest`**, and **`StorefrontGuardTest`** carry forward overlapping invariants.
+
+Baseline record: [`docs/PERFORMANCE_BASELINES.md`](PERFORMANCE_BASELINES.md).
+
+**No wall-clock assertions:** performance checks use query-count and write-count deltas only.
+
+## Milestone 7 — release audit (Release Candidate)
+
+### Guards
+
+- **`composer release-audit`** / **`bin/release-audit.sh`** — PHPCS, unit release-audit guards, security/performance/persisted-data subsets, POT drift, `composer audit`, production ZIP build + `ReleaseZipInspector`.
+- **`tests/unit/ReleaseAuditTest.php`** (`@group release-audit`) — repository hygiene, foreign-coupling scan, metadata consistency, settings schema, security/performance document gates, CI job presence, ZIP inspection when `UMC_RELEASE_ZIP` is set.
+- **CI `release-audit` job** — runs the canonical command on every pull request.
+
+Audit record: [`docs/RELEASE_AUDIT.md`](RELEASE_AUDIT.md). **Zero unresolved release blockers** required before merge/tag/release approval.
+
+## Milestone 7 — documentation synchronization (Release Candidate)
+
+### Guards
+
+- **`tests/unit/DocumentationSyncTest.php`** (`@group documentation`, `@group release-audit`) — required doc files, `readme.txt` header/metadata vs plugin header, manual migration and uninstall statements, ROADMAP Milestone 7 closure, forbidden premature tag/release claims, documented composer commands, relative link resolution, architecture/security cross-references, `ReleaseZipInspector` requires `readme.txt`.
+- **`tests/unit/MigrationDocumentationTest.php`** — migration playbook structure and cross-links.
+- **`tests/unit/ReleaseAuditTest.php`** — overlapping metadata and hygiene guards.
+
+Merchant readme: [`readme.txt`](../readme.txt) (Stable tag 0.7.0). Developer readme: [`README.md`](../README.md).
+
+## Milestone 7 — v0.7.0 RC finalization (Commit 10)
+
+### Guards
+
+- **`DocumentationSyncTest`** — canonical version **0.7.0**, changelog entries, Milestone 7 complete, no pending-commit language, packaged ZIP metadata when `UMC_RELEASE_ZIP` is set.
+- **`ReleaseAuditTest`**, **`ReleaseZipInspector`**, **`composer release-audit`** — full RB1–RB15 gate at **0.7.0**.

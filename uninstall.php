@@ -2,9 +2,10 @@
 /**
  * Uninstall handler.
  *
- * Removes plugin settings only. Order snapshot meta (_umc_*) is intentionally
- * preserved forever: exchange-rate snapshots are permanent order data
- * (see docs/adr/0001-single-stock-base-price-model.md).
+ * Deletes plugin configuration only. All commerce audit data and per-user
+ * dismissal state are preserved forever (ADR-0009).
+ *
+ * Must stay aligned with UMC\PersistedKeys::uninstall_deleted_option_keys().
  *
  * @package UniversalMulticurrency
  */

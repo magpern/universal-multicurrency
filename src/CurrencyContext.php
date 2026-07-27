@@ -289,7 +289,12 @@ final class CurrencyContext {
 		// Display preference only; validated against the allow-list in the
 		// resolver. State changes happen in CurrencySwitcher, not here.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only currency preference, allow-list validated, no state change.
-		return isset( $_GET[ self::QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::QUERY_VAR ] ) ) : null;
+		if ( ! isset( $_GET[ self::QUERY_VAR ] ) ) {
+			return null;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Read-only preference; normalized in normalize_currency_code().
+		return $this->normalize_currency_code( wp_unslash( $_GET[ self::QUERY_VAR ] ) );
 	}
 
 	/**
@@ -302,15 +307,40 @@ final class CurrencyContext {
 
 		$value = WC()->session->get( self::SESSION_KEY );
 
-		return is_string( $value ) && '' !== $value ? $value : null;
+		return $this->normalize_currency_code( $value );
 	}
 
 	/**
 	 * Reads the selected code from the guest cookie, if present.
 	 */
 	private function read_cookie(): ?string {
-		return isset( $_COOKIE[ self::COOKIE_NAME ] )
-			? sanitize_text_field( wp_unslash( $_COOKIE[ self::COOKIE_NAME ] ) )
-			: null;
+		if ( ! isset( $_COOKIE[ self::COOKIE_NAME ] ) ) {
+			return null;
+		}
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Normalized in normalize_currency_code().
+		return $this->normalize_currency_code( wp_unslash( $_COOKIE[ self::COOKIE_NAME ] ) );
+	}
+
+	/**
+	 * Normalizes a currency candidate to an uppercase ISO-style code or null.
+	 *
+	 * Rejects malformed values at the input boundary so session/cookie/query
+	 * poisoning cannot propagate non-code strings toward resolution logic.
+	 *
+	 * @param mixed $value Raw candidate value.
+	 */
+	private function normalize_currency_code( mixed $value ): ?string {
+		if ( ! is_scalar( $value ) ) {
+			return null;
+		}
+
+		$code = strtoupper( trim( sanitize_text_field( (string) $value ) ) );
+
+		if ( 1 !== preg_match( '/^[A-Z]{3}$/', $code ) ) {
+			return null;
+		}
+
+		return $code;
 	}
 }

@@ -82,6 +82,17 @@ final class Plugin {
 			return;
 		}
 
+		add_action(
+			'init',
+			static function (): void {
+				load_plugin_textdomain(
+					'universal-multicurrency',
+					false,
+					dirname( plugin_basename( UMC_PLUGIN_FILE ) ) . '/languages'
+				);
+			}
+		);
+
 		$this->booted = true;
 
 		$settings = new Settings();

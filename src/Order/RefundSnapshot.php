@@ -25,6 +25,9 @@ namespace UMC\Order;
  */
 final class RefundSnapshot {
 
+	public const META_PARENT_TRANSACTION_CURRENCY = '_umc_parent_transaction_currency';
+	public const META_PARENT_RATE_IDENTITY        = '_umc_parent_rate_identity';
+
 	/**
 	 * Snapshot reader.
 	 *
@@ -115,8 +118,8 @@ final class RefundSnapshot {
 		}
 
 		return array(
-			'_umc_parent_transaction_currency' => $currency,
-			'_umc_parent_rate_identity'        => $snapshot->rate_identity(),
+			self::META_PARENT_TRANSACTION_CURRENCY => $currency,
+			self::META_PARENT_RATE_IDENTITY        => $snapshot->rate_identity(),
 		);
 	}
 }

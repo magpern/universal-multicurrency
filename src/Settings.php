@@ -28,6 +28,13 @@ final class Settings {
 	public const SCHEMA_VERSION = 1;
 
 	/**
+	 * Optional upgrade runner override (tests only).
+	 *
+	 * @var SettingsUpgrader|null
+	 */
+	private static ?SettingsUpgrader $upgrader = null;
+
+	/**
 	 * Cached, sanitized settings. Null until first load.
 	 *
 	 * @var array<string, mixed>|null
@@ -44,6 +51,22 @@ final class Settings {
 		if ( null !== $data ) {
 			$this->data = self::sanitize( $data );
 		}
+	}
+
+	/**
+	 * Overrides the upgrade runner (tests only).
+	 *
+	 * @param SettingsUpgrader|null $upgrader Runner to inject, or null to restore production default.
+	 */
+	public static function set_upgrader( ?SettingsUpgrader $upgrader ): void {
+		self::$upgrader = $upgrader;
+	}
+
+	/**
+	 * Resets the upgrade runner override (tests only).
+	 */
+	public static function reset_upgrader(): void {
+		self::$upgrader = null;
 	}
 
 	/**
@@ -162,10 +185,36 @@ final class Settings {
 	 */
 	public function get(): array {
 		if ( null === $this->data ) {
-			$this->data = self::sanitize( get_option( self::OPTION, array() ) );
+			$this->load_from_option();
 		}
 
 		return $this->data;
+	}
+
+	/**
+	 * Loads settings from the option, running schema upgrade when the option exists.
+	 */
+	private function load_from_option(): void {
+		$stored = get_option( self::OPTION, false );
+
+		if ( false === $stored ) {
+			$this->data = self::defaults();
+			return;
+		}
+
+		$upgrader = self::$upgrader ?? new SettingsUpgrader();
+		$result   = $upgrader->upgrade( $stored );
+
+		if ( $result->is_unsupported_future() || $result->is_failed() ) {
+			$this->data = self::defaults();
+			return;
+		}
+
+		$this->data = $result->settings();
+
+		if ( $result->should_persist() ) {
+			update_option( self::OPTION, $this->data );
+		}
 	}
 
 	/**

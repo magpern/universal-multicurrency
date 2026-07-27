@@ -96,7 +96,7 @@ dismissible. The settings-tab panel is always visible when findings exist.
 Dismissal is per user — other administrators still see the warning.
 
 *Consequences.* This is the first non-order persisted data outside `umc_settings`.
-It is deliberately not removed on uninstall (documented trade-off). Orphaned
+It is deliberately not removed on uninstall (see ADR-0009). Orphaned
 dismissal rows keyed to old fingerprints are harmless.
 
 ### 6. Diagnostics is the only namespace that knows third-party plugins exist

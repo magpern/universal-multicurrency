@@ -4,6 +4,43 @@ A running, continuously-maintained record of what each milestone changes so it
 can be safely deployed and, if needed, rolled back. Generic by design — no
 site-, host- or deployment-specific detail belongs here.
 
+## Contributor validation commands
+
+Canonical commands (see `composer.json`):
+
+| Command | Purpose |
+|---|---|
+| `composer phpcs` | PHPCS — 0 errors, 0 warnings required |
+| `composer test:unit` | Pure PHP unit suite |
+| `composer test:integration` | WordPress + WooCommerce integration (MySQL; `tests/bin/install-wp.sh`) |
+| `composer test:mutation` | Infection over Diagnostics scorer (PCOV) |
+| `composer make-pot` | Regenerate `languages/universal-multicurrency.pot` |
+| `composer make-pot:check` | Fail when committed POT is stale |
+| `composer audit` | Composer security audit (production deps) |
+| `composer release-audit` | Release-blocking RC gate — see [`RELEASE_AUDIT.md`](RELEASE_AUDIT.md) |
+
+Release zip build:
+
+```bash
+composer install --no-dev
+bash bin/build-zip.sh
+```
+
+Produces `dist/universal-multicurrency-0.7.0.zip`. The archive includes `readme.txt`,
+production `src/`, `vendor/`, and `languages/universal-multicurrency.pot`.
+
+Performance subset:
+
+```bash
+vendor/bin/phpunit -c phpunit.xml.dist --group performance
+vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
+```
+
+**Tag and release:** Git tag `v0.7.0` and GitHub release publication remain
+pending explicit approval after review — do not create without instruction.
+
+---
+
 ## Milestone 3 — classic cart, checkout & order currency (v0.3.0)
 
 ### Summary
@@ -490,3 +527,317 @@ explicit non-goals. Dismissal is per user and per fingerprint — other
 administrators still see active conflicts. One residual notice may appear on the
 plugin deactivation confirmation screen until the next request (PHP cannot
 undeclare classes mid-request).
+
+---
+
+## Milestone 7 — merchant migration documentation (Release Candidate)
+
+### Summary
+
+Documents the **manual** merchant cut-over path from another currency switcher.
+No runtime migration, foreign import, CSV parser, or admin import UI is added.
+Internal `umc_settings` schema 0→1 upgrade (`SettingsUpgrader`) was shipped in
+an earlier M7 commit; it never reads foreign plugin data.
+
+### Files created
+
+| Path | Purpose |
+|---|---|
+| `docs/MIGRATION.md` | Merchant migration playbook, checklist, FAQ, UMC CSV format spec (future only) |
+| `tests/unit/MigrationDocumentationTest.php` | Structural guard binding migration docs to ADR policy |
+
+### Files modified
+
+| Path | Change |
+|---|---|
+| `docs/ARCHITECTURE.md` | Link to `MIGRATION.md` |
+| `docs/COMPATIBILITY.md` | Supported/unsupported migration matrix |
+| `docs/ROADMAP.md` | Item 7 migration playbook progress |
+| `docs/DEPLOYMENT.md` | This record |
+| `README.md` | Documentation table entry |
+
+### New options / DB changes
+
+None. No schema version bump. No migrations beyond existing `SettingsUpgrader` 0→1.
+
+### Deployment sequence (stores arriving from another switcher)
+
+Follow [`docs/MIGRATION.md`](MIGRATION.md) in full. Summary:
+
+1. Backup database and plugin files; rehearse on staging.
+2. Export old switcher currencies/rates to a spreadsheet from its admin UI.
+3. Deactivate the old switcher — never run two runtime converters on live traffic.
+4. Install/activate UMC; recreate currencies and rates manually in WooCommerce → Settings → Multicurrency.
+5. Flush object/page cache; run the verification checklist in `MIGRATION.md`.
+6. Cut over production; record deployed commit here.
+
+### Rollback
+
+| Action | Effect |
+|---|---|
+| Roll back UMC plugin zip | Prior behaviour; `_umc_*` order meta **preserved** |
+| Re-enable old switcher | Deactivate UMC first; re-test on staging |
+| Uninstall UMC | Deletes `umc_settings` only (ADR-0009) |
+
+### Known limitations (M7 migration docs)
+
+- No automatic import from FOX/WOOCS, CURCY, WPML, YayCurrency, or any third-party switcher.
+- UMC CSV format is specified for possible future tooling only — no parser or admin UI in RC.
+- Historical order metadata and WooCommerce order totals are never re-converted.
+
+---
+
+## Milestone 7 — translation readiness (Release Candidate)
+
+### Summary
+
+Completes i18n audit for merchant-facing strings, adds canonical POT template,
+`load_plugin_textdomain()`, translator comments on ambiguous placeholders, and
+automated POT drift protection. No JavaScript shipped; RTL audit documented only.
+
+### Files created
+
+| Path | Purpose |
+|---|---|
+| `languages/universal-multicurrency.pot` | Canonical gettext template |
+| `bin/make-pot.sh` | Deterministic POT generation and `--check` drift guard |
+| `docs/TRANSLATION.md` | Text domain, POT workflow, JS status, RTL audit |
+| `tests/unit/TranslationReadinessTest.php` | Domain/POT/JS/RTL documentation guards |
+
+### Files modified
+
+| Path | Change |
+|---|---|
+| `src/Diagnostics/ConflictNotice.php` | i18n for evidence phrases and list conjunctions |
+| `src/Admin/OrderCurrencyMetaBox.php` | i18n for UTC label and manual rate source |
+| `src/SettingsUpgradeResult.php` | i18n for unsupported schema message |
+| `src/Plugin.php` | `load_plugin_textdomain()` on `init` |
+| `composer.json` | `make-pot` / `make-pot:check` scripts |
+| `.github/workflows/ci.yml` | `pot` job |
+| `bin/build-zip.sh` | Include `languages/` in release zip |
+| `docs/ROADMAP.md`, `README.md`, `CLAUDE.md`, `docs/TEST_STRATEGY.md` | Translation pointers |
+
+### New options / DB changes
+
+None.
+
+### Deployment sequence
+
+1. Deploy as usual; no settings migration.
+2. Translators may add `languages/universal-multicurrency-{locale}.mo` alongside the plugin.
+3. No runtime behaviour change for English-only stores.
+
+### Rollback
+
+Safe to prior release; `.mo` files from this release can remain harmlessly.
+
+### Known limitations (M7 translation)
+
+- No bundled locale `.mo` files in RC — POT only.
+- RTL audit documented; no dedicated `rtl.css` in RC.
+- No JavaScript i18n (no shipped JS).
+
+---
+
+## Milestone 7 — security audit (Release Candidate)
+
+### Summary
+
+Whole-plugin security review with code hardening, executable guards, and
+[`docs/SECURITY_REVIEW.md`](SECURITY_REVIEW.md). Zero unresolved Critical/High
+findings at Commit 6.
+
+### Files created
+
+| Path | Purpose |
+|---|---|
+| `docs/SECURITY_REVIEW.md` | Audit record by severity |
+| `tests/unit/SecuritySourceGuardTest.php` | Static security invariants |
+| `tests/integration/SecurityBehaviourTest.php` | Negative authorization/input tests |
+
+### Files modified
+
+| Path | Change |
+|---|---|
+| `src/CurrencyContext.php` | ISO currency code normalization at input boundary |
+| `src/Diagnostics/ConflictNotice.php` | Harden settings admin URL against open redirects |
+| `docs/ROADMAP.md`, `docs/TEST_STRATEGY.md`, `docs/DEPLOYMENT.md` | Security progress pointers |
+
+### Deployment sequence
+
+No deployment-specific steps. Behaviour changes are defensive only (malformed
+currency input ignored; external notice URLs rejected).
+
+### Rollback
+
+Safe to prior release.
+
+### Known limitations (M7 security)
+
+See accepted Medium/Low risks in `SECURITY_REVIEW.md` (currency switch nonce-less
+GET, guest cookie readability, site-owner filter trust boundary).
+
+---
+
+## Milestone 7 — performance baselines (Release Candidate)
+
+### Summary
+
+Deterministic query/write-count ceilings documented in
+[`docs/PERFORMANCE_BASELINES.md`](PERFORMANCE_BASELINES.md). No wall-clock CI
+thresholds. No transients or persistent object-cache keys in `src/`.
+
+### Files created
+
+| Path | Purpose |
+|---|---|
+| `docs/PERFORMANCE_BASELINES.md` | Baseline record and ceiling change process |
+| `tests/Support/PerformanceMetrics.php` | Scoped measurement helpers |
+| `tests/integration/PerformanceBaselineTest.php` | WordPress/WooCommerce ceiling tests |
+| `tests/unit/PerformanceBaselineTest.php` | Pure settings/upgrader idempotency |
+| `tests/unit/PerformanceGuardTest.php` | Documentation/constant sync; no cache calls |
+
+### Files modified
+
+| Path | Change |
+|---|---|
+| `.github/workflows/ci.yml` | `performance` job |
+| `docs/ROADMAP.md`, `docs/TEST_STRATEGY.md`, `docs/DEPLOYMENT.md` | Performance pointers |
+
+### Deployment sequence
+
+No deployment-specific steps. Ceilings are enforced in CI only.
+
+### Rollback
+
+Safe to prior release.
+
+---
+
+## Milestone 7 — release audit (Release Candidate)
+
+### Summary
+
+Executable release-blocking gate via `composer release-audit` /
+[`docs/RELEASE_AUDIT.md`](RELEASE_AUDIT.md). Validates repository hygiene,
+metadata, persisted-data contract, security/performance subsets, POT drift,
+`composer audit`, and the production release ZIP contents.
+
+### Files created
+
+| Path | Purpose |
+|---|---|
+| `bin/release-audit.sh` | Canonical orchestrator |
+| `bin/inspect-release-zip.php` | CLI ZIP inspection wrapper |
+| `docs/RELEASE_AUDIT.md` | Audit record (RB1–RB15) |
+| `tests/Support/ReleaseZipInspector.php` | Archive inclusion/exclusion rules |
+| `tests/unit/ReleaseAuditTest.php` | Repository and package guards |
+
+### Files modified
+
+| Path | Change |
+|---|---|
+| `composer.json` | `release-audit` script |
+| `bin/make-pot.sh` | `--allow-root`, wp-cli bootstrap for audit environments |
+| `.github/workflows/ci.yml` | `release-audit` job |
+| `docs/TEST_STRATEGY.md` | Release-audit section |
+
+### Deployment sequence
+
+Contributors and CI run `composer release-audit` before Commit 10 version bump.
+No merchant-facing runtime change.
+
+### Rollback
+
+Safe to prior release.
+
+---
+
+## Milestone 7 — documentation synchronization (Release Candidate)
+
+### Summary
+
+Synchronizes the complete documentation set with the implemented Release
+Candidate state. Adds minimal WordPress `readme.txt` (Stable tag **0.6.0**).
+Does **not** bump plugin version or close Milestone 7.
+
+### Files created
+
+| Path | Purpose |
+|---|---|
+| `readme.txt` | WordPress plugin readme (merchant-oriented) |
+| `tests/unit/DocumentationSyncTest.php` | Documentation/metadata/link guards |
+
+### Files modified
+
+| Path | Change |
+|---|---|
+| `README.md` | Developer readme aligned with readme.txt and RC commands |
+| `CLAUDE.md` | Contributor workflow including `composer release-audit` |
+| `docs/ROADMAP.md` | Milestone 7 item status; Commit 10 pending |
+| `docs/ARCHITECTURE.md` | RC governance section |
+| `docs/DEPLOYMENT.md` | Contributor commands; this record |
+| `docs/RELEASE_AUDIT.md` | readme.txt in ZIP inclusion list |
+| `docs/SECURITY_REVIEW.md` | SettingsUpgrader boundary note |
+| `docs/TEST_STRATEGY.md` | Documentation sync guards |
+| `tests/Support/ReleaseZipInspector.php` | Require `readme.txt` in release ZIP |
+
+### Deployment sequence
+
+No runtime change. Rebuild release zip after adding `readme.txt`:
+
+```bash
+composer install --no-dev
+bash bin/build-zip.sh
+composer release-audit
+```
+
+### Rollback
+
+Safe to prior release; remove `readme.txt` only if downgrading before Commit 9.
+
+### Known limitations (M7 documentation)
+
+- No bundled locale `.mo` files (documented in `readme.txt` and `TRANSLATION.md`).
+- UMC CSV format remains specification-only (`MIGRATION.md`).
+
+---
+
+## Milestone 7 — v0.7.0 Release Candidate finalization (Commit 10)
+
+### Summary
+
+Finalizes the repository as **v0.7.0** Release Candidate: version bump, changelog,
+roadmap closure, release-audit record update, documentation guards, and validated
+production ZIP. Does **not** create Git tag, GitHub release, merge, or PR closure.
+
+### Files modified
+
+| Path | Change |
+|---|---|
+| `universal-multicurrency.php` | Version → **0.7.0** (`Version:` header + `UMC_VERSION`) |
+| `readme.txt` | Stable tag **0.7.0**; 0.7.0 changelog; retains 0.6.0 history |
+| `README.md` | Current RC **0.7.0**; Milestone 7 complete; tag/release pending |
+| `docs/ROADMAP.md` | Milestone 7 **complete**; all work items complete |
+| `docs/RELEASE_AUDIT.md` | Closure record; RB results at **0.7.0** |
+| `docs/ARCHITECTURE.md`, `docs/DEPLOYMENT.md`, `docs/TEST_STRATEGY.md`, `CLAUDE.md` | Final RC state |
+| `tests/unit/DocumentationSyncTest.php` | Version **0.7.0** and closure guards |
+| `tests/unit/MigrationDocumentationTest.php`, `tests/unit/ReleaseAuditTest.php` | Packaged version checks |
+
+### Deployment sequence
+
+1. Run `composer release-audit` on the **0.7.0** tree.
+2. Build `dist/universal-multicurrency-0.7.0.zip` with `composer install --no-dev` + `bin/build-zip.sh`.
+3. Deploy the zip; no settings schema bump beyond existing v0→v1 path.
+4. Record deployed commit here after production cut-over.
+
+### Rollback
+
+Downgrade to **0.6.0** zip if needed. Order snapshots and `_umc_*` meta unchanged.
+Settings schema remains v1.
+
+### Post-review actions (out of scope for Commit 10)
+
+- Create and push Git tag `v0.7.0`
+- Publish GitHub release with `dist/universal-multicurrency-0.7.0.zip`
+- Merge `milestone-7-release-candidate` after approval

@@ -23,19 +23,25 @@
     **Deferred from this line (explicit non-goals):** community-submitted
     built-in detector labels without maintainer verification; automatic
     remediation of any kind.
-7.  Release candidate — **not closed by v0.6.0.** Remaining objectives:
-    - **Migration handling** — upgrade paths, schema-version bumps, and the
-      story for stores arriving from another switcher
-    - **Uninstall audit** — inventory every key the plugin has ever written;
-      decision on orphaned dismissal meta; tighten the structural guard to pin
-      the real invariant (no `_umc_*` order meta deleted)
-    - **Translation readiness** — plugin-wide i18n audit, `.pot` generation,
-      translator comments, RTL/locale review
-    - **Whole-plugin security review** — M2–M5 surfaces (price filters, Store
-      API extension data, order snapshot writes, switcher redirect), not only
-      Diagnostics
-    - **Performance baseline** — catalogue query counts, cart recalculation
-      cost, Store API timing, object-cache behaviour under load
+7.  Release candidate (**v0.7.0**) — **complete** in this repository.
+
+    | Milestone 7 work item | Status |
+    |---|---|
+    | Persisted-data inventory | **Complete** |
+    | Uninstall policy (ADR-0009) | **Complete** |
+    | Settings upgrade framework (schema v1, v0→v1 only) | **Complete** |
+    | Merchant migration documentation | **Complete** — [`docs/MIGRATION.md`](MIGRATION.md) |
+    | Translation readiness | **Complete** — [`docs/TRANSLATION.md`](TRANSLATION.md) |
+    | Security audit | **Complete** — [`docs/SECURITY_REVIEW.md`](SECURITY_REVIEW.md) |
+    | Performance baselines | **Complete** — [`docs/PERFORMANCE_BASELINES.md`](PERFORMANCE_BASELINES.md) |
+    | Release audit | **Complete** — [`docs/RELEASE_AUDIT.md`](RELEASE_AUDIT.md), `composer release-audit` |
+    | Documentation synchronization | **Complete** — `readme.txt`, aligned doc set |
+    | Version bump and RC closure | **Complete** — repository prepared for **v0.7.0** |
+
+    **Resulting release candidate:** **v0.7.0** (`UMC_VERSION` and plugin header).
+
+    **Not yet performed:** Git tag `v0.7.0`, GitHub release publication, branch
+    merge, or pull-request closure — pending explicit approval after review.
 
 Future: Auto rates, GeoIP, reporting, APIs.
 

@@ -13,7 +13,11 @@ The plugin is fully standalone. Its only plugin dependency is WooCommerce
 FOX / WOOCS / WooCommerce Currency Switcher or any helper plugin, and reads
 none of their classes, functions, constants, options, cookies or sessions. All
 persisted state lives in the plugin's own `umc_settings` option (plus permanent
-order snapshot meta in later milestones). See ADR-0003.
+order snapshot meta in later milestones). The authoritative inventory of every
+key is [`docs/PERSISTED_DATA.md`](PERSISTED_DATA.md), enforced by
+`PersistedKeys` and `PersistedKeysInventoryTest`. Merchant migration from
+another currency switcher is documented in [`docs/MIGRATION.md`](MIGRATION.md)
+(manual path only; no foreign import). See ADR-0003.
 
 ## Layers
 
@@ -51,7 +55,7 @@ is unit-testable without a bootstrap. It never registers hooks.
 | Class | Contract |
 |---|---|
 | `Currency` | Immutable value object. Code validated as `^[A-Z]{3}$` (format only, not ISO-4217 membership — WooCommerce allows custom codes). Decimals 0–4. Position one of `left`, `right`, `left_space`, `right_space`. |
-| `Settings` | Sole owner of `umc_settings`. `defaults()`/`sanitize()` are pure and never throw; sanitize cleans or drops invalid input (invalid decimals fall back to 2, unusable rates are blanked while the row is kept). Constructible from in-memory data for testing. |
+| `Settings` | Sole owner of `umc_settings`. `defaults()`/`sanitize()` are pure and never throw; sanitize cleans or drops invalid input (invalid decimals fall back to 2, unusable rates are blanked while the row is kept). Constructible from in-memory data for testing. On first load from the option, {@see SettingsUpgrader} may migrate legacy schema version 0 stores to version 1, normalize through `sanitize()`, and persist only when the stored value changes. |
 | `RateProvider` | The only rate abstraction (an implementation seam for future automatic rates). `get_rate(base, target)` returns `'1'` for same-currency, a positive decimal string, or `null`. |
 | `ManualRateProvider` | Reads admin-entered rates from `Settings`; performs no arithmetic. |
 | `Converter` | `convert(amount, target)` and the pure static `apply_rate()` / `round_to_string()`. Rounds half-up to the target decimals; base target is a rate-1 no-op. See ADR-0002. |
@@ -60,6 +64,34 @@ is unit-testable without a bootstrap. It never registers hooks.
 Exceptions live in `UMC\Exceptions` and all implement the marker interface
 `UMC\Exceptions\Exception` for catch-all handling, while extending the most
 fitting SPL type (`InvalidArgumentException` / `RuntimeException`).
+
+### Settings schema upgrade (Milestone 7)
+
+`Settings::SCHEMA_VERSION` is **1** and must not be bumped unless a genuine
+settings shape change requires it. There is no artificial version 2 in production.
+
+Legacy stores (schema version **0**) persisted only a `currencies` array inside
+`umc_settings`, with no explicit `schema_version` key. The sole production
+migration (`SettingsUpgrader::migrate_0_to_1`) introduces
+`schema_version: 1` and copies the currency rows unchanged; {@see Settings::sanitize()}
+then produces the canonical row shape.
+
+`SettingsUpgrader` responsibilities:
+
+- parse the stored schema version (missing/malformed → 0)
+- reject unsupported **future** versions without persisting partial results
+- apply migrations in ascending target-version order
+- sanitize through `Settings::sanitize()`
+- persist only when migration or normalization changes the stored option value
+- remain idempotent (`v1 → v1` performs no migration and avoids writes when already canonical)
+
+Future migrations register in `SettingsUpgrader::production_migrations()` keyed by
+the version they produce. Chaining is proven in unit tests via injected migration
+maps (for example `0 → 1 → 2 → 3`) without exposing fake versions in production.
+
+When the option is **absent**, `Settings::get()` returns defaults without writing.
+When upgrade fails, in-memory callers receive defaults and the stored option is
+left untouched.
 
 ## Storefront integration layer (Milestone 2)
 
@@ -260,3 +292,30 @@ no class reference crosses the Admin boundary.
 5. **A merchant warning can never influence monetary behaviour.** No price, rate, cart total, coupon, shipping cost, tax, gateway availability, order, refund, or snapshot may differ because a conflict was detected, graded, rendered, or dismissed.
 6. **Detection observes; it never acts.** No plugin is activated, deactivated, modified, or configured; no plugin option is written; no foreign data is read beyond passive existence checks.
 7. **Detection is free everywhere it is not needed.** Zero hooks, zero probes, zero queries, and zero autoloaded Diagnostics classes on frontend, Store API, REST, AJAX, cron, and CLI requests.
+
+## Release Candidate governance (Milestone 7)
+
+The Release Candidate adds documentation, guards, and audit gates without
+changing monetary behaviour. Authoritative records:
+
+| Topic | Document / gate |
+|---|---|
+| Standalone architecture (no foreign runtime coupling) | ADR-0003, `DiagnosticsBoundaryGuardTest`, `ReleaseAuditTest` |
+| Passive conflict detection | ADR-0007, `DiagnosticsGuardTest` |
+| Persisted-key inventory | [`PERSISTED_DATA.md`](PERSISTED_DATA.md), `PersistedKeys`, `PersistedKeysInventoryTest` |
+| Uninstall retention | ADR-0009, `uninstall.php`, `UninstallPolicyGuardTest` |
+| Manual merchant migration only | [`MIGRATION.md`](MIGRATION.md) — no foreign import, no RC CSV parser |
+| Settings schema | `Settings::SCHEMA_VERSION === 1`; sole production migration v0→v1 via `SettingsUpgrader`; no artificial v2 |
+| Translation readiness | [`TRANSLATION.md`](TRANSLATION.md), `languages/universal-multicurrency.pot`, `composer make-pot:check` |
+| Security audit | [`SECURITY_REVIEW.md`](SECURITY_REVIEW.md) — zero open Critical/High; accepted M/L risks documented |
+| Performance baselines | [`PERFORMANCE_BASELINES.md`](PERFORMANCE_BASELINES.md) — deterministic query/write ceilings only |
+| Release audit | [`RELEASE_AUDIT.md`](RELEASE_AUDIT.md), `composer release-audit` — release-blocking repository gate |
+
+`SettingsUpgrader` uses a single broad `catch ( \Throwable )` at the upgrade
+boundary so corrupt stored options fail closed to defaults without persisting
+partial migrations. `StorefrontGuardTest` allowlists only `SettingsUpgrader.php`
+for that pattern.
+
+Plugin version is **0.7.0** (Release Candidate). Milestone 7 is complete in this
+repository. Git tag and GitHub release publication remain pending explicit
+approval after review.
