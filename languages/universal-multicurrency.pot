@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Universal Multicurrency for WooCommerce 0.8.0\n"
+"Project-Id-Version: Universal Multicurrency for WooCommerce 0.8.1\n"
 "Report-Msgid-Bugs-To: https://github.com/magpern/universal-multicurrency/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,7 +23,7 @@ msgstr ""
 
 #. Description of the plugin
 #: universal-multicurrency.php
-msgid "Unlimited currencies with manual exchange rates. WooCommerce remains the single source of truth for products and inventory; currency affects monetary values only."
+msgid "Unlimited currencies with manual or automatic exchange rates. WooCommerce remains the single source of truth for products and inventory; currency affects monetary values only."
 msgstr ""
 
 #. Author of the plugin

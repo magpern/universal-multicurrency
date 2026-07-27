@@ -26,7 +26,7 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Produces `dist/universal-multicurrency-0.8.0.zip`. The archive includes `readme.txt`,
+Produces `dist/universal-multicurrency-0.8.1.zip`. The archive includes `readme.txt`,
 production `src/`, `vendor/`, and `languages/universal-multicurrency.pot`.
 
 Performance subset:
@@ -36,8 +36,8 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release:** Git tag **`v0.8.0`** and GitHub release published. Future
-tags require explicit approval before creation.
+**Prepared release:** **v0.8.1** on `main`. Git tag and GitHub release are not
+yet created — do not create without explicit approval.
 
 ---
 
@@ -922,5 +922,39 @@ scheduling/timestamp behaviour plus test and documentation closure:
 | `88bfa44` | `CEILING_RATE_UPDATE_NOT_MODIFIED_WRITES = 0` |
 | `045ac34` | Site Health and controller round-trip integration tests; Milestone 8 documentation synchronization |
 
-A store already running v0.8.0 can take these by deploying a `main` build; there
+A store already running v0.8.0 can take these by deploying a **0.8.1** build; there
 is no data change and no migration step.
+
+---
+
+## v0.8.1 — maintenance release (prepared)
+
+### Summary
+
+Packages the post-v0.8.0 maintenance work on `main` under version **0.8.1**.
+No settings schema bump; no new merchant-facing automatic-rate features.
+
+### Merchant-visible changes
+
+| Area | Change |
+|---|---|
+| Recurring updates | Changing `rate_update_interval` now reschedules the Action Scheduler job (`0eee862`) |
+| Admin rate edits | Editing manual rate, adjustment, or per-currency rate mode refreshes `rate_updated_at` (`b826481`) |
+| Plugin metadata | Header description reflects manual and automatic exchange-rate support (`7ee8e9b`) |
+
+### Repository-only alignment (not user-facing features)
+
+Post-v0.8.0 review closure, documentation synchronization, regression guards, and
+the uninstall performance ceiling (`045ac34`, `470ba45`, `7ee8e9b`).
+
+### Deployment sequence
+
+1. Run `composer release-audit` on the **0.8.1** tree.
+2. Build `dist/universal-multicurrency-0.8.1.zip` with `composer install --no-dev`
+   + `bin/build-zip.sh`.
+3. Deploy over **0.8.0** in place. No migration step.
+
+### Rollback
+
+Downgrade to the **0.8.0** zip if needed. Settings schema remains v2; order
+snapshots are unaffected.

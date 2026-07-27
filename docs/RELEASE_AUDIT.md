@@ -1,26 +1,27 @@
-# Release audit — Milestone 8 (v0.8.0)
+# Release audit — v0.8.1 maintenance release
 
-Executable release-blocking gate for Universal Multicurrency **v0.8.0**. This
-document records scope, criteria, commands, audit results, and the Milestone 8
-closure state.
+Executable release-blocking gate for Universal Multicurrency **v0.8.1**. This
+document records scope, criteria, commands, audit results, and the current
+release-preparation state.
 
 **Governing question:** If we published this release tomorrow, is there anything
 left in the repository that clearly should not ship?
 
-**Repository status:** **released as v0.8.0**. The automatic-exchange-rate
-milestone shipped, and the post-release review findings recorded below are all
-closed. Milestone 9 has not started.
+**Repository status:** **prepared for v0.8.1** on `main`. Milestone 8 shipped at
+**v0.8.0**; post-release review findings are closed. Git tag **`v0.8.1`** and
+GitHub release publication are **not yet created** — pending explicit approval.
+Milestone 9 has not started.
 
 ---
 
-## Release Candidate closure record
+## Release closure record
 
 | Item | Value |
 |---|---|
-| Version | **0.8.0** |
-| Settings schema | **2** |
+| Version | **0.8.1** |
+| Settings schema | **2** (unchanged from v0.8.0) |
 | Persisted-data inventory version | **3** |
-| Production migrations | **v0 → v1**, **v1 → v2** |
+| Production migrations | **v0 → v1**, **v1 → v2** (unchanged) |
 | Unresolved Critical security findings | **0** |
 | Unresolved High security findings | **0** |
 | Unresolved release blockers | **0** |
@@ -29,9 +30,38 @@ closed. Milestone 9 has not started.
 | POT drift | **Passing** |
 | Dependency audit (`composer audit`) | **Passing** |
 | Package inspection | **Passing** |
-| Git tag `v0.8.0` | **Created** |
-| GitHub release `v0.8.0` | **Published** |
-| Milestone 8 | **Complete** — released and review-closed |
+| Git tag `v0.8.0` | **Created** (superseded) |
+| GitHub release `v0.8.0` | **Published** (superseded) |
+| Git tag `v0.8.1` | **Not yet created** |
+| GitHub release `v0.8.1` | **Not yet published** |
+| Milestone 8 | **Complete** — released and review-closed at v0.8.0 |
+
+---
+
+## v0.8.1 maintenance scope
+
+Prepared maintenance release. **No settings schema change** — safe in-place
+upgrade from v0.8.0.
+
+### Merchant-visible fixes
+
+| Change | Commit |
+|---|---|
+| Recurring rate updates reschedule when `rate_update_interval` changes | `0eee862` |
+| Merchant rate edits refresh `rate_updated_at` when rate inputs change | `b826481` |
+| Plugin header description reflects manual and automatic exchange rates | `7ee8e9b` |
+
+### Repository alignment shipped with 0.8.1 (not new user-facing features)
+
+| Change | Commit |
+|---|---|
+| v1 → v2 conversion-fidelity regression guard | `137f129` |
+| HTTP 304 zero-`umc_settings`-write performance ceiling | `88bfa44` |
+| Site Health rate diagnostics integration coverage | `045ac34` |
+| Manual rate-update controller round-trip integration coverage | `045ac34` |
+| Milestone 8 documentation synchronization | `045ac34` |
+| Documentation consistency audit | `470ba45` |
+| Uninstall performance guard aligned to both configuration options | `7ee8e9b` |
 
 ---
 
@@ -164,7 +194,7 @@ Exit code **non-zero** when any release-blocking step fails.
 
 ## Release-blocking criteria
 
-| ID | Criterion | Result (v0.8.0) |
+| ID | Criterion | Result (v0.8.1) |
 |---|---|---|
 | RB1 | No tracked secrets, dumps, caches, or `dist/` artifacts | **Pass** |
 | RB2 | `docs/plans/` remains untracked (local-only planning) | **Pass** |
@@ -212,10 +242,10 @@ needles remain confined to `Diagnostics/DetectorManifest.php` only.
 
 ## Metadata and compatibility
 
-| Field | Value (v0.8.0) |
+| Field | Value (v0.8.1) |
 |---|---|
-| Plugin version (header + `UMC_VERSION`) | **0.8.0** |
-| readme.txt Stable tag | **0.8.0** |
+| Plugin version (header + `UMC_VERSION`) | **0.8.1** |
+| readme.txt Stable tag | **0.8.1** |
 | Text domain | `universal-multicurrency` |
 | Requires PHP | 8.1 |
 | Requires Plugins | woocommerce |
@@ -297,11 +327,11 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Expected artifact: **`dist/universal-multicurrency-0.8.0.zip`**
+Expected artifact: **`dist/universal-multicurrency-0.8.1.zip`**
 
 ### Included
 
-- `universal-multicurrency.php` (header Version **0.8.0**), `uninstall.php`, `readme.txt` (Stable tag **0.8.0**)
+- `universal-multicurrency.php` (header Version **0.8.1**), `uninstall.php`, `readme.txt` (Stable tag **0.8.1**)
 - `src/` production PHP
 - `vendor/autoload.php` (+ production autoload only)
 - `languages/universal-multicurrency.pot`

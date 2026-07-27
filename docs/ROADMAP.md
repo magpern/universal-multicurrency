@@ -80,6 +80,17 @@
     providers beyond Frankfurter; historical rate storage; per-currency
     provider selection.
 
+    ### v0.8.1 maintenance release (prepared)
+
+    | Item | Status |
+    |---|---|
+    | Version bump to **0.8.1** | **Prepared** — tag and GitHub release pending |
+    | Scheduler interval reconciliation | **Shipped** — `0eee862` |
+    | Merchant-edit `rate_updated_at` correction | **Shipped** — `b826481` |
+    | Documentation and guard alignment | **Shipped** — `470ba45`, `7ee8e9b` |
+
+    No settings schema change. Safe in-place upgrade from **0.8.0**.
+
 ## Future milestones — not started, not implemented
 
 None of the following exists in the codebase today:

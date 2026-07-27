@@ -25,7 +25,7 @@ use ZipArchive;
  */
 final class DocumentationSyncTest extends TestCase {
 
-	private const CURRENT_VERSION = '0.8.0';
+	private const CURRENT_VERSION = '0.8.1';
 
 	/**
 	 * Tracked documentation sources that must exist and stay internally consistent.
@@ -220,9 +220,10 @@ final class DocumentationSyncTest extends TestCase {
 		$this->assertSame( 'universal-multicurrency', $header['Text Domain'] ?? null );
 	}
 
-	public function test_readme_txt_changelog_includes_080_and_retains_history(): void {
+	public function test_readme_txt_changelog_includes_current_and_retains_history(): void {
 		$readme = $this->read( 'readme.txt' );
 
+		$this->assertStringContainsString( '= ' . self::CURRENT_VERSION . ' =', $readme );
 		$this->assertStringContainsString( '= 0.8.0 =', $readme );
 		$this->assertStringContainsString( '= 0.7.0 =', $readme );
 		$this->assertStringContainsString( '= 0.6.0 =', $readme );
@@ -324,12 +325,13 @@ final class DocumentationSyncTest extends TestCase {
 	public function test_release_audit_records_milestone_eight_closure_state(): void {
 		$audit = $this->read( 'docs/RELEASE_AUDIT.md' );
 
-		$this->assertStringContainsString( 'Release Candidate closure record', $audit );
-		$this->assertStringContainsString( 'Version | **0.8.0**', $audit );
+		$this->assertStringContainsString( 'Release closure record', $audit );
+		$this->assertStringContainsString( 'Version | **' . self::CURRENT_VERSION . '**', $audit );
 		$this->assertStringContainsString( 'Unresolved release blockers | **0**', $audit );
 		$this->assertStringContainsString( 'Open Milestone 8 review findings | **0**', $audit );
+		$this->assertStringContainsString( 'Git tag `v' . self::CURRENT_VERSION . '` | **Not yet created**', $audit );
+		$this->assertStringContainsString( 'GitHub release `v' . self::CURRENT_VERSION . '` | **Not yet published**', $audit );
 		$this->assertStringContainsString( 'Git tag `v0.8.0` | **Created**', $audit );
-		$this->assertStringContainsString( 'GitHub release `v0.8.0` | **Published**', $audit );
 		$this->assertStringContainsString( 'Milestone 8 | **Complete**', $audit );
 		$this->assertStringContainsString( '## Post-release review findings', $audit );
 	}
@@ -354,7 +356,7 @@ final class DocumentationSyncTest extends TestCase {
 		$this->assertStringContainsString( 'composer release-audit', $deployment );
 		$this->assertStringContainsString( 'bin/build-zip.sh', $deployment );
 		$this->assertStringContainsString( 'composer install --no-dev', $deployment );
-		$this->assertStringContainsString( 'universal-multicurrency-0.8.0.zip', $deployment );
+		$this->assertStringContainsString( 'universal-multicurrency-' . self::CURRENT_VERSION . '.zip', $deployment );
 	}
 
 	public function test_settings_schema_documentation_matches_implementation(): void {

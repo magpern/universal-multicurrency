@@ -4,7 +4,7 @@ Tags: woocommerce, currency, multicurrency, exchange rates, money
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.8.0
+Stable tag: 0.8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -50,6 +50,12 @@ The plugin ships a POT template (`languages/universal-multicurrency.pot`) for tr
 
 == Changelog ==
 
+= 0.8.1 =
+* Fixes recurring rate-update scheduling when the configured interval changes
+* Refreshes rate timestamps when merchants edit manual rate, adjustment, or per-currency rate mode inputs
+* Corrects plugin header description to reflect manual and automatic exchange-rate support
+* No settings schema change; safe in-place upgrade from 0.8.0
+
 = 0.8.0 =
 * Automatic exchange rates via Frankfurter (`ExchangeRateSource`, conditional HTTP caching)
 * Settings schema v2: `manual_rate`, `provider_rate`, `merchant_adjustment`, global/per-currency rate modes
@@ -72,6 +78,9 @@ The plugin ships a POT template (`languages/universal-multicurrency.pot`) for tr
 * Storefront conversion, classic cart/checkout, order snapshots, historical order display, refunds, and Store API / blocks parity (milestones 2–5)
 
 == Upgrade Notice ==
+
+= 0.8.1 =
+Maintenance release. No settings schema change — safe upgrade from 0.8.0. Requires WooCommerce 8.2+, PHP 8.1+, and HPOS.
 
 = 0.8.0 =
 Upgrades settings schema v1→v2 automatically (`rate` becomes `manual_rate`; default rate mode stays manual). Requires WooCommerce 8.2+, PHP 8.1+, and HPOS.

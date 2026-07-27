@@ -5,9 +5,9 @@ rates from an exchange-rate provider. Products and inventory stay in the store's
 base currency; conversion happens at runtime on storefront, cart, checkout, and
 Store API surfaces. Orders carry a permanent exchange-rate snapshot.
 
-**Current release:** **v0.8.0** (plugin header and `UMC_VERSION`) — automatic
-exchange rates. Milestone 8 shipped and its post-release review is closed; see
-[`docs/RELEASE_AUDIT.md`](docs/RELEASE_AUDIT.md).
+**Prepared release:** **v0.8.1** (plugin header and `UMC_VERSION`) — packages
+post-v0.8.0 maintenance fixes. Tag and GitHub release await explicit approval;
+see [`docs/RELEASE_AUDIT.md`](docs/RELEASE_AUDIT.md).
 
 ## Invariants
 
@@ -34,7 +34,7 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Produces `dist/universal-multicurrency-0.8.0.zip`. Upload and activate through
+Produces `dist/universal-multicurrency-0.8.1.zip`. Upload and activate through
 WordPress, or symlink the plugin directory into `wp-content/plugins/`.
 WooCommerce must be active first. The release zip includes `readme.txt`,
 production `src/`, `vendor/`, and `languages/universal-multicurrency.pot`.
@@ -71,6 +71,12 @@ CI legs, and passive conflict detectors.
 
 ## Changelog
 
+### 0.8.1 — Maintenance release
+
+Fixes recurring rate-update scheduling when the configured interval changes;
+refreshes `rate_updated_at` when merchants edit rate inputs; corrects the plugin
+header description. No settings schema change — safe upgrade from 0.8.0.
+
 ### 0.8.0 — Automatic exchange rates
 
 Provider abstraction with the Frankfurter source, Action Scheduler recurring
@@ -95,7 +101,7 @@ five-leg CI matrix, and `docs/COMPATIBILITY.md`.
 
 | Document | Contents |
 |---|---|
-| [`readme.txt`](readme.txt) | WordPress.org–oriented plugin readme (Stable tag 0.8.0) |
+| [`readme.txt`](readme.txt) | WordPress.org–oriented plugin readme (Stable tag 0.8.1) |
 | [`docs/PRODUCT_REQUIREMENTS.md`](docs/PRODUCT_REQUIREMENTS.md) | Goals and non-goals |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Layers, invariants, collaborators, exchange-rate layer |
 | [`docs/HOOKS.md`](docs/HOOKS.md) | Every hook registered, and every extension point provided |
@@ -108,7 +114,7 @@ five-leg CI matrix, and `docs/COMPATIBILITY.md`.
 | [`docs/SECURITY_REVIEW.md`](docs/SECURITY_REVIEW.md) | Security audit record and accepted residual risks |
 | [`docs/PERFORMANCE_BASELINES.md`](docs/PERFORMANCE_BASELINES.md) | Deterministic performance ceilings |
 | [`docs/RELEASE_AUDIT.md`](docs/RELEASE_AUDIT.md) | Executable release-blocking audit record |
-| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Milestone status (Milestone 8 released at v0.8.0) |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Milestone status (Milestone 8 at v0.8.0; v0.8.1 maintenance prepared) |
 | [`docs/adr/`](docs/adr/) | Architecture decision records |
 
 ## License
