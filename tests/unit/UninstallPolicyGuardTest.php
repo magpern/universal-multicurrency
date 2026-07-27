@@ -11,6 +11,7 @@ namespace UMC\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 use UMC\PersistedKeys;
+use UMC\Rates\RateUpdateState;
 use UMC\Settings;
 
 /**
@@ -71,9 +72,9 @@ final class UninstallPolicyGuardTest extends TestCase {
 		);
 	}
 
-	public function test_uninstall_deleted_option_keys_match_settings_option(): void {
+	public function test_uninstall_deleted_option_keys_match_persisted_inventory(): void {
 		$this->assertSame(
-			array( Settings::OPTION ),
+			array( Settings::OPTION, RateUpdateState::OPTION ),
 			PersistedKeys::uninstall_deleted_option_keys()
 		);
 	}

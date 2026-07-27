@@ -29,6 +29,7 @@ final class SecuritySourceGuardTest extends TestCase {
 		'CurrencySwitcher.php',
 		'NoticeDismissal.php',
 		'SettingsPage.php',
+		'ExchangeRateSettingsField.php',
 		'OrderPayCurrencyLock.php',
 		'RateUpdateController.php',
 	);
@@ -43,6 +44,8 @@ final class SecuritySourceGuardTest extends TestCase {
 		'Plugin.php',
 		'WordPressEnvironmentProbe.php',
 		'RateUpdateState.php',
+		'ExchangeRateSettingsField.php',
+		'CurrencyTableField.php',
 	);
 
 	private function root(): string {

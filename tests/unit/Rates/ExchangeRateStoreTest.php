@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace UMC\Tests\Unit\Rates;
 
 use PHPUnit\Framework\TestCase;
+use UMC\Tests\Unit\Doubles\ThrowingRateUpdateState;
 use UMC\Rates\ExchangeRateStore;
 use UMC\Rates\ProviderMetadata;
 use UMC\Rates\RateFetchResult;
@@ -25,8 +26,8 @@ final class ExchangeRateStoreTest extends TestCase {
 	public function test_settings_provider_rate_survives_state_save_failure(): void {
 		$settings = new Settings(
 			array(
-				'rate_mode'    => Settings::RATE_MODE_AUTOMATIC,
-				'currencies'   => array(
+				'rate_mode'  => Settings::RATE_MODE_AUTOMATIC,
+				'currencies' => array(
 					'SEK' => array(
 						'enabled'     => true,
 						'manual_rate' => '',
@@ -36,16 +37,11 @@ final class ExchangeRateStoreTest extends TestCase {
 			)
 		);
 
-		$throwing_state = new class( null ) extends RateUpdateState {
-			public function save( array $state ): void {
-				unset( $state );
-				throw new \RuntimeException( 'Simulated state write failure.' );
-			}
-		};
+		$throwing_state = new ThrowingRateUpdateState();
 
 		$store = new ExchangeRateStore( $settings, $throwing_state, 'EUR', 'lock' );
 
-		$meta = new ProviderMetadata( ProviderMetadata::SCHEMA_VERSION, 'frankfurter', '2026-07-24' );
+		$meta   = new ProviderMetadata( ProviderMetadata::SCHEMA_VERSION, 'frankfurter', '2026-07-24' );
 		$result = RateFetchResult::success(
 			array( new RateQuote( 'EUR', 'SEK', '11.5' ) ),
 			array(),

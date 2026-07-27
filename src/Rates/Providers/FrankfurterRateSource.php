@@ -66,27 +66,46 @@ final class FrankfurterRateSource implements ExchangeRateSource {
 		'ZAR',
 	);
 
+	/**
+	 * HTTP transport for outbound requests.
+	 *
+	 * @var HttpTransport
+	 */
 	private HttpTransport $transport;
 
 	/**
+	 * Creates the Frankfurter rate source.
+	 *
 	 * @param HttpTransport|null $transport HTTP transport (defaults to WordPress in production wiring).
 	 */
 	public function __construct( ?HttpTransport $transport = null ) {
 		$this->transport = $transport ?? new \UMC\Rates\Http\WordPressHttpTransport();
 	}
 
+	/**
+	 * The provider identifier.
+	 */
 	public function id(): string {
 		return self::PROVIDER_ID;
 	}
 
+	/**
+	 * The human-readable provider label.
+	 */
 	public function label(): string {
 		return 'Frankfurter';
 	}
 
+	/**
+	 * Whether conditional HTTP requests are supported.
+	 */
 	public function supports_conditional_requests(): bool {
 		return true;
 	}
 
+	/**
+	 * Whether historical rate endpoints are supported.
+	 */
 	public function supports_historical_rates(): bool {
 		return true;
 	}
@@ -117,7 +136,9 @@ final class FrankfurterRateSource implements ExchangeRateSource {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @param string[] $target_codes Target currency codes (never empty).
+	 * @param string                $base_code    Base currency code.
+	 * @param string[]              $target_codes Target currency codes (never empty).
+	 * @param ProviderMetadata|null $previous     Previous batch metadata for conditional requests.
 	 */
 	public function fetch( string $base_code, array $target_codes, ?ProviderMetadata $previous = null ): RateFetchResult {
 		$base_code    = strtoupper( trim( $base_code ) );
@@ -190,6 +211,9 @@ final class FrankfurterRateSource implements ExchangeRateSource {
 	}
 
 	/**
+	 * Builds conditional request headers from previous metadata.
+	 *
+	 * @param ProviderMetadata|null $previous Previous batch metadata.
 	 * @return array<string, string>
 	 */
 	private function conditional_headers( ?ProviderMetadata $previous ): array {
@@ -215,7 +239,11 @@ final class FrankfurterRateSource implements ExchangeRateSource {
 	}
 
 	/**
+	 * Builds a total-failure fetch result for every target code.
+	 *
 	 * @param string[] $target_codes Target currency codes.
+	 * @param string   $reason       Failure reason code.
+	 * @param int      $fetched_at   Unix timestamp of the fetch attempt.
 	 */
 	private function total_failure( array $target_codes, string $reason, int $fetched_at ): RateFetchResult {
 		$meta     = new ProviderMetadata( ProviderMetadata::SCHEMA_VERSION, self::PROVIDER_ID );
@@ -233,6 +261,11 @@ final class FrankfurterRateSource implements ExchangeRateSource {
 		);
 	}
 
+	/**
+	 * Caps an HTTP header value to the supported maximum length.
+	 *
+	 * @param string|null $value Raw header value.
+	 */
 	private function cap_header( ?string $value ): ?string {
 		if ( null === $value ) {
 			return null;

@@ -40,14 +40,14 @@ final class CurrencyTableFieldTest extends WP_UnitTestCase {
 		$parsed = $this->field()->parse(
 			array(
 				array(
-					'code'             => 'sek',
-					'enabled'          => '1',
-					'symbol'           => 'kr',
-					'position'         => 'right_space',
-					'decimals'         => '2',
-					'manual_rate'      => '11.50',
-					'merchant_adjustment'=> '0',
-					'rate_mode'        => '',
+					'code'                => 'sek',
+					'enabled'             => '1',
+					'symbol'              => 'kr',
+					'position'            => 'right_space',
+					'decimals'            => '2',
+					'manual_rate'         => '11.50',
+					'merchant_adjustment' => '0',
+					'rate_mode'           => '',
 				),
 			)
 		);
@@ -66,15 +66,15 @@ final class CurrencyTableFieldTest extends WP_UnitTestCase {
 		$parsed = $this->field()->parse(
 			array(
 				array(
-					'code' => '',
+					'code'        => '',
 					'manual_rate' => '5',
 				),
 				array(
-					'code' => 'EUR',
+					'code'        => 'EUR',
 					'manual_rate' => '2',
 				),
 				array(
-					'code' => 'SEK',
+					'code'        => 'SEK',
 					'manual_rate' => '11.5',
 				),
 			)

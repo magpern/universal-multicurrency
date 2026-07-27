@@ -15,9 +15,11 @@ namespace UMC\Rates\Http;
 interface HttpTransport {
 
 	/**
-	 * @param string               $url     Request URL.
+	 * Performs an HTTP GET request.
+	 *
+	 * @param string                $url     Request URL.
 	 * @param array<string, string> $headers Optional request headers.
-	 * @param int                  $timeout Timeout in seconds.
+	 * @param int                   $timeout Timeout in seconds.
 	 * @return HttpResponse
 	 */
 	public function get( string $url, array $headers = array(), int $timeout = 15 ): HttpResponse;

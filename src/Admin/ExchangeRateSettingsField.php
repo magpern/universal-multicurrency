@@ -19,10 +19,26 @@ use UMC\Settings;
  */
 final class ExchangeRateSettingsField {
 
+	/**
+	 * Merchant settings store.
+	 *
+	 * @var Settings
+	 */
 	private Settings $settings;
 
+	/**
+	 * Rate persistence boundary.
+	 *
+	 * @var ExchangeRateStore
+	 */
 	private ExchangeRateStore $store;
 
+	/**
+	 * Binds the field to settings and the rate store.
+	 *
+	 * @param Settings          $settings Merchant settings store.
+	 * @param ExchangeRateStore $store    Rate persistence boundary.
+	 */
 	public function __construct( Settings $settings, ExchangeRateStore $store ) {
 		$this->settings = $settings;
 		$this->store    = $store;
@@ -97,6 +113,8 @@ final class ExchangeRateSettingsField {
 	}
 
 	/**
+	 * Parses global exchange-rate settings from the current POST payload.
+	 *
 	 * @return array<string, mixed>
 	 */
 	public function parse_post(): array {
@@ -105,7 +123,7 @@ final class ExchangeRateSettingsField {
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$interval = isset( $_POST['umc_rate_update_interval'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['umc_rate_update_interval'] ) ) : Settings::DEFAULT_RATE_INTERVAL;
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
-		$max_age = isset( $_POST['umc_rate_max_age_hours'] ) ? (int) wp_unslash( $_POST['umc_rate_max_age_hours'] ) : Settings::DEFAULT_RATE_MAX_AGE_HOURS;
+		$max_age = isset( $_POST['umc_rate_max_age_hours'] ) ? absint( wp_unslash( $_POST['umc_rate_max_age_hours'] ) ) : Settings::DEFAULT_RATE_MAX_AGE_HOURS;
 
 		return array(
 			'rate_mode'            => $mode,
@@ -115,6 +133,9 @@ final class ExchangeRateSettingsField {
 		);
 	}
 
+	/**
+	 * Formats the latest successful automatic fetch timestamp.
+	 */
 	private function last_success_label(): string {
 		$latest = 0;
 
@@ -133,6 +154,9 @@ final class ExchangeRateSettingsField {
 		return wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $latest );
 	}
 
+	/**
+	 * Formats the next scheduled background update timestamp.
+	 */
 	private function next_run_label(): string {
 		if ( ! function_exists( 'as_next_scheduled_action' ) ) {
 			return __( 'Unavailable', 'universal-multicurrency' );
@@ -147,6 +171,9 @@ final class ExchangeRateSettingsField {
 		return wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), (int) $next );
 	}
 
+	/**
+	 * Builds the manual "update all" admin button markup.
+	 */
 	private function update_all_button(): string {
 		$url = wp_nonce_url(
 			admin_url( 'admin-post.php?action=umc_update_rates&scope=all' ),

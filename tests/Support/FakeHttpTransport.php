@@ -24,7 +24,7 @@ final class FakeHttpTransport implements HttpTransport {
 	private array $requests = array();
 
 	/**
-	 * @param string      $url      URL pattern or exact URL.
+	 * @param string       $url      URL pattern or exact URL.
 	 * @param HttpResponse $response Canned response.
 	 */
 	public function register( string $url, HttpResponse $response ): void {
@@ -34,9 +34,9 @@ final class FakeHttpTransport implements HttpTransport {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @param string               $url     Request URL.
+	 * @param string                $url     Request URL.
 	 * @param array<string, string> $headers Optional request headers.
-	 * @param int                  $timeout Timeout in seconds.
+	 * @param int                   $timeout Timeout in seconds.
 	 */
 	public function get( string $url, array $headers = array(), int $timeout = 15 ): HttpResponse {
 		unset( $timeout );

@@ -14,13 +14,30 @@ namespace UMC\Rates;
  */
 final class RateUpdateService {
 
+	/**
+	 * Configured exchange-rate source.
+	 *
+	 * @var ExchangeRateSource
+	 */
 	private ExchangeRateSource $source;
 
+	/**
+	 * Persistence boundary for rate data.
+	 *
+	 * @var ExchangeRateStore
+	 */
 	private ExchangeRateStore $store;
 
+	/**
+	 * Store base currency code.
+	 *
+	 * @var string
+	 */
 	private string $base_currency_code;
 
 	/**
+	 * Binds the update service to its source, store, and base currency.
+	 *
 	 * @param ExchangeRateSource $source             Rate provider.
 	 * @param ExchangeRateStore  $store              Persistence boundary.
 	 * @param string             $base_currency_code Store base currency code.
@@ -36,7 +53,11 @@ final class RateUpdateService {
 	}
 
 	/**
+	 * Fetches and persists rates for automatic currencies.
+	 *
 	 * @param string[]|null $codes Null = every automatic currency.
+	 * @throws UpdateInProgressException When another update holds the lock.
+	 * @throws \Throwable                When an unexpected error occurs during the update.
 	 */
 	public function update( ?array $codes = null ): RateFetchResult {
 		if ( ! $this->store->try_acquire_lock() ) {
@@ -68,6 +89,8 @@ final class RateUpdateService {
 
 			/**
 			 * Fires after a rate fetch attempt completes.
+			 *
+			 * @since 0.8.0
 			 *
 			 * @param RateFetchResult $result Fetch outcome.
 			 */

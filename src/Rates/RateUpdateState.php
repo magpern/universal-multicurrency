@@ -14,7 +14,7 @@ namespace UMC\Rates;
  *
  * Only {@see ExchangeRateStore} reads or writes this option in production.
  */
-final class RateUpdateState {
+class RateUpdateState {
 
 	public const OPTION = 'umc_rate_state';
 
@@ -33,11 +33,15 @@ final class RateUpdateState {
 	public const ERROR_MAX_LENGTH = 200;
 
 	/**
+	 * In-memory operational state.
+	 *
 	 * @var array<string, mixed>|null
 	 */
 	private ?array $data = null;
 
 	/**
+	 * Creates an operational state store.
+	 *
 	 * @param array<string, mixed>|null $data Optional in-memory state.
 	 */
 	public function __construct( ?array $data = null ) {
@@ -47,17 +51,19 @@ final class RateUpdateState {
 	}
 
 	/**
+	 * Returns the default operational state shape.
+	 *
 	 * @return array<string, mixed>
 	 */
 	public static function defaults(): array {
 		return array(
-			'schema_version'      => self::SCHEMA_VERSION,
-			'provider_metadata'   => null,
-			'currencies'          => array(),
-			'last_run_at'         => 0,
-			'next_run_at'         => 0,
-			'failure_history'     => array(),
-			'lock'                => array(
+			'schema_version'    => self::SCHEMA_VERSION,
+			'provider_metadata' => null,
+			'currencies'        => array(),
+			'last_run_at'       => 0,
+			'next_run_at'       => 0,
+			'failure_history'   => array(),
+			'lock'              => array(
 				'owner'      => '',
 				'expires_at' => 0,
 			),
@@ -65,6 +71,8 @@ final class RateUpdateState {
 	}
 
 	/**
+	 * Sanitizes a persisted operational state payload.
+	 *
 	 * @param mixed $raw Raw persisted value.
 	 * @return array<string, mixed>
 	 */
@@ -106,6 +114,8 @@ final class RateUpdateState {
 	}
 
 	/**
+	 * Returns the current operational state, loading from the option when needed.
+	 *
 	 * @return array<string, mixed>
 	 */
 	public function get(): array {
@@ -117,6 +127,8 @@ final class RateUpdateState {
 	}
 
 	/**
+	 * Persists sanitized operational state.
+	 *
 	 * @param array<string, mixed> $state State to persist.
 	 */
 	public function save( array $state ): void {
@@ -124,6 +136,11 @@ final class RateUpdateState {
 		update_option( self::OPTION, $this->data );
 	}
 
+	/**
+	 * Attempts to acquire the update lock for the given owner.
+	 *
+	 * @param string $owner Lock owner token.
+	 */
 	public function try_acquire_lock( string $owner ): bool {
 		$state = $this->get();
 		$lock  = $state['lock'];
@@ -143,6 +160,9 @@ final class RateUpdateState {
 		return true;
 	}
 
+	/**
+	 * Releases the update lock.
+	 */
 	public function release_lock(): void {
 		$state         = $this->get();
 		$state['lock'] = array(
@@ -153,6 +173,8 @@ final class RateUpdateState {
 	}
 
 	/**
+	 * Sanitizes one per-currency operational row.
+	 *
 	 * @param array<string, mixed> $row Raw currency operational row.
 	 * @return array<string, mixed>
 	 */
@@ -182,6 +204,8 @@ final class RateUpdateState {
 	}
 
 	/**
+	 * Sanitizes a timestamp field.
+	 *
 	 * @param mixed $value Raw timestamp.
 	 */
 	private static function sanitize_timestamp( mixed $value ): int {
@@ -193,6 +217,8 @@ final class RateUpdateState {
 	}
 
 	/**
+	 * Sanitizes the bounded failure history list.
+	 *
 	 * @param array<int, mixed> $history Raw failure history.
 	 * @return list<array<string, mixed>>
 	 */
@@ -226,6 +252,8 @@ final class RateUpdateState {
 	}
 
 	/**
+	 * Sanitizes the update lock row.
+	 *
 	 * @param array<string, mixed> $lock Raw lock row.
 	 * @return array{owner: string, expires_at: int}
 	 */

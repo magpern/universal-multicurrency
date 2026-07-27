@@ -16,19 +16,41 @@ use UMC\Settings;
  */
 final class ExchangeRateStore {
 
+	/**
+	 * Merchant settings store.
+	 *
+	 * @var Settings
+	 */
 	private Settings $settings;
 
+	/**
+	 * Operational rate-update state store.
+	 *
+	 * @var RateUpdateState
+	 */
 	private RateUpdateState $state;
 
+	/**
+	 * Store base currency code.
+	 *
+	 * @var string
+	 */
 	private string $base_currency_code;
 
+	/**
+	 * Lock owner token for fetch coordination.
+	 *
+	 * @var string
+	 */
 	private string $lock_owner;
 
 	/**
-	 * @param Settings         $settings           Settings store.
-	 * @param RateUpdateState  $state              Operational state store.
-	 * @param string           $base_currency_code Store base currency code.
-	 * @param string|null      $lock_owner         Lock owner token (generated when omitted).
+	 * Binds the store to settings, operational state, and the base currency.
+	 *
+	 * @param Settings        $settings           Settings store.
+	 * @param RateUpdateState $state              Operational state store.
+	 * @param string          $base_currency_code Store base currency code.
+	 * @param string|null     $lock_owner         Lock owner token (generated when omitted).
 	 */
 	public function __construct(
 		Settings $settings,
@@ -42,6 +64,9 @@ final class ExchangeRateStore {
 		$this->lock_owner         = $lock_owner ?? wp_generate_password( 12, false );
 	}
 
+	/**
+	 * Returns the current global rate configuration snapshot.
+	 */
 	public function get_configuration(): RateConfiguration {
 		$data     = $this->settings->get();
 		$interval = RateUpdateInterval::from_iso8601( (string) ( $data['rate_update_interval'] ?? Settings::DEFAULT_RATE_INTERVAL ) )
@@ -56,6 +81,8 @@ final class ExchangeRateStore {
 	}
 
 	/**
+	 * Returns every enabled automatic currency code.
+	 *
 	 * @return string[]
 	 */
 	public function get_automatic_currency_codes(): array {
@@ -72,6 +99,9 @@ final class ExchangeRateStore {
 		return $codes;
 	}
 
+	/**
+	 * Returns metadata from the last successful provider fetch.
+	 */
 	public function get_last_provider_metadata(): ?ProviderMetadata {
 		$raw = $this->state->get()['provider_metadata'] ?? null;
 
@@ -82,6 +112,11 @@ final class ExchangeRateStore {
 		return ProviderMetadata::from_array( $raw );
 	}
 
+	/**
+	 * Returns operational status for one currency.
+	 *
+	 * @param string $code Currency code.
+	 */
 	public function get_operational_status( string $code ): CurrencyRateStatus {
 		$code  = strtoupper( $code );
 		$row   = $this->state->get()['currencies'][ $code ] ?? array();
@@ -96,14 +131,25 @@ final class ExchangeRateStore {
 		);
 	}
 
+	/**
+	 * Attempts to acquire the update lock for this store instance.
+	 */
 	public function try_acquire_lock(): bool {
 		return $this->state->try_acquire_lock( $this->lock_owner );
 	}
 
+	/**
+	 * Releases the update lock held by this store instance.
+	 */
 	public function release_lock(): void {
 		$this->state->release_lock();
 	}
 
+	/**
+	 * Persists settings and operational state from a fetch result.
+	 *
+	 * @param RateFetchResult $result Fetch outcome to apply.
+	 */
 	public function apply_fetch_result( RateFetchResult $result ): void {
 		$fetched_at = $result->fetched_at();
 		$targets    = $this->get_automatic_currency_codes();
@@ -118,11 +164,14 @@ final class ExchangeRateStore {
 	}
 
 	/**
-	 * @param string[] $targets Automatic currency codes.
+	 * Updates operational state after an HTTP 304 not-modified response.
+	 *
+	 * @param string[] $targets    Automatic currency codes.
+	 * @param int      $fetched_at Unix timestamp of the fetch attempt.
 	 */
 	private function apply_not_modified_state( array $targets, int $fetched_at ): void {
-		$state                   = $this->state->get();
-		$state['last_run_at']    = $fetched_at;
+		$state                    = $this->state->get();
+		$state['last_run_at']     = $fetched_at;
 		$state['failure_history'] = is_array( $state['failure_history'] ?? null ) ? $state['failure_history'] : array();
 
 		foreach ( $targets as $code ) {
@@ -142,6 +191,11 @@ final class ExchangeRateStore {
 		$this->state->save( $state );
 	}
 
+	/**
+	 * Writes successful provider quotes into merchant settings.
+	 *
+	 * @param RateFetchResult $result Fetch outcome to apply.
+	 */
 	private function apply_settings_from_result( RateFetchResult $result ): void {
 		if ( array() === $result->quotes() ) {
 			return;
@@ -169,7 +223,10 @@ final class ExchangeRateStore {
 	}
 
 	/**
-	 * @param string[] $targets Automatic currency codes targeted by the fetch.
+	 * Updates operational state from a fetch result.
+	 *
+	 * @param RateFetchResult $result  Fetch outcome to apply.
+	 * @param string[]        $targets Automatic currency codes targeted by the fetch.
 	 */
 	private function apply_state_from_result( RateFetchResult $result, array $targets ): void {
 		$state                = $this->state->get();
@@ -199,18 +256,18 @@ final class ExchangeRateStore {
 			$row['last_fetch_at'] = $fetched_at;
 
 			if ( isset( $successful[ $code ] ) ) {
-				$row['last_status']          = RateUpdateState::STATUS_SUCCESS;
-				$row['last_error']           = '';
-				$row['consecutive_failures'] = 0;
+				$row['last_status']           = RateUpdateState::STATUS_SUCCESS;
+				$row['last_error']            = '';
+				$row['consecutive_failures']  = 0;
 				$state['currencies'][ $code ] = $row;
 				continue;
 			}
 
 			$error = $failures[ $code ] ?? ( $result->is_total_failure() ? 'provider_unavailable' : 'not_returned_by_provider' );
 
-			$row['last_status']          = RateUpdateState::STATUS_FAILED;
-			$row['last_error']           = $this->cap_error( (string) $error );
-			$row['consecutive_failures'] = (int) ( $row['consecutive_failures'] ?? 0 ) + 1;
+			$row['last_status']           = RateUpdateState::STATUS_FAILED;
+			$row['last_error']            = $this->cap_error( (string) $error );
+			$row['consecutive_failures']  = (int) ( $row['consecutive_failures'] ?? 0 ) + 1;
 			$state['currencies'][ $code ] = $row;
 
 			$state['failure_history'] = $this->prepend_failure(
@@ -225,7 +282,12 @@ final class ExchangeRateStore {
 	}
 
 	/**
+	 * Prepends one failure entry to the bounded history list.
+	 *
 	 * @param list<array<string, mixed>> $history Existing history.
+	 * @param int                        $at      Unix timestamp of the failure.
+	 * @param string                     $scope   Currency code or scope label.
+	 * @param string                     $error   Failure reason.
 	 * @return list<array<string, mixed>>
 	 */
 	private function prepend_failure( array $history, int $at, string $scope, string $error ): array {
@@ -241,6 +303,11 @@ final class ExchangeRateStore {
 		return array_slice( $history, 0, RateUpdateState::FAILURE_HISTORY_CAP );
 	}
 
+	/**
+	 * Caps an error string to the supported maximum length.
+	 *
+	 * @param string $error Raw error string.
+	 */
 	private function cap_error( string $error ): string {
 		if ( strlen( $error ) <= RateUpdateState::ERROR_MAX_LENGTH ) {
 			return $error;

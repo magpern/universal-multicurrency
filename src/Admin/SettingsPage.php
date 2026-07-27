@@ -19,12 +19,34 @@ use WC_Settings_Page;
  */
 final class SettingsPage extends WC_Settings_Page {
 
+	/**
+	 * Merchant settings store.
+	 *
+	 * @var Settings
+	 */
 	private Settings $settings;
 
+	/**
+	 * Currencies table field renderer.
+	 *
+	 * @var CurrencyTableField
+	 */
 	private CurrencyTableField $field;
 
+	/**
+	 * Global exchange-rate settings field renderer.
+	 *
+	 * @var ExchangeRateSettingsField
+	 */
 	private ExchangeRateSettingsField $exchange_field;
 
+	/**
+	 * Builds the settings tab and its custom field renderers.
+	 *
+	 * @param Settings          $settings Merchant settings store.
+	 * @param Currency          $base     Store base currency.
+	 * @param ExchangeRateStore $store    Rate persistence boundary.
+	 */
 	public function __construct( Settings $settings, Currency $base, ExchangeRateStore $store ) {
 		$this->id             = 'umc';
 		$this->label          = __( 'Multicurrency', 'universal-multicurrency' );
@@ -40,6 +62,8 @@ final class SettingsPage extends WC_Settings_Page {
 	}
 
 	/**
+	 * Returns the WooCommerce settings field definitions for this tab.
+	 *
 	 * @return array<int, array<string, mixed>>
 	 */
 	public function get_settings(): array {
@@ -68,9 +92,11 @@ final class SettingsPage extends WC_Settings_Page {
 		);
 	}
 
+	/**
+	 * Saves multicurrency settings from the current POST payload.
+	 */
 	public function save(): void {
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing
-		$raw = isset( $_POST['umc_currencies'] ) ? wp_unslash( $_POST['umc_currencies'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$raw = isset( $_POST['umc_currencies'] ) ? wp_unslash( $_POST['umc_currencies'] ) : array(); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Verified by WooCommerce settings save.
 
 		$currencies = $this->field->parse( is_array( $raw ) ? $raw : array() );
 		$globals    = $this->exchange_field->parse_post();
@@ -80,10 +106,15 @@ final class SettingsPage extends WC_Settings_Page {
 
 		/**
 		 * Fires after multicurrency settings are persisted.
+		 *
+		 * @since 0.8.0
 		 */
 		do_action( 'umc_settings_saved' );
 	}
 
+	/**
+	 * Renders a one-time admin notice after manual rate-update redirects.
+	 */
 	public function maybe_render_notice(): void {
 		if ( ! isset( $_GET['umc_msg'], $_GET['umc_typ'] ) || ! is_admin() ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
@@ -94,9 +125,12 @@ final class SettingsPage extends WC_Settings_Page {
 			return;
 		}
 
-		$message = sanitize_text_field( wp_unslash( rawurldecode( (string) $_GET['umc_msg'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$type    = sanitize_key( wp_unslash( (string) $_GET['umc_typ'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$class   = 'warning' === $type ? 'notice-warning' : 'notice-success';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Display-only query args after redirect.
+		$raw_msg = wp_unslash( (string) $_GET['umc_msg'] );
+		$message = sanitize_text_field( rawurldecode( $raw_msg ) );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$type  = sanitize_key( wp_unslash( (string) $_GET['umc_typ'] ) );
+		$class = 'warning' === $type ? 'notice-warning' : 'notice-success';
 
 		printf(
 			'<div class="notice %1$s is-dismissible"><p>%2$s</p></div>',

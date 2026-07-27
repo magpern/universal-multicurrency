@@ -25,16 +25,26 @@ final class Diagnostics {
 	 */
 	private ConflictDetector $detector;
 
+	/**
+	 * Merchant settings store for rate health checks.
+	 *
+	 * @var Settings|null
+	 */
 	private ?Settings $settings;
 
+	/**
+	 * Operational rate store for rate health checks.
+	 *
+	 * @var ExchangeRateStore|null
+	 */
 	private ?ExchangeRateStore $rate_store;
 
 	/**
 	 * Builds the diagnostics service and its detector stack.
 	 *
-	 * @param ConflictDetector|null   $detector   Optional detector for tests.
-	 * @param Settings|null           $settings   Settings store for rate health.
-	 * @param ExchangeRateStore|null  $rate_store Rate operational store.
+	 * @param ConflictDetector|null  $detector   Optional detector for tests.
+	 * @param Settings|null          $settings   Settings store for rate health.
+	 * @param ExchangeRateStore|null $rate_store Rate operational store.
 	 */
 	public function __construct(
 		?ConflictDetector $detector = null,
@@ -50,6 +60,9 @@ final class Diagnostics {
 		$this->rate_store = $rate_store;
 	}
 
+	/**
+	 * Registers diagnostics admin surfaces.
+	 */
 	public function register(): void {
 		$dismissal = new NoticeDismissal( $this->detector );
 		$dismissal->register();

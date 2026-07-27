@@ -19,21 +19,43 @@ final class RateFailureNotice {
 
 	private const THRESHOLD = 3;
 
+	/**
+	 * Merchant settings store.
+	 *
+	 * @var Settings
+	 */
 	private Settings $settings;
 
+	/**
+	 * Rate persistence boundary.
+	 *
+	 * @var ExchangeRateStore
+	 */
 	private ExchangeRateStore $store;
 
+	/**
+	 * Binds the notice to settings and the rate store.
+	 *
+	 * @param Settings          $settings Merchant settings store.
+	 * @param ExchangeRateStore $store    Rate persistence boundary.
+	 */
 	public function __construct( Settings $settings, ExchangeRateStore $store ) {
 		$this->settings = $settings;
 		$this->store    = $store;
 	}
 
+	/**
+	 * Registers the admin notice hook.
+	 */
 	public function register(): void {
 		add_action( 'admin_notices', array( $this, 'render' ) );
 	}
 
+	/**
+	 * Renders the warning notice when failures exceed the threshold.
+	 */
 	public function render(): void {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- WooCommerce shop-manager capability.
 			return;
 		}
 

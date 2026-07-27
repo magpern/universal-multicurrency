@@ -14,13 +14,30 @@ namespace UMC\Rates;
  */
 final class RateQuote {
 
+	/**
+	 * Base currency code.
+	 *
+	 * @var string
+	 */
 	private string $base_code;
 
+	/**
+	 * Target currency code.
+	 *
+	 * @var string
+	 */
 	private string $target_code;
 
+	/**
+	 * Positive decimal string rate.
+	 *
+	 * @var string
+	 */
 	private string $rate;
 
 	/**
+	 * Builds a single exchange-rate quote.
+	 *
 	 * @param string $base_code   Base currency code.
 	 * @param string $target_code Target currency code.
 	 * @param string $rate        Positive decimal string.
@@ -31,14 +48,23 @@ final class RateQuote {
 		$this->rate        = $rate;
 	}
 
+	/**
+	 * The base currency code.
+	 */
 	public function base_code(): string {
 		return $this->base_code;
 	}
 
+	/**
+	 * The target currency code.
+	 */
 	public function target_code(): string {
 		return $this->target_code;
 	}
 
+	/**
+	 * The positive decimal string rate.
+	 */
 	public function rate(): string {
 		return $this->rate;
 	}

@@ -88,12 +88,12 @@ final class Settings {
 	 */
 	public static function defaults(): array {
 		return array(
-			'schema_version'        => self::SCHEMA_VERSION,
-			'rate_mode'             => self::RATE_MODE_MANUAL,
-			'rate_provider'         => self::DEFAULT_RATE_PROVIDER,
-			'rate_update_interval'  => self::DEFAULT_RATE_INTERVAL,
-			'rate_max_age_hours'    => self::DEFAULT_RATE_MAX_AGE_HOURS,
-			'currencies'            => array(),
+			'schema_version'       => self::SCHEMA_VERSION,
+			'rate_mode'            => self::RATE_MODE_MANUAL,
+			'rate_provider'        => self::DEFAULT_RATE_PROVIDER,
+			'rate_update_interval' => self::DEFAULT_RATE_INTERVAL,
+			'rate_max_age_hours'   => self::DEFAULT_RATE_MAX_AGE_HOURS,
+			'currencies'           => array(),
 		);
 	}
 
@@ -254,29 +254,41 @@ final class Settings {
 	}
 
 	/**
-	 * @param mixed  $raw     Raw mode value.
-	 * @param string $default Default when invalid.
+	 * Normalizes a per-currency or global rate mode string.
+	 *
+	 * @param mixed  $raw      Raw mode value.
+	 * @param string $fallback Value when empty or invalid.
 	 */
-	private static function sanitize_rate_mode( mixed $raw, string $default ): string {
+	private static function sanitize_rate_mode( mixed $raw, string $fallback ): string {
 		$mode = is_string( $raw ) ? strtolower( trim( $raw ) ) : '';
 
 		if ( '' === $mode ) {
-			return $default;
+			return $fallback;
 		}
 
 		if ( self::RATE_MODE_MANUAL === $mode || self::RATE_MODE_AUTOMATIC === $mode ) {
 			return $mode;
 		}
 
-		return $default;
+		return $fallback;
 	}
 
+	/**
+	 * Normalizes the configured rate provider identifier.
+	 *
+	 * @param mixed $raw Raw provider value.
+	 */
 	private static function sanitize_provider( mixed $raw ): string {
 		$id = is_string( $raw ) ? strtolower( trim( $raw ) ) : '';
 
 		return self::DEFAULT_RATE_PROVIDER === $id ? self::DEFAULT_RATE_PROVIDER : self::DEFAULT_RATE_PROVIDER;
 	}
 
+	/**
+	 * Normalizes the recurring update interval ISO-8601 duration.
+	 *
+	 * @param mixed $raw Raw interval value.
+	 */
 	private static function sanitize_interval( mixed $raw ): string {
 		$value = is_string( $raw ) ? strtoupper( trim( $raw ) ) : '';
 
@@ -285,6 +297,11 @@ final class Settings {
 		return in_array( $value, $allowed, true ) ? $value : self::DEFAULT_RATE_INTERVAL;
 	}
 
+	/**
+	 * Normalizes the maximum accepted automatic rate age in hours.
+	 *
+	 * @param mixed $raw Raw max-age value.
+	 */
 	private static function sanitize_max_age_hours( mixed $raw ): int {
 		if ( ! is_numeric( $raw ) ) {
 			return self::DEFAULT_RATE_MAX_AGE_HOURS;

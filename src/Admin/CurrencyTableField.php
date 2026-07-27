@@ -25,14 +25,41 @@ final class CurrencyTableField {
 	private const BLANK_ROWS = 3;
 	private const FIELD      = 'umc_currencies';
 
+	/**
+	 * Merchant settings store.
+	 *
+	 * @var Settings
+	 */
 	private Settings $settings;
 
+	/**
+	 * Store base currency.
+	 *
+	 * @var Currency
+	 */
 	private Currency $base;
 
+	/**
+	 * Rate persistence boundary.
+	 *
+	 * @var ExchangeRateStore
+	 */
 	private ExchangeRateStore $store;
 
+	/**
+	 * Rate status label evaluator.
+	 *
+	 * @var RateStatusEvaluator
+	 */
 	private RateStatusEvaluator $status;
 
+	/**
+	 * Binds the field to settings, the base currency, and the rate store.
+	 *
+	 * @param Settings          $settings Merchant settings store.
+	 * @param Currency          $base     Store base currency.
+	 * @param ExchangeRateStore $store    Rate persistence boundary.
+	 */
 	public function __construct( Settings $settings, Currency $base, ExchangeRateStore $store ) {
 		$this->settings = $settings;
 		$this->base     = $base;
@@ -40,6 +67,9 @@ final class CurrencyTableField {
 		$this->status   = new RateStatusEvaluator( $settings, $store );
 	}
 
+	/**
+	 * Renders the currencies table field.
+	 */
 	public function render(): void {
 		$configured = $this->settings->get_currencies();
 		unset( $configured[ $this->base->code() ] );
@@ -93,6 +123,8 @@ final class CurrencyTableField {
 	}
 
 	/**
+	 * Parses the currencies table POST payload into sanitized config rows.
+	 *
 	 * @param array<int|string, mixed> $raw Unslashed POST payload.
 	 * @return array<string, array<string, mixed>>
 	 */
@@ -128,6 +160,9 @@ final class CurrencyTableField {
 		return $currencies;
 	}
 
+	/**
+	 * Renders the fixed base-currency table row.
+	 */
 	private function base_row(): string {
 		return sprintf(
 			'<tr><td>%1$s</td><td><strong>%2$s</strong></td><td colspan="12">%3$s</td></tr>',
@@ -138,7 +173,13 @@ final class CurrencyTableField {
 	}
 
 	/**
-	 * @param array<string, mixed> $config Row config.
+	 * Renders one editable currency table row.
+	 *
+	 * @param string               $index         Row index in the POST array.
+	 * @param string               $code          Currency code.
+	 * @param array<string, mixed> $config        Row configuration.
+	 * @param bool                 $code_open     Whether the code field is editable.
+	 * @param string               $provider_date Provider date label for display.
 	 */
 	private function editable_row( string $index, string $code, array $config, bool $code_open, string $provider_date ): string {
 		$name       = self::FIELD . '[' . $index . ']';
@@ -212,6 +253,9 @@ final class CurrencyTableField {
 		);
 	}
 
+	/**
+	 * Returns the provider date label for the currencies table.
+	 */
 	private function provider_date_label(): string {
 		$raw = $this->store->get_last_provider_metadata();
 
@@ -222,11 +266,17 @@ final class CurrencyTableField {
 		return $raw->provider_date() ?? '—';
 	}
 
+	/**
+	 * Builds the per-row rate mode select markup.
+	 *
+	 * @param string $name    Field name.
+	 * @param string $current Current selected value.
+	 */
 	private function mode_select( string $name, string $current ): string {
 		$options = array(
-			''                              => __( 'Inherit global', 'universal-multicurrency' ),
-			Settings::RATE_MODE_MANUAL      => __( 'Manual', 'universal-multicurrency' ),
-			Settings::RATE_MODE_AUTOMATIC   => __( 'Automatic', 'universal-multicurrency' ),
+			''                            => __( 'Inherit global', 'universal-multicurrency' ),
+			Settings::RATE_MODE_MANUAL    => __( 'Manual', 'universal-multicurrency' ),
+			Settings::RATE_MODE_AUTOMATIC => __( 'Automatic', 'universal-multicurrency' ),
 		);
 
 		$html = '';
@@ -243,6 +293,12 @@ final class CurrencyTableField {
 		return sprintf( '<select name="%1$s">%2$s</select>', esc_attr( $name ), $html );
 	}
 
+	/**
+	 * Builds the per-row symbol position select markup.
+	 *
+	 * @param string $name    Field name.
+	 * @param string $current Current selected value.
+	 */
 	private function position_select( string $name, string $current ): string {
 		$labels = array(
 			'left'        => __( 'Left', 'universal-multicurrency' ),

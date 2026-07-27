@@ -16,19 +16,51 @@ final class ProviderMetadata {
 
 	public const SCHEMA_VERSION = 1;
 
+	/**
+	 * Metadata shape version.
+	 *
+	 * @var int
+	 */
 	private int $schema_version;
 
+	/**
+	 * Provider identifier.
+	 *
+	 * @var string
+	 */
 	private string $provider_id;
 
+	/**
+	 * Provider "as of" date, if known.
+	 *
+	 * @var string|null
+	 */
 	private ?string $provider_date;
 
+	/**
+	 * Provider dataset version, if any.
+	 *
+	 * @var string|null
+	 */
 	private ?string $provider_version;
 
+	/**
+	 * HTTP ETag from the last fetch, if present.
+	 *
+	 * @var string|null
+	 */
 	private ?string $etag;
 
+	/**
+	 * HTTP Last-Modified from the last fetch, if present.
+	 *
+	 * @var string|null
+	 */
 	private ?string $last_modified;
 
 	/**
+	 * Builds provider metadata for a fetch result.
+	 *
 	 * @param int         $schema_version   Metadata shape version.
 	 * @param string      $provider_id      Provider identifier.
 	 * @param string|null $provider_date    Provider "as of" date.
@@ -73,6 +105,8 @@ final class ProviderMetadata {
 	}
 
 	/**
+	 * Serializes metadata for persistence.
+	 *
 	 * @return array<string, scalar|null>
 	 */
 	public function to_array(): array {
@@ -86,31 +120,51 @@ final class ProviderMetadata {
 		);
 	}
 
+	/**
+	 * The metadata shape version.
+	 */
 	public function schema_version(): int {
 		return $this->schema_version;
 	}
 
+	/**
+	 * The provider identifier.
+	 */
 	public function provider_id(): string {
 		return $this->provider_id;
 	}
 
+	/**
+	 * The provider "as of" date.
+	 */
 	public function provider_date(): ?string {
 		return $this->provider_date;
 	}
 
+	/**
+	 * The provider dataset version.
+	 */
 	public function provider_version(): ?string {
 		return $this->provider_version;
 	}
 
+	/**
+	 * The HTTP ETag from the last fetch.
+	 */
 	public function etag(): ?string {
 		return $this->etag;
 	}
 
+	/**
+	 * The HTTP Last-Modified from the last fetch.
+	 */
 	public function last_modified(): ?string {
 		return $this->last_modified;
 	}
 
 	/**
+	 * Normalizes a nullable string field.
+	 *
 	 * @param mixed $value Raw value.
 	 */
 	private static function nullable_string( mixed $value ): ?string {

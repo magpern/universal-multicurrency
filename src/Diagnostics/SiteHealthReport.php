@@ -61,17 +61,27 @@ final class SiteHealthReport {
 	 */
 	private VersionPolicy $policy;
 
+	/**
+	 * Merchant settings store for rate health checks.
+	 *
+	 * @var Settings|null
+	 */
 	private ?Settings $settings;
 
+	/**
+	 * Operational rate store for rate health checks.
+	 *
+	 * @var ExchangeRateStore|null
+	 */
 	private ?ExchangeRateStore $rate_store;
 
 	/**
 	 * Binds the report to a shared conflict detector.
 	 *
-	 * @param ConflictDetector        $detector   Memoized conflict detector.
-	 * @param VersionPolicy|null      $policy     Optional policy for tests.
-	 * @param Settings|null           $settings   Optional settings for rate health.
-	 * @param ExchangeRateStore|null  $rate_store Optional rate store for rate health.
+	 * @param ConflictDetector       $detector   Memoized conflict detector.
+	 * @param VersionPolicy|null     $policy     Optional policy for tests.
+	 * @param Settings|null          $settings   Optional settings for rate health.
+	 * @param ExchangeRateStore|null $rate_store Optional rate store for rate health.
 	 */
 	public function __construct(
 		ConflictDetector $detector,
@@ -773,6 +783,9 @@ final class SiteHealthReport {
 		return implode( ', ', $escaped ) . ', ' . \__( 'and', 'universal-multicurrency' ) . ' ' . $last;
 	}
 
+	/**
+	 * Counts automatic currencies with stale provider rates.
+	 */
 	private function stale_automatic_count(): int {
 		if ( null === $this->settings || null === $this->rate_store ) {
 			return 0;
@@ -790,6 +803,9 @@ final class SiteHealthReport {
 		return $stale;
 	}
 
+	/**
+	 * Returns the age in hours of the oldest automatic provider rate.
+	 */
 	private function oldest_automatic_rate_age_hours(): int {
 		if ( null === $this->settings ) {
 			return 0;

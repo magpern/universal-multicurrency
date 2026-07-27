@@ -9,12 +9,16 @@ declare(strict_types=1);
 
 namespace UMC\Rates;
 
+use UMC\Settings;
+
 /**
  * Derives the storefront rate from manual/automatic inputs without I/O.
  */
 final class RateResolver {
 
 	/**
+	 * Computes the effective storefront rate from persisted inputs.
+	 *
 	 * @param string $mode                Resolved mode: manual | automatic.
 	 * @param string $manual_rate         Decimal string or '' (unset).
 	 * @param string $provider_rate       Decimal string or '' (never fetched).

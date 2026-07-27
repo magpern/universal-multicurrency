@@ -18,17 +18,41 @@ final class Scheduler {
 
 	public const HOOK = 'umc_run_rate_update';
 
+	/**
+	 * Persistence boundary for rate configuration.
+	 *
+	 * @var ExchangeRateStore
+	 */
 	private ExchangeRateStore $store;
 
+	/**
+	 * Rate update orchestration service.
+	 *
+	 * @var RateUpdateService
+	 */
 	private RateUpdateService $service;
 
+	/**
+	 * Whether hooks have already been registered.
+	 *
+	 * @var bool
+	 */
 	private bool $booted = false;
 
+	/**
+	 * Binds the scheduler to the store and update service.
+	 *
+	 * @param ExchangeRateStore $store   Persistence boundary.
+	 * @param RateUpdateService $service Rate update orchestration service.
+	 */
 	public function __construct( ExchangeRateStore $store, RateUpdateService $service ) {
 		$this->store   = $store;
 		$this->service = $service;
 	}
 
+	/**
+	 * Registers Action Scheduler hooks.
+	 */
 	public function register(): void {
 		if ( $this->booted ) {
 			return;
@@ -41,6 +65,9 @@ final class Scheduler {
 		add_action( 'umc_settings_saved', array( $this, 'ensure_scheduled' ) );
 	}
 
+	/**
+	 * Ensures a recurring action exists on init when settings were not just saved.
+	 */
 	public function ensure_scheduled_on_init(): void {
 		if ( did_action( 'umc_settings_saved' ) ) {
 			return;
@@ -49,6 +76,9 @@ final class Scheduler {
 		$this->ensure_scheduled();
 	}
 
+	/**
+	 * Ensures or clears the recurring update action for the current configuration.
+	 */
 	public function ensure_scheduled(): void {
 		if ( ! function_exists( 'as_next_scheduled_action' ) || ! function_exists( 'as_schedule_recurring_action' ) ) {
 			return;
@@ -73,6 +103,9 @@ final class Scheduler {
 		as_schedule_recurring_action( time() + $interval, $interval, self::HOOK );
 	}
 
+	/**
+	 * Runs one scheduled rate update.
+	 */
 	public function run(): void {
 		try {
 			$this->service->update( null );

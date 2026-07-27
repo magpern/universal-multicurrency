@@ -18,18 +18,34 @@ use UMC\Rates\UpdateInProgressException;
  */
 final class RateUpdateController {
 
+	/**
+	 * Rate update orchestration service.
+	 *
+	 * @var RateUpdateService
+	 */
 	private RateUpdateService $service;
 
+	/**
+	 * Binds the controller to the update service.
+	 *
+	 * @param RateUpdateService $service Rate update orchestration service.
+	 */
 	public function __construct( RateUpdateService $service ) {
 		$this->service = $service;
 	}
 
+	/**
+	 * Registers the admin-post handler.
+	 */
 	public function register(): void {
 		add_action( 'admin_post_umc_update_rates', array( $this, 'handle' ) );
 	}
 
+	/**
+	 * Handles a manual rate-update request.
+	 */
 	public function handle(): void {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- WooCommerce shop-manager capability.
 			wp_die( esc_html__( 'You do not have permission to update exchange rates.', 'universal-multicurrency' ) );
 		}
 
@@ -47,6 +63,11 @@ final class RateUpdateController {
 		}
 	}
 
+	/**
+	 * Builds the admin notice message for a fetch result.
+	 *
+	 * @param RateFetchResult $result Fetch outcome.
+	 */
 	private function message_for_result( RateFetchResult $result ): string {
 		if ( $result->is_not_modified() ) {
 			return __( 'Rates are already up to date.', 'universal-multicurrency' );
@@ -63,6 +84,12 @@ final class RateUpdateController {
 		return __( 'Exchange rates updated successfully.', 'universal-multicurrency' );
 	}
 
+	/**
+	 * Redirects back to the settings tab with a flash notice.
+	 *
+	 * @param string $message Notice message.
+	 * @param string $type    Notice type (`success` or `warning`).
+	 */
 	private function redirect_with_notice( string $message, string $type ): void {
 		$redirect = add_query_arg(
 			array(

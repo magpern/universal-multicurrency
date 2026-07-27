@@ -17,9 +17,9 @@ final class WordPressHttpTransport implements HttpTransport {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @param string               $url     Request URL.
+	 * @param string                $url     Request URL.
 	 * @param array<string, string> $headers Optional request headers.
-	 * @param int                  $timeout Timeout in seconds.
+	 * @param int                   $timeout Timeout in seconds.
 	 */
 	public function get( string $url, array $headers = array(), int $timeout = 15 ): HttpResponse {
 		$response = wp_safe_remote_get(

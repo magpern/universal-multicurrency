@@ -103,11 +103,11 @@ final class Plugin {
 
 		$this->booted = true;
 
-		$settings   = new Settings();
-		$base       = $this->base_currency();
-		$rate_state = new RateUpdateState();
-		$rate_store = new ExchangeRateStore( $settings, $rate_state, $base->code() );
-		$rate_source = $this->resolve_rate_source( $settings );
+		$settings     = new Settings();
+		$base         = $this->base_currency();
+		$rate_state   = new RateUpdateState();
+		$rate_store   = new ExchangeRateStore( $settings, $rate_state, $base->code() );
+		$rate_source  = $this->resolve_rate_source( $settings );
 		$rate_service = new RateUpdateService( $rate_source, $rate_store, $base->code() );
 		( new Scheduler( $rate_store, $rate_service ) )->register();
 
@@ -221,8 +221,17 @@ final class Plugin {
 
 	/**
 	 * Resolves the configured exchange-rate source implementation.
+	 *
+	 * @param Settings $settings Merchant settings store.
 	 */
 	private function resolve_rate_source( Settings $settings ): ExchangeRateSource {
+		/**
+		 * Filters the available exchange-rate source implementations.
+		 *
+		 * @since 0.8.0
+		 *
+		 * @param ExchangeRateSource[] $sources Registered rate sources.
+		 */
 		$sources = (array) apply_filters(
 			'umc_exchange_rate_sources',
 			array( new FrankfurterRateSource() )
