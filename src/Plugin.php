@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace UMC;
 
 use UMC\Admin\OrderCurrencyMetaBox;
+use UMC\Admin\PluginActionLinks;
 use UMC\Admin\RateFailureNotice;
 use UMC\Admin\RateUpdateController;
 use UMC\Admin\SettingsPage;
@@ -110,6 +111,7 @@ final class Plugin {
 		$rate_source  = $this->resolve_rate_source( $settings );
 		$rate_service = new RateUpdateService( $rate_source, $rate_store, $base->code() );
 		( new Scheduler( $rate_store, $rate_service ) )->register();
+		( new PluginActionLinks() )->register();
 
 		if ( is_admin() ) {
 			( new RateUpdateController( $rate_service ) )->register();

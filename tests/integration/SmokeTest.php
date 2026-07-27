@@ -52,6 +52,21 @@ final class SmokeTest extends WP_UnitTestCase {
 		);
 	}
 
+	public function test_registers_plugin_settings_action_link(): void {
+		$hook = 'plugin_action_links_' . self::PLUGIN_ID;
+
+		$this->assertSame(
+			array( 'UMC\Admin\PluginActionLinks::add_settings_link' ),
+			$this->plugin_callbacks_on( $hook )
+		);
+
+		$links = apply_filters( $hook, array( '<a>Deactivate</a>' ) );
+
+		$this->assertCount( 2, $links );
+		$this->assertStringContainsString( 'page=wc-settings&amp;tab=umc', $links[0] );
+		$this->assertStringContainsString( 'Settings', $links[0] );
+	}
+
 	/**
 	 * The plugin must never register stock, fee or order-status callbacks.
 	 * Fees stay disabled and stock is never touched; the cart, coupon,
