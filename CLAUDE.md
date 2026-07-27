@@ -46,11 +46,13 @@
   `.github/workflows/ci.yml` for the reference setup). After changing user-facing
   strings, run `composer make-pot` and `composer make-pot:check`. When Diagnostics code
   changes, `composer test:mutation` runs Infection over the unit suite (PCOV
-  required; thresholds in `infection.json5`).
+  required; thresholds in `infection.json5`). Before Release Candidate closure,
+  run `composer audit` and `composer release-audit` (see `docs/RELEASE_AUDIT.md`).
 - Machine-specific dev-environment notes belong in `CLAUDE.local.md`
   (gitignored) — never in this file.
-- Release: bump the `Version:` plugin header, `UMC_VERSION`, and
-  `docs/COMPATIBILITY.md` together; tag `vX.Y.Z` matching the header, push
-  the tag. The Release workflow builds and publishes the installable zip.
+- Release: bump the `Version:` plugin header, `UMC_VERSION`, `readme.txt` Stable
+  tag, and `docs/COMPATIBILITY.md` together (Commit 10 for Milestone 7 → 0.7.0);
+  tag `vX.Y.Z` matching the header, push the tag. The Release workflow builds and
+  publishes the installable zip.
 - Adding or removing a built-in detector follows the governance checklist in
   `docs/COMPATIBILITY.md § Detection`.

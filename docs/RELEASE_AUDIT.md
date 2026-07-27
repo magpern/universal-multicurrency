@@ -149,11 +149,11 @@ Authoritative registry: [`PERSISTED_DATA.md`](PERSISTED_DATA.md) +
 - Canonical text domain enforced (`TranslationReadinessTest`)
 - Committed `languages/universal-multicurrency.pot`
 - `composer make-pot:check` passes
-- Release ZIP includes `languages/universal-multicurrency.pot`
+- Release ZIP includes `languages/universal-multicurrency.pot` and `readme.txt`
 - No shipped frontend JavaScript requiring i18n
 - RTL audit documented in [`TRANSLATION.md`](TRANSLATION.md) (audit-only)
 
-**Note:** `readme.txt` is not yet present; Commit 10 adds the minimal RC readme.
+**Note:** `readme.txt` Stable tag remains **0.6.0** until Commit 10.
 
 ---
 
@@ -195,7 +195,7 @@ Expected artifact at Commit 8 (pre-bump): **`dist/universal-multicurrency-0.6.0.
 
 ### Included
 
-- `universal-multicurrency.php`, `uninstall.php`
+- `universal-multicurrency.php`, `uninstall.php`, `readme.txt`
 - `src/` production PHP
 - `vendor/autoload.php` (+ production autoload only)
 - `languages/universal-multicurrency.pot`
@@ -225,7 +225,7 @@ Integration matrix (five legs + ceiling early-warning) unchanged from M6/M7.
 | ID | Observation |
 |---|---|
 | NB1 | Plugin version remains **0.6.0** until Commit 10 (`v0.7.0` target) |
-| NB2 | `readme.txt` deferred to Commit 10 minimal RC readme |
+| NB2 | `readme.txt` Stable tag remains **0.6.0** until Commit 10 |
 | NB3 | No root `LICENSE` file; GPL declared in plugin header and `composer.json` |
 | NB4 | Full five-leg integration matrix validated in CI, not re-run entirely in the local release-audit script |
 | NB5 | `docs/plans/` may exist locally but is classified non-shipping |

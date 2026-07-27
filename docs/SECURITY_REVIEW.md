@@ -64,7 +64,7 @@ No open critical findings at RC audit completion.
 | ID | Note |
 |---|---|
 | I1 | `composer audit` run in CI validation — no known advisories on production deps (`php >=8.1` only) |
-| I2 | Release ZIP copies `src/`, `vendor/`, `languages/`, plugin bootstrap — excludes `tests/`, `docs/`, plans |
+| I2 | Release ZIP copies `src/`, `vendor/`, `languages/`, `readme.txt`, plugin bootstrap — excludes `tests/`, `docs/`, plans |
 
 ---
 
@@ -105,6 +105,17 @@ Unauthorized dismissal attempts do not write user meta (`SecurityBehaviourTest`)
 - No `$wpdb` in `src/` (`StorefrontGuardTest`, `SecuritySourceGuardTest`).
 - Order/refund data via `WC_Order` CRUD only (`StorefrontGuardTest` M4 guards).
 - No wildcard metadata deletion; uninstall deletes `umc_settings` only (ADR-0009).
+
+---
+
+## Settings upgrade boundary
+
+`SettingsUpgrader::upgrade()` wraps migration work in `catch ( \Throwable )` so
+corrupt or unexpected stored options fail closed: callers receive defaults,
+`should_persist()` stays false, and partial migrations are never written. This is
+intentional at the persistence boundary — not a blanket exception-swallowing
+pattern. `StorefrontGuardTest` allowlists **only** `SettingsUpgrader.php` for
+broad `catch ( Throwable | Exception )` probes elsewhere in `src/`.
 
 ---
 

@@ -39,6 +39,7 @@ final class ReleaseZipInspector {
 	public const REQUIRED_ENTRIES = array(
 		'universal-multicurrency/universal-multicurrency.php',
 		'universal-multicurrency/uninstall.php',
+		'universal-multicurrency/readme.txt',
 		'universal-multicurrency/languages/universal-multicurrency.pot',
 		'universal-multicurrency/vendor/autoload.php',
 	);

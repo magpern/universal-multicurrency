@@ -5,6 +5,10 @@ inventory stay in the store's base currency; conversion happens at runtime on
 storefront, cart, checkout, and Store API surfaces. Orders carry a permanent
 exchange-rate snapshot.
 
+**Shipped version:** 0.6.0 (plugin header and `UMC_VERSION`). Milestone 7 Release
+Candidate work continues on `milestone-7-release-candidate`; **0.7.0** is targeted
+in Commit 10 and is **not yet released**.
+
 ## Invariants
 
 - WooCommerce owns inventory — never split stock by currency.
@@ -13,53 +17,84 @@ exchange-rate snapshot.
 - Orders store immutable `_umc_*` snapshots; never deleted on uninstall.
 - HPOS required; standalone — no FOX/WOOCS coupling (see ADR-0003, ADR-0007).
 - Compatibility detection observes only; never deactivates another plugin.
+- Merchant migration from another switcher is **manual only** — no foreign import
+  (see `docs/MIGRATION.md`).
 
 ## Install
 
 Build the installable zip:
 
 ```bash
-bin/build-zip.sh
+composer install --no-dev
+bash bin/build-zip.sh
 ```
 
 Upload and activate through WordPress, or symlink the plugin directory into
-`wp-content/plugins/`. WooCommerce must be active first.
+`wp-content/plugins/`. WooCommerce must be active first. The release zip includes
+`readme.txt`, production `src/`, `vendor/`, and `languages/universal-multicurrency.pot`.
 
 ## Development
 
 ```bash
 composer install
 composer phpcs
+composer make-pot
 composer make-pot:check
 composer test:unit
 composer test:integration   # needs MySQL + tests/bin/install-wp.sh
 composer test:mutation      # Diagnostics scorer; needs PCOV
+composer audit
+composer release-audit      # release-blocking RC gate (see docs/RELEASE_AUDIT.md)
 ```
 
 Docker command examples: `CLAUDE.local.md` (local, gitignored).
 
 ## Compatibility
 
-See [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md) for supported PHP,
-WordPress, and WooCommerce versions, the CI matrix, and built-in conflict
-detectors.
+Requires **PHP 8.1+**, **WordPress 6.5+**, and **WooCommerce 8.2+** (HPOS). See
+[`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md) for the supported-version matrix,
+CI legs, and passive conflict detectors.
+
+## Migration and uninstall
+
+- **Migration:** manual cut-over only — deactivate the old switcher, configure UMC
+  manually; no automatic import from FOX/WOOCS or other switchers.
+- **Uninstall:** deletes `umc_settings` only; `_umc_*` order meta,
+  `_umc_parent_*` refund meta, and `umc_dismissed_notices` user meta are preserved
+  (ADR-0009).
+
+## Changelog preview
+
+### Unreleased (target 0.7.0 — Commit 10)
+
+Release Candidate closure: version bump, final RC validation, and Milestone 7
+roadmap completion. Not shipped yet.
+
+### 0.6.0
+
+Compatibility and diagnostics milestone — passive conflict detection, Site Health,
+five-leg CI matrix, and `docs/COMPATIBILITY.md`.
 
 ## Documentation
 
 | Document | Contents |
 |---|---|
+| [`readme.txt`](readme.txt) | WordPress.org–oriented plugin readme (Stable tag 0.6.0) |
 | [`docs/PRODUCT_REQUIREMENTS.md`](docs/PRODUCT_REQUIREMENTS.md) | Goals and non-goals |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Layers, invariants, collaborators |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Layers, invariants, collaborators, RC governance |
 | [`docs/HOOKS.md`](docs/HOOKS.md) | Every WooCommerce hook registered |
 | [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md) | Version matrix and detector governance |
-| [`docs/TEST_STRATEGY.md`](docs/TEST_STRATEGY.md) | Unit, integration, guards, mutation |
-| [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Per-milestone deploy and rollback record |
-| [`docs/MIGRATION.md`](docs/MIGRATION.md) | Manual merchant cut-over from another switcher (no foreign import) |
+| [`docs/TEST_STRATEGY.md`](docs/TEST_STRATEGY.md) | Unit, integration, guards, mutation, release audit |
+| [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Per-milestone deploy record and contributor commands |
+| [`docs/MIGRATION.md`](docs/MIGRATION.md) | Manual merchant cut-over (no foreign import) |
+| [`docs/PERSISTED_DATA.md`](docs/PERSISTED_DATA.md) | Persisted-key inventory and uninstall contract |
 | [`docs/TRANSLATION.md`](docs/TRANSLATION.md) | Text domain, POT workflow, JS/RTL translation status |
 | [`docs/SECURITY_REVIEW.md`](docs/SECURITY_REVIEW.md) | M7 security audit record and accepted residual risks |
-| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Milestone status |
+| [`docs/PERFORMANCE_BASELINES.md`](docs/PERFORMANCE_BASELINES.md) | Deterministic performance ceilings |
+| [`docs/RELEASE_AUDIT.md`](docs/RELEASE_AUDIT.md) | Executable release-blocking audit record |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Milestone status (M7 open pending Commit 10) |
 | [`docs/adr/`](docs/adr/) | Architecture decision records |
 
 ## License
 
-GPL-2.0-or-later — see [`LICENSE`](LICENSE).
+GPL-2.0-or-later — declared in the plugin header and `composer.json`.

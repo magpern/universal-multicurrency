@@ -292,3 +292,29 @@ no class reference crosses the Admin boundary.
 5. **A merchant warning can never influence monetary behaviour.** No price, rate, cart total, coupon, shipping cost, tax, gateway availability, order, refund, or snapshot may differ because a conflict was detected, graded, rendered, or dismissed.
 6. **Detection observes; it never acts.** No plugin is activated, deactivated, modified, or configured; no plugin option is written; no foreign data is read beyond passive existence checks.
 7. **Detection is free everywhere it is not needed.** Zero hooks, zero probes, zero queries, and zero autoloaded Diagnostics classes on frontend, Store API, REST, AJAX, cron, and CLI requests.
+
+## Release Candidate governance (Milestone 7)
+
+The Release Candidate adds documentation, guards, and audit gates without
+changing monetary behaviour. Authoritative records:
+
+| Topic | Document / gate |
+|---|---|
+| Standalone architecture (no foreign runtime coupling) | ADR-0003, `DiagnosticsBoundaryGuardTest`, `ReleaseAuditTest` |
+| Passive conflict detection | ADR-0007, `DiagnosticsGuardTest` |
+| Persisted-key inventory | [`PERSISTED_DATA.md`](PERSISTED_DATA.md), `PersistedKeys`, `PersistedKeysInventoryTest` |
+| Uninstall retention | ADR-0009, `uninstall.php`, `UninstallPolicyGuardTest` |
+| Manual merchant migration only | [`MIGRATION.md`](MIGRATION.md) — no foreign import, no RC CSV parser |
+| Settings schema | `Settings::SCHEMA_VERSION === 1`; sole production migration v0→v1 via `SettingsUpgrader`; no artificial v2 |
+| Translation readiness | [`TRANSLATION.md`](TRANSLATION.md), `languages/universal-multicurrency.pot`, `composer make-pot:check` |
+| Security audit | [`SECURITY_REVIEW.md`](SECURITY_REVIEW.md) — zero open Critical/High; accepted M/L risks documented |
+| Performance baselines | [`PERFORMANCE_BASELINES.md`](PERFORMANCE_BASELINES.md) — deterministic query/write ceilings only |
+| Release audit | [`RELEASE_AUDIT.md`](RELEASE_AUDIT.md), `composer release-audit` — release-blocking repository gate |
+
+`SettingsUpgrader` uses a single broad `catch ( \Throwable )` at the upgrade
+boundary so corrupt stored options fail closed to defaults without persisting
+partial migrations. `StorefrontGuardTest` allowlists only `SettingsUpgrader.php`
+for that pattern.
+
+Plugin version remains **0.6.0** until Commit 10 (`v0.7.0` target). Milestone 7
+is not closed in Commit 9.

@@ -4,6 +4,45 @@ A running, continuously-maintained record of what each milestone changes so it
 can be safely deployed and, if needed, rolled back. Generic by design — no
 site-, host- or deployment-specific detail belongs here.
 
+## Contributor validation commands
+
+Canonical commands (see `composer.json`):
+
+| Command | Purpose |
+|---|---|
+| `composer phpcs` | PHPCS — 0 errors, 0 warnings required |
+| `composer test:unit` | Pure PHP unit suite |
+| `composer test:integration` | WordPress + WooCommerce integration (MySQL; `tests/bin/install-wp.sh`) |
+| `composer test:mutation` | Infection over Diagnostics scorer (PCOV) |
+| `composer make-pot` | Regenerate `languages/universal-multicurrency.pot` |
+| `composer make-pot:check` | Fail when committed POT is stale |
+| `composer audit` | Composer security audit (production deps) |
+| `composer release-audit` | Release-blocking RC gate — see [`RELEASE_AUDIT.md`](RELEASE_AUDIT.md) |
+
+Release zip build:
+
+```bash
+composer install --no-dev
+bash bin/build-zip.sh
+```
+
+Produces `dist/universal-multicurrency-0.6.0.zip` at Commit 9 (version bump in
+Commit 10). The archive includes `readme.txt`, production `src/`, `vendor/`,
+and `languages/universal-multicurrency.pot`.
+
+Performance subset:
+
+```bash
+vendor/bin/phpunit -c phpunit.xml.dist --group performance
+vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
+```
+
+**Commit 10 owns:** bump header/`UMC_VERSION`/`readme.txt` Stable tag to **0.7.0**,
+final RC validation, Milestone 7 roadmap closure, release tag, and PR/release
+readiness. Do not perform those steps before Commit 10.
+
+---
+
 ## Milestone 3 — classic cart, checkout & order currency (v0.3.0)
 
 ### Summary
@@ -639,3 +678,134 @@ Safe to prior release.
 
 See accepted Medium/Low risks in `SECURITY_REVIEW.md` (currency switch nonce-less
 GET, guest cookie readability, site-owner filter trust boundary).
+
+---
+
+## Milestone 7 — performance baselines (Release Candidate)
+
+### Summary
+
+Deterministic query/write-count ceilings documented in
+[`docs/PERFORMANCE_BASELINES.md`](PERFORMANCE_BASELINES.md). No wall-clock CI
+thresholds. No transients or persistent object-cache keys in `src/`.
+
+### Files created
+
+| Path | Purpose |
+|---|---|
+| `docs/PERFORMANCE_BASELINES.md` | Baseline record and ceiling change process |
+| `tests/Support/PerformanceMetrics.php` | Scoped measurement helpers |
+| `tests/integration/PerformanceBaselineTest.php` | WordPress/WooCommerce ceiling tests |
+| `tests/unit/PerformanceBaselineTest.php` | Pure settings/upgrader idempotency |
+| `tests/unit/PerformanceGuardTest.php` | Documentation/constant sync; no cache calls |
+
+### Files modified
+
+| Path | Change |
+|---|---|
+| `.github/workflows/ci.yml` | `performance` job |
+| `docs/ROADMAP.md`, `docs/TEST_STRATEGY.md`, `docs/DEPLOYMENT.md` | Performance pointers |
+
+### Deployment sequence
+
+No deployment-specific steps. Ceilings are enforced in CI only.
+
+### Rollback
+
+Safe to prior release.
+
+---
+
+## Milestone 7 — release audit (Release Candidate)
+
+### Summary
+
+Executable release-blocking gate via `composer release-audit` /
+[`docs/RELEASE_AUDIT.md`](RELEASE_AUDIT.md). Validates repository hygiene,
+metadata, persisted-data contract, security/performance subsets, POT drift,
+`composer audit`, and the production release ZIP contents.
+
+### Files created
+
+| Path | Purpose |
+|---|---|
+| `bin/release-audit.sh` | Canonical orchestrator |
+| `bin/inspect-release-zip.php` | CLI ZIP inspection wrapper |
+| `docs/RELEASE_AUDIT.md` | Audit record (RB1–RB15) |
+| `tests/Support/ReleaseZipInspector.php` | Archive inclusion/exclusion rules |
+| `tests/unit/ReleaseAuditTest.php` | Repository and package guards |
+
+### Files modified
+
+| Path | Change |
+|---|---|
+| `composer.json` | `release-audit` script |
+| `bin/make-pot.sh` | `--allow-root`, wp-cli bootstrap for audit environments |
+| `.github/workflows/ci.yml` | `release-audit` job |
+| `docs/TEST_STRATEGY.md` | Release-audit section |
+
+### Deployment sequence
+
+Contributors and CI run `composer release-audit` before Commit 10 version bump.
+No merchant-facing runtime change.
+
+### Rollback
+
+Safe to prior release.
+
+---
+
+## Milestone 7 — documentation synchronization (Release Candidate)
+
+### Summary
+
+Synchronizes the complete documentation set with the implemented Release
+Candidate state. Adds minimal WordPress `readme.txt` (Stable tag **0.6.0**).
+Does **not** bump plugin version or close Milestone 7.
+
+### Files created
+
+| Path | Purpose |
+|---|---|
+| `readme.txt` | WordPress plugin readme (merchant-oriented) |
+| `tests/unit/DocumentationSyncTest.php` | Documentation/metadata/link guards |
+
+### Files modified
+
+| Path | Change |
+|---|---|
+| `README.md` | Developer readme aligned with readme.txt and RC commands |
+| `CLAUDE.md` | Contributor workflow including `composer release-audit` |
+| `docs/ROADMAP.md` | Milestone 7 item status; Commit 10 pending |
+| `docs/ARCHITECTURE.md` | RC governance section |
+| `docs/DEPLOYMENT.md` | Contributor commands; this record |
+| `docs/RELEASE_AUDIT.md` | readme.txt in ZIP inclusion list |
+| `docs/SECURITY_REVIEW.md` | SettingsUpgrader boundary note |
+| `docs/TEST_STRATEGY.md` | Documentation sync guards |
+| `tests/Support/ReleaseZipInspector.php` | Require `readme.txt` in release ZIP |
+
+### Deployment sequence
+
+No runtime change. Rebuild release zip after adding `readme.txt`:
+
+```bash
+composer install --no-dev
+bash bin/build-zip.sh
+composer release-audit
+```
+
+### Rollback
+
+Safe to prior release; remove `readme.txt` only if downgrading before Commit 9.
+
+### Known limitations (M7 documentation)
+
+- Stable tag remains **0.6.0** until Commit 10.
+- No bundled locale `.mo` files (documented in `readme.txt` and `TRANSLATION.md`).
+- UMC CSV format remains specification-only (`MIGRATION.md`).
+
+### Commit 10 (not performed here)
+
+- Bump `Version:` / `UMC_VERSION` / `readme.txt` Stable tag to **0.7.0**
+- Close Milestone 7 in `docs/ROADMAP.md`
+- Tag `v0.7.0` and publish release zip under the new version

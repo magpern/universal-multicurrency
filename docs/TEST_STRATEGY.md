@@ -304,3 +304,13 @@ Baseline record: [`docs/PERFORMANCE_BASELINES.md`](PERFORMANCE_BASELINES.md).
 - **CI `release-audit` job** — runs the canonical command on every pull request.
 
 Audit record: [`docs/RELEASE_AUDIT.md`](RELEASE_AUDIT.md). **Zero unresolved release blockers** required before Commit 10.
+
+## Milestone 7 — documentation synchronization (Release Candidate)
+
+### Guards
+
+- **`tests/unit/DocumentationSyncTest.php`** (`@group documentation`, `@group release-audit`) — required doc files, `readme.txt` header/metadata vs plugin header, manual migration and uninstall statements, ROADMAP Commit 10 pending, forbidden v0.7.0 release claims, documented composer commands, relative link resolution, architecture/security cross-references, `ReleaseZipInspector` requires `readme.txt`.
+- **`tests/unit/MigrationDocumentationTest.php`** — migration playbook structure and cross-links.
+- **`tests/unit/ReleaseAuditTest.php`** — overlapping metadata and hygiene guards.
+
+Merchant readme: [`readme.txt`](../readme.txt) (Stable tag 0.6.0). Developer readme: [`README.md`](../README.md).

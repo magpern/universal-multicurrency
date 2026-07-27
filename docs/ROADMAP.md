@@ -23,19 +23,24 @@
     **Deferred from this line (explicit non-goals):** community-submitted
     built-in detector labels without maintainer verification; automatic
     remediation of any kind.
-7.  Release candidate — **not closed by v0.6.0.** Remaining objectives:
-    - **Migration handling** — **merchant playbook shipped:**
-      [`docs/MIGRATION.md`](MIGRATION.md) (manual cut-over; ADR-0003/0007; no
-      foreign import). Internal settings schema 0→1 upgrade (`SettingsUpgrader`).
-      Optional UMC CSV format specified for future tooling only (no RC import UI).
-    - **Uninstall audit** — **shipped (M7):** [`PERSISTED_DATA.md`](PERSISTED_DATA.md),
-      [`ADR-0009`](adr/0009-uninstall-retention-policy.md), executable guards
-    - **Translation readiness** — **shipped (M7):** [`docs/TRANSLATION.md`](TRANSLATION.md)
-      (i18n audit, `languages/universal-multicurrency.pot`, CI drift guard, RTL audit)
-    - **Whole-plugin security review** — **shipped (M7):** [`SECURITY_REVIEW.md`](SECURITY_REVIEW.md),
-      `SecuritySourceGuardTest`, `SecurityBehaviourTest`; zero open Critical/High findings
-    - **Performance baseline** — **shipped (M7):** [`PERFORMANCE_BASELINES.md`](PERFORMANCE_BASELINES.md),
-      query/write-count guards (`PerformanceBaselineTest`, `PerformanceGuardTest`); no wall-clock CI gates
+7.  Release candidate — **open** (not closed until Commit 10). Shipped plugin
+    version remains **0.6.0**; target **v0.7.0** is pending final validation.
+
+    | Milestone 7 work item | Status |
+    |---|---|
+    | Persisted-data inventory | **Complete** |
+    | Uninstall policy (ADR-0009) | **Complete** |
+    | Settings upgrade framework (schema v1, v0→v1 only) | **Complete** |
+    | Merchant migration documentation | **Complete** — [`docs/MIGRATION.md`](MIGRATION.md) |
+    | Translation readiness | **Complete** — [`docs/TRANSLATION.md`](TRANSLATION.md) |
+    | Security audit | **Complete** — [`docs/SECURITY_REVIEW.md`](SECURITY_REVIEW.md) |
+    | Performance baselines | **Complete** — [`docs/PERFORMANCE_BASELINES.md`](PERFORMANCE_BASELINES.md) |
+    | Release audit | **Complete** — [`docs/RELEASE_AUDIT.md`](RELEASE_AUDIT.md), `composer release-audit` |
+    | Documentation synchronization | **Complete** (Commit 9) — `readme.txt`, aligned doc set |
+    | Version bump and RC closure | **Pending** (Commit 10) — bump to 0.7.0, tag, Milestone 7 closure |
+
+    **Not done in Commit 9:** plugin version bump, Stable tag 0.7.0, release tag,
+    or Milestone 7 closure.
 
 Future: Auto rates, GeoIP, reporting, APIs.
 
