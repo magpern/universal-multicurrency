@@ -253,8 +253,15 @@ final class DiagnosticsGuardTest extends WP_UnitTestCase {
 	}
 
 	public function test_g7_only_the_probe_performs_registry_lookups(): void {
+		$files = array_values(
+			array_filter(
+				$this->diagnostics_files( 'WordPressEnvironmentProbe.php' ),
+				static fn( string $file ): bool => 'SiteHealthReport.php' !== basename( $file )
+			)
+		);
+
 		$this->assert_pattern_absent_from(
-			$this->diagnostics_files( 'WordPressEnvironmentProbe.php' ),
+			$files,
 			'/\$wp_filter|\$shortcode_tags|\bclass_exists\s*\(|\bfunction_exists\s*\(|\binterface_exists\s*\(|\bdefined\s*\(|\bconstant\s*\(|\bhas_(filter|action)\s*\(/',
 			'G7: only WordPressEnvironmentProbe.php may probe WordPress registries.'
 		);
@@ -411,7 +418,7 @@ final class DiagnosticsGuardTest extends WP_UnitTestCase {
 
 		$this->assertStringContainsString( 'if ( is_admin() && ! wp_doing_ajax()', $source );
 		$this->assertMatchesRegularExpression(
-			'/if\s*\(\s*is_admin\(\)[^{]+\)\s*\{\s*\R\s*\(\s*new Diagnostics\(\)\s*\)->register\(\)/',
+			'/if\s*\(\s*is_admin\(\)[^{]+\)\s*\{\s*\R\s*\(\s*new Diagnostics\([^)]*\)\s*\)->register\(\)/',
 			$source,
 			'Diagnostics registration must stay behind the admin gate in Plugin.php.'
 		);

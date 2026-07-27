@@ -219,7 +219,7 @@ final class ConflictNoticeIntegrationTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'wp_doing_ajax()', $source );
 		$this->assertStringContainsString( 'wp_doing_cron()', $source );
 		$this->assertStringContainsString( 'WP_CLI', $source );
-		$this->assertStringContainsString( 'new Diagnostics()', $source );
+		$this->assertStringContainsString( 'new Diagnostics(', $source );
 	}
 
 	public function test_medium_fixture_renders_warning_on_plugins_screen_only(): void {
