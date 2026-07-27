@@ -102,8 +102,8 @@ final class ConflictNoticeSettingsIntegrationTest extends WP_UnitTestCase {
 	}
 
 	public function test_settings_page_prepends_the_conflict_field(): void {
-		$settings = new Settings();
-		$page     = new SettingsPage(
+		$settings        = new Settings();
+		$page            = new SettingsPage(
 			$settings,
 			new Currency( 'USD', 2, '$', 'left', true ),
 			new ExchangeRateStore( $settings, new RateUpdateState(), 'USD', 'test-lock' )
