@@ -56,16 +56,16 @@ final class SettingsUpgraderTest extends TestCase {
 		$this->assertFalse( $result->is_unsupported_future() );
 		$this->assertTrue( $result->should_persist() );
 		$this->assertSame( Settings::SCHEMA_VERSION, $result->settings()['schema_version'] );
-		$this->assertSame( '11.50', $result->settings()['currencies']['SEK']['rate'] );
+		$this->assertSame( '11.50', $result->settings()['currencies']['SEK']['manual_rate'] );
 	}
 
-	public function test_v1_to_v1_performs_no_migration_and_avoids_persist_when_canonical(): void {
+	public function test_v2_to_v2_performs_no_migration_and_avoids_persist_when_canonical(): void {
 		$canonical = Settings::sanitize(
 			array(
-				'schema_version' => 1,
+				'schema_version' => Settings::SCHEMA_VERSION,
 				'currencies'     => array(
 					'USD' => array(
-						'rate' => '1.20',
+						'manual_rate' => '1.20',
 					),
 				),
 			)
@@ -75,6 +75,25 @@ final class SettingsUpgraderTest extends TestCase {
 
 		$this->assertSame( $canonical, $result->settings() );
 		$this->assertFalse( $result->should_persist() );
+	}
+
+	public function test_v1_to_v2_migration_renames_rate_to_manual_rate(): void {
+		$result = ( new SettingsUpgrader() )->upgrade(
+			array(
+				'schema_version' => 1,
+				'currencies'     => array(
+					'SEK' => array(
+						'rate'            => '11.50',
+						'rate_updated_at' => 100,
+					),
+				),
+			)
+		);
+
+		$this->assertSame( Settings::SCHEMA_VERSION, $result->settings()['schema_version'] );
+		$this->assertSame( '11.50', $result->settings()['currencies']['SEK']['manual_rate'] );
+		$this->assertArrayNotHasKey( 'rate', $result->settings()['currencies']['SEK'] );
+		$this->assertSame( Settings::RATE_MODE_MANUAL, $result->settings()['rate_mode'] );
 	}
 
 	public function test_v0_upgrade_is_idempotent(): void {
@@ -123,7 +142,7 @@ final class SettingsUpgraderTest extends TestCase {
 			)
 		);
 
-		$this->assertSame( '', $result->settings()['currencies']['USD']['rate'] );
+		$this->assertSame( '', $result->settings()['currencies']['USD']['manual_rate'] );
 		$this->assertArrayNotHasKey( 'evil_key', $result->settings()['currencies']['USD'] );
 	}
 
@@ -222,12 +241,13 @@ final class SettingsUpgraderTest extends TestCase {
 		$this->assertSame( array( 1, 2, 3 ), $executed, 'Re-running at target version must not repeat migrations.' );
 	}
 
-	public function test_production_runner_only_registers_real_v0_to_v1_migration(): void {
+	public function test_production_runner_registers_v0_to_v1_and_v1_to_v2_migrations(): void {
 		$this->assertSame(
-			array( 1 ),
+			array( 1, 2 ),
 			array_keys( SettingsUpgrader::production_migrations() )
 		);
 		$this->assertSame( SettingsUpgrader::MIGRATE_0_TO_1, SettingsUpgrader::production_migrations()[1] );
+		$this->assertSame( SettingsUpgrader::MIGRATE_1_TO_2, SettingsUpgrader::production_migrations()[2] );
 	}
 
 	public function test_migrate_0_to_1_strips_unknown_root_keys(): void {
@@ -248,7 +268,7 @@ final class SettingsUpgraderTest extends TestCase {
 		);
 	}
 
-	public function test_upgrade_marks_non_canonical_v1_for_persistence(): void {
+	public function test_upgrade_marks_non_canonical_v1_for_persistence_via_v2_migration(): void {
 		$result = ( new SettingsUpgrader() )->upgrade(
 			array(
 				'schema_version' => 1,
@@ -260,5 +280,6 @@ final class SettingsUpgraderTest extends TestCase {
 
 		$this->assertTrue( $result->should_persist() );
 		$this->assertArrayHasKey( 'SEK', $result->settings()['currencies'] );
+		$this->assertSame( '11.5', $result->settings()['currencies']['SEK']['manual_rate'] );
 	}
 }

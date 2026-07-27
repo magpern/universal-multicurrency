@@ -18,6 +18,7 @@ use UMC\Diagnostics\NoticeDismissal;
 use UMC\Order\OrderSnapshot;
 use UMC\Order\RefundSnapshot;
 use UMC\PersistedKeys;
+use UMC\Rates\RateUpdateState;
 use UMC\Settings;
 use UMC\StoreApi\CartExtensionData;
 use UMC\Tests\Support\SourceGuardTrait;
@@ -100,9 +101,9 @@ final class PersistedKeysInventoryTest extends TestCase {
 		$this->assertSame( $expected, $documented );
 	}
 
-	public function test_option_keys_match_settings_constant(): void {
+	public function test_option_keys_match_persisted_inventory(): void {
 		$this->assertSame(
-			array( Settings::OPTION ),
+			array( Settings::OPTION, RateUpdateState::OPTION ),
 			PersistedKeys::option_keys()
 		);
 	}

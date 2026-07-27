@@ -29,7 +29,9 @@ final class SecuritySourceGuardTest extends TestCase {
 		'CurrencySwitcher.php',
 		'NoticeDismissal.php',
 		'SettingsPage.php',
+		'ExchangeRateSettingsField.php',
 		'OrderPayCurrencyLock.php',
+		'RateUpdateController.php',
 	);
 
 	/**
@@ -41,6 +43,9 @@ final class SecuritySourceGuardTest extends TestCase {
 		'Settings.php',
 		'Plugin.php',
 		'WordPressEnvironmentProbe.php',
+		'RateUpdateState.php',
+		'ExchangeRateSettingsField.php',
+		'CurrencyTableField.php',
 	);
 
 	private function root(): string {
@@ -175,10 +180,11 @@ final class SecuritySourceGuardTest extends TestCase {
 		);
 	}
 
-	public function test_uninstall_deletes_only_contracted_option(): void {
+	public function test_uninstall_deletes_only_contracted_options(): void {
 		$source = (string) file_get_contents( $this->root() . '/uninstall.php' );
 
 		$this->assertSame( 1, preg_match_all( "/delete_option\s*\(\s*['\"]umc_settings['\"]\s*\)/", $source ) );
+		$this->assertSame( 1, preg_match_all( "/delete_option\s*\(\s*['\"]umc_rate_state['\"]\s*\)/", $source ) );
 		$this->assertStringNotContainsString( 'delete_user_meta', $source );
 		$this->assertStringNotContainsString( 'delete_post_meta', $source );
 	}

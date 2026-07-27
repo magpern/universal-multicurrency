@@ -10,53 +10,59 @@ declare(strict_types=1);
 namespace UMC\Admin;
 
 use UMC\Currency;
+use UMC\Rates\ExchangeRateStore;
 use UMC\Settings;
 use WC_Settings_Page;
 
 /**
  * Adds a "Multicurrency" tab under WooCommerce → Settings.
- *
- * Renders the currencies table via {@see CurrencyTableField} and persists it
- * through {@see Settings::save()} (which runs the Milestone 1 sanitizer). The
- * save handler runs inside WooCommerce's settings-save flow, which has already
- * verified the settings nonce. A neutral label is used because the product name
- * is provisional (see ADR-0003).
  */
 final class SettingsPage extends WC_Settings_Page {
 
 	/**
-	 * Settings store.
+	 * Merchant settings store.
 	 *
 	 * @var Settings
 	 */
 	private Settings $settings;
 
 	/**
-	 * Currencies table field.
+	 * Currencies table field renderer.
 	 *
 	 * @var CurrencyTableField
 	 */
 	private CurrencyTableField $field;
 
 	/**
-	 * Builds the settings page and wires WooCommerce's settings hooks.
+	 * Global exchange-rate settings field renderer.
 	 *
-	 * @param Settings $settings Settings store.
-	 * @param Currency $base     Base currency.
+	 * @var ExchangeRateSettingsField
 	 */
-	public function __construct( Settings $settings, Currency $base ) {
-		$this->id       = 'umc';
-		$this->label    = __( 'Multicurrency', 'universal-multicurrency' );
-		$this->settings = $settings;
-		$this->field    = new CurrencyTableField( $settings, $base );
+	private ExchangeRateSettingsField $exchange_field;
+
+	/**
+	 * Builds the settings tab and its custom field renderers.
+	 *
+	 * @param Settings          $settings Merchant settings store.
+	 * @param Currency          $base     Store base currency.
+	 * @param ExchangeRateStore $store    Rate persistence boundary.
+	 */
+	public function __construct( Settings $settings, Currency $base, ExchangeRateStore $store ) {
+		$this->id             = 'umc';
+		$this->label          = __( 'Multicurrency', 'universal-multicurrency' );
+		$this->settings       = $settings;
+		$this->field          = new CurrencyTableField( $settings, $base, $store );
+		$this->exchange_field = new ExchangeRateSettingsField( $settings, $store );
 
 		parent::__construct();
 
+		add_action( 'woocommerce_admin_field_umc_exchange_rates', array( $this->exchange_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_currencies', array( $this->field, 'render' ) );
+		add_action( 'admin_notices', array( $this, 'maybe_render_notice' ) );
 	}
 
 	/**
-	 * The settings fields for this tab (a titled section wrapping the table).
+	 * Returns the WooCommerce settings field definitions for this tab.
 	 *
 	 * @return array<int, array<string, mixed>>
 	 */
@@ -72,6 +78,10 @@ final class SettingsPage extends WC_Settings_Page {
 				'id'   => 'umc_settings_title',
 			),
 			array(
+				'type' => 'umc_exchange_rates',
+				'id'   => 'umc_exchange_rates',
+			),
+			array(
 				'type' => 'umc_currencies',
 				'id'   => 'umc_currencies',
 			),
@@ -83,17 +93,49 @@ final class SettingsPage extends WC_Settings_Page {
 	}
 
 	/**
-	 * Persists the posted currencies through the sanitizing settings store.
-	 *
-	 * WooCommerce verifies the `woocommerce-settings` nonce before firing the
-	 * save hook this method is bound to.
+	 * Saves multicurrency settings from the current POST payload.
 	 */
 	public function save(): void {
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- WooCommerce verifies the woocommerce-settings nonce before woocommerce_settings_save_{tab}.
-		$raw = isset( $_POST['umc_currencies'] ) ? wp_unslash( $_POST['umc_currencies'] ) : array(); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verified by WooCommerce; each field is sanitized in CurrencyTableField::parse() and Settings::sanitize().
+		$raw = isset( $_POST['umc_currencies'] ) ? wp_unslash( $_POST['umc_currencies'] ) : array(); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Verified by WooCommerce settings save.
 
 		$currencies = $this->field->parse( is_array( $raw ) ? $raw : array() );
+		$globals    = $this->exchange_field->parse_post();
+		$merged     = array_merge( $this->settings->get(), $globals, array( 'currencies' => $currencies ) );
 
-		$this->settings->save( array( 'currencies' => $currencies ) );
+		$this->settings->save( $merged );
+
+		/**
+		 * Fires after multicurrency settings are persisted.
+		 *
+		 * @since 0.8.0
+		 */
+		do_action( 'umc_settings_saved' );
+	}
+
+	/**
+	 * Renders a one-time admin notice after manual rate-update redirects.
+	 */
+	public function maybe_render_notice(): void {
+		if ( ! isset( $_GET['umc_msg'], $_GET['umc_typ'] ) || ! is_admin() ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET['page'], $_GET['tab'] ) || 'wc-settings' !== $_GET['page'] || 'umc' !== $_GET['tab'] ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Display-only query args after redirect.
+		$raw_msg = wp_unslash( (string) $_GET['umc_msg'] );
+		$message = sanitize_text_field( rawurldecode( $raw_msg ) );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$type  = sanitize_key( wp_unslash( (string) $_GET['umc_typ'] ) );
+		$class = 'warning' === $type ? 'notice-warning' : 'notice-success';
+
+		printf(
+			'<div class="notice %1$s is-dismissible"><p>%2$s</p></div>',
+			esc_attr( $class ),
+			esc_html( $message )
+		);
 	}
 }

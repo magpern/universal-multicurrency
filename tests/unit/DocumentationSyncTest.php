@@ -25,7 +25,7 @@ use ZipArchive;
  */
 final class DocumentationSyncTest extends TestCase {
 
-	private const CURRENT_VERSION = '0.7.0';
+	private const CURRENT_VERSION = '0.8.0';
 
 	/**
 	 * Tracked documentation sources that must exist and stay internally consistent.
@@ -50,6 +50,10 @@ final class DocumentationSyncTest extends TestCase {
 		'docs/adr/0003-standalone-no-fox-woocs-coupling.md',
 		'docs/adr/0007-passive-conflict-detection.md',
 		'docs/adr/0009-uninstall-retention-policy.md',
+		'docs/adr/0010-automatic-rate-providers.md',
+		'docs/adr/0011-action-scheduler-rate-updates.md',
+		'docs/adr/0012-operational-rate-state-separation.md',
+		'docs/adr/0013-conditional-http-rate-caching.md',
 	);
 
 	/**
@@ -93,8 +97,8 @@ final class DocumentationSyncTest extends TestCase {
 		'NB2 readme deferred',
 		'version bump pending',
 		'RC closure pending',
-		'target 0.7.0 — Commit 10',
-		'Unreleased (target 0.7.0',
+		'target 0.8.0 — Commit 13',
+		'Unreleased (target 0.8.0',
 	);
 
 	private function root(): string {
@@ -216,12 +220,13 @@ final class DocumentationSyncTest extends TestCase {
 		$this->assertSame( 'universal-multicurrency', $header['Text Domain'] ?? null );
 	}
 
-	public function test_readme_txt_changelog_includes_070_and_retains_060_history(): void {
+	public function test_readme_txt_changelog_includes_080_and_retains_history(): void {
 		$readme = $this->read( 'readme.txt' );
 
+		$this->assertStringContainsString( '= 0.8.0 =', $readme );
 		$this->assertStringContainsString( '= 0.7.0 =', $readme );
 		$this->assertStringContainsString( '= 0.6.0 =', $readme );
-		$this->assertStringContainsString( 'persisted-data inventory', $readme );
+		$this->assertStringContainsString( 'Frankfurter', $readme );
 		$this->assertStringContainsString( 'release audit', strtolower( $readme ) );
 	}
 
@@ -248,14 +253,12 @@ final class DocumentationSyncTest extends TestCase {
 		}
 	}
 
-	public function test_roadmap_shows_milestone_seven_complete_at_070(): void {
+	public function test_roadmap_shows_milestone_eight_complete_at_080(): void {
 		$roadmap = $this->read( 'docs/ROADMAP.md' );
 
-		$this->assertStringContainsString( 'Milestone 7', $roadmap );
+		$this->assertStringContainsString( 'Milestone 8', $roadmap );
 		$this->assertStringContainsString( 'complete', strtolower( $roadmap ) );
-		$this->assertStringContainsString( 'v0.7.0', $roadmap );
-		$this->assertStringContainsString( 'Version bump and RC closure', $roadmap );
-		$this->assertStringNotContainsString( 'Pending (Commit 10)', $roadmap );
+		$this->assertStringContainsString( 'v0.8.0', $roadmap );
 	}
 
 	public function test_key_docs_contain_no_temporary_pending_commit_ten_wording(): void {
@@ -297,10 +300,10 @@ final class DocumentationSyncTest extends TestCase {
 		$audit = $this->read( 'docs/RELEASE_AUDIT.md' );
 
 		$this->assertStringContainsString( 'Release Candidate closure record', $audit );
-		$this->assertStringContainsString( 'Version | **0.7.0**', $audit );
+		$this->assertStringContainsString( 'Version | **0.8.0**', $audit );
 		$this->assertStringContainsString( 'Unresolved release blockers | **0**', $audit );
-		$this->assertStringContainsString( 'Git tag `v0.7.0` | **Not yet created**', $audit );
-		$this->assertStringContainsString( 'Milestone 7 | **Complete**', $audit );
+		$this->assertStringContainsString( 'Git tag `v0.8.0` | **Not yet created**', $audit );
+		$this->assertStringContainsString( 'Milestone 8 | **Complete**', $audit );
 	}
 
 	public function test_documented_composer_commands_exist(): void {
@@ -323,12 +326,12 @@ final class DocumentationSyncTest extends TestCase {
 		$this->assertStringContainsString( 'composer release-audit', $deployment );
 		$this->assertStringContainsString( 'bin/build-zip.sh', $deployment );
 		$this->assertStringContainsString( 'composer install --no-dev', $deployment );
-		$this->assertStringContainsString( 'universal-multicurrency-0.7.0.zip', $deployment );
+		$this->assertStringContainsString( 'universal-multicurrency-0.8.0.zip', $deployment );
 	}
 
 	public function test_settings_schema_documentation_matches_implementation(): void {
-		$this->assertSame( 1, Settings::SCHEMA_VERSION );
-		$this->assertSame( array( 1 ), array_keys( SettingsUpgrader::production_migrations() ) );
+		$this->assertSame( 2, Settings::SCHEMA_VERSION );
+		$this->assertSame( array( 1, 2 ), array_keys( SettingsUpgrader::production_migrations() ) );
 
 		foreach ( array( 'docs/ARCHITECTURE.md', 'docs/MIGRATION.md' ) as $file ) {
 			$source = $this->read( $file );
@@ -345,6 +348,7 @@ final class DocumentationSyncTest extends TestCase {
 
 		$this->assertStringContainsString( (string) PersistedKeys::INVENTORY_VERSION, $doc );
 		$this->assertStringContainsString( 'umc_settings', $doc );
+		$this->assertStringContainsString( 'umc_rate_state', $doc );
 		$this->assertStringContainsString( 'umc_dismissed_notices', $doc );
 		$this->assertStringContainsString( 'Preserved', $doc );
 		$this->assertStringContainsString( 'ADR-0009', $doc );

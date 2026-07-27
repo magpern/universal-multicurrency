@@ -335,12 +335,13 @@ final class ReleaseAuditTest extends TestCase {
 		$this->assertSame( '>=8.1', $composer['require']['php'] ?? null );
 	}
 
-	public function test_settings_schema_remains_v1_with_single_production_migration(): void {
-		$this->assertSame( 1, Settings::SCHEMA_VERSION );
+	public function test_settings_schema_is_v2_with_production_migrations(): void {
+		$this->assertSame( 2, Settings::SCHEMA_VERSION );
 
 		$migrations = SettingsUpgrader::production_migrations();
-		$this->assertSame( array( 1 ), array_keys( $migrations ) );
+		$this->assertSame( array( 1, 2 ), array_keys( $migrations ) );
 		$this->assertSame( SettingsUpgrader::MIGRATE_0_TO_1, $migrations[1] );
+		$this->assertSame( SettingsUpgrader::MIGRATE_1_TO_2, $migrations[2] );
 	}
 
 	public function test_persisted_keys_inventory_version_is_documented(): void {
@@ -353,10 +354,11 @@ final class ReleaseAuditTest extends TestCase {
 		);
 	}
 
-	public function test_uninstall_php_deletes_only_contracted_option(): void {
+	public function test_uninstall_php_deletes_only_contracted_options(): void {
 		$source = $this->read( 'uninstall.php' );
 
 		$this->assertSame( 1, preg_match_all( "/delete_option\s*\(\s*['\"]umc_settings['\"]\s*\)/", $source ) );
+		$this->assertSame( 1, preg_match_all( "/delete_option\s*\(\s*['\"]umc_rate_state['\"]\s*\)/", $source ) );
 		$this->assertStringNotContainsString( 'delete_user_meta', $source );
 		$this->assertStringNotContainsString( 'delete_post_meta', $source );
 	}

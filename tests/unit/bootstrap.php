@@ -40,6 +40,24 @@ if ( ! function_exists( '__' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wp_generate_password' ) ) {
+	function wp_generate_password( $length = 12, $special_chars = true ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		return str_repeat( 'a', (int) $length );
+	}
+}
+
+if ( ! function_exists( 'get_option' ) ) {
+	function get_option( $option, $default = false ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound, Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed, Universal.NamingConventions.NoReservedKeywordParameterNames.defaultFound
+		return $default;
+	}
+}
+
+if ( ! function_exists( 'update_option' ) ) {
+	function update_option( $option, $value ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound, Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		return true;
+	}
+}
+
 if ( ! function_exists( '_n' ) ) {
 	/**
 	 * Minimal plural stub for unit tests without WordPress loaded.
@@ -60,3 +78,4 @@ if ( ! function_exists( '_n' ) ) {
 require_once __DIR__ . '/Doubles/ArrayEnvironmentProbe.php';
 require_once __DIR__ . '/Doubles/CountingEnvironmentProbe.php';
 require_once __DIR__ . '/Doubles/StaticDetectorRegistry.php';
+require_once __DIR__ . '/Doubles/ThrowingRateUpdateState.php';

@@ -45,7 +45,7 @@ final class SettingsOptionTest extends WP_UnitTestCase {
 
 		// A fresh instance reads what was persisted.
 		$reloaded = ( new Settings() )->get();
-		$this->assertSame( '11.50', $reloaded['currencies']['SEK']['rate'] );
+		$this->assertSame( '11.50', $reloaded['currencies']['SEK']['manual_rate'] );
 		$this->assertSame( 'kr', $reloaded['currencies']['SEK']['symbol'] );
 		$this->assertSame( Settings::SCHEMA_VERSION, $reloaded['schema_version'] );
 	}
@@ -71,7 +71,7 @@ final class SettingsOptionTest extends WP_UnitTestCase {
 		$this->assertArrayNotHasKey( 'BAD1', $stored['currencies'] );
 		$this->assertSame( 2, $stored['currencies']['SEK']['decimals'] );
 		$this->assertSame( 'left', $stored['currencies']['SEK']['position'] );
-		$this->assertSame( '', $stored['currencies']['SEK']['rate'] );
+		$this->assertSame( '', $stored['currencies']['SEK']['manual_rate'] );
 	}
 
 	public function test_resaving_is_stable(): void {

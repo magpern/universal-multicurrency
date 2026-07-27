@@ -15,6 +15,8 @@ use UMC\Diagnostics\DetectorRegistry;
 use UMC\Diagnostics\Diagnostics;
 use UMC\Diagnostics\NoticeDismissal;
 use UMC\Diagnostics\SignatureKind;
+use UMC\Rates\ExchangeRateStore;
+use UMC\Rates\RateUpdateState;
 use UMC\Settings;
 use WP_UnitTestCase;
 
@@ -100,11 +102,16 @@ final class ConflictNoticeSettingsIntegrationTest extends WP_UnitTestCase {
 	}
 
 	public function test_settings_page_prepends_the_conflict_field(): void {
-		$page     = new SettingsPage( new Settings(), new Currency( 'USD', 2, '$', 'left', true ) );
-		$settings = $page->get_settings();
+		$settings        = new Settings();
+		$page            = new SettingsPage(
+			$settings,
+			new Currency( 'USD', 2, '$', 'left', true ),
+			new ExchangeRateStore( $settings, new RateUpdateState(), 'USD', 'test-lock' )
+		);
+		$settings_fields = $page->get_settings();
 
-		$this->assertSame( 'umc_conflict', $settings[0]['type'] );
-		$this->assertSame( 'umc_conflict_notice', $settings[0]['id'] );
+		$this->assertSame( 'umc_conflict', $settings_fields[0]['type'] );
+		$this->assertSame( 'umc_conflict_notice', $settings_fields[0]['id'] );
 	}
 
 	public function test_settings_tab_notice_renders_without_dismiss_link(): void {

@@ -43,7 +43,25 @@
     **Not yet performed:** Git tag `v0.7.0`, GitHub release publication, branch
     merge, or pull-request closure — pending explicit approval after review.
 
-Future: Auto rates, GeoIP, reporting, APIs.
+8.  Automatic exchange rates (**v0.8.0**) — **complete** in this repository.
+
+    | Milestone 8 work item | Status |
+    |---|---|
+    | Provider abstraction and derive-don't-persist (ADR-0010) | **Complete** |
+    | Action Scheduler recurring updates (ADR-0011) | **Complete** |
+    | Operational state separation (ADR-0012) | **Complete** |
+    | Conditional HTTP caching (ADR-0013) | **Complete** |
+    | Frankfurter provider, admin UI, Site Health | **Complete** |
+
+    **Resulting release:** **v0.8.0** (`UMC_VERSION` and plugin header).
+
+    **Deferred from this line (explicit non-goals):** WP-CLI commands
+    (`wp umc rates update|status|…`) — service layers are CLI-ready; a future
+    milestone can add a thin command wrapper without redesign.
+
+    **Not yet performed:** Git tag `v0.8.0`, GitHub release publication — pending explicit approval after review.
+
+Future: GeoIP, reporting, APIs.
 
 The plugin is standalone and replaces FOX/WOOCS and the old MP helper; only
 WooCommerce is a dependency (see docs/adr/0003).

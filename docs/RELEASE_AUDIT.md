@@ -1,13 +1,13 @@
-# Release audit — Milestone 7 Release Candidate (v0.7.0)
+# Release audit — Milestone 8 (v0.8.0)
 
-Executable release-blocking gate for Universal Multicurrency **v0.7.0**. This
+Executable release-blocking gate for Universal Multicurrency **v0.8.0**. This
 document records scope, criteria, commands, audit results, and the Release
 Candidate closure state.
 
-**Governing question:** If we published this Release Candidate tomorrow, is
-there anything left in the repository that clearly should not ship?
+**Governing question:** If we published this release tomorrow, is there anything
+left in the repository that clearly should not ship?
 
-**Repository status:** prepared for **v0.7.0**. Git tag and GitHub release
+**Repository status:** prepared for **v0.8.0**. Git tag and GitHub release
 publication are **not yet created** — pending explicit approval after review.
 
 ---
@@ -16,10 +16,10 @@ publication are **not yet created** — pending explicit approval after review.
 
 | Item | Value |
 |---|---|
-| Version | **0.7.0** |
-| Settings schema | **1** |
-| Persisted-data inventory version | **2** |
-| Sole production migration | **v0 → v1** |
+| Version | **0.8.0** |
+| Settings schema | **2** |
+| Persisted-data inventory version | **3** |
+| Production migrations | **v0 → v1**, **v1 → v2** |
 | Unresolved Critical security findings | **0** |
 | Unresolved High security findings | **0** |
 | Unresolved release blockers | **0** |
@@ -27,9 +27,9 @@ publication are **not yet created** — pending explicit approval after review.
 | POT drift | **Passing** |
 | Dependency audit (`composer audit`) | **Passing** |
 | Package inspection | **Passing** |
-| Git tag `v0.7.0` | **Not yet created** |
+| Git tag `v0.8.0` | **Not yet created** |
 | GitHub release publication | **Pending explicit approval** |
-| Milestone 7 | **Complete** in repository |
+| Milestone 8 | **Complete** in repository |
 
 ---
 

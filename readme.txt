@@ -4,15 +4,15 @@ Tags: woocommerce, currency, multicurrency, exchange rates, money
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.7.0
+Stable tag: 0.8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Unlimited currencies with manual exchange rates. WooCommerce owns products and inventory; currency affects monetary values only.
+Unlimited currencies with manual or automatic exchange rates (Frankfurter). WooCommerce owns products and inventory; currency affects monetary values only.
 
 == Description ==
 
-Universal Multicurrency for WooCommerce lets merchants offer unlimited currencies using manually entered exchange rates. Product and inventory data stay in the store base currency; prices convert at runtime on the storefront, cart, checkout, and WooCommerce Store API surfaces.
+Universal Multicurrency for WooCommerce lets merchants offer unlimited currencies using manually entered exchange rates or automatic Frankfurter-backed updates. Product and inventory data stay in the store base currency; prices convert at runtime on the storefront, cart, checkout, and WooCommerce Store API surfaces.
 
 * Classic cart and checkout, Cart Block, and Checkout Block
 * High-Performance Order Storage (HPOS) required and declared compatible
@@ -22,7 +22,7 @@ Universal Multicurrency for WooCommerce lets merchants offer unlimited currencie
 
 **Migration from another currency switcher:** manual cut-over only. This plugin does not import settings from FOX/WOOCS, WPML Multicurrency, or other switchers. Configure currencies and rates manually in WooCommerce → Settings → Multicurrency.
 
-**Uninstall:** removes plugin settings (`umc_settings`) only. Order and refund snapshot metadata is preserved permanently.
+**Uninstall:** removes plugin settings (`umc_settings`, `umc_rate_state`) only. Order and refund snapshot metadata is preserved permanently.
 
 == Installation ==
 
@@ -50,6 +50,13 @@ The plugin ships a POT template (`languages/universal-multicurrency.pot`) for tr
 
 == Changelog ==
 
+= 0.8.0 =
+* Automatic exchange rates via Frankfurter (`ExchangeRateSource`, conditional HTTP caching)
+* Settings schema v2: `manual_rate`, `provider_rate`, `merchant_adjustment`, global/per-currency rate modes
+* Effective rates derived on read (`RateResolver`); operational state in `umc_rate_state`
+* Action Scheduler recurring updates; manual update-now / update-all admin actions
+* Site Health rate diagnostics; ADRs 0010–0013
+
 = 0.7.0 =
 * Release Candidate: persisted-data inventory and uninstall retention policy (ADR-0009)
 * Settings upgrade framework (schema v1; sole production migration v0→v1)
@@ -65,6 +72,9 @@ The plugin ships a POT template (`languages/universal-multicurrency.pot`) for tr
 * Storefront conversion, classic cart/checkout, order snapshots, historical order display, refunds, and Store API / blocks parity (milestones 2–5)
 
 == Upgrade Notice ==
+
+= 0.8.0 =
+Upgrades settings schema v1→v2 automatically (`rate` becomes `manual_rate`; default rate mode stays manual). Requires WooCommerce 8.2+, PHP 8.1+, and HPOS.
 
 = 0.7.0 =
 Release Candidate packaging and documentation only for most stores upgrading from 0.6.0 — no settings schema bump beyond the existing v0→v1 path. Requires WooCommerce 8.2+, PHP 8.1+, and HPOS.

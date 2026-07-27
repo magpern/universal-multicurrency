@@ -20,8 +20,12 @@ final class SettingsSanitizeTest extends TestCase {
 	public function test_defaults_shape(): void {
 		$this->assertSame(
 			array(
-				'schema_version' => Settings::SCHEMA_VERSION,
-				'currencies'     => array(),
+				'schema_version'       => Settings::SCHEMA_VERSION,
+				'rate_mode'            => Settings::RATE_MODE_MANUAL,
+				'rate_provider'        => Settings::DEFAULT_RATE_PROVIDER,
+				'rate_update_interval' => Settings::DEFAULT_RATE_INTERVAL,
+				'rate_max_age_hours'   => Settings::DEFAULT_RATE_MAX_AGE_HOURS,
+				'currencies'           => array(),
 			),
 			Settings::defaults()
 		);
@@ -45,12 +49,15 @@ final class SettingsSanitizeTest extends TestCase {
 
 		$this->assertSame(
 			array(
-				'enabled'         => true,
-				'symbol'          => 'kr',
-				'position'        => 'right_space',
-				'decimals'        => 2,
-				'rate'            => '11.50',
-				'rate_updated_at' => 1753440000,
+				'enabled'             => true,
+				'symbol'              => 'kr',
+				'position'            => 'right_space',
+				'decimals'            => 2,
+				'manual_rate'         => '11.50',
+				'provider_rate'       => '',
+				'merchant_adjustment' => '0',
+				'rate_mode'           => '',
+				'rate_updated_at'     => 1753440000,
 			),
 			$clean['currencies']['SEK']
 		);
@@ -166,7 +173,7 @@ final class SettingsSanitizeTest extends TestCase {
 	 */
 	public function test_rate_normalization( mixed $input, string $expected ): void {
 		$clean = Settings::sanitize( array( 'currencies' => array( 'USD' => array( 'rate' => $input ) ) ) );
-		$this->assertSame( $expected, $clean['currencies']['USD']['rate'] );
+		$this->assertSame( $expected, $clean['currencies']['USD']['manual_rate'] );
 	}
 
 	/**
@@ -199,7 +206,7 @@ final class SettingsSanitizeTest extends TestCase {
 			)
 		);
 		$this->assertArrayHasKey( 'USD', $clean['currencies'] );
-		$this->assertSame( '', $clean['currencies']['USD']['rate'] );
+		$this->assertSame( '', $clean['currencies']['USD']['manual_rate'] );
 	}
 
 	public function test_non_array_input_returns_defaults(): void {
@@ -223,7 +230,7 @@ final class SettingsSanitizeTest extends TestCase {
 		$this->assertArrayNotHasKey( 'injected_root', $clean );
 		$this->assertArrayNotHasKey( 'evil', $clean['currencies']['USD'] );
 		$this->assertSame(
-			array( 'enabled', 'symbol', 'position', 'decimals', 'rate', 'rate_updated_at' ),
+			array( 'enabled', 'symbol', 'position', 'decimals', 'manual_rate', 'provider_rate', 'merchant_adjustment', 'rate_mode', 'rate_updated_at' ),
 			array_keys( $clean['currencies']['USD'] )
 		);
 	}
