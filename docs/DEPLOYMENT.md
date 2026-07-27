@@ -26,9 +26,8 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Produces `dist/universal-multicurrency-0.6.0.zip` at Commit 9 (version bump in
-Commit 10). The archive includes `readme.txt`, production `src/`, `vendor/`,
-and `languages/universal-multicurrency.pot`.
+Produces `dist/universal-multicurrency-0.7.0.zip`. The archive includes `readme.txt`,
+production `src/`, `vendor/`, and `languages/universal-multicurrency.pot`.
 
 Performance subset:
 
@@ -37,9 +36,8 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Commit 10 owns:** bump header/`UMC_VERSION`/`readme.txt` Stable tag to **0.7.0**,
-final RC validation, Milestone 7 roadmap closure, release tag, and PR/release
-readiness. Do not perform those steps before Commit 10.
+**Tag and release:** Git tag `v0.7.0` and GitHub release publication remain
+pending explicit approval after review — do not create without instruction.
 
 ---
 
@@ -800,12 +798,46 @@ Safe to prior release; remove `readme.txt` only if downgrading before Commit 9.
 
 ### Known limitations (M7 documentation)
 
-- Stable tag remains **0.6.0** until Commit 10.
 - No bundled locale `.mo` files (documented in `readme.txt` and `TRANSLATION.md`).
 - UMC CSV format remains specification-only (`MIGRATION.md`).
 
-### Commit 10 (not performed here)
+---
 
-- Bump `Version:` / `UMC_VERSION` / `readme.txt` Stable tag to **0.7.0**
-- Close Milestone 7 in `docs/ROADMAP.md`
-- Tag `v0.7.0` and publish release zip under the new version
+## Milestone 7 — v0.7.0 Release Candidate finalization (Commit 10)
+
+### Summary
+
+Finalizes the repository as **v0.7.0** Release Candidate: version bump, changelog,
+roadmap closure, release-audit record update, documentation guards, and validated
+production ZIP. Does **not** create Git tag, GitHub release, merge, or PR closure.
+
+### Files modified
+
+| Path | Change |
+|---|---|
+| `universal-multicurrency.php` | Version → **0.7.0** (`Version:` header + `UMC_VERSION`) |
+| `readme.txt` | Stable tag **0.7.0**; 0.7.0 changelog; retains 0.6.0 history |
+| `README.md` | Current RC **0.7.0**; Milestone 7 complete; tag/release pending |
+| `docs/ROADMAP.md` | Milestone 7 **complete**; all work items complete |
+| `docs/RELEASE_AUDIT.md` | Closure record; RB results at **0.7.0** |
+| `docs/ARCHITECTURE.md`, `docs/DEPLOYMENT.md`, `docs/TEST_STRATEGY.md`, `CLAUDE.md` | Final RC state |
+| `tests/unit/DocumentationSyncTest.php` | Version **0.7.0** and closure guards |
+| `tests/unit/MigrationDocumentationTest.php`, `tests/unit/ReleaseAuditTest.php` | Packaged version checks |
+
+### Deployment sequence
+
+1. Run `composer release-audit` on the **0.7.0** tree.
+2. Build `dist/universal-multicurrency-0.7.0.zip` with `composer install --no-dev` + `bin/build-zip.sh`.
+3. Deploy the zip; no settings schema bump beyond existing v0→v1 path.
+4. Record deployed commit here after production cut-over.
+
+### Rollback
+
+Downgrade to **0.6.0** zip if needed. Order snapshots and `_umc_*` meta unchanged.
+Settings schema remains v1.
+
+### Post-review actions (out of scope for Commit 10)
+
+- Create and push Git tag `v0.7.0`
+- Publish GitHub release with `dist/universal-multicurrency-0.7.0.zip`
+- Merge `milestone-7-release-candidate` after approval

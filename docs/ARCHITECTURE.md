@@ -316,5 +316,6 @@ boundary so corrupt stored options fail closed to defaults without persisting
 partial migrations. `StorefrontGuardTest` allowlists only `SettingsUpgrader.php`
 for that pattern.
 
-Plugin version remains **0.6.0** until Commit 10 (`v0.7.0` target). Milestone 7
-is not closed in Commit 9.
+Plugin version is **0.7.0** (Release Candidate). Milestone 7 is complete in this
+repository. Git tag and GitHub release publication remain pending explicit
+approval after review.

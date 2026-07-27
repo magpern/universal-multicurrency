@@ -4,7 +4,7 @@ Tags: woocommerce, currency, multicurrency, exchange rates, money
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.6.0
+Stable tag: 0.7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -50,12 +50,24 @@ The plugin ships a POT template (`languages/universal-multicurrency.pot`) for tr
 
 == Changelog ==
 
+= 0.7.0 =
+* Release Candidate: persisted-data inventory and uninstall retention policy (ADR-0009)
+* Settings upgrade framework (schema v1; sole production migration v0→v1)
+* Manual merchant migration documentation (no foreign import; CSV format spec only)
+* Translation readiness (canonical POT, drift guard, RTL audit documentation)
+* Security audit and hardening (zero open Critical/High findings)
+* Deterministic performance baselines and CI performance job
+* Executable release audit (`composer release-audit`) and documentation synchronization
+
 = 0.6.0 =
 * Compatibility layer: passive conflict detection, admin notices, Site Health tests, and version support documentation
 * Five-leg supported-version CI matrix
 * Storefront conversion, classic cart/checkout, order snapshots, historical order display, refunds, and Store API / blocks parity (milestones 2–5)
 
 == Upgrade Notice ==
+
+= 0.7.0 =
+Release Candidate packaging and documentation only for most stores upgrading from 0.6.0 — no settings schema bump beyond the existing v0→v1 path. Requires WooCommerce 8.2+, PHP 8.1+, and HPOS.
 
 = 0.6.0 =
 Requires WooCommerce 8.2 or newer and PHP 8.1 or newer. HPOS must be enabled.

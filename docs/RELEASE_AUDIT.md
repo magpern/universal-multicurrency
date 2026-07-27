@@ -1,14 +1,35 @@
-# Release audit — Milestone 7 Release Candidate
+# Release audit — Milestone 7 Release Candidate (v0.7.0)
 
-Executable release-blocking gate for Universal Multicurrency before Commit 10
-(version bump). This document records scope, criteria, commands, and the audit
-result at Commit 8.
+Executable release-blocking gate for Universal Multicurrency **v0.7.0**. This
+document records scope, criteria, commands, audit results, and the Release
+Candidate closure state.
 
 **Governing question:** If we published this Release Candidate tomorrow, is
 there anything left in the repository that clearly should not ship?
 
-**Not in this commit:** final documentation synchronization (Commit 9), version
-bump/tag (Commit 10), Milestone 7 closure.
+**Repository status:** prepared for **v0.7.0**. Git tag and GitHub release
+publication are **not yet created** — pending explicit approval after review.
+
+---
+
+## Release Candidate closure record
+
+| Item | Value |
+|---|---|
+| Version | **0.7.0** |
+| Settings schema | **1** |
+| Persisted-data inventory version | **2** |
+| Sole production migration | **v0 → v1** |
+| Unresolved Critical security findings | **0** |
+| Unresolved High security findings | **0** |
+| Unresolved release blockers | **0** |
+| Deterministic performance gates | **Passing** |
+| POT drift | **Passing** |
+| Dependency audit (`composer audit`) | **Passing** |
+| Package inspection | **Passing** |
+| Git tag `v0.7.0` | **Not yet created** |
+| GitHub release publication | **Pending explicit approval** |
+| Milestone 7 | **Complete** in repository |
 
 ---
 
@@ -18,7 +39,7 @@ bump/tag (Commit 10), Milestone 7 closure.
 |---|---|
 | Repository hygiene | `ReleaseAuditTest` tracked-file scan; `.gitignore` policy |
 | Prohibited foreign coupling | `ReleaseAuditTest` + `DiagnosticsBoundaryGuardTest` (ADR-0003) |
-| Metadata / compatibility | `ReleaseAuditTest`, `CompatibilityMatrixTest`, plugin header |
+| Metadata / compatibility | `ReleaseAuditTest`, `CompatibilityMatrixTest`, `DocumentationSyncTest`, plugin header |
 | Persisted-data contract | `PersistedKeysInventoryTest`, `UninstallPolicyGuardTest` |
 | Settings upgrade | `ReleaseAuditTest`, `SettingsUpgraderTest`, integration upgrade tests |
 | Translation readiness | `TranslationReadinessTest`, `composer make-pot:check` |
@@ -27,6 +48,7 @@ bump/tag (Commit 10), Milestone 7 closure.
 | Release ZIP | `bin/build-zip.sh`, `ReleaseZipInspector`, `bin/inspect-release-zip.php` |
 | CI configuration | `ReleaseAuditTest` required-job guard; `.github/workflows/ci.yml` |
 | Dependencies | `composer audit`; production `require` is PHP only |
+| Documentation | `DocumentationSyncTest` |
 
 ---
 
@@ -62,18 +84,18 @@ Exit code **non-zero** when any release-blocking step fails.
 
 ## Release-blocking criteria
 
-| ID | Criterion | Result (Commit 8) |
+| ID | Criterion | Result (v0.7.0 RC) |
 |---|---|---|
 | RB1 | No tracked secrets, dumps, caches, or `dist/` artifacts | **Pass** |
 | RB2 | `docs/plans/` remains untracked (local-only planning) | **Pass** |
 | RB3 | No foreign switcher runtime coupling outside allowlisted manifest | **Pass** |
-| RB4 | Plugin header, `UMC_VERSION`, text domain, PHP/WC metadata consistent | **Pass** |
+| RB4 | Plugin header, `UMC_VERSION`, readme Stable tag, text domain, PHP/WC metadata consistent | **Pass** |
 | RB5 | `Settings::SCHEMA_VERSION === 1`; single production migration | **Pass** |
 | RB6 | Persisted-key inventory matches docs + implementation | **Pass** |
 | RB7 | Uninstall deletes `umc_settings` only; preserves commerce + dismissal meta | **Pass** |
 | RB8 | `SECURITY_REVIEW.md`: zero open Critical/High | **Pass** |
 | RB9 | `PERFORMANCE_BASELINES.md` present; deterministic ceilings enforced | **Pass** |
-| RB10 | POT drift check passes; POT ships in release ZIP | **Pass** |
+| RB10 | POT drift check passes; POT + readme.txt ship in release ZIP | **Pass** |
 | RB11 | `composer audit` clean on production dependencies | **Pass** |
 | RB12 | Release ZIP contains production tree only (see below) | **Pass** |
 | RB13 | CI declares phpcs, pot, unit, integration, performance, build, release-audit jobs | **Pass** |
@@ -110,9 +132,10 @@ needles remain confined to `Diagnostics/DetectorManifest.php` only.
 
 ## Metadata and compatibility
 
-| Field | Value (pre-Commit 10) |
+| Field | Value (v0.7.0 RC) |
 |---|---|
-| Plugin version (header + `UMC_VERSION`) | **0.6.0** (intentionally unchanged until Commit 10) |
+| Plugin version (header + `UMC_VERSION`) | **0.7.0** |
+| readme.txt Stable tag | **0.7.0** |
 | Text domain | `universal-multicurrency` |
 | Requires PHP | 8.1 |
 | Requires Plugins | woocommerce |
@@ -151,9 +174,8 @@ Authoritative registry: [`PERSISTED_DATA.md`](PERSISTED_DATA.md) +
 - `composer make-pot:check` passes
 - Release ZIP includes `languages/universal-multicurrency.pot` and `readme.txt`
 - No shipped frontend JavaScript requiring i18n
+- No bundled locale `.mo` files in this RC
 - RTL audit documented in [`TRANSLATION.md`](TRANSLATION.md) (audit-only)
-
-**Note:** `readme.txt` Stable tag remains **0.6.0** until Commit 10.
 
 ---
 
@@ -191,11 +213,11 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Expected artifact at Commit 8 (pre-bump): **`dist/universal-multicurrency-0.6.0.zip`**
+Expected artifact: **`dist/universal-multicurrency-0.7.0.zip`**
 
 ### Included
 
-- `universal-multicurrency.php`, `uninstall.php`, `readme.txt`
+- `universal-multicurrency.php` (header Version **0.7.0**), `uninstall.php`, `readme.txt` (Stable tag **0.7.0**)
 - `src/` production PHP
 - `vendor/autoload.php` (+ production autoload only)
 - `languages/universal-multicurrency.pot`
@@ -205,6 +227,7 @@ Expected artifact at Commit 8 (pre-bump): **`dist/universal-multicurrency-0.6.0.
 - `tests/`, `docs/`, `docs/plans/`, `.git/`, `.github/`
 - PHPUnit, PHPCS, Infection, and other dev vendor packages
 - `.env`, CI configs, planning files
+- Nested previous release ZIPs
 
 Inspector: `bin/inspect-release-zip.php` / `ReleaseZipInspector`.
 
@@ -224,11 +247,10 @@ Integration matrix (five legs + ceiling early-warning) unchanged from M6/M7.
 
 | ID | Observation |
 |---|---|
-| NB1 | Plugin version remains **0.6.0** until Commit 10 (`v0.7.0` target) |
-| NB2 | `readme.txt` Stable tag remains **0.6.0** until Commit 10 |
-| NB3 | No root `LICENSE` file; GPL declared in plugin header and `composer.json` |
-| NB4 | Full five-leg integration matrix validated in CI, not re-run entirely in the local release-audit script |
-| NB5 | `docs/plans/` may exist locally but is classified non-shipping |
+| NB1 | No root `LICENSE` file; GPL declared in plugin header, `composer.json`, and `readme.txt` |
+| NB2 | Full five-leg integration matrix validated in CI, not re-run entirely in the local release-audit script |
+| NB3 | `docs/plans/` may exist locally but is classified non-shipping |
+| NB4 | Git tag and GitHub release publication intentionally deferred until post-review approval |
 
 ---
 
@@ -248,3 +270,4 @@ After material repository changes:
 - [`PERFORMANCE_BASELINES.md`](PERFORMANCE_BASELINES.md)
 - [`PERSISTED_DATA.md`](PERSISTED_DATA.md)
 - [`TEST_STRATEGY.md`](TEST_STRATEGY.md)
+- [`ROADMAP.md`](ROADMAP.md)

@@ -5,9 +5,9 @@ inventory stay in the store's base currency; conversion happens at runtime on
 storefront, cart, checkout, and Store API surfaces. Orders carry a permanent
 exchange-rate snapshot.
 
-**Shipped version:** 0.6.0 (plugin header and `UMC_VERSION`). Milestone 7 Release
-Candidate work continues on `milestone-7-release-candidate`; **0.7.0** is targeted
-in Commit 10 and is **not yet released**.
+**Current release candidate:** **v0.7.0** (plugin header and `UMC_VERSION`).
+Milestone 7 is complete in this repository. Git tag `v0.7.0` and GitHub release
+publication remain pending explicit approval after review.
 
 ## Invariants
 
@@ -29,9 +29,10 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Upload and activate through WordPress, or symlink the plugin directory into
-`wp-content/plugins/`. WooCommerce must be active first. The release zip includes
-`readme.txt`, production `src/`, `vendor/`, and `languages/universal-multicurrency.pot`.
+Produces `dist/universal-multicurrency-0.7.0.zip`. Upload and activate through
+WordPress, or symlink the plugin directory into `wp-content/plugins/`.
+WooCommerce must be active first. The release zip includes `readme.txt`,
+production `src/`, `vendor/`, and `languages/universal-multicurrency.pot`.
 
 ## Development
 
@@ -63,12 +64,14 @@ CI legs, and passive conflict detectors.
   `_umc_parent_*` refund meta, and `umc_dismissed_notices` user meta are preserved
   (ADR-0009).
 
-## Changelog preview
+## Changelog
 
-### Unreleased (target 0.7.0 — Commit 10)
+### 0.7.0 — Release Candidate
 
-Release Candidate closure: version bump, final RC validation, and Milestone 7
-roadmap completion. Not shipped yet.
+Persisted-data inventory, uninstall policy, settings upgrade framework (schema v1),
+manual migration documentation, translation readiness, security audit, deterministic
+performance baselines, executable release audit, and documentation synchronization.
+See [`docs/RELEASE_AUDIT.md`](docs/RELEASE_AUDIT.md) for the closure record.
 
 ### 0.6.0
 
@@ -79,7 +82,7 @@ five-leg CI matrix, and `docs/COMPATIBILITY.md`.
 
 | Document | Contents |
 |---|---|
-| [`readme.txt`](readme.txt) | WordPress.org–oriented plugin readme (Stable tag 0.6.0) |
+| [`readme.txt`](readme.txt) | WordPress.org–oriented plugin readme (Stable tag 0.7.0) |
 | [`docs/PRODUCT_REQUIREMENTS.md`](docs/PRODUCT_REQUIREMENTS.md) | Goals and non-goals |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Layers, invariants, collaborators, RC governance |
 | [`docs/HOOKS.md`](docs/HOOKS.md) | Every WooCommerce hook registered |
@@ -92,7 +95,7 @@ five-leg CI matrix, and `docs/COMPATIBILITY.md`.
 | [`docs/SECURITY_REVIEW.md`](docs/SECURITY_REVIEW.md) | M7 security audit record and accepted residual risks |
 | [`docs/PERFORMANCE_BASELINES.md`](docs/PERFORMANCE_BASELINES.md) | Deterministic performance ceilings |
 | [`docs/RELEASE_AUDIT.md`](docs/RELEASE_AUDIT.md) | Executable release-blocking audit record |
-| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Milestone status (M7 open pending Commit 10) |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Milestone status (Milestone 7 complete at v0.7.0 RC) |
 | [`docs/adr/`](docs/adr/) | Architecture decision records |
 
 ## License

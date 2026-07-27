@@ -1,6 +1,6 @@
 <?php
 /**
- * Documentation synchronization guards — Milestone 7 Commit 9.
+ * Documentation synchronization guards — Milestone 7 Commit 9–10.
  *
  * @package UniversalMulticurrency
  */
@@ -15,6 +15,7 @@ use UMC\PersistedKeys;
 use UMC\Settings;
 use UMC\SettingsUpgrader;
 use UMC\Tests\Support\ReleaseZipInspector;
+use ZipArchive;
 
 /**
  * Structural guards binding public and developer documentation to implementation.
@@ -23,6 +24,8 @@ use UMC\Tests\Support\ReleaseZipInspector;
  * @group release-audit
  */
 final class DocumentationSyncTest extends TestCase {
+
+	private const CURRENT_VERSION = '0.7.0';
 
 	/**
 	 * Tracked documentation sources that must exist and stay internally consistent.
@@ -65,17 +68,33 @@ final class DocumentationSyncTest extends TestCase {
 	);
 
 	/**
-	 * Documentation files scanned for forbidden "released" claims about v0.7.0.
+	 * Documentation files scanned for forbidden premature publication claims.
 	 *
 	 * @var list<string>
 	 */
-	private const RELEASE_CLAIM_SCAN_FILES = array(
+	private const PUBLICATION_CLAIM_SCAN_FILES = array(
 		'README.md',
 		'readme.txt',
 		'docs/ROADMAP.md',
 		'docs/DEPLOYMENT.md',
 		'docs/RELEASE_AUDIT.md',
-		'docs/COMPATIBILITY.md',
+	);
+
+	/**
+	 * Temporary RC wording that must not remain after Commit 10.
+	 *
+	 * @var list<string>
+	 */
+	private const FORBIDDEN_PENDING_WORDING = array(
+		'Commit 10 pending',
+		'pending Commit 10',
+		'Stable tag remains 0.6.0',
+		'NB1 version deferred',
+		'NB2 readme deferred',
+		'version bump pending',
+		'RC closure pending',
+		'target 0.7.0 — Commit 10',
+		'Unreleased (target 0.7.0',
 	);
 
 	private function root(): string {
@@ -174,14 +193,16 @@ final class DocumentationSyncTest extends TestCase {
 		}
 	}
 
-	public function test_readme_txt_stable_tag_remains_pre_commit_ten_version(): void {
+	public function test_canonical_version_is_070_everywhere_required(): void {
 		$header  = $this->parse_plugin_header_fields();
 		$readme  = $this->parse_readme_txt_header();
 		$version = $header['Version'] ?? null;
 
-		$this->assertSame( '0.6.0', $version, 'Commit 9 must not bump the plugin header version.' );
-		$this->assertSame( '0.6.0', $readme['Stable tag'] ?? null, 'readme Stable tag must match the shipped header version.' );
-		$this->assertSame( $version, $readme['Stable tag'] ?? null, 'readme Stable tag must match plugin header Version.' );
+		$this->assertSame( self::CURRENT_VERSION, $version );
+		$this->assertSame( self::CURRENT_VERSION, $header['UMC_VERSION'] ?? null );
+		$this->assertSame( self::CURRENT_VERSION, $readme['Stable tag'] ?? null );
+		$this->assertStringContainsString( 'Stable tag: ' . self::CURRENT_VERSION, $this->read( 'readme.txt' ) );
+		$this->assertStringContainsString( self::CURRENT_VERSION, $this->read( 'docs/RELEASE_AUDIT.md' ) );
 	}
 
 	public function test_readme_txt_metadata_matches_plugin_header(): void {
@@ -193,6 +214,15 @@ final class DocumentationSyncTest extends TestCase {
 		$this->assertSame( 'GPLv2 or later', $readme['License'] ?? null );
 		$this->assertSame( 'https://www.gnu.org/licenses/gpl-2.0.html', $readme['License URI'] ?? null );
 		$this->assertSame( 'universal-multicurrency', $header['Text Domain'] ?? null );
+	}
+
+	public function test_readme_txt_changelog_includes_070_and_retains_060_history(): void {
+		$readme = $this->read( 'readme.txt' );
+
+		$this->assertStringContainsString( '= 0.7.0 =', $readme );
+		$this->assertStringContainsString( '= 0.6.0 =', $readme );
+		$this->assertStringContainsString( 'persisted-data inventory', $readme );
+		$this->assertStringContainsString( 'release audit', strtolower( $readme ) );
 	}
 
 	public function test_readme_files_do_not_imply_automatic_foreign_import(): void {
@@ -218,39 +248,59 @@ final class DocumentationSyncTest extends TestCase {
 		}
 	}
 
-	public function test_roadmap_shows_milestone_seven_open_and_commit_ten_pending(): void {
+	public function test_roadmap_shows_milestone_seven_complete_at_070(): void {
 		$roadmap = $this->read( 'docs/ROADMAP.md' );
 
-		$this->assertStringContainsString( 'Documentation synchronization', $roadmap );
-		$this->assertStringContainsString( 'Complete', $roadmap );
-		$this->assertStringContainsString( 'Commit 10', $roadmap );
-		$this->assertStringContainsString( 'Pending', $roadmap );
-		$this->assertStringNotContainsString( 'Milestone 7 complete', $roadmap );
-		$this->assertStringNotContainsString( 'Milestone 7 — complete', $roadmap );
-		$this->assertStringNotContainsString( 'v0.7.0 released', $roadmap );
+		$this->assertStringContainsString( 'Milestone 7', $roadmap );
+		$this->assertStringContainsString( 'complete', strtolower( $roadmap ) );
+		$this->assertStringContainsString( 'v0.7.0', $roadmap );
+		$this->assertStringContainsString( 'Version bump and RC closure', $roadmap );
+		$this->assertStringNotContainsString( 'Pending (Commit 10)', $roadmap );
 	}
 
-	public function test_no_documentation_claims_v070_has_been_released(): void {
+	public function test_key_docs_contain_no_temporary_pending_commit_ten_wording(): void {
+		foreach ( array( 'README.md', 'docs/ROADMAP.md', 'docs/RELEASE_AUDIT.md', 'docs/ARCHITECTURE.md' ) as $file ) {
+			$source = $this->read( $file );
+
+			foreach ( self::FORBIDDEN_PENDING_WORDING as $phrase ) {
+				$this->assertStringNotContainsString(
+					$phrase,
+					$source,
+					$file . ' must not retain temporary RC pending wording: ' . $phrase
+				);
+			}
+		}
+	}
+
+	public function test_no_documentation_claims_git_tag_or_github_release_already_published(): void {
 		$forbidden = array(
-			'/Stable tag:\s*0\.7\.0/i',
-			'/Version:\s*0\.7\.0/m',
-			"/UMC_VERSION',\s*'0\.7\.0'/",
-			'/v0\.7\.0 has been released/i',
-			'/released v0\.7\.0/i',
-			'/Milestone 7 complete/i',
+			'/Git tag `v0\.7\.0` has been/i',
+			'/GitHub release published/i',
+			'/release has been published/i',
+			'/tag v0\.7\.0 (?:has been|was) (?:created|pushed)/i',
 		);
 
-		foreach ( self::RELEASE_CLAIM_SCAN_FILES as $file ) {
+		foreach ( self::PUBLICATION_CLAIM_SCAN_FILES as $file ) {
 			$source = $this->read( $file );
 
 			foreach ( $forbidden as $pattern ) {
 				$this->assertDoesNotMatchRegularExpression(
 					$pattern,
 					$source,
-					$file . ' must not claim v0.7.0 is released or Milestone 7 complete.'
+					$file . ' must not claim the tag or GitHub release already exists.'
 				);
 			}
 		}
+	}
+
+	public function test_release_audit_records_rc_closure_state(): void {
+		$audit = $this->read( 'docs/RELEASE_AUDIT.md' );
+
+		$this->assertStringContainsString( 'Release Candidate closure record', $audit );
+		$this->assertStringContainsString( 'Version | **0.7.0**', $audit );
+		$this->assertStringContainsString( 'Unresolved release blockers | **0**', $audit );
+		$this->assertStringContainsString( 'Git tag `v0.7.0` | **Not yet created**', $audit );
+		$this->assertStringContainsString( 'Milestone 7 | **Complete**', $audit );
 	}
 
 	public function test_documented_composer_commands_exist(): void {
@@ -273,7 +323,7 @@ final class DocumentationSyncTest extends TestCase {
 		$this->assertStringContainsString( 'composer release-audit', $deployment );
 		$this->assertStringContainsString( 'bin/build-zip.sh', $deployment );
 		$this->assertStringContainsString( 'composer install --no-dev', $deployment );
-		$this->assertStringContainsString( 'Commit 10', $deployment );
+		$this->assertStringContainsString( 'universal-multicurrency-0.7.0.zip', $deployment );
 	}
 
 	public function test_settings_schema_documentation_matches_implementation(): void {
@@ -368,7 +418,36 @@ final class DocumentationSyncTest extends TestCase {
 		$this->assertContains(
 			'universal-multicurrency/readme.txt',
 			ReleaseZipInspector::REQUIRED_ENTRIES,
-			'Release ZIP must ship readme.txt after Commit 9.'
+			'Release ZIP must ship readme.txt.'
 		);
+	}
+
+	public function test_packaged_plugin_and_readme_report_070_when_zip_built(): void {
+		if ( ! class_exists( ZipArchive::class ) ) {
+			$this->markTestSkipped( 'ext-zip is required for packaged version inspection.' );
+		}
+
+		$zip_path = getenv( 'UMC_RELEASE_ZIP' );
+
+		if ( ! is_string( $zip_path ) || '' === $zip_path ) {
+			$this->markTestSkipped( 'UMC_RELEASE_ZIP is set by bin/release-audit.sh after building the archive.' );
+		}
+
+		if ( ! str_starts_with( $zip_path, '/' ) ) {
+			$zip_path = $this->root() . '/' . ltrim( $zip_path, '/' );
+		}
+
+		$this->assertStringEndsWith( 'universal-multicurrency-' . self::CURRENT_VERSION . '.zip', $zip_path );
+
+		$zip = new ZipArchive();
+		$this->assertTrue( $zip->open( $zip_path ) );
+
+		$plugin_source = (string) $zip->getFromName( 'universal-multicurrency/universal-multicurrency.php' );
+		$readme_source = (string) $zip->getFromName( 'universal-multicurrency/readme.txt' );
+		$zip->close();
+
+		$this->assertStringContainsString( 'Version: ' . self::CURRENT_VERSION, $plugin_source );
+		$this->assertStringContainsString( "UMC_VERSION', '" . self::CURRENT_VERSION . "'", $plugin_source );
+		$this->assertStringContainsString( 'Stable tag: ' . self::CURRENT_VERSION, $readme_source );
 	}
 }

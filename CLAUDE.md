@@ -51,8 +51,8 @@
 - Machine-specific dev-environment notes belong in `CLAUDE.local.md`
   (gitignored) — never in this file.
 - Release: bump the `Version:` plugin header, `UMC_VERSION`, `readme.txt` Stable
-  tag, and `docs/COMPATIBILITY.md` together (Commit 10 for Milestone 7 → 0.7.0);
-  tag `vX.Y.Z` matching the header, push the tag. The Release workflow builds and
+  tag, and `docs/COMPATIBILITY.md` together; tag `vX.Y.Z` matching the header,
+  push the tag only when explicitly approved. The Release workflow builds and
   publishes the installable zip.
 - Adding or removing a built-in detector follows the governance checklist in
   `docs/COMPATIBILITY.md § Detection`.

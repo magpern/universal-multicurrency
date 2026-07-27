@@ -79,7 +79,7 @@ final class UninstallPolicyTest extends WP_UnitTestCase {
 				OrderSnapshot::META_EXCHANGE_RATE        => '11.50',
 				OrderSnapshot::META_RATE_TIMESTAMP       => 1_700_000_000,
 				OrderSnapshot::META_RATE_SOURCE          => OrderSnapshot::SOURCE_MANUAL,
-				OrderSnapshot::META_PLUGIN_VERSION       => '0.6.0',
+				OrderSnapshot::META_PLUGIN_VERSION       => '0.7.0',
 				OrderSnapshot::META_RATE_IDENTITY        => 'SEK:11.50',
 				OrderSnapshot::META_SNAPSHOT_VERSION     => 2,
 				OrderSnapshot::META_TRANSACTION_DECIMALS => 2,

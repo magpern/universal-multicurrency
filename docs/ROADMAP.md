@@ -23,8 +23,7 @@
     **Deferred from this line (explicit non-goals):** community-submitted
     built-in detector labels without maintainer verification; automatic
     remediation of any kind.
-7.  Release candidate — **open** (not closed until Commit 10). Shipped plugin
-    version remains **0.6.0**; target **v0.7.0** is pending final validation.
+7.  Release candidate (**v0.7.0**) — **complete** in this repository.
 
     | Milestone 7 work item | Status |
     |---|---|
@@ -36,11 +35,13 @@
     | Security audit | **Complete** — [`docs/SECURITY_REVIEW.md`](SECURITY_REVIEW.md) |
     | Performance baselines | **Complete** — [`docs/PERFORMANCE_BASELINES.md`](PERFORMANCE_BASELINES.md) |
     | Release audit | **Complete** — [`docs/RELEASE_AUDIT.md`](RELEASE_AUDIT.md), `composer release-audit` |
-    | Documentation synchronization | **Complete** (Commit 9) — `readme.txt`, aligned doc set |
-    | Version bump and RC closure | **Pending** (Commit 10) — bump to 0.7.0, tag, Milestone 7 closure |
+    | Documentation synchronization | **Complete** — `readme.txt`, aligned doc set |
+    | Version bump and RC closure | **Complete** — repository prepared for **v0.7.0** |
 
-    **Not done in Commit 9:** plugin version bump, Stable tag 0.7.0, release tag,
-    or Milestone 7 closure.
+    **Resulting release candidate:** **v0.7.0** (`UMC_VERSION` and plugin header).
+
+    **Not yet performed:** Git tag `v0.7.0`, GitHub release publication, branch
+    merge, or pull-request closure — pending explicit approval after review.
 
 Future: Auto rates, GeoIP, reporting, APIs.
 
