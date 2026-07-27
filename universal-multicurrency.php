@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Universal Multicurrency for WooCommerce
  * Plugin URI: https://github.com/magpern/universal-multicurrency
- * Description: Unlimited currencies with manual exchange rates. WooCommerce remains the single source of truth for products and inventory; currency affects monetary values only.
+ * Description: Unlimited currencies with manual or automatic exchange rates. WooCommerce remains the single source of truth for products and inventory; currency affects monetary values only.
  * Version: 0.8.0
  * Author: magpern
  * License: GPL-2.0-or-later

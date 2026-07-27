@@ -17,6 +17,7 @@ use UMC\Diagnostics\WordPressEnvironmentProbe;
 use UMC\Order\OrderSnapshot;
 use UMC\Order\OrderSnapshotReader;
 use UMC\Order\RefundSnapshot;
+use UMC\PersistedKeys;
 use UMC\Plugin;
 use UMC\Rates\ExchangeRateStore;
 use UMC\Rates\Http\HttpResponse;
@@ -74,7 +75,7 @@ final class PerformanceBaselineTest extends WP_UnitTestCase {
 
 	public const CEILING_REFUND_SNAPSHOT_META_KEYS = 2;
 
-	public const CEILING_UNINSTALL_OPTION_DELETES = 1;
+	public const CEILING_UNINSTALL_OPTION_DELETES = 2;
 
 	public const CEILING_UNINSTALL_USER_META_DELETES = 0;
 
@@ -487,6 +488,7 @@ final class PerformanceBaselineTest extends WP_UnitTestCase {
 
 	public function test_uninstall_path_deletes_only_contracted_option(): void {
 		( new Settings() )->save( array( 'currencies' => self::CURRENCIES ) );
+		update_option( RateUpdateState::OPTION, array( 'schema_version' => 1 ) );
 
 		$user_id = self::factory()->user->create(
 			array(
@@ -496,12 +498,12 @@ final class PerformanceBaselineTest extends WP_UnitTestCase {
 		$stored  = array( 'abcd1234abcd1234' => time() );
 		update_user_meta( $user_id, 'umc_dismissed_notices', $stored );
 
-		$option_deletes = 0;
+		$deleted = array();
 		add_action(
 			'delete_option',
-			static function ( string $option ) use ( &$option_deletes ): void {
-				if ( Settings::OPTION === $option ) {
-					++$option_deletes;
+			static function ( string $option ) use ( &$deleted ): void {
+				if ( in_array( $option, PersistedKeys::uninstall_deleted_option_keys(), true ) ) {
+					$deleted[] = $option;
 				}
 			}
 		);
@@ -522,8 +524,13 @@ final class PerformanceBaselineTest extends WP_UnitTestCase {
 
 		$this->assertSame(
 			self::CEILING_UNINSTALL_OPTION_DELETES,
-			$option_deletes,
-			'Uninstall must delete umc_settings exactly once.'
+			count( $deleted ),
+			'Uninstall must delete exactly the contracted configuration options.'
+		);
+		$this->assertSame(
+			PersistedKeys::uninstall_deleted_option_keys(),
+			array_values( array_unique( $deleted ) ),
+			'Uninstall must delete each contracted configuration option once.'
 		);
 		$this->assertSame(
 			self::CEILING_UNINSTALL_USER_META_DELETES,
