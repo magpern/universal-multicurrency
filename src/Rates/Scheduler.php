@@ -9,8 +9,6 @@ declare(strict_types=1);
 
 namespace UMC\Rates;
 
-use UMC\Settings;
-
 /**
  * Schedules and runs background rate updates.
  */
@@ -80,27 +78,103 @@ final class Scheduler {
 	 * Ensures or clears the recurring update action for the current configuration.
 	 */
 	public function ensure_scheduled(): void {
-		if ( ! function_exists( 'as_next_scheduled_action' ) || ! function_exists( 'as_schedule_recurring_action' ) ) {
+		if ( ! function_exists( 'as_schedule_recurring_action' ) ) {
 			return;
 		}
 
 		$config = $this->store->get_configuration();
 
 		if ( ! $config->is_automatic_enabled() ) {
-			if ( function_exists( 'as_unschedule_action' ) ) {
-				as_unschedule_action( self::HOOK );
+			$this->unschedule_all();
+			return;
+		}
+
+		$interval_seconds = $config->rate_update_interval()->seconds();
+
+		if ( $this->schedule_matches_configuration( $interval_seconds ) ) {
+			return;
+		}
+
+		$this->unschedule_all();
+		as_schedule_recurring_action( time() + $interval_seconds, $interval_seconds, self::HOOK );
+	}
+
+	/**
+	 * Removes every pending recurring action for this hook.
+	 */
+	private function unschedule_all(): void {
+		if ( function_exists( 'as_unschedule_all_actions' ) ) {
+			as_unschedule_all_actions( self::HOOK );
+			return;
+		}
+
+		if ( function_exists( 'as_unschedule_action' ) ) {
+			as_unschedule_action( self::HOOK );
+		}
+	}
+
+	/**
+	 * Whether the pending recurring schedule matches the configured interval.
+	 *
+	 * @param int $configured_interval Configured interval in seconds.
+	 */
+	private function schedule_matches_configuration( int $configured_interval ): bool {
+		if ( ! function_exists( 'as_get_scheduled_actions' ) ) {
+			return function_exists( 'as_next_scheduled_action' ) && false !== as_next_scheduled_action( self::HOOK );
+		}
+
+		$scheduled_interval = $this->scheduled_interval_seconds();
+
+		return null !== $scheduled_interval && $scheduled_interval === $configured_interval;
+	}
+
+	/**
+	 * Returns the interval of the sole pending recurring action, if unambiguous.
+	 */
+	private function scheduled_interval_seconds(): ?int {
+		if ( ! function_exists( 'as_get_scheduled_actions' ) ) {
+			return null;
+		}
+
+		$actions = as_get_scheduled_actions(
+			array(
+				'hook'     => self::HOOK,
+				'status'   => \ActionScheduler_Store::STATUS_PENDING,
+				'per_page' => 100,
+			)
+		);
+
+		if ( array() === $actions ) {
+			return null;
+		}
+
+		$intervals = array();
+
+		foreach ( $actions as $action ) {
+			if ( ! is_object( $action ) || ! method_exists( $action, 'get_schedule' ) ) {
+				return null;
 			}
-			return;
+
+			$schedule = $action->get_schedule();
+
+			if ( ! is_object( $schedule ) || ! method_exists( $schedule, 'is_recurring' ) || ! $schedule->is_recurring() ) {
+				return null;
+			}
+
+			if ( ! method_exists( $schedule, 'get_recurrence' ) ) {
+				return null;
+			}
+
+			$intervals[] = (int) $schedule->get_recurrence();
 		}
 
-		$interval = $config->rate_update_interval()->seconds();
-		$next     = as_next_scheduled_action( self::HOOK );
+		$intervals = array_values( array_unique( $intervals ) );
 
-		if ( false !== $next ) {
-			return;
+		if ( 1 !== count( $actions ) || 1 !== count( $intervals ) ) {
+			return null;
 		}
 
-		as_schedule_recurring_action( time() + $interval, $interval, self::HOOK );
+		return $intervals[0];
 	}
 
 	/**
