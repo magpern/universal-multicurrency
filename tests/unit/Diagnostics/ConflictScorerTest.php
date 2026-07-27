@@ -93,6 +93,25 @@ final class ConflictScorerTest extends TestCase {
 		$this->assertSame( array(), $findings );
 	}
 
+	public function test_scores_below_the_reporting_threshold_never_appear_in_results(): void {
+		$detector = new Detector(
+			'below-threshold',
+			'Below threshold',
+			array( new Signature( SignatureKind::HOOK, 'weak_hook', 9 ) )
+		);
+
+		$findings = $this->scorer()->score(
+			array( $detector ),
+			array( 'hook:weak_hook' => true )
+		);
+
+		$this->assertSame( array(), $findings );
+
+		foreach ( $findings as $finding ) {
+			$this->assertNotSame( Confidence::NONE, $finding->confidence() );
+		}
+	}
+
 	public function test_only_unrelated_evidence_keys_produce_no_findings(): void {
 		$evidence = array(
 			'class:SomeUnrelatedClass' => true,
@@ -164,6 +183,30 @@ final class ConflictScorerTest extends TestCase {
 		$this->assertCount( 2, $findings );
 		$this->assertSame( 'zzz-high', $findings[0]->id(), 'Higher score must sort first regardless of id.' );
 		$this->assertSame( 'aaa-low', $findings[1]->id() );
+	}
+
+	public function test_findings_are_sorted_even_when_input_order_disagrees_with_score(): void {
+		$medium = new Detector( 'med', 'Medium', array( new Signature( SignatureKind::FUNCTION, 'med_fn', 30 ) ) );
+		$high   = new Detector( 'high', 'High', array( new Signature( SignatureKind::PLUGIN_PATH, 'high/index.php', 60 ) ) );
+		$low    = new Detector( 'low', 'Low', array( new Signature( SignatureKind::HOOK, 'low_hook', 10 ) ) );
+
+		$evidence = array(
+			'function:med_fn'            => true,
+			'plugin_path:high/index.php' => true,
+			'hook:low_hook'              => true,
+		);
+
+		$findings = $this->scorer()->score( array( $medium, $high, $low ), $evidence );
+
+		$this->assertSame(
+			array( 'high', 'med', 'low' ),
+			array_map(
+				static function ( $finding ): string {
+					return $finding->id();
+				},
+				$findings
+			)
+		);
 	}
 
 	// ------------------------------------------------------------------
@@ -265,8 +308,32 @@ final class ConflictScorerTest extends TestCase {
 		$detector = $this->full_detector();
 		$evidence = array( 'constant:EXAMPLE_VERSION' => true ); // LOW.
 
-		$this->assertCount( 1, $this->scorer()->score( array( $detector ), $evidence, Confidence::LOW ) );
+		$low_findings = $this->scorer()->score( array( $detector ), $evidence, Confidence::LOW );
+
+		$this->assertCount( 1, $low_findings );
+		$this->assertSame( Confidence::LOW, $low_findings[0]->confidence() );
 		$this->assertSame( array(), $this->scorer()->score( array( $detector ), $evidence, Confidence::MEDIUM ) );
+		$this->assertSame( array(), $this->scorer()->score( array( $detector ), $evidence, Confidence::HIGH ) );
+
+		foreach ( $low_findings as $finding ) {
+			$this->assertTrue( Confidence::at_least( $finding->confidence(), Confidence::LOW ) );
+		}
+	}
+
+	public function test_sub_threshold_scores_never_surface_even_when_minimum_is_none(): void {
+		$detector = new Detector(
+			'weak',
+			'Weak',
+			array( new Signature( SignatureKind::HOOK, 'weak_hook', 9 ) )
+		);
+
+		$findings = $this->scorer()->score(
+			array( $detector ),
+			array( 'hook:weak_hook' => true ),
+			Confidence::NONE
+		);
+
+		$this->assertSame( array(), $findings );
 	}
 
 	public function test_rejects_an_unknown_minimum_confidence(): void {

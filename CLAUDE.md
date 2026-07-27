@@ -35,7 +35,9 @@
 
 - Checks: `composer phpcs`, `composer test:unit`, `composer test:integration`
   (integration needs MySQL and `tests/bin/install-wp.sh`; see
-  `.github/workflows/ci.yml` for the reference setup).
+  `.github/workflows/ci.yml` for the reference setup). When Diagnostics code
+  changes, `composer test:mutation` runs Infection over the unit suite (PCOV
+  required; thresholds in `infection.json5`).
 - Machine-specific dev-environment notes belong in `CLAUDE.local.md`
   (gitignored) — never in this file.
 - Release: bump the `Version:` plugin header, tag `vX.Y.Z` matching it, push

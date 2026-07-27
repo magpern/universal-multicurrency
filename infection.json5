@@ -1,0 +1,56 @@
+{
+    "$schema": "vendor/infection/infection/resources/schema.json",
+
+    // Diagnostics scoring is the only place a silent logic weakening produces a
+    // wrong label rather than a crash. Unit tests only — integration would
+    // re-bootstrap WordPress on every mutant.
+    "timeout": 10,
+    "source": {
+        "directories": [
+            "src/Diagnostics"
+        ],
+        "excludes": [
+            // Integration-only or presentation layers: exercised by the WP
+            // bootstrap suite, not the unit runner Infection uses.
+            "ConflictNotice.php",
+            "SiteHealthReport.php",
+            "NoticeDismissal.php",
+            "Diagnostics.php",
+            "WordPressEnvironmentProbe.php",
+            // Declarative data: mutating string literals does not test scoring logic.
+            "DetectorManifest.php",
+            // Value objects and seams covered indirectly through scorer tests.
+            "Detector.php",
+            "Signature.php",
+            "Finding.php",
+            "Confidence.php",
+            "SignatureKind.php",
+            "EnvironmentProbe.php",
+            "DetectorCatalog.php",
+            // Registry hydration and detector orchestration: integration-tested;
+            // the scorer and version classifier are the silent-weakening risk.
+            "DetectorRegistry.php",
+            "ConflictDetector.php"
+        ]
+    },
+    "logs": {
+        "text": ".infection/infection.log",
+        "summary": ".infection/summary.log",
+        "json": ".infection/log.json"
+    },
+    "minMsi": 85,
+    "minCoveredMsi": 95,
+    "mutators": {
+        "@default": true,
+        "Continue_": {
+            "ignore": [
+                "UMC\\Diagnostics\\ConflictScorer::score"
+            ]
+        }
+    },
+    "testFramework": "phpunit",
+    "bootstrap": "vendor/autoload.php",
+    "phpUnit": {
+        "configDir": "."
+    }
+}

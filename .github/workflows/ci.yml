@@ -193,3 +193,36 @@ jobs:
         with:
           name: universal-multicurrency
           path: dist/universal-multicurrency-*.zip
+
+  mutation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            diagnostics:
+              - 'src/Diagnostics/**'
+              - 'tests/unit/Diagnostics/**'
+              - 'infection.json5'
+              - 'composer.json'
+              - 'composer.lock'
+      - uses: shivammathur/setup-php@v2
+        if: steps.changes.outputs.diagnostics == 'true'
+        id: setup-php
+        with:
+          php-version: '8.3'
+          coverage: pcov
+          ini-values: pcov.directory=src
+      - uses: actions/cache@v4
+        if: steps.changes.outputs.diagnostics == 'true'
+        with:
+          path: ~/.cache/composer
+          key: ${{ runner.os }}-composer-${{ steps.setup-php.outputs.php-version }}-${{ hashFiles('composer.lock') }}-mutation
+          restore-keys: |
+            ${{ runner.os }}-composer-${{ steps.setup-php.outputs.php-version }}-${{ hashFiles('composer.lock') }}-
+      - if: steps.changes.outputs.diagnostics == 'true'
+        run: composer install --prefer-dist --no-progress
+      - if: steps.changes.outputs.diagnostics == 'true'
+        run: composer test:mutation

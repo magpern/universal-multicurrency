@@ -66,6 +66,14 @@ final class VersionPolicyTest extends TestCase {
 		$this->assertSame( VersionPolicy::SUPPORTED, $this->policy()->evaluate( '8.2.5', '8.1', '8.4' ) );
 	}
 
+	public function test_evaluate_trims_surrounding_whitespace_on_host_reported_versions(): void {
+		$this->assertSame( VersionPolicy::SUPPORTED, $this->policy()->evaluate( ' 8.3 ', '8.1', '8.4' ) );
+	}
+
+	public function test_evaluate_trims_declared_floor_and_tested_versions(): void {
+		$this->assertSame( VersionPolicy::SUPPORTED, $this->policy()->evaluate( '8.3', ' 8.1 ', ' 8.4 ' ) );
+	}
+
 	public function test_evaluate_never_throws_on_malformed_input(): void {
 		$this->assertSame( VersionPolicy::UNPARSEABLE, $this->policy()->evaluate( '<script>', '8.1', '8.4' ) );
 		$this->assertSame( VersionPolicy::UNPARSEABLE, $this->policy()->evaluate( '8.1.2.3.4', '8.1', '8.4' ) );

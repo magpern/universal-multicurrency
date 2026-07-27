@@ -135,6 +135,24 @@ surface is exactly:
 Performance assertions use `$wpdb->num_queries` deltas only — never wall-clock timing.
 Each guard was verified to fail when violated, not merely to pass today.
 
+## Mutation testing (Diagnostics scorer)
+
+Infection runs over `src/Diagnostics/` with the **unit suite only** — integration
+tests re-bootstrap WordPress on every mutant and are excluded. The job is scoped
+to scoring logic (`ConflictScorer.php`, `VersionPolicy.php`): presentation layers,
+registry hydration, manifest data, and value objects are excluded because mutating
+string literals or integration-only surfaces does not test label correctness.
+
+Deterministic execution uses a single thread (`composer test:mutation` →
+`infection --threads=1`). Thresholds enforced in `infection.json5`:
+
+- **MSI:** 85%
+- **Covered Code MSI:** 95%
+
+CI runs the mutation job on PHP 8.3 with PCOV when `src/Diagnostics/**`,
+`tests/unit/Diagnostics/**`, or `infection.json5` changes (`dorny/paths-filter`).
+Unrelated pull requests skip the job.
+
 ## Store API and Blocks (Milestone 5)
 
 `tests/integration/StoreApi/` drives real `/wc/store/v1` routes through

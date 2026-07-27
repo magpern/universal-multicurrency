@@ -50,6 +50,10 @@ final class VersionPolicy {
 	 * @param string $tested  Highest version this milestone verified.
 	 */
 	public function evaluate( string $running, string $floor, string $tested ): string {
+		$running = trim( $running );
+		$floor   = trim( $floor );
+		$tested  = trim( $tested );
+
 		if ( ! self::is_parseable( $running ) || ! self::is_parseable( $floor ) || ! self::is_parseable( $tested ) ) {
 			return self::UNPARSEABLE;
 		}
@@ -75,6 +79,6 @@ final class VersionPolicy {
 	 * @param string $version Candidate version string.
 	 */
 	private static function is_parseable( string $version ): bool {
-		return 1 === preg_match( '/^\d+(?:\.\d+){0,2}$/', trim( $version ) );
+		return 1 === preg_match( '/^\d+(?:\.\d+){0,2}$/', $version );
 	}
 }
