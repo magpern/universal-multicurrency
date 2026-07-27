@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace UMC\Diagnostics;
 
+use UMC\Rates\ExchangeRateStore;
+use UMC\Rates\RateStatusEvaluator;
+use UMC\Rates\RateUpdateState;
+use UMC\Rates\Scheduler;
 use UMC\Settings;
 
 /**
@@ -23,6 +27,8 @@ final class SiteHealthReport {
 	public const TEST_CONFLICTS = 'umc_conflicts';
 
 	public const TEST_ENVIRONMENT = 'umc_environment';
+
+	public const TEST_RATE_HEALTH = 'umc_rate_health';
 
 	/**
 	 * Tested-up-to ceilings for PHP and WordPress, mirroring
@@ -55,15 +61,28 @@ final class SiteHealthReport {
 	 */
 	private VersionPolicy $policy;
 
+	private ?Settings $settings;
+
+	private ?ExchangeRateStore $rate_store;
+
 	/**
 	 * Binds the report to a shared conflict detector.
 	 *
-	 * @param ConflictDetector   $detector Memoized conflict detector.
-	 * @param VersionPolicy|null $policy  Optional policy for tests.
+	 * @param ConflictDetector        $detector   Memoized conflict detector.
+	 * @param VersionPolicy|null      $policy     Optional policy for tests.
+	 * @param Settings|null           $settings   Optional settings for rate health.
+	 * @param ExchangeRateStore|null  $rate_store Optional rate store for rate health.
 	 */
-	public function __construct( ConflictDetector $detector, ?VersionPolicy $policy = null ) {
-		$this->detector = $detector;
-		$this->policy   = $policy ?? new VersionPolicy();
+	public function __construct(
+		ConflictDetector $detector,
+		?VersionPolicy $policy = null,
+		?Settings $settings = null,
+		?ExchangeRateStore $rate_store = null
+	) {
+		$this->detector   = $detector;
+		$this->policy     = $policy ?? new VersionPolicy();
+		$this->settings   = $settings;
+		$this->rate_store = $rate_store;
 	}
 
 	/**
@@ -93,6 +112,10 @@ final class SiteHealthReport {
 		$tests['direct'][ self::TEST_ENVIRONMENT ] = array(
 			'label' => \__( 'Universal Multicurrency environment', 'universal-multicurrency' ),
 			'test'  => array( $this, 'run_environment_test' ),
+		);
+		$tests['direct'][ self::TEST_RATE_HEALTH ] = array(
+			'label' => \__( 'Exchange rate provider health', 'universal-multicurrency' ),
+			'test'  => array( $this, 'run_rate_health_test' ),
 		);
 
 		return $tests;
@@ -137,6 +160,104 @@ final class SiteHealthReport {
 			self::evaluate_environment_axes( $this->policy, $declared, $running ),
 			self::is_hpos_enabled(),
 			self::is_below_announced_floor( $running, self::ANNOUNCED_FLOORS )
+		);
+	}
+
+	/**
+	 * Executes the exchange-rate health Site Health test (last-known state only).
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function run_rate_health_test(): array {
+		if ( null === $this->settings || null === $this->rate_store ) {
+			return self::format_test_result(
+				self::TEST_RATE_HEALTH,
+				\__( 'Exchange rate health unavailable', 'universal-multicurrency' ),
+				'good',
+				'<p>' . \esc_html__( 'Rate health diagnostics were not initialized.', 'universal-multicurrency' ) . '</p>'
+			);
+		}
+
+		$evaluator = new RateStatusEvaluator( $this->settings, $this->rate_store );
+		$stale     = 0;
+		$failed    = 0;
+
+		foreach ( array_keys( $this->settings->get_currencies() ) as $code ) {
+			$label = $evaluator->label_for_currency( $code );
+
+			if ( RateStatusEvaluator::LABEL_STALE === $label ) {
+				++$stale;
+			}
+
+			if ( RateStatusEvaluator::LABEL_FAILED === $label ) {
+				++$failed;
+			}
+		}
+
+		$scheduled = function_exists( 'as_next_scheduled_action' ) && false !== as_next_scheduled_action( Scheduler::HOOK );
+		$config    = $this->rate_store->get_configuration();
+
+		if ( $config->is_automatic_enabled() && ! $scheduled ) {
+			return self::format_test_result(
+				self::TEST_RATE_HEALTH,
+				\__( 'Automatic rate updates are not scheduled', 'universal-multicurrency' ),
+				'critical',
+				'<p>' . \esc_html__( 'Automatic mode is enabled but no recurring update is scheduled.', 'universal-multicurrency' ) . '</p>'
+			);
+		}
+
+		if ( $failed > 0 ) {
+			return self::format_test_result(
+				self::TEST_RATE_HEALTH,
+				\__( 'Recent exchange-rate fetch failures detected', 'universal-multicurrency' ),
+				'critical',
+				'<p>' . \esc_html(
+					sprintf(
+						/* translators: %d: number of currencies with failed fetches */
+						_n(
+							'%d automatic currency has a failed fetch on record.',
+							'%d automatic currencies have failed fetches on record.',
+							$failed,
+							'universal-multicurrency'
+						),
+						$failed
+					)
+				) . '</p>'
+			);
+		}
+
+		if ( $stale >= 3 ) {
+			return self::format_test_result(
+				self::TEST_RATE_HEALTH,
+				\__( 'Multiple automatic exchange rates are stale', 'universal-multicurrency' ),
+				'critical',
+				'<p>' . \esc_html(
+					sprintf(
+						/* translators: %d: stale currency count */
+						__( '%d automatic currencies exceed the configured maximum age.', 'universal-multicurrency' ),
+						$stale
+					)
+				) . '</p>'
+			);
+		}
+
+		if ( $stale > 0 ) {
+			return self::format_test_result(
+				self::TEST_RATE_HEALTH,
+				\__( 'Some automatic exchange rates are stale', 'universal-multicurrency' ),
+				'recommended',
+				'<p>' . \esc_html__(
+					'One or more automatic currencies exceed the configured maximum age. Conversion still uses the last known rate.',
+					'universal-multicurrency'
+				) . '</p>'
+			);
+		}
+
+		return self::format_test_result(
+			self::TEST_RATE_HEALTH,
+			\__( 'Exchange rate provider health looks good', 'universal-multicurrency' ),
+			'good',
+			'<p>' . \esc_html__( 'No stale or failed automatic rates were recorded in the last-known operational state.', 'universal-multicurrency' ) . '</p>'
 		);
 	}
 
@@ -362,9 +483,14 @@ final class SiteHealthReport {
 			}
 
 			$enabled = ! isset( $config['enabled'] ) || (bool) $config['enabled'];
-			$rate    = isset( $config['rate'] ) ? trim( (string) $config['rate'] ) : '';
+			$manual  = isset( $config['manual_rate'] ) ? trim( (string) $config['manual_rate'] ) : '';
+			if ( '' === $manual && isset( $config['rate'] ) ) {
+				$manual = trim( (string) $config['rate'] );
+			}
+			$provider = isset( $config['provider_rate'] ) ? trim( (string) $config['provider_rate'] ) : '';
+			$has_rate = '' !== $manual || '' !== $provider;
 
-			if ( $enabled && '' !== $rate ) {
+			if ( $enabled && $has_rate ) {
 				++$enabled_and_rated;
 			}
 		}
@@ -527,6 +653,14 @@ final class SiteHealthReport {
 					'label' => \__( 'Store API conversion', 'universal-multicurrency' ),
 					'value' => \__( 'Active', 'universal-multicurrency' ),
 				),
+				'stale_automatic_rates'        => array(
+					'label' => \__( 'Stale automatic rates', 'universal-multicurrency' ),
+					'value' => (string) $this->stale_automatic_count(),
+				),
+				'oldest_automatic_rate_age'    => array(
+					'label' => \__( 'Oldest automatic rate age (hours)', 'universal-multicurrency' ),
+					'value' => (string) $this->oldest_automatic_rate_age_hours(),
+				),
 			),
 		);
 	}
@@ -637,6 +771,48 @@ final class SiteHealthReport {
 		$last = array_pop( $escaped );
 
 		return implode( ', ', $escaped ) . ', ' . \__( 'and', 'universal-multicurrency' ) . ' ' . $last;
+	}
+
+	private function stale_automatic_count(): int {
+		if ( null === $this->settings || null === $this->rate_store ) {
+			return 0;
+		}
+
+		$evaluator = new RateStatusEvaluator( $this->settings, $this->rate_store );
+		$stale     = 0;
+
+		foreach ( array_keys( $this->settings->get_currencies() ) as $code ) {
+			if ( RateStatusEvaluator::LABEL_STALE === $evaluator->label_for_currency( $code ) ) {
+				++$stale;
+			}
+		}
+
+		return $stale;
+	}
+
+	private function oldest_automatic_rate_age_hours(): int {
+		if ( null === $this->settings ) {
+			return 0;
+		}
+
+		$oldest = 0;
+
+		foreach ( $this->settings->get_currencies() as $code => $config ) {
+			if ( Settings::RATE_MODE_AUTOMATIC !== $this->settings->get_effective_rate_mode( (string) $code ) ) {
+				continue;
+			}
+
+			$updated = (int) ( $config['rate_updated_at'] ?? 0 );
+
+			if ( $updated <= 0 ) {
+				continue;
+			}
+
+			$age    = (int) floor( ( time() - $updated ) / 3600 );
+			$oldest = max( $oldest, $age );
+		}
+
+		return $oldest;
 	}
 
 	/**

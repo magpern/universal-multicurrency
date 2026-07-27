@@ -46,6 +46,11 @@ final class OrderSnapshot {
 	public const SOURCE_MANUAL = 'manual';
 
 	/**
+	 * Rate source identifier for automatic (provider-derived) rates.
+	 */
+	public const SOURCE_AUTOMATIC = 'automatic';
+
+	/**
 	 * Request-scoped currency facade.
 	 *
 	 * @var CurrencyContext
@@ -128,12 +133,17 @@ final class OrderSnapshot {
 			return false;
 		}
 
+		$active_code = $this->context->get_active_code();
+		$rate_source = Settings::RATE_MODE_AUTOMATIC === $this->settings->get_effective_rate_mode( $active_code )
+			? self::SOURCE_AUTOMATIC
+			: self::SOURCE_MANUAL;
+
 		$meta = self::snapshot_meta(
 			$this->context->get_base_currency()->code(),
-			$this->context->get_active_code(),
+			$active_code,
 			$this->context->get_rate(),
-			$this->rate_timestamp( $this->context->get_active_code() ),
-			self::SOURCE_MANUAL,
+			$this->rate_timestamp( $active_code ),
+			$rate_source,
 			$this->version,
 			$this->context->get_currency_signature(),
 			2, // Schema version for M4 and later.

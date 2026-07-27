@@ -57,6 +57,7 @@ final class SettingsUpgrader {
 	public static function production_migrations(): array {
 		return array(
 			1 => self::MIGRATE_0_TO_1,
+			2 => self::MIGRATE_1_TO_2,
 		);
 	}
 
@@ -157,6 +158,53 @@ final class SettingsUpgrader {
 			'currencies'     => is_array( $data['currencies'] ?? null ) ? $data['currencies'] : array(),
 		);
 	}
+
+	/**
+	 * Real v1 → v2 migration.
+	 *
+	 * Renames `rate` to `manual_rate`, adds automatic-rate fields, and global
+	 * configuration defaults. Upgraded stores remain in manual mode.
+	 *
+	 * @param array<string, mixed> $data Raw settings at schema version 1.
+	 * @return array<string, mixed>
+	 */
+	public static function migrate_1_to_2( array $data ): array {
+		$currencies = array();
+
+		if ( isset( $data['currencies'] ) && is_array( $data['currencies'] ) ) {
+			foreach ( $data['currencies'] as $code => $config ) {
+				if ( ! is_string( $code ) || ! is_array( $config ) ) {
+					continue;
+				}
+
+				$row = $config;
+
+				if ( ! array_key_exists( 'manual_rate', $row ) && array_key_exists( 'rate', $row ) ) {
+					$row['manual_rate'] = $row['rate'];
+				}
+
+				unset( $row['rate'] );
+
+				$currencies[ $code ] = $row;
+			}
+		}
+
+		return array(
+			'schema_version'       => 2,
+			'rate_mode'            => $data['rate_mode'] ?? Settings::RATE_MODE_MANUAL,
+			'rate_provider'        => $data['rate_provider'] ?? Settings::DEFAULT_RATE_PROVIDER,
+			'rate_update_interval' => $data['rate_update_interval'] ?? Settings::DEFAULT_RATE_INTERVAL,
+			'rate_max_age_hours'   => $data['rate_max_age_hours'] ?? Settings::DEFAULT_RATE_MAX_AGE_HOURS,
+			'currencies'           => $currencies,
+		);
+	}
+
+	/**
+	 * Migration callable for v1 → v2.
+	 *
+	 * @var callable(array<string, mixed>): array<string, mixed>
+	 */
+	public const MIGRATE_1_TO_2 = array( self::class, 'migrate_1_to_2' );
 
 	/**
 	 * Applies migrations from the stored version up to the target version.

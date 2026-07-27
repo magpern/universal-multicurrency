@@ -21,10 +21,16 @@ no foreign import (ADR-0003, ADR-0007).
 
 | Key | Owner | Contents | Uninstall |
 |---|---|---|---|
-| `umc_settings` | `Settings` | Plugin configuration: `schema_version`, enabled currencies, manual rates, formatting per currency | **Deleted** (ADR-0009) |
+| `umc_settings` | `Settings` | Plugin configuration: `schema_version`, global rate mode/provider/interval, per-currency formatting, `manual_rate`, co-located `provider_rate`, `merchant_adjustment`, `rate_mode` | **Deleted** (ADR-0009) |
+| `umc_rate_state` | `RateUpdateState` (via `ExchangeRateStore`) | Operational fetch bookkeeping: versioned `provider_metadata`, per-currency fetch status, failure history, scheduler mirror, update lock | **Deleted** (ADR-0009) |
 
 The store **base currency** lives in WooCommerce's `woocommerce_currency` option
 only. It is never duplicated into `umc_settings` (see ADR-0003).
+
+`provider_rate` is operational data (an observation from a fetch) but is stored
+inside `umc_settings` so the storefront hot path avoids a second option read
+(ADR-0012). Future export/import must use a field-level allowlist — never dump
+either option wholesale (see ADR-0012).
 
 ---
 
@@ -127,6 +133,7 @@ that cache per currency. That value is not a standalone persisted key.
 | Surface | On uninstall |
 |---|---|
 | `umc_settings` option | **Deleted** |
+| `umc_rate_state` option | **Deleted** |
 | `_umc_*` order meta | **Preserved forever** |
 | `_umc_parent_*` refund meta | **Preserved forever** |
 | `umc_dismissed_notices` user meta | **Preserved** |
@@ -147,9 +154,10 @@ with `PersistedKeys::inventory()` — never edit one without the other.
 
 ```umc:persisted-inventory
 {
-  "inventory_version": 2,
+  "inventory_version": 3,
   "options": [
-    "umc_settings"
+    "umc_settings",
+    "umc_rate_state"
   ],
   "order_meta": [
     "_umc_base_currency",
@@ -183,7 +191,8 @@ with `PersistedKeys::inventory()` — never edit one without the other.
   "object_cache": [],
   "uninstall_policy": {
     "delete_options": [
-      "umc_settings"
+      "umc_settings",
+      "umc_rate_state"
     ],
     "preserve_order_meta": [
       "_umc_base_currency",

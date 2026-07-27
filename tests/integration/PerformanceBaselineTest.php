@@ -205,13 +205,13 @@ final class PerformanceBaselineTest extends WP_UnitTestCase {
 			)
 		);
 
-		$this->assertSame( '1.20', $settings->get()['currencies']['USD']['rate'] );
+		$this->assertSame( '1.20', $settings->get()['currencies']['USD']['manual_rate'] );
 		$this->assertSame( 1, $this->umc_settings_option_write_count, 'save() performs one explicit write.' );
 
 		$this->reset_performance_counters();
 
 		for ( $i = 0; $i < 3; $i++ ) {
-			$this->assertSame( '1.20', $settings->get()['currencies']['USD']['rate'] );
+			$this->assertSame( '1.20', $settings->get()['currencies']['USD']['manual_rate'] );
 		}
 
 		$this->assertSame(

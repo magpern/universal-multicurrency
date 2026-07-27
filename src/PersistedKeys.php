@@ -26,7 +26,7 @@ final class PersistedKeys {
 	/**
 	 * Bump when the inventory shape or membership changes.
 	 */
-	public const INVENTORY_VERSION = 2;
+	public const INVENTORY_VERSION = 3;
 
 	/**
 	 * WordPress options written by the plugin.
@@ -36,6 +36,7 @@ final class PersistedKeys {
 	public static function option_keys(): array {
 		return array(
 			Settings::OPTION,
+			\UMC\Rates\RateUpdateState::OPTION,
 		);
 	}
 

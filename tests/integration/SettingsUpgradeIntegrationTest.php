@@ -77,7 +77,7 @@ final class SettingsUpgradeIntegrationTest extends WP_UnitTestCase {
 		$loaded = ( new Settings() )->get();
 
 		$this->assertSame( Settings::SCHEMA_VERSION, $loaded['schema_version'] );
-		$this->assertSame( '11.50', $loaded['currencies']['SEK']['rate'] );
+		$this->assertSame( '11.50', $loaded['currencies']['SEK']['manual_rate'] );
 		$this->assertSame( 1, $this->option_update_count );
 
 		$stored = get_option( Settings::OPTION );
@@ -100,7 +100,7 @@ final class SettingsUpgradeIntegrationTest extends WP_UnitTestCase {
 
 		$reloaded = ( new Settings() )->get();
 
-		$this->assertSame( '1.20', $reloaded['currencies']['USD']['rate'] );
+		$this->assertSame( '1.20', $reloaded['currencies']['USD']['manual_rate'] );
 		$this->assertSame( 0, $this->option_update_count );
 	}
 

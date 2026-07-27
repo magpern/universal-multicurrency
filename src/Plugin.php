@@ -10,6 +10,8 @@ declare(strict_types=1);
 namespace UMC;
 
 use UMC\Admin\OrderCurrencyMetaBox;
+use UMC\Admin\RateFailureNotice;
+use UMC\Admin\RateUpdateController;
 use UMC\Admin\SettingsPage;
 use UMC\Diagnostics\Diagnostics;
 use UMC\Cart\CartRecalculation;
@@ -28,7 +30,13 @@ use UMC\Order\OrderPayCurrencyLock;
 use UMC\Order\OrderSnapshot;
 use UMC\Order\OrderSnapshotReader;
 use UMC\Order\RefundSnapshot;
+use UMC\Rates\ExchangeRateSource;
+use UMC\Rates\ExchangeRateStore;
 use UMC\Rates\ManualRateProvider;
+use UMC\Rates\Providers\FrankfurterRateSource;
+use UMC\Rates\RateUpdateService;
+use UMC\Rates\RateUpdateState;
+use UMC\Rates\Scheduler;
 use UMC\StoreApi\CartExtensionData;
 use UMC\StoreApi\CheckoutSnapshotAdapter;
 use UMC\StoreApi\OrderCurrencyLock;
@@ -95,8 +103,19 @@ final class Plugin {
 
 		$this->booted = true;
 
-		$settings = new Settings();
-		$base     = $this->base_currency();
+		$settings   = new Settings();
+		$base       = $this->base_currency();
+		$rate_state = new RateUpdateState();
+		$rate_store = new ExchangeRateStore( $settings, $rate_state, $base->code() );
+		$rate_source = $this->resolve_rate_source( $settings );
+		$rate_service = new RateUpdateService( $rate_source, $rate_store, $base->code() );
+		( new Scheduler( $rate_store, $rate_service ) )->register();
+
+		if ( is_admin() ) {
+			( new RateUpdateController( $rate_service ) )->register();
+			( new RateFailureNotice( $settings, $rate_store ) )->register();
+		}
+
 		$registry = new CurrencyRegistry( $settings, $base );
 		$rates    = new ManualRateProvider( $settings, $base->code() );
 		$context  = new CurrencyContext( $registry, $rates, new CurrencyResolver() );
@@ -157,8 +176,8 @@ final class Plugin {
 		// Admin settings tab (instantiated lazily, only when WC builds settings).
 		add_filter(
 			'woocommerce_get_settings_pages',
-			static function ( array $pages ) use ( $settings, $base ): array {
-				$pages[] = new SettingsPage( $settings, $base );
+			static function ( array $pages ) use ( $settings, $base, $rate_store ): array {
+				$pages[] = new SettingsPage( $settings, $base, $rate_store );
 
 				return $pages;
 			}
@@ -178,7 +197,7 @@ final class Plugin {
 		// registration cannot perturb the variation-price cache key because
 		// Diagnostics attaches no WooCommerce filters.
 		if ( is_admin() && ! wp_doing_ajax() && ! wp_doing_cron() && ! ( defined( 'WP_CLI' ) && WP_CLI ) ) {
-			( new Diagnostics() )->register();
+			( new Diagnostics( null, $settings, $rate_store ) )->register();
 		}
 	}
 
@@ -198,5 +217,25 @@ final class Plugin {
 		}
 
 		return new Currency( $code, $decimals, '', $position, true );
+	}
+
+	/**
+	 * Resolves the configured exchange-rate source implementation.
+	 */
+	private function resolve_rate_source( Settings $settings ): ExchangeRateSource {
+		$sources = (array) apply_filters(
+			'umc_exchange_rate_sources',
+			array( new FrankfurterRateSource() )
+		);
+
+		$configured = (string) ( $settings->get()['rate_provider'] ?? Settings::DEFAULT_RATE_PROVIDER );
+
+		foreach ( $sources as $source ) {
+			if ( $source instanceof ExchangeRateSource && $source->id() === $configured ) {
+				return $source;
+			}
+		}
+
+		return new FrankfurterRateSource();
 	}
 }

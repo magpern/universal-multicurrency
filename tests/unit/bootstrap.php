@@ -40,6 +40,12 @@ if ( ! function_exists( '__' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wp_generate_password' ) ) {
+	function wp_generate_password( $length = 12, $special_chars = true ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		return str_repeat( 'a', (int) $length );
+	}
+}
+
 if ( ! function_exists( '_n' ) ) {
 	/**
 	 * Minimal plural stub for unit tests without WordPress loaded.
