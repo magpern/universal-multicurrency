@@ -599,3 +599,43 @@ Safe to prior release; `.mo` files from this release can remain harmlessly.
 - No bundled locale `.mo` files in RC — POT only.
 - RTL audit documented; no dedicated `rtl.css` in RC.
 - No JavaScript i18n (no shipped JS).
+
+---
+
+## Milestone 7 — security audit (Release Candidate)
+
+### Summary
+
+Whole-plugin security review with code hardening, executable guards, and
+[`docs/SECURITY_REVIEW.md`](SECURITY_REVIEW.md). Zero unresolved Critical/High
+findings at Commit 6.
+
+### Files created
+
+| Path | Purpose |
+|---|---|
+| `docs/SECURITY_REVIEW.md` | Audit record by severity |
+| `tests/unit/SecuritySourceGuardTest.php` | Static security invariants |
+| `tests/integration/SecurityBehaviourTest.php` | Negative authorization/input tests |
+
+### Files modified
+
+| Path | Change |
+|---|---|
+| `src/CurrencyContext.php` | ISO currency code normalization at input boundary |
+| `src/Diagnostics/ConflictNotice.php` | Harden settings admin URL against open redirects |
+| `docs/ROADMAP.md`, `docs/TEST_STRATEGY.md`, `docs/DEPLOYMENT.md` | Security progress pointers |
+
+### Deployment sequence
+
+No deployment-specific steps. Behaviour changes are defensive only (malformed
+currency input ignored; external notice URLs rejected).
+
+### Rollback
+
+Safe to prior release.
+
+### Known limitations (M7 security)
+
+See accepted Medium/Low risks in `SECURITY_REVIEW.md` (currency switch nonce-less
+GET, guest cookie readability, site-owner filter trust boundary).

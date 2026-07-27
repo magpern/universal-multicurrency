@@ -541,7 +541,7 @@ final class ConflictNotice {
 		$dismissible  = ! empty( $view['dismissible'] );
 		$fingerprint  = isset( $view['fingerprint'] ) ? (string) $view['fingerprint'] : '';
 		$is_network   = ! empty( $view['is_network'] );
-		$settings_url = \admin_url( isset( $view['settings_url'] ) ? (string) $view['settings_url'] : 'admin.php?page=wc-settings&tab=umc' );
+		$settings_url = $this->settings_admin_url( $view );
 		$plugin_list  = $this->format_plugin_list( $labels );
 
 		if ( $dismissible ) {
@@ -736,5 +736,24 @@ final class ConflictNotice {
 		$last = array_pop( $labels );
 
 		return implode( ', ', $labels ) . ', ' . __( 'and', 'universal-multicurrency' ) . ' ' . $last;
+	}
+
+	/**
+	 * Builds a safe admin settings URL for conflict notices.
+	 *
+	 * Filters may adjust the relative admin.php path, but external URLs are
+	 * rejected to prevent open redirects from view-model hooks.
+	 *
+	 * @param array<string, mixed> $view Notice view model.
+	 */
+	private function settings_admin_url( array $view ): string {
+		$default = 'admin.php?page=wc-settings&tab=umc';
+		$path    = isset( $view['settings_url'] ) ? (string) $view['settings_url'] : $default;
+
+		if ( 1 !== preg_match( '/^admin\.php(?:\?[^#]*)?$/', $path ) ) {
+			$path = $default;
+		}
+
+		return \admin_url( $path );
 	}
 }

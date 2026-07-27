@@ -269,3 +269,13 @@ require shipping JavaScript.
 - **CI `pot` job** — runs `composer make-pot:check` on every pull request.
 
 POT headers strip wall-clock fields (`POT-Creation-Date`, `PO-Revision-Date`, `X-Generator`) so diffs are deterministic. See [`docs/TRANSLATION.md`](TRANSLATION.md) for contributor workflow and the RTL audit (documentation only — no mandatory RTL CSS fixes in RC).
+
+## Milestone 7 — security audit (Release Candidate)
+
+### Guards
+
+- **`tests/unit/SecuritySourceGuardTest.php`** — static invariants: no `$wpdb`, safe redirects only, no dangerous functions or debug output, request superglobal boundaries, confined `get_option()` / `get_user_meta()`, no runtime filesystem writes, no custom AJAX/REST, uninstall contract, release zip exclusions, currency input normalization and settings URL hardening markers.
+- **`tests/integration/SecurityBehaviourTest.php`** — poisoned cookie/session/query handling, dismissal fingerprint mismatch, conflict-notice settings URL open-redirect rejection.
+- Existing **`StorefrontGuardTest`**, **`DiagnosticsGuardTest`**, **`UninstallPolicyTest`**, and PHPCS enforce carry-forward boundaries.
+
+Audit record: [`docs/SECURITY_REVIEW.md`](SECURITY_REVIEW.md). **Zero unresolved Critical/High findings** at Commit 6.

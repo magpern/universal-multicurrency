@@ -56,6 +56,7 @@ detectors.
 | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Per-milestone deploy and rollback record |
 | [`docs/MIGRATION.md`](docs/MIGRATION.md) | Manual merchant cut-over from another switcher (no foreign import) |
 | [`docs/TRANSLATION.md`](docs/TRANSLATION.md) | Text domain, POT workflow, JS/RTL translation status |
+| [`docs/SECURITY_REVIEW.md`](docs/SECURITY_REVIEW.md) | M7 security audit record and accepted residual risks |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | Milestone status |
 | [`docs/adr/`](docs/adr/) | Architecture decision records |
 

@@ -32,9 +32,8 @@
       [`ADR-0009`](adr/0009-uninstall-retention-policy.md), executable guards
     - **Translation readiness** — **shipped (M7):** [`docs/TRANSLATION.md`](TRANSLATION.md)
       (i18n audit, `languages/universal-multicurrency.pot`, CI drift guard, RTL audit)
-    - **Whole-plugin security review** — M2–M5 surfaces (price filters, Store
-      API extension data, order snapshot writes, switcher redirect), not only
-      Diagnostics
+    - **Whole-plugin security review** — **shipped (M7):** [`SECURITY_REVIEW.md`](SECURITY_REVIEW.md),
+      `SecuritySourceGuardTest`, `SecurityBehaviourTest`; zero open Critical/High findings
     - **Performance baseline** — catalogue query counts, cart recalculation
       cost, Store API timing, object-cache behaviour under load
 
