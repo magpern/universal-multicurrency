@@ -44,6 +44,7 @@ final class Diagnostics {
 		$dismissal->register();
 
 		( new ConflictNotice( $this->detector, $dismissal ) )->register();
+		( new SiteHealthReport( $this->detector ) )->register();
 	}
 
 	/**
