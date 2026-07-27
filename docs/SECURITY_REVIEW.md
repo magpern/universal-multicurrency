@@ -206,7 +206,8 @@ option write (`RateUpdateControllerIntegrationTest`).
 
 - No `$wpdb` in `src/` (`StorefrontGuardTest`, `SecuritySourceGuardTest`).
 - Order/refund data via `WC_Order` CRUD only (`StorefrontGuardTest` M4 guards).
-- No wildcard metadata deletion; uninstall deletes `umc_settings` only (ADR-0009).
+- No wildcard metadata deletion; uninstall deletes configuration options
+  (`umc_settings`, `umc_rate_state`) only (ADR-0009, extended by ADR-0012).
 
 ---
 

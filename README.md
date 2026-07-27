@@ -65,9 +65,9 @@ CI legs, and passive conflict detectors.
 
 - **Migration:** manual cut-over only — deactivate the old switcher, configure UMC
   manually; no automatic import from FOX/WOOCS or other switchers.
-- **Uninstall:** deletes `umc_settings` only; `_umc_*` order meta,
-  `_umc_parent_*` refund meta, and `umc_dismissed_notices` user meta are preserved
-  (ADR-0009).
+- **Uninstall:** deletes plugin configuration options (`umc_settings`,
+  `umc_rate_state`) only; `_umc_*` order meta, `_umc_parent_*` refund meta,
+  and `umc_dismissed_notices` user meta are preserved (ADR-0009).
 
 ## Changelog
 

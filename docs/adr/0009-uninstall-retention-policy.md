@@ -20,8 +20,9 @@ accidentally.
 
 On plugin uninstall (`uninstall.php`), the plugin **must**:
 
-1. **Delete plugin configuration only** — the `umc_settings` option
-   (`Settings::OPTION` / `PersistedKeys::option_keys()`).
+1. **Delete plugin configuration only** — every option in
+   `PersistedKeys::uninstall_deleted_option_keys()` (currently `umc_settings`
+   and `umc_rate_state`; the latter added in Milestone 8, ADR-0012).
 2. **Never delete order snapshot metadata** — all `_umc_*` keys written by
    `OrderSnapshot` (permanent commerce audit data; ADR-0004).
 3. **Never delete refund snapshot metadata** — all `_umc_parent_*` keys written
@@ -39,16 +40,17 @@ WordPress uninstall targets (they expire through WooCommerce / the browser).
 - **Commerce data is permanent.** Exchange-rate snapshots on orders and refunds
   are immutable audit records. Removing them would destroy historical context
   required for accounting, support, and ADR-0005 historical display.
-- **Configuration is ephemeral.** `umc_settings` holds rates and enabled
-  currencies for the live plugin only; it has no meaning without the plugin
-  active.
+- **Configuration is ephemeral.** `umc_settings` holds merchant rate configuration;
+  `umc_rate_state` holds operational fetch bookkeeping. Neither has meaning
+  without the plugin active.
 - **Dismissal meta is cosmetic.** Per-user notice dismissals have no effect
   after uninstall and no security sensitivity; deleting them would require
   `delete_user_meta` and offer no merchant benefit (ADR-0007).
 
 ## Consequences
 
-- `uninstall.php` remains a single `delete_option()` call.
+- `uninstall.php` calls `delete_option()` once per configuration option listed
+  in `PersistedKeys::uninstall_deleted_option_keys()`.
 - `PersistedKeys::uninstall_policy()` and `UninstallPolicyGuardTest` /
   `UninstallPolicyTest` enforce the contract in CI.
 - Re-installing the plugin after uninstall starts from default settings; order

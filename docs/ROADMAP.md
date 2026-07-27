@@ -67,9 +67,9 @@
     | Bump `rate_updated_at` on merchant rate edits | **Complete** — `b826481` |
     | v1 → v2 conversion-fidelity regression test | **Complete** — `137f129` |
     | `CEILING_RATE_UPDATE_NOT_MODIFIED_WRITES` 304 write ceiling | **Complete** — `88bfa44` |
-    | Site Health rate diagnostics integration coverage | **Complete** |
-    | `admin_post_umc_update_rates` round-trip integration coverage | **Complete** |
-    | Milestone 8 documentation synchronization | **Complete** |
+    | Site Health rate diagnostics integration coverage | **Complete** — `045ac34` |
+    | `admin_post_umc_update_rates` round-trip integration coverage | **Complete** — `045ac34` |
+    | Milestone 8 documentation synchronization | **Complete** — `045ac34` |
 
     **Open Milestone 8 review findings: none.** See
     [`RELEASE_AUDIT.md`](RELEASE_AUDIT.md) § Post-release review findings.

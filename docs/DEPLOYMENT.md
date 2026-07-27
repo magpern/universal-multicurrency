@@ -36,8 +36,8 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Tag and release:** Git tag `v0.7.0` and GitHub release publication remain
-pending explicit approval after review — do not create without instruction.
+**Current release:** Git tag **`v0.8.0`** and GitHub release published. Future
+tags require explicit approval before creation.
 
 ---
 
@@ -920,7 +920,7 @@ scheduling/timestamp behaviour plus test and documentation closure:
 | `b826481` | `CurrencyTableField` bumps `rate_updated_at` when a merchant actually edits rate inputs |
 | `137f129` | v1 → v2 conversion-fidelity regression test |
 | `88bfa44` | `CEILING_RATE_UPDATE_NOT_MODIFIED_WRITES = 0` |
-| review closure | Site Health and controller round-trip integration tests; Milestone 8 documentation synchronization |
+| `045ac34` | Site Health and controller round-trip integration tests; Milestone 8 documentation synchronization |
 
 A store already running v0.8.0 can take these by deploying a `main` build; there
 is no data change and no migration step.

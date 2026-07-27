@@ -8,6 +8,7 @@ Create a universal multicurrency plugin for WooCommerce.
 
 -   Unlimited currencies
 -   Manual exchange rates
+-   Automatic exchange rates from a provider (Frankfurter; v0.8.0)
 -   Currency switcher
 -   Runtime conversion
 -   Cart & checkout
@@ -27,6 +28,8 @@ documented in `docs/COMPATIBILITY.md` and enforced in CI.
 
 ## Non-goals
 
-GeoIP, subscriptions, bundles, automatic rates, multi-warehouse,
+GeoIP, subscriptions, bundles, multi-warehouse,
 currency-specific stock, automatic remediation of detected conflicts, and
-deactivating or modifying other plugins.
+deactivating or modifying other plugins. Additional exchange-rate providers
+beyond Frankfurter, per-currency provider selection, and WP-CLI wrappers over
+the rate services remain future work (see `docs/ROADMAP.md`).

@@ -12,9 +12,9 @@ The plugin is fully standalone. Its only plugin dependency is WooCommerce
 (`Requires Plugins: woocommerce`). It has no dependency or runtime coupling to
 FOX / WOOCS / WooCommerce Currency Switcher or any helper plugin, and reads
 none of their classes, functions, constants, options, cookies or sessions. All
-persisted state lives in the plugin's own `umc_settings` option (plus permanent
-order snapshot meta in later milestones). The authoritative inventory of every
-key is [`docs/PERSISTED_DATA.md`](PERSISTED_DATA.md), enforced by
+persisted state lives in the plugin's own options (`umc_settings`,
+`umc_rate_state`) plus permanent order and refund snapshot metadata. The
+authoritative inventory of every key is [`docs/PERSISTED_DATA.md`](PERSISTED_DATA.md), enforced by
 `PersistedKeys` and `PersistedKeysInventoryTest`. Merchant migration from
 another currency switcher is documented in [`docs/MIGRATION.md`](MIGRATION.md)
 (manual path only; no foreign import). See ADR-0003.
@@ -41,8 +41,9 @@ is unit-testable without a bootstrap. It never registers hooks.
   are configuration held in `Settings` and resolved through a `RateProvider`.
 - **`Converter` is stateless and owns all monetary arithmetic.** It holds only
   its collaborators, keeps no mutable state, caches nothing, and is fully
-  deterministic. No other class multiplies or rounds money — `Settings` and
-  `ManualRateProvider` only store and return rate strings.
+  deterministic. No other class multiplies or rounds money — `Settings::get_rate()`
+  and `ManualRateProvider` return derived rate strings; `RateResolver` owns
+  effective-rate arithmetic (ADR-0010).
 - **The base currency lives only in the WooCommerce `woocommerce_currency`
   option** and is never duplicated into `umc_settings`. The domain layer does
   not read that option itself: `CurrencyRegistry` receives the base `Currency`
@@ -56,8 +57,8 @@ is unit-testable without a bootstrap. It never registers hooks.
 |---|---|
 | `Currency` | Immutable value object. Code validated as `^[A-Z]{3}$` (format only, not ISO-4217 membership — WooCommerce allows custom codes). Decimals 0–4. Position one of `left`, `right`, `left_space`, `right_space`. |
 | `Settings` | Sole owner of `umc_settings`. `defaults()`/`sanitize()` are pure and never throw; sanitize cleans or drops invalid input (invalid decimals fall back to 2, unusable rates are blanked while the row is kept). Constructible from in-memory data for testing. On first load from the option, {@see SettingsUpgrader} may migrate legacy schema version 0 stores to version 1, normalize through `sanitize()`, and persist only when the stored value changes. |
-| `RateProvider` | The only rate abstraction (an implementation seam for future automatic rates). `get_rate(base, target)` returns `'1'` for same-currency, a positive decimal string, or `null`. |
-| `ManualRateProvider` | Reads admin-entered rates from `Settings`; performs no arithmetic. |
+| `RateProvider` | Runtime read-side contract for `Converter` — synchronous, no I/O. `get_rate(base, target)` returns `'1'` for same-currency, a positive decimal string, or `null`. Automatic quotes reach this path through `Settings::get_rate()` / `RateResolver`; batch fetches use `ExchangeRateSource` instead (ADR-0010). |
+| `ManualRateProvider` | The shipped `RateProvider` implementation. Delegates to `Settings::get_rate()`; performs no arithmetic. |
 | `Converter` | `convert(amount, target)` and the pure static `apply_rate()` / `round_to_string()`. Rounds half-up to the target decimals; base target is a rate-1 no-op. See ADR-0002. |
 | `CurrencyRegistry` | Assembles `Currency` objects from an injected base plus configured currencies. Base is always present and enabled; a same-code settings row never overrides the base identity. |
 
@@ -326,9 +327,10 @@ for that pattern.
 ## Exchange rate layer (Milestone 8)
 
 Milestone 8 makes exchange rates fetchable from an external provider without
-changing how conversion reads a rate. `ManualRateProvider` and `Converter` are
-untouched: the money path still asks `Settings` for a currency's rate. What is
-new is *where that number comes from* and *what is allowed to persist*.
+changing how conversion reads a rate. `Converter` and the `RateProvider` read
+contract are unchanged; `Settings::get_rate()` derives the effective rate through
+`RateResolver`. What is new is *where the inputs come from* and *what is allowed
+to persist*.
 
 Two rules shape the whole layer:
 
@@ -349,7 +351,7 @@ Two rules shape the whole layer:
 |---|---|---|
 | `Rates\ExchangeRateSource` | — | Provider contract: `id()`, `label()`, capability probes, and `fetch( base, targets, ?previous )` returning one `RateFetchResult` for the whole batch. Distinct from `RateProvider`, which resolves rates for conversion at runtime. |
 | `Rates\Providers\FrankfurterRateSource` | `Http\HttpTransport` | The shipped provider. One batch request per update; parses quotes through `Settings::normalize_rate()`; maps HTTP 304 to `RateFetchResult::not_modified()` and any other non-2xx or malformed body to a total failure. Injectable transport keeps every test offline. |
-| `Rates\Http\HttpTransport` / `WordPressHttpTransport` | — | Narrow outbound seam over `wp_remote_get()`, normalized into `HttpResponse` (status, lowercase headers, body, transport-error flag). |
+| `Rates\Http\HttpTransport` / `WordPressHttpTransport` | — | Narrow outbound seam over `wp_safe_remote_get()`, normalized into `HttpResponse` (status, lowercase headers, body, transport-error flag). |
 | `Rates\RateQuote` | — | Immutable `base → target` quote as a decimal string. |
 | `Rates\RateFetchResult` | `RateQuote`, `ProviderMetadata` | Immutable batch outcome: quotes, per-currency failures, metadata, fetch timestamp, and the mutually exclusive predicates `is_not_modified()`, `is_partial_failure()`, `is_total_failure()`. |
 | `Rates\ProviderMetadata` | — | Immutable cache validators and provenance (schema version, provider id, quote date, `ETag`, `Last-Modified`). Stored in `umc_rate_state`, never in `umc_settings`. |

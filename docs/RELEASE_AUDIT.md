@@ -64,10 +64,10 @@ finding is closed; each row names the commit that closed it.
 | 1 | `Scheduler::ensure_scheduled()` returned early whenever any recurring action existed, so changing `rate_update_interval` never rescheduled | **Fixed** — schedule recurrence is compared against the configured interval; duplicates collapse to one | `0eee862` |
 | 2 | Admin saves preserved `rate_updated_at` when `manual_rate`, `merchant_adjustment`, or `rate_mode` changed, so merchant edits looked older than they were | **Fixed** — `CurrencyTableField::rate_inputs_changed()` bumps the timestamp on a real change | `b826481` |
 | 3 | No regression proof that the v1 → v2 migration leaves manual-mode conversion output byte-identical | **Covered by tests** — `tests/unit/SettingsMigrationFidelityTest.php` | `137f129` |
-| 4 | No named write ceiling proving an HTTP 304 update performs zero `umc_settings` writes | **Covered by tests** — `CEILING_RATE_UPDATE_NOT_MODIFIED_WRITES = 0`, enforced at unit, integration-baseline, and controller layers | `88bfa44`, this commit |
-| 5 | Site Health rate diagnostics had no behavioural integration coverage | **Covered by tests** — `tests/integration/Diagnostics/SiteHealthRateIntegrationTest.php` | this commit |
-| 6 | No round-trip test proving the admin update request reaches the real service and persistence boundary | **Covered by tests** — `tests/integration/Rates/RateUpdateControllerIntegrationTest.php` | this commit |
-| 7 | Documentation still described v0.8.0 as unreleased and carried Milestone 7 schema and version facts | **Documented** — this commit synchronizes RELEASE_AUDIT, ROADMAP, ARCHITECTURE, MIGRATION, SECURITY_REVIEW, HOOKS, PERFORMANCE_BASELINES | this commit |
+| 4 | No named write ceiling proving an HTTP 304 update performs zero `umc_settings` writes | **Covered by tests** — `CEILING_RATE_UPDATE_NOT_MODIFIED_WRITES = 0`, enforced at unit, integration-baseline, and controller layers | `88bfa44`, `045ac34` |
+| 5 | Site Health rate diagnostics had no behavioural integration coverage | **Covered by tests** — `tests/integration/Diagnostics/SiteHealthRateIntegrationTest.php` | `045ac34` |
+| 6 | No round-trip test proving the admin update request reaches the real service and persistence boundary | **Covered by tests** — `tests/integration/Rates/RateUpdateControllerIntegrationTest.php` | `045ac34` |
+| 7 | Documentation still described v0.8.0 as unreleased and carried Milestone 7 schema and version facts | **Documented** — `045ac34` synchronizes RELEASE_AUDIT, ROADMAP, ARCHITECTURE, MIGRATION, SECURITY_REVIEW, HOOKS, PERFORMANCE_BASELINES | `045ac34` |
 
 No production behaviour changed in findings 3–7; they are test and
 documentation closure only.
@@ -172,7 +172,7 @@ Exit code **non-zero** when any release-blocking step fails.
 | RB4 | Plugin header, `UMC_VERSION`, readme Stable tag, text domain, PHP/WC metadata consistent | **Pass** |
 | RB5 | `Settings::SCHEMA_VERSION === 2`; production migrations v0 → v1 → v2 only | **Pass** |
 | RB6 | Persisted-key inventory matches docs + implementation (`umc_settings`, `umc_rate_state`, `umc_dismissed_notices`) | **Pass** |
-| RB7 | Uninstall deletes `umc_settings` only; preserves commerce + dismissal meta | **Pass** |
+| RB7 | Uninstall deletes configuration options (`umc_settings`, `umc_rate_state`); preserves commerce + dismissal meta | **Pass** |
 | RB8 | `SECURITY_REVIEW.md`: zero open Critical/High | **Pass** |
 | RB9 | `PERFORMANCE_BASELINES.md` present; deterministic ceilings enforced | **Pass** |
 | RB10 | POT drift check passes; POT + readme.txt ship in release ZIP | **Pass** |

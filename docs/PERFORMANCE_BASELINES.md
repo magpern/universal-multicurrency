@@ -121,7 +121,7 @@ Ceiling constants are declared on `PerformanceBaselineTest` and enforced in CI.
 
 | Scenario | Observed baseline | Enforced ceiling | Constant | Rationale |
 |---|---:|---:|---|---|
-| `uninstall.php` | 1 option delete | **1** | `CEILING_UNINSTALL_OPTION_DELETES` | Deletes `umc_settings` only |
+| `uninstall.php` | 1 `umc_settings` delete in integration spy | **1** | `CEILING_UNINSTALL_OPTION_DELETES` | Deletes `umc_settings` and `umc_rate_state`; spy counts `umc_settings` only |
 | Dismissal user meta | 0 deletes | **0** | `CEILING_UNINSTALL_USER_META_DELETES` | ADR-0009 retention |
 
 ### Automatic rate updates (Milestone 8)
