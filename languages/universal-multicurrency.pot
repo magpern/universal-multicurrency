@@ -31,12 +31,232 @@ msgstr ""
 msgid "magpern"
 msgstr ""
 
-#: src/Admin/CurrencyTableField.php:95
-msgid "Currencies"
+#: src/Admin/CurrencyActionController.php:55
+#: src/Admin/CurrencyActionController.php:64
+msgid "That currency could not be added. It may already exist or is not recognised."
 msgstr ""
 
+#: src/Admin/CurrencyActionController.php:85
+msgid "Currency added."
+msgstr ""
+
+#: src/Admin/CurrencyActionController.php:105
+msgid "That currency could not be removed."
+msgstr ""
+
+#: src/Admin/CurrencyActionController.php:115
+msgid "Currency removed."
+msgstr ""
+
+#: src/Admin/CurrencyActionController.php:133
+msgid "That currency could not be updated."
+msgstr ""
+
+#: src/Admin/CurrencyActionController.php:145
+msgid "Currency enabled."
+msgstr ""
+
+#: src/Admin/CurrencyActionController.php:146
+msgid "Currency disabled."
+msgstr ""
+
+#: src/Admin/CurrencyActionController.php:194
+msgid "You do not have permission to manage currencies."
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:51
+#: src/Admin/CurrencyOverviewField.php:209
 #: src/Admin/CurrencyTableField.php:100
 msgid "Enabled"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:52
+#: src/Frontend/Switcher.php:146
+msgid "Currency"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:53
+#: src/Admin/CurrencyTableField.php:105
+msgid "Mode"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:54
+msgid "Effective Rate"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:55
+msgid "Adjustment"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:56
+#: src/Admin/CurrencyTableField.php:112
+msgid "Status"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:57
+msgid "Updated"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:58
+#: src/Admin/CurrencyTableField.php:113
+msgid "Actions"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:91
+#: src/Admin/CurrencyOverviewField.php:109
+msgid "Add currency"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:96
+msgid "Search currencies…"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:125
+#: src/Admin/CurrencyTableField.php:141
+msgid "Always"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:128
+#: src/Diagnostics/SiteHealthReport.php:628
+msgid "Yes"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:128
+#: src/Diagnostics/SiteHealthReport.php:628
+msgid "No"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:140
+#: src/Admin/ViewModel/CurrencyViewModelFactory.php:85
+#: src/Admin/ViewModel/CurrencyViewModelFactory.php:89
+#: src/Diagnostics/SiteHealthReport.php:615
+msgid "Base currency"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:166
+msgid "WooCommerce settings"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:169
+msgid "Edit"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:172
+msgid "Update rate"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:175
+msgid "Remove this currency from the store configuration?"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:175
+msgid "Remove"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:200
+msgid "Close"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:205
+msgid "General"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:213
+msgid "Symbol override"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:217
+msgid "Symbol position"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:221
+#: src/Admin/CurrencyTableField.php:104
+#: src/Admin/OrderCurrencyMetaBox.php:230
+msgid "Decimals"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:226
+msgid "Exchange rate"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:228
+#: src/Admin/ExchangeRateSettingsField.php:66
+msgid "Rate mode"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:232
+#: src/Admin/CurrencyTableField.php:107
+msgid "Provider rate"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:236
+msgid "Adjustment percentage"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:240
+#: src/Admin/CurrencyTableField.php:109
+msgid "Effective rate"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:247
+#: src/Admin/CurrencyTableField.php:106
+msgid "Manual rate"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:253
+#: src/Admin/CurrencyTableField.php:189
+msgid "Update now"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:273
+#: src/Admin/CurrencyTableField.php:249
+msgid "Inherit global"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:274
+#: src/Admin/CurrencyTableField.php:250
+#: src/Admin/ExchangeRateSettingsField.php:69
+#: src/Admin/OrderCurrencyMetaBox.php:279
+#: src/Admin/ViewModel/CurrencyViewModelFactory.php:248
+#: src/Admin/ViewModel/CurrencyViewModelFactory.php:254
+#: src/Admin/ViewModel/CurrencyViewModelFactory.php:265
+#: src/Admin/ViewModel/CurrencyViewModelFactory.php:318
+msgid "Manual"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:275
+#: src/Admin/CurrencyTableField.php:251
+#: src/Admin/ExchangeRateSettingsField.php:70
+#: src/Admin/ViewModel/CurrencyViewModelFactory.php:247
+#: src/Admin/ViewModel/CurrencyViewModelFactory.php:253
+#: src/Admin/ViewModel/CurrencyViewModelFactory.php:269
+msgid "Automatic"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:300
+#: src/Admin/CurrencyTableField.php:276
+msgid "Left"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:301
+#: src/Admin/CurrencyTableField.php:277
+msgid "Right"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:302
+#: src/Admin/CurrencyTableField.php:278
+msgid "Left with space"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:303
+#: src/Admin/CurrencyTableField.php:279
+msgid "Right with space"
+msgstr ""
+
+#: src/Admin/CurrencyTableField.php:95
+#: src/Admin/SettingsPage.php:104
+#: src/Admin/SettingsPage.php:242
+msgid "Currencies"
 msgstr ""
 
 #: src/Admin/CurrencyTableField.php:101
@@ -44,7 +264,7 @@ msgid "Code"
 msgstr ""
 
 #: src/Admin/CurrencyTableField.php:102
-#: src/Admin/OrderCurrencyMetaBox.php:226
+#: src/Admin/OrderCurrencyMetaBox.php:236
 msgid "Symbol"
 msgstr ""
 
@@ -52,29 +272,8 @@ msgstr ""
 msgid "Position"
 msgstr ""
 
-#: src/Admin/CurrencyTableField.php:104
-#: src/Admin/OrderCurrencyMetaBox.php:220
-msgid "Decimals"
-msgstr ""
-
-#: src/Admin/CurrencyTableField.php:105
-msgid "Mode"
-msgstr ""
-
-#: src/Admin/CurrencyTableField.php:106
-msgid "Manual rate"
-msgstr ""
-
-#: src/Admin/CurrencyTableField.php:107
-msgid "Provider rate"
-msgstr ""
-
 #: src/Admin/CurrencyTableField.php:108
 msgid "Adjustment %"
-msgstr ""
-
-#: src/Admin/CurrencyTableField.php:109
-msgid "Effective rate"
 msgstr ""
 
 #: src/Admin/CurrencyTableField.php:110
@@ -85,155 +284,113 @@ msgstr ""
 msgid "Last updated"
 msgstr ""
 
-#: src/Admin/CurrencyTableField.php:112
-msgid "Status"
-msgstr ""
-
-#: src/Admin/CurrencyTableField.php:113
-msgid "Actions"
-msgstr ""
-
-#: src/Admin/CurrencyTableField.php:208
-msgid "Always"
-msgstr ""
-
-#: src/Admin/CurrencyTableField.php:210
+#: src/Admin/CurrencyTableField.php:143
 msgid "Base currency (configured in WooCommerce → Settings → General)"
 msgstr ""
 
-#: src/Admin/CurrencyTableField.php:256
-msgid "Update now"
-msgstr ""
-
-#: src/Admin/CurrencyTableField.php:316
-msgid "Inherit global"
-msgstr ""
-
-#: src/Admin/CurrencyTableField.php:317
-#: src/Admin/ExchangeRateSettingsField.php:68
-#: src/Admin/OrderCurrencyMetaBox.php:269
-msgid "Manual"
-msgstr ""
-
-#: src/Admin/CurrencyTableField.php:318
-#: src/Admin/ExchangeRateSettingsField.php:69
-msgid "Automatic"
-msgstr ""
-
-#: src/Admin/CurrencyTableField.php:343
-msgid "Left"
-msgstr ""
-
-#: src/Admin/CurrencyTableField.php:344
-msgid "Right"
-msgstr ""
-
-#: src/Admin/CurrencyTableField.php:345
-msgid "Left with space"
-msgstr ""
-
-#: src/Admin/CurrencyTableField.php:346
-msgid "Right with space"
-msgstr ""
-
-#: src/Admin/ExchangeRateSettingsField.php:61
-msgid "Exchange rates"
-msgstr ""
-
-#: src/Admin/ExchangeRateSettingsField.php:65
-msgid "Rate mode"
-msgstr ""
-
-#: src/Admin/ExchangeRateSettingsField.php:74
-msgid "Provider"
+#: src/Admin/ExchangeRateSettingsField.php:63
+msgid "Global exchange rates"
 msgstr ""
 
 #: src/Admin/ExchangeRateSettingsField.php:75
+msgid "Provider"
+msgstr ""
+
+#: src/Admin/ExchangeRateSettingsField.php:76
 msgid "Frankfurter"
 msgstr ""
 
-#: src/Admin/ExchangeRateSettingsField.php:78
+#: src/Admin/ExchangeRateSettingsField.php:79
 msgid "Update interval"
 msgstr ""
 
-#: src/Admin/ExchangeRateSettingsField.php:90
+#: src/Admin/ExchangeRateSettingsField.php:91
 msgid "Maximum accepted age (hours)"
 msgstr ""
 
-#: src/Admin/ExchangeRateSettingsField.php:96
+#: src/Admin/ExchangeRateSettingsField.php:97
 msgid "Last successful update"
 msgstr ""
 
-#: src/Admin/ExchangeRateSettingsField.php:100
+#: src/Admin/ExchangeRateSettingsField.php:101
 msgid "Next scheduled update"
 msgstr ""
 
-#: src/Admin/ExchangeRateSettingsField.php:104
+#: src/Admin/ExchangeRateSettingsField.php:105
 msgid "Update all now"
 msgstr ""
 
-#: src/Admin/ExchangeRateSettingsField.php:151
+#: src/Admin/ExchangeRateSettingsField.php:153
 #: src/Rates/RateStatusEvaluator.php:87
 msgid "Never"
 msgstr ""
 
-#: src/Admin/ExchangeRateSettingsField.php:162
+#: src/Admin/ExchangeRateSettingsField.php:164
+#: src/Admin/ViewModel/CurrencyViewModelFactory.php:332
 msgid "Unavailable"
 msgstr ""
 
-#: src/Admin/ExchangeRateSettingsField.php:168
+#: src/Admin/ExchangeRateSettingsField.php:170
 msgid "Not scheduled"
 msgstr ""
 
-#: src/Admin/ExchangeRateSettingsField.php:186
+#: src/Admin/ExchangeRateSettingsField.php:188
 msgid "Update all automatic rates"
 msgstr ""
 
-#: src/Admin/OrderCurrencyMetaBox.php:70
 #: src/Admin/OrderCurrencyMetaBox.php:80
+#: src/Admin/OrderCurrencyMetaBox.php:90
 msgid "Currency & Exchange Rate"
 msgstr ""
 
-#: src/Admin/OrderCurrencyMetaBox.php:179
+#: src/Admin/OrderCurrencyMetaBox.php:189
 msgid "This order was created before the Universal Multicurrency plugin was installed. No snapshot metadata is available."
 msgstr ""
 
-#: src/Admin/OrderCurrencyMetaBox.php:186
+#: src/Admin/OrderCurrencyMetaBox.php:196
 msgid "Snapshot Version"
 msgstr ""
 
-#: src/Admin/OrderCurrencyMetaBox.php:192
+#: src/Admin/OrderCurrencyMetaBox.php:202
 msgid "Base Currency"
 msgstr ""
 
-#: src/Admin/OrderCurrencyMetaBox.php:197
+#: src/Admin/OrderCurrencyMetaBox.php:207
 msgid "Order Currency"
 msgstr ""
 
-#: src/Admin/OrderCurrencyMetaBox.php:202
+#: src/Admin/OrderCurrencyMetaBox.php:212
 msgid "Exchange Rate"
 msgstr ""
 
-#: src/Admin/OrderCurrencyMetaBox.php:208
+#: src/Admin/OrderCurrencyMetaBox.php:218
 msgid "Rate Set At"
 msgstr ""
 
-#: src/Admin/OrderCurrencyMetaBox.php:214
+#: src/Admin/OrderCurrencyMetaBox.php:224
 msgid "Rate Source"
 msgstr ""
 
-#: src/Admin/OrderCurrencyMetaBox.php:232
+#: src/Admin/OrderCurrencyMetaBox.php:242
 msgid "Plugin Version"
 msgstr ""
 
-#: src/Admin/OrderCurrencyMetaBox.php:238
+#: src/Admin/OrderCurrencyMetaBox.php:248
 msgid "Rate Identity"
 msgstr ""
 
 #. translators: %s: UTC timestamp formatted as Y-m-d H:i:s.
-#: src/Admin/OrderCurrencyMetaBox.php:257
+#: src/Admin/OrderCurrencyMetaBox.php:267
 #, php-format
 msgid "%s UTC"
+msgstr ""
+
+#: src/Admin/PlaceholderSectionField.php:25
+msgid "This section will be implemented in a future milestone."
+msgstr ""
+
+#: src/Admin/PluginActionLinks.php:58
+msgid "Settings"
 msgstr ""
 
 #. translators: %s: comma-separated currency codes
@@ -266,9 +423,69 @@ msgstr ""
 msgid "Exchange rates updated successfully."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:52
-#: src/Admin/SettingsPage.php:77
+#: src/Admin/SettingsPage.php:75
+#: src/Admin/SettingsPage.php:330
 msgid "Multicurrency"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:105
+#: src/Admin/SettingsPage.php:269
+msgid "Exchange Rates"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:106
+msgid "Display"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:107
+msgid "Checkout"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:108
+msgid "Compatibility"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:109
+msgid "Advanced"
+msgstr ""
+
+#: src/Admin/ViewModel/CurrencyViewModelFactory.php:145
+msgid "Disable"
+msgstr ""
+
+#: src/Admin/ViewModel/CurrencyViewModelFactory.php:145
+msgid "Enable"
+msgstr ""
+
+#. translators: %s: inherited global rate mode label
+#: src/Admin/ViewModel/CurrencyViewModelFactory.php:245
+#, php-format
+msgid "Inherit (%s)"
+msgstr ""
+
+#. translators: %s: signed adjustment percentage, e.g. +2%
+#: src/Admin/ViewModel/CurrencyViewModelFactory.php:277
+#, php-format
+msgid "Automatic (%s%%)"
+msgstr ""
+
+#: src/Admin/ViewModel/CurrencyViewModelFactory.php:311
+msgid "Disabled"
+msgstr ""
+
+#: src/Admin/ViewModel/CurrencyViewModelFactory.php:327
+#: src/Rates/RateStatusEvaluator.php:85
+msgid "Stale"
+msgstr ""
+
+#: src/Admin/ViewModel/CurrencyViewModelFactory.php:336
+msgid "Current"
+msgstr ""
+
+#. translators: 1: currency name, 2: ISO currency code
+#: src/Currency/CurrencyMetadata.php:76
+#, php-format
+msgid "%1$s (%2$s)"
 msgstr ""
 
 #. translators: %s: plugin bootstrap path relative to wp-content/plugins.
@@ -504,10 +721,6 @@ msgstr ""
 msgid "Plugin version"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:615
-msgid "Base currency"
-msgstr ""
-
 #: src/Diagnostics/SiteHealthReport.php:619
 msgid "Currencies configured"
 msgstr ""
@@ -518,14 +731,6 @@ msgstr ""
 
 #: src/Diagnostics/SiteHealthReport.php:627
 msgid "HPOS enabled"
-msgstr ""
-
-#: src/Diagnostics/SiteHealthReport.php:628
-msgid "Yes"
-msgstr ""
-
-#: src/Diagnostics/SiteHealthReport.php:628
-msgid "No"
 msgstr ""
 
 #: src/Diagnostics/SiteHealthReport.php:631
@@ -616,18 +821,10 @@ msgstr ""
 msgid "High-Performance Order Storage (HPOS) is not enabled. Universal Multicurrency supports legacy order storage, but HPOS is recommended."
 msgstr ""
 
-#: src/Frontend/Switcher.php:146
-msgid "Currency"
-msgstr ""
-
 #. translators: %s: active currency code.
 #: src/Integration/GatewayCompatibility.php:174
 #, php-format
 msgid "No payment method is available for %s. Please choose a different currency to continue."
-msgstr ""
-
-#: src/Rates/RateStatusEvaluator.php:85
-msgid "Stale"
 msgstr ""
 
 #: src/Rates/RateStatusEvaluator.php:86

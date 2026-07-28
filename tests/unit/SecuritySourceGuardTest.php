@@ -25,7 +25,10 @@ final class SecuritySourceGuardTest extends TestCase {
 	 * @var array<int, string>
 	 */
 	private const REQUEST_INPUT_FILES = array(
+		'AdminAssets.php',
+		'CurrencyActionController.php',
 		'CurrencyContext.php',
+		'CurrencyOverviewField.php',
 		'CurrencySwitcher.php',
 		'NoticeDismissal.php',
 		'SettingsPage.php',
@@ -46,6 +49,7 @@ final class SecuritySourceGuardTest extends TestCase {
 		'RateUpdateState.php',
 		'ExchangeRateSettingsField.php',
 		'CurrencyTableField.php',
+		'CurrencyViewModelFactory.php',
 	);
 
 	private function root(): string {

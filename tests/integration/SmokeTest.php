@@ -63,7 +63,9 @@ final class SmokeTest extends WP_UnitTestCase {
 		$links = apply_filters( $hook, array( '<a>Deactivate</a>' ) );
 
 		$this->assertCount( 2, $links );
-		$this->assertStringContainsString( 'page=wc-settings&amp;tab=umc', $links[0] );
+		$this->assertStringContainsString( 'page=wc-settings', $links[0] );
+		$this->assertStringContainsString( 'tab=umc', $links[0] );
+		$this->assertStringContainsString( 'section=currencies', $links[0] );
 		$this->assertStringContainsString( 'Settings', $links[0] );
 	}
 

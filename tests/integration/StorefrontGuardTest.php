@@ -328,7 +328,7 @@ final class StorefrontGuardTest extends WP_UnitTestCase {
 		// Shipping JavaScript would also mean shipping a second place where money
 		// could be formatted or, worse, calculated.
 		$this->assert_pattern_absent_from(
-			$this->umc_source_files(),
+			$this->umc_source_files_except( array( 'AdminAssets.php' ) ),
 			'/wp_(register|enqueue)_script|IntegrationInterface|woocommerce_blocks_(cart|checkout|mini-cart)_block_registration/',
 			'No frontend assets: the blocks are served entirely by server-side conversion.'
 		);

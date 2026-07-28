@@ -23,6 +23,15 @@ final class TranslationReadinessTest extends TestCase {
 
 	private const TEXT_DOMAIN = 'universal-multicurrency';
 
+	/**
+	 * Shipped JavaScript files reviewed for i18n boundaries.
+	 *
+	 * @var array<int, string>
+	 */
+	private const APPROVED_JS_FILES = array(
+		'assets/admin/umc-settings.js',
+	);
+
 	private function root(): string {
 		return dirname( __DIR__, 2 );
 	}
@@ -173,8 +182,22 @@ final class TranslationReadinessTest extends TestCase {
 				'/\.js$/i'
 			);
 
-			$js_files = iterator_to_array( $iterator, false );
-			$this->assertSame( array(), $js_files, 'Shipped JavaScript is not allowed without i18n review.' );
+			$js_files   = iterator_to_array( $iterator, false );
+			$unexpected = array();
+
+			foreach ( $js_files as $file ) {
+				if ( ! $file instanceof SplFileInfo ) {
+					continue;
+				}
+
+				$relative_path = ltrim( str_replace( $this->root() . '/', '', $file->getPathname() ), '/' );
+
+				if ( ! in_array( $relative_path, self::APPROVED_JS_FILES, true ) ) {
+					$unexpected[] = $relative_path;
+				}
+			}
+
+			$this->assertSame( array(), $unexpected, 'Shipped JavaScript is not allowed without i18n review.' );
 		}
 	}
 
@@ -185,7 +208,7 @@ final class TranslationReadinessTest extends TestCase {
 		$this->assertStringContainsString( 'composer make-pot', $source );
 		$this->assertStringContainsString( 'JavaScript translation status', $source );
 		$this->assertStringContainsString( 'RTL readiness audit', $source );
-		$this->assertStringContainsString( 'No shipped JavaScript files', $source );
+		$this->assertStringContainsString( 'assets/admin/umc-settings.js', $source );
 	}
 
 	public function test_pot_is_current(): void {

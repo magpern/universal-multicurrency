@@ -1,0 +1,185 @@
+.umc-settings .umc-currencies-section {
+	max-width: 100%;
+}
+
+.umc-add-currency {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	align-items: center;
+	margin: 0 0 16px;
+}
+
+.umc-add-currency__form {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	align-items: center;
+}
+
+.umc-currencies-overview th,
+.umc-currencies-overview td {
+	vertical-align: top;
+}
+
+.umc-currency-meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 4px;
+	color: #646970;
+	font-size: 12px;
+}
+
+.umc-base-label {
+	font-weight: 600;
+}
+
+.umc-effective-rate {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.umc-effective-rate__value {
+	font-weight: 600;
+}
+
+.umc-effective-rate__source {
+	color: #646970;
+	font-size: 12px;
+}
+
+.umc-status-badge {
+	display: inline-block;
+	padding: 2px 8px;
+	border-radius: 3px;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.6;
+}
+
+.umc-status-badge--current {
+	background: #c6e1c6;
+	color: #2f5233;
+}
+
+.umc-status-badge--stale {
+	background: #f8dda7;
+	color: #614200;
+}
+
+.umc-status-badge--unavailable {
+	background: #eba3a3;
+	color: #761919;
+}
+
+.umc-status-badge--disabled,
+.umc-status-badge--base {
+	background: #e5e5e5;
+	color: #50575e;
+}
+
+.umc-status-badge--manual {
+	background: #c8d7e1;
+	color: #2e4453;
+}
+
+.umc-enabled-badge {
+	display: inline-block;
+	padding: 2px 8px;
+	border-radius: 3px;
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.umc-enabled-badge--on {
+	background: #c6e1c6;
+	color: #2f5233;
+}
+
+.umc-enabled-badge--off {
+	background: #e5e5e5;
+	color: #50575e;
+}
+
+.umc-row-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+}
+
+.umc-editor-row {
+	display: none;
+}
+
+.umc-editor-row--open {
+	display: table-row;
+}
+
+.umc-editor {
+	padding: 16px;
+	background: #f6f7f7;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+}
+
+.umc-editor__header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 16px;
+}
+
+.umc-editor__header h3 {
+	margin: 0;
+}
+
+.umc-editor__grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 16px;
+}
+
+.umc-editor__section {
+	margin: 0;
+	padding: 16px;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+}
+
+.umc-editor__section legend {
+	font-weight: 600;
+	padding: 0 4px;
+}
+
+.umc-editor-field--hidden {
+	display: none;
+}
+
+.umc-admin-card {
+	max-width: 720px;
+	padding: 16px;
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+}
+
+.umc-admin-card__title {
+	margin: 0 0 16px;
+}
+
+.umc-admin-card .form-table {
+	margin: 0;
+}
+
+.umc-admin-card .form-table th {
+	width: 220px;
+	padding-left: 0;
+}
+
+.umc-section-placeholder {
+	margin: 0;
+}

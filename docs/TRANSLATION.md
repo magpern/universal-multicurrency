@@ -82,15 +82,22 @@ Release zips include the `languages/` directory when present (`bin/build-zip.sh`
 
 ## JavaScript translation status
 
-**No shipped JavaScript files.** The storefront switcher, admin settings table, and
-diagnostics notices are server-rendered PHP only. There is no webpack/block editor
-bundle and no `wp_set_script_translations()` registration.
+**One approved admin JavaScript file:** `assets/admin/umc-settings.js`.
 
-`TranslationReadinessTest` asserts the repository contains no `*.js` files under
-`src/` or `assets/` so accidental untranslated client-side strings are caught early.
-If JavaScript is added later, strings must use `@wordpress/i18n`, script translations
-must be registered, and msgids must be included in the POT via `@wordpress/i18n` extraction
-or an documented equivalent.
+It handles Multicurrency settings UI behaviour only (expand/collapse editors,
+enhanced currency search, remove confirmation). User-facing copy stays in PHP:
+
+- remove confirmation text is rendered as a `data-confirm` attribute via
+  `esc_attr__()` in `CurrencyOverviewField`
+- the script reads that attribute and does not embed English literals
+
+There is still no storefront JavaScript bundle and no `wp_set_script_translations()`
+registration. If additional JavaScript is added later, strings must use
+`@wordpress/i18n`, script translations must be registered, and msgids must be
+included in the POT via `@wordpress/i18n` extraction or a documented equivalent.
+
+`TranslationReadinessTest` allowlists `assets/admin/umc-settings.js` and fails on
+any other shipped `*.js` under `src/` or `assets/`.
 
 ---
 

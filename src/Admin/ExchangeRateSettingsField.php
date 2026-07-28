@@ -58,9 +58,10 @@ final class ExchangeRateSettingsField {
 
 		?>
 		<tr valign="top">
-			<th scope="row" class="titledesc"><?php esc_html_e( 'Exchange rates', 'universal-multicurrency' ); ?></th>
-			<td class="forminp">
-				<table class="form-table" style="margin:0;">
+			<td class="forminp umc-settings" colspan="2">
+				<div class="umc-admin-card">
+					<h2 class="umc-admin-card__title"><?php esc_html_e( 'Global exchange rates', 'universal-multicurrency' ); ?></h2>
+					<table class="form-table" role="presentation">
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Rate mode', 'universal-multicurrency' ); ?></th>
 						<td>
@@ -106,7 +107,8 @@ final class ExchangeRateSettingsField {
 							<?php echo wp_kses_post( $this->update_all_button() ); ?>
 						</td>
 					</tr>
-				</table>
+					</table>
+				</div>
 			</td>
 		</tr>
 		<?php

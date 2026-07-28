@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace UMC;
 
+use UMC\Admin\AdminAssets;
+use UMC\Admin\CurrencyActionController;
 use UMC\Admin\OrderCurrencyMetaBox;
 use UMC\Admin\PluginActionLinks;
 use UMC\Admin\RateFailureNotice;
@@ -31,6 +33,7 @@ use UMC\Order\OrderPayCurrencyLock;
 use UMC\Order\OrderSnapshot;
 use UMC\Order\OrderSnapshotReader;
 use UMC\Order\RefundSnapshot;
+use UMC\Currency\WooCommerceCurrencyProvider;
 use UMC\Rates\ExchangeRateSource;
 use UMC\Rates\ExchangeRateStore;
 use UMC\Rates\ManualRateProvider;
@@ -114,8 +117,10 @@ final class Plugin {
 		( new PluginActionLinks() )->register();
 
 		if ( is_admin() ) {
+			( new AdminAssets() )->register();
 			( new RateUpdateController( $rate_service ) )->register();
 			( new RateFailureNotice( $settings, $rate_store ) )->register();
+			( new CurrencyActionController( $settings, $base, new WooCommerceCurrencyProvider() ) )->register();
 		}
 
 		$registry = new CurrencyRegistry( $settings, $base );
