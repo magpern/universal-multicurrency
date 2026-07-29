@@ -1670,39 +1670,39 @@ msgstr ""
 msgid "Unsupported settings schema version %1$d (current plugin supports up to %2$d)."
 msgstr ""
 
-#: src/StoreApi/CartExtensionData.php:133
+#: src/StoreApi/CartExtensionData.php:149
 msgid "Currency code the cart is presented in."
 msgstr ""
 
-#: src/StoreApi/CartExtensionData.php:138
+#: src/StoreApi/CartExtensionData.php:154
 msgid "Currency code prices are authored in."
 msgstr ""
 
-#: src/StoreApi/CartExtensionData.php:143
+#: src/StoreApi/CartExtensionData.php:159
 msgid "Currency codes the shopper may choose."
 msgstr ""
 
-#: src/StoreApi/CartExtensionData.php:149
+#: src/StoreApi/CartExtensionData.php:165
 msgid "Configured checkout currency mode."
 msgstr ""
 
-#: src/StoreApi/CartExtensionData.php:154
+#: src/StoreApi/CartExtensionData.php:170
 msgid "Shopper-selected currency code."
 msgstr ""
 
-#: src/StoreApi/CartExtensionData.php:159
+#: src/StoreApi/CartExtensionData.php:175
 msgid "Effective checkout currency code."
 msgstr ""
 
-#: src/StoreApi/CartExtensionData.php:164
+#: src/StoreApi/CartExtensionData.php:180
 msgid "Checkout transition reason, when applicable."
 msgstr ""
 
-#: src/StoreApi/CartExtensionData.php:169
+#: src/StoreApi/CartExtensionData.php:185
 msgid "Whether checkout fell back to store currency."
 msgstr ""
 
-#: src/StoreApi/CartExtensionData.php:174
+#: src/StoreApi/CartExtensionData.php:190
 msgid "Checkout transition notice payload for Blocks."
 msgstr ""
 

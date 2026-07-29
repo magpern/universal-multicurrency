@@ -183,11 +183,57 @@ final class CheckoutStoreApiNoticePayloadTest extends StoreApiTestCase {
 	 * @return array<string, mixed>
 	 */
 	private function checkout_extension(): array {
-		$data = $this->response_data( $this->store_api_request( 'GET', '/checkout' ) );
+		if ( $this->checkout_endpoint_extension_supported() ) {
+			$data = $this->response_data( $this->store_api_request( 'GET', '/checkout' ) );
+
+			$this->assertArrayHasKey( 'extensions', $data );
+
+			return (array) $data['extensions'][ CartExtensionData::NAMESPACE_KEY ];
+		}
+
+		return $this->cart_extension_during_checkout();
+	}
+
+	/**
+	 * Reads cart extension data while presenting a checkout route identity.
+	 *
+	 * WooCommerce 8.2 exposes checkout policy fields on the cart endpoint only.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function cart_extension_during_checkout(): array {
+		$previous_uri = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Test harness restores a URI it set itself.
+		$previous_route = $GLOBALS['wp']->query_vars['rest_route'] ?? null;
+
+		$_SERVER['REQUEST_URI']                  = '/wp-json/wc/store/v1/checkout';
+		$GLOBALS['wp']->query_vars['rest_route'] = '/wc/store/v1/checkout';
+
+		try {
+			$data = $this->response_data( $this->store_api_request( 'GET', '/cart' ) );
+		} finally {
+			if ( null === $previous_uri ) {
+				unset( $_SERVER['REQUEST_URI'] );
+			} else {
+				$_SERVER['REQUEST_URI'] = $previous_uri;
+			}
+
+			if ( null === $previous_route ) {
+				unset( $GLOBALS['wp']->query_vars['rest_route'] );
+			} else {
+				$GLOBALS['wp']->query_vars['rest_route'] = $previous_route;
+			}
+		}
 
 		$this->assertArrayHasKey( 'extensions', $data );
 
 		return (array) $data['extensions'][ CartExtensionData::NAMESPACE_KEY ];
+	}
+
+	/**
+	 * Whether WooCommerce exposes umc data on the checkout endpoint itself.
+	 */
+	private function checkout_endpoint_extension_supported(): bool {
+		return defined( 'WC_VERSION' ) && version_compare( WC_VERSION, '8.3.0', '>=' );
 	}
 
 	/**
