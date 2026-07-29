@@ -50,6 +50,12 @@
 			}
 
 			if ( 'radio' === $field.attr( 'type' ) ) {
+				var $checked = $root.find( '[data-umc-display-field="' + name + '"]:enabled:checked' );
+
+				if ( $checked.length ) {
+					return $checked.val();
+				}
+
 				return $root.find( '[data-umc-display-field="' + name + '"]:checked' ).val();
 			}
 
@@ -282,7 +288,7 @@
 
 			setExclusiveClass(
 				[ 'umc-switcher--side-left', 'umc-switcher--side-right' ],
-				'left' === ( $root.find( '[data-umc-display-field="side"]' ).val() || 'right' )
+				'left' === ( fieldValue( 'side' ) || 'right' )
 					? 'umc-switcher--side-left'
 					: 'umc-switcher--side-right'
 			);
@@ -293,7 +299,7 @@
 					top: 'umc-switcher--align-top',
 					middle: 'umc-switcher--align-middle',
 					bottom: 'umc-switcher--align-bottom',
-				}[ $root.find( '[data-umc-display-field="vertical_alignment"]' ).val() || 'middle' ] || 'umc-switcher--align-middle'
+				}[ fieldValue( 'vertical_alignment' ) || 'middle' ] || 'umc-switcher--align-middle'
 			);
 
 			setExclusiveClass(
@@ -302,7 +308,7 @@
 					automatic: 'umc-switcher--theme-automatic',
 					light: 'umc-switcher--theme-light',
 					dark: 'umc-switcher--theme-dark',
-				}[ $root.find( '[data-umc-display-field="theme"]' ).val() || 'automatic' ] || 'umc-switcher--theme-automatic'
+				}[ fieldValue( 'theme' ) || 'automatic' ] || 'umc-switcher--theme-automatic'
 			);
 
 			setExclusiveClass(
@@ -311,7 +317,7 @@
 					compact: 'umc-switcher--size-compact',
 					standard: 'umc-switcher--size-standard',
 					large: 'umc-switcher--size-large',
-				}[ $root.find( '[data-umc-display-field="size"]' ).val() || 'standard' ] || 'umc-switcher--size-standard'
+				}[ fieldValue( 'size' ) || 'standard' ] || 'umc-switcher--size-standard'
 			);
 
 			setExclusiveClass(
@@ -320,7 +326,7 @@
 					slight: 'umc-switcher--shape-slight',
 					rounded: 'umc-switcher--shape-rounded',
 					pill: 'umc-switcher--shape-pill',
-				}[ $root.find( '[data-umc-display-field="shape"]' ).val() || 'rounded' ] || 'umc-switcher--shape-rounded'
+				}[ fieldValue( 'shape' ) || 'rounded' ] || 'umc-switcher--shape-rounded'
 			);
 
 			$switcher.toggleClass( 'umc-switcher--expanded', 'horizontal_list' === style );
