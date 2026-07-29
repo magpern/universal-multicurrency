@@ -16,6 +16,7 @@ use UMC\Currency;
 use UMC\CurrencyRegistry;
 use UMC\CurrencyContext;
 use UMC\CurrencyResolver;
+use UMC\Display\SwitcherShortcode;
 use UMC\Display\SwitcherRenderer;
 use UMC\Display\SwitcherSettings;
 use UMC\Display\SwitcherSettingsRepository;
@@ -75,9 +76,138 @@ final class DisplaySettingsFieldTest extends WP_UnitTestCase {
 		$html = $this->capture_render();
 
 		$this->assertStringContainsString( 'umc-display-layout', $html );
+		$this->assertStringContainsString( 'umc-display-configurator', $html );
 		$this->assertStringContainsString( 'umc-display-preview-frame', $html );
 		$this->assertStringContainsString( 'umc-switcher', $html );
 		$this->assertStringContainsString( 'umc-display-card--position umc-display-card--hidden', $html );
+	}
+
+	public function test_render_includes_configurator_contract_markup(): void {
+		$this->save_display(
+			array(
+				'enabled'   => true,
+				'placement' => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
+			)
+		);
+
+		$html = $this->capture_render();
+
+		$this->assertStringContainsString( 'umc-display-enable-row', $html );
+		$this->assertSame( 5, substr_count( $html, '<label class="umc-display-choice-card">' ) );
+		$this->assertSame( 3, substr_count( $html, 'name="umc_display[placement]"' ) );
+		$this->assertSame( 2, substr_count( $html, 'name="umc_display[style]"' ) );
+		$this->assertStringContainsString( 'data-umc-position-panel="floating_side"', $html );
+		$this->assertStringContainsString( 'data-umc-position-panel="sticky_footer"', $html );
+		$this->assertStringContainsString( 'data-umc-manual-panel', $html );
+		$this->assertStringContainsString( '[' . SwitcherShortcode::TAG_PRIMARY . ']', $html );
+		$this->assertStringContainsString( 'aria-hidden="true"', $html );
+		$this->assertStringContainsString( 'data-umc-copy-shortcode', $html );
+	}
+
+	public function test_floating_side_panel_contains_vertical_controls_only_in_side_subtree(): void {
+		$this->save_display(
+			array(
+				'placement' => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
+			)
+		);
+
+		$html = $this->capture_render();
+		$side = $this->extract_panel_subtree( $html, 'floating_side' );
+		$bottom = $this->extract_panel_subtree( $html, 'sticky_footer' );
+
+		$this->assertStringContainsString( 'name="umc_display[position][vertical_alignment]"', $side );
+		$this->assertStringContainsString( 'name="umc_display[position][vertical_offset]"', $side );
+		$this->assertStringNotContainsString( 'name="umc_display[position][vertical_alignment]"', $bottom );
+		$this->assertStringNotContainsString( 'name="umc_display[position][vertical_offset]"', $bottom );
+		$this->assertStringContainsString( 'name="umc_display[position][bottom_offset]"', $bottom );
+	}
+
+	public function test_initial_render_disables_inactive_position_panel_controls(): void {
+		$this->save_display(
+			array(
+				'placement' => SwitcherSettings::PLACEMENT_STICKY_FOOTER,
+			)
+		);
+
+		$html = $this->capture_render();
+		$side = $this->extract_panel_subtree( $html, 'floating_side' );
+		$bottom = $this->extract_panel_subtree( $html, 'sticky_footer' );
+
+		$this->assertStringContainsString( 'disabled', $side );
+		$this->assertStringNotContainsString( ' disabled', $bottom );
+	}
+
+	public function test_parse_post_preserves_inactive_bottom_offset_when_saving_floating_side(): void {
+		$this->save_display(
+			array(
+				'enabled'   => true,
+				'placement' => SwitcherSettings::PLACEMENT_STICKY_FOOTER,
+				'position'  => array(
+					'bottom_offset' => 40,
+				),
+				'visibility' => array(
+					'desktop' => true,
+					'mobile'  => true,
+				),
+			)
+		);
+
+		$_POST['umc_display'] = array(
+			'enabled'    => '1',
+			'placement'  => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
+			'style'      => SwitcherSettings::STYLE_DROPDOWN,
+			'position'   => array(
+				'side'               => SwitcherSettings::SIDE_LEFT,
+				'vertical_alignment' => SwitcherSettings::ALIGN_TOP,
+				'vertical_offset'    => '12',
+				'edge_offset'          => '24',
+			),
+			'visibility' => array(
+				'desktop' => '1',
+				'mobile'  => '1',
+			),
+		);
+
+		$parsed = $this->display_field()->parse_post();
+
+		$this->assertIsArray( $parsed );
+		$this->assertSame( 40, $parsed['display']['position']['bottom_offset'] );
+	}
+
+	public function test_parse_post_preserves_position_subtree_when_manual_placement_submitted(): void {
+		$this->save_display(
+			array(
+				'enabled'   => true,
+				'placement' => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
+				'position'  => array(
+					'side'               => SwitcherSettings::SIDE_LEFT,
+					'vertical_alignment' => SwitcherSettings::ALIGN_TOP,
+					'vertical_offset'    => 12,
+					'edge_offset'        => 24,
+					'bottom_offset'      => 40,
+				),
+				'visibility' => array(
+					'desktop' => true,
+					'mobile'  => true,
+				),
+			)
+		);
+
+		$_POST['umc_display'] = array(
+			'enabled'    => '1',
+			'placement'  => SwitcherSettings::PLACEMENT_MANUAL,
+			'style'      => SwitcherSettings::STYLE_DROPDOWN,
+			'visibility' => array(
+				'desktop' => '1',
+				'mobile'  => '1',
+			),
+		);
+
+		$parsed = $this->display_field()->parse_post();
+
+		$this->assertIsArray( $parsed );
+		$this->assertSame( SwitcherSettings::SIDE_LEFT, $parsed['display']['position']['side'] );
+		$this->assertSame( 40, $parsed['display']['position']['bottom_offset'] );
 	}
 
 	public function test_parse_post_sanitizes_display_settings(): void {
@@ -253,5 +383,44 @@ final class DisplaySettingsFieldTest extends WP_UnitTestCase {
 		$this->display_field()->render();
 
 		return (string) ob_get_clean();
+	}
+
+	private function extract_panel_subtree( string $html, string $panel ): string {
+		$needle = 'data-umc-position-panel="' . $panel . '"';
+
+		$start = strpos( $html, $needle );
+
+		if ( false === $start ) {
+			return '';
+		}
+
+		$open = strrpos( substr( $html, 0, $start ), '<div' );
+
+		if ( false === $open ) {
+			return '';
+		}
+
+		$fragment = substr( $html, $open );
+		$depth    = 0;
+		$length   = strlen( $fragment );
+		$output   = '';
+
+		for ( $i = 0; $i < $length; $i++ ) {
+			$output .= $fragment[ $i ];
+
+			if ( '<' === $fragment[ $i ] && str_starts_with( substr( $fragment, $i, 4 ), '<div' ) ) {
+				++$depth;
+			}
+
+			if ( '<' === $fragment[ $i ] && str_starts_with( substr( $fragment, $i, 6 ), '</div>' ) ) {
+				--$depth;
+
+				if ( 0 === $depth ) {
+					break;
+				}
+			}
+		}
+
+		return $output;
 	}
 }

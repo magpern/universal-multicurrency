@@ -50,6 +50,13 @@ final class DisplaySettingsField {
 	private SwitcherSettingsRepository $settings_repository;
 
 	/**
+	 * Presentation markup helper.
+	 *
+	 * @var DisplayControlRenderer
+	 */
+	private DisplayControlRenderer $controls;
+
+	/**
 	 * Whether style was coerced during the last {@see parse_post()} call.
 	 *
 	 * @var bool
@@ -59,21 +66,24 @@ final class DisplaySettingsField {
 	/**
 	 * Binds the Display settings field to settings and preview services.
 	 *
-	 * @param Settings                   $settings            Merchant settings store.
-	 * @param SwitcherViewModelFactory   $factory             Preview view-model factory.
-	 * @param SwitcherRenderer           $renderer            Shared switcher renderer.
-	 * @param SwitcherSettingsRepository $settings_repository Display settings repository.
+	 * @param Settings                    $settings            Merchant settings store.
+	 * @param SwitcherViewModelFactory    $factory             Preview view-model factory.
+	 * @param SwitcherRenderer            $renderer            Shared switcher renderer.
+	 * @param SwitcherSettingsRepository  $settings_repository Display settings repository.
+	 * @param DisplayControlRenderer|null $controls           Optional presentation helper.
 	 */
 	public function __construct(
 		Settings $settings,
 		SwitcherViewModelFactory $factory,
 		SwitcherRenderer $renderer,
-		SwitcherSettingsRepository $settings_repository
+		SwitcherSettingsRepository $settings_repository,
+		?DisplayControlRenderer $controls = null
 	) {
 		$this->settings            = $settings;
 		$this->factory             = $factory;
 		$this->renderer            = $renderer;
 		$this->settings_repository = $settings_repository;
+		$this->controls            = $controls ?? new DisplayControlRenderer();
 	}
 
 	/**
@@ -87,16 +97,18 @@ final class DisplaySettingsField {
 	 * Renders the Display settings workspace.
 	 */
 	public function render(): void {
-		$raw      = $this->settings->get()['display'] ?? array();
-		$settings = SwitcherSettings::from_array( is_array( $raw ) ? $raw : array() );
-		$model    = $this->factory->create_for_admin_preview( $settings );
-		$preview  = $this->renderer->render( $model );
+		$raw       = $this->settings->get()['display'] ?? array();
+		$settings  = SwitcherSettings::from_array( is_array( $raw ) ? $raw : array() );
+		$model     = $this->factory->create_for_admin_preview( $settings );
+		$preview   = $this->renderer->render( $model );
+		$placement = $settings->placement();
 
 		?>
 		<tr valign="top">
 			<td class="forminp umc-settings umc-display-settings" colspan="2">
 				<div class="umc-display-layout">
-					<div class="umc-display-main">
+					<div class="umc-display-configurator">
+						<?php $this->render_enable_row( $settings ); ?>
 						<?php $this->render_notices( $settings ); ?>
 						<?php $this->render_switcher_card( $settings ); ?>
 						<?php $this->render_position_card( $settings ); ?>
@@ -107,7 +119,7 @@ final class DisplaySettingsField {
 					</div>
 					<div class="umc-display-preview">
 						<div class="umc-display-preview__header">
-							<h3 class="umc-display-preview__title"><?php esc_html_e( 'Preview', 'universal-multicurrency' ); ?></h3>
+							<h3 class="umc-display-preview__title"><?php esc_html_e( 'Live preview', 'universal-multicurrency' ); ?></h3>
 							<div class="umc-display-preview__viewport" role="group" aria-label="<?php esc_attr_e( 'Preview viewport', 'universal-multicurrency' ); ?>">
 								<button type="button" class="button umc-display-preview__viewport-btn is-active" data-umc-preview-viewport="desktop"><?php esc_html_e( 'Desktop', 'universal-multicurrency' ); ?></button>
 								<button type="button" class="button umc-display-preview__viewport-btn" data-umc-preview-viewport="mobile"><?php esc_html_e( 'Mobile', 'universal-multicurrency' ); ?></button>
@@ -122,11 +134,15 @@ final class DisplaySettingsField {
 									echo $preview;
 									?>
 								</div>
+								<div class="umc-display-preview-disabled" data-umc-preview-disabled-overlay hidden>
+									<p><?php esc_html_e( 'Switcher is currently disabled', 'universal-multicurrency' ); ?></p>
+								</div>
 							</div>
 						</div>
 						<p class="description umc-display-preview__hint"><?php esc_html_e( 'Preview simulates a storefront viewport. Currency links do not change the customer selection.', 'universal-multicurrency' ); ?></p>
 					</div>
 				</div>
+				<input type="hidden" data-umc-display-placement="<?php echo esc_attr( $placement ); ?>" />
 			</td>
 		</tr>
 		<?php
@@ -141,7 +157,7 @@ final class DisplaySettingsField {
 		$this->show_coercion_notice = false;
 
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Verified by WooCommerce settings save.
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Values normalized and sanitized via SwitcherSettings::from_array.
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Values normalized and sanitized via SwitcherSettings.
 		$raw = isset( $_POST['umc_display'] ) ? wp_unslash( $_POST['umc_display'] ) : array();
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
@@ -149,20 +165,72 @@ final class DisplaySettingsField {
 			$raw = array();
 		}
 
-		$raw = $this->normalize_post_raw( $raw );
+		$stored = $this->stored_display_raw();
+		$raw    = $this->normalize_post_raw( $raw );
 
-		if ( ! SwitcherSettings::visibility_valid_for_save( $raw ) ) {
+		$active_placement = isset( $raw['placement'] ) && is_string( $raw['placement'] )
+			? $raw['placement']
+			: (string) ( $stored['placement'] ?? SwitcherSettings::PLACEMENT_MANUAL );
+
+		$merged              = array_replace_recursive( $stored, $raw );
+		$merged['position']  = $this->merge_position_preserving_inactive(
+			is_array( $stored['position'] ?? null ) ? $stored['position'] : SwitcherSettings::default_array()['position'],
+			is_array( $raw['position'] ?? null ) ? $raw['position'] : array(),
+			$active_placement
+		);
+		$merged['placement'] = $active_placement;
+
+		if ( ! SwitcherSettings::visibility_valid_for_save( $merged ) ) {
 			return null;
 		}
 
-		$settings = SwitcherSettings::from_array( $raw );
+		$settings = SwitcherSettings::from_array( $merged );
 
 		$this->show_coercion_notice = $settings->was_style_coerced();
 
 		return array(
-			'display'              => SwitcherSettings::sanitize_raw( $raw ),
+			'display'              => SwitcherSettings::sanitize_raw( $merged ),
 			'show_coercion_notice' => $this->show_coercion_notice,
 		);
+	}
+
+	/**
+	 * Outputs presentation markup from {@see DisplayControlRenderer}.
+	 *
+	 * @param string $markup Escaped HTML fragment.
+	 */
+	private function echo_control_markup( string $markup ): void {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in DisplayControlRenderer.
+		echo $markup;
+	}
+
+	/**
+	 * Renders the prominent enable row with status badge.
+	 *
+	 * @param SwitcherSettings $settings Current display settings.
+	 */
+	private function render_enable_row( SwitcherSettings $settings ): void {
+		$enabled = $settings->is_enabled();
+		?>
+		<div class="umc-display-enable-row">
+			<div class="umc-display-enable-row__control">
+				<?php
+				$this->echo_control_markup(
+					$this->controls->toggle_row(
+						'umc_display[enabled]',
+						$enabled,
+						__( 'Enable storefront switcher', 'universal-multicurrency' ),
+						'',
+						array( 'data-umc-display-field' => 'enabled' )
+					)
+				);
+				?>
+			</div>
+			<span class="umc-display-enable-row__status<?php echo esc_attr( $enabled ? ' is-on' : ' is-off' ); ?>" data-umc-display-status>
+				<?php echo esc_html( $enabled ? __( 'On', 'universal-multicurrency' ) : __( 'Off', 'universal-multicurrency' ) ); ?>
+			</span>
+		</div>
+		<?php
 	}
 
 	/**
@@ -176,30 +244,20 @@ final class DisplaySettingsField {
 		}
 
 		if ( $this->detect_duplicate_shortcode_warning() ) {
-			$this->notice(
-				'warning',
-				__( 'Automatic placement is enabled and a currency switcher shortcode was detected on an important page or menu link. Both may appear on the storefront.', 'universal-multicurrency' )
+			$this->echo_control_markup(
+				$this->controls->callout(
+					'warning',
+					__( 'Automatic placement is enabled and a currency switcher shortcode was detected on an important page or menu link. Both may appear on the storefront.', 'universal-multicurrency' )
+				)
 			);
 			return;
 		}
 
-		$this->notice(
-			'info',
-			__( 'Automatic placement injects the switcher on every storefront page. Use manual placement with a shortcode when you need precise control.', 'universal-multicurrency' )
-		);
-	}
-
-	/**
-	 * Prints one inline admin notice for the Display workspace.
-	 *
-	 * @param string $type    Notice type: info, warning.
-	 * @param string $message Notice message.
-	 */
-	private function notice( string $type, string $message ): void {
-		printf(
-			'<div class="notice notice-%1$s inline umc-display-notice"><p>%2$s</p></div>',
-			esc_attr( $type ),
-			esc_html( $message )
+		$this->echo_control_markup(
+			$this->controls->callout(
+				'info',
+				__( 'Automatic placement injects the switcher on every storefront page. Use manual placement with a shortcode when you need precise control.', 'universal-multicurrency' )
+			)
 		);
 	}
 
@@ -212,32 +270,44 @@ final class DisplaySettingsField {
 		$placement      = $settings->placement();
 		$style          = $settings->style();
 		$auto_placement = SwitcherSettings::PLACEMENT_MANUAL !== $placement;
+		$manual_hidden  = SwitcherSettings::PLACEMENT_MANUAL !== $placement ? ' umc-display-panel--hidden' : '';
 
 		?>
 		<div class="umc-display-card">
 			<h3 class="umc-display-card__title"><?php esc_html_e( 'Switcher', 'universal-multicurrency' ); ?></h3>
-			<label class="umc-display-toggle">
-				<input type="hidden" name="umc_display[enabled]" value="0" />
-				<input type="checkbox" name="umc_display[enabled]" value="1" <?php checked( $settings->is_enabled() ); ?> data-umc-display-field="enabled" />
-				<span><?php esc_html_e( 'Enable storefront switcher', 'universal-multicurrency' ); ?></span>
-			</label>
 			<fieldset class="umc-display-fieldset">
 				<legend><?php esc_html_e( 'Placement', 'universal-multicurrency' ); ?></legend>
-				<div class="umc-display-radio-cards">
+				<div class="umc-display-choice-cards" data-umc-placement-cards>
 					<?php
-					foreach (
-						array(
-							SwitcherSettings::PLACEMENT_MANUAL        => __( 'Manual placement', 'universal-multicurrency' ),
-							SwitcherSettings::PLACEMENT_FLOATING_SIDE => __( 'Floating side', 'universal-multicurrency' ),
-							SwitcherSettings::PLACEMENT_STICKY_FOOTER => __( 'Floating bottom', 'universal-multicurrency' ),
-						) as $value => $label
-					) {
-						$this->radio_card(
-							'umc_display[placement]',
-							$value,
-							$label,
-							$placement === $value,
-							array( 'data-umc-display-field' => 'placement' )
+					$placements = array(
+						SwitcherSettings::PLACEMENT_MANUAL => array(
+							'label'       => __( 'Manual placement', 'universal-multicurrency' ),
+							'description' => __( 'Place the switcher with a shortcode.', 'universal-multicurrency' ),
+							'diagram'     => $this->controls->diagram_placement_manual(),
+						),
+						SwitcherSettings::PLACEMENT_FLOATING_SIDE => array(
+							'label'       => __( 'Floating side', 'universal-multicurrency' ),
+							'description' => __( 'Fixed to the left or right edge.', 'universal-multicurrency' ),
+							'diagram'     => $this->controls->diagram_placement_floating_side(),
+						),
+						SwitcherSettings::PLACEMENT_STICKY_FOOTER => array(
+							'label'       => __( 'Floating bottom', 'universal-multicurrency' ),
+							'description' => __( 'Fixed above the bottom edge.', 'universal-multicurrency' ),
+							'diagram'     => $this->controls->diagram_placement_floating_bottom(),
+						),
+					);
+
+					foreach ( $placements as $value => $meta ) {
+						$this->echo_control_markup(
+							$this->controls->choice_card(
+								'umc_display[placement]',
+								$value,
+								$placement === $value,
+								$meta['label'],
+								$meta['description'],
+								$meta['diagram'],
+								array( 'data-umc-display-field' => 'placement' )
+							)
 						);
 					}
 					?>
@@ -245,89 +315,116 @@ final class DisplaySettingsField {
 			</fieldset>
 			<fieldset class="umc-display-fieldset">
 				<legend><?php esc_html_e( 'Style', 'universal-multicurrency' ); ?></legend>
-				<div class="umc-display-radio-cards">
+				<div class="umc-display-choice-cards" data-umc-style-cards>
 					<?php
-					$this->radio_card(
-						'umc_display[style]',
-						SwitcherSettings::STYLE_DROPDOWN,
-						__( 'Dropdown', 'universal-multicurrency' ),
-						SwitcherSettings::STYLE_DROPDOWN === $style,
-						array( 'data-umc-display-field' => 'style' )
+					$this->echo_control_markup(
+						$this->controls->choice_card(
+							'umc_display[style]',
+							SwitcherSettings::STYLE_DROPDOWN,
+							SwitcherSettings::STYLE_DROPDOWN === $style,
+							__( 'Dropdown', 'universal-multicurrency' ),
+							__( 'Compact trigger with a menu.', 'universal-multicurrency' ),
+							$this->controls->diagram_style_dropdown(),
+							array( 'data-umc-display-field' => 'style' )
+						)
 					);
-					$this->radio_card(
-						'umc_display[style]',
-						SwitcherSettings::STYLE_HORIZONTAL_LIST,
-						__( 'Horizontal list', 'universal-multicurrency' ),
-						SwitcherSettings::STYLE_HORIZONTAL_LIST === $style,
-						array(
-							'data-umc-display-field' => 'style',
-							'disabled'               => $auto_placement ? 'disabled' : null,
+
+					$horizontal_attrs = array( 'data-umc-display-field' => 'style' );
+					if ( $auto_placement ) {
+						$horizontal_attrs['disabled'] = 'disabled';
+					}
+
+					$this->echo_control_markup(
+						$this->controls->choice_card(
+							'umc_display[style]',
+							SwitcherSettings::STYLE_HORIZONTAL_LIST,
+							SwitcherSettings::STYLE_HORIZONTAL_LIST === $style,
+							__( 'Horizontal list', 'universal-multicurrency' ),
+							__( 'Inline currency links.', 'universal-multicurrency' ),
+							$this->controls->diagram_style_horizontal_list(),
+							$horizontal_attrs
 						)
 					);
 					?>
 				</div>
-				<p class="description"><?php esc_html_e( 'Horizontal list is available with manual placement only. Automatic placements always use the dropdown style.', 'universal-multicurrency' ); ?></p>
+				<p class="description umc-display-style-note" data-umc-style-note><?php esc_html_e( 'Horizontal list is available with manual placement only. Automatic placements always use the dropdown style.', 'universal-multicurrency' ); ?></p>
 			</fieldset>
+			<div class="umc-display-shortcode-panel<?php echo esc_attr( $manual_hidden ); ?>" data-umc-manual-panel>
+				<h4 class="umc-display-shortcode-panel__title"><?php esc_html_e( 'Manual shortcode', 'universal-multicurrency' ); ?></h4>
+				<p class="description"><?php esc_html_e( 'Add this shortcode to a page, post, or widget area.', 'universal-multicurrency' ); ?></p>
+				<div class="umc-display-shortcode-panel__row">
+					<code class="umc-display-shortcode-panel__code" data-umc-shortcode-text>[<?php echo esc_html( SwitcherShortcode::TAG_PRIMARY ); ?>]</code>
+					<button type="button" class="button umc-display-shortcode-panel__copy" data-umc-copy-shortcode aria-label="<?php esc_attr_e( 'Copy shortcode', 'universal-multicurrency' ); ?>">
+						<?php esc_html_e( 'Copy', 'universal-multicurrency' ); ?>
+					</button>
+				</div>
+			</div>
 		</div>
 		<?php
 	}
 
 	/**
-	 * Renders the Position card for automatic placements.
+	 * Renders the Position card with dual placement panels.
 	 *
 	 * @param SwitcherSettings $settings Current display settings.
 	 */
 	private function render_position_card( SwitcherSettings $settings ): void {
-		$placement = $settings->placement();
-		$position  = $settings->position();
-		$hidden    = SwitcherSettings::PLACEMENT_MANUAL === $placement ? ' umc-display-card--hidden' : '';
+		$placement     = $settings->placement();
+		$position      = $settings->position();
+		$hidden        = SwitcherSettings::PLACEMENT_MANUAL === $placement ? ' umc-display-card--hidden' : '';
+		$side_active   = SwitcherSettings::PLACEMENT_FLOATING_SIDE === $placement;
+		$bottom_active = SwitcherSettings::PLACEMENT_STICKY_FOOTER === $placement;
 
 		?>
 		<div class="umc-display-card umc-display-card--position<?php echo esc_attr( $hidden ); ?>" data-umc-position-card>
 			<h3 class="umc-display-card__title"><?php esc_html_e( 'Position', 'universal-multicurrency' ); ?></h3>
-			<?php if ( SwitcherSettings::PLACEMENT_FLOATING_SIDE === $placement ) : ?>
-				<?php $this->render_side_field( $position ); ?>
-				<label class="umc-display-field">
-					<span><?php esc_html_e( 'Vertical position', 'universal-multicurrency' ); ?></span>
-					<select name="umc_display[position][vertical_alignment]" data-umc-display-field="vertical_alignment">
-						<?php foreach ( array( SwitcherSettings::ALIGN_TOP, SwitcherSettings::ALIGN_MIDDLE, SwitcherSettings::ALIGN_BOTTOM ) as $align ) : ?>
-							<option value="<?php echo esc_attr( $align ); ?>" <?php selected( $position['vertical_alignment'], $align ); ?>><?php echo esc_html( ucfirst( $align ) ); ?></option>
-						<?php endforeach; ?>
-					</select>
-				</label>
-				<label class="umc-display-field">
-					<span><?php esc_html_e( 'Vertical offset (px)', 'universal-multicurrency' ); ?></span>
-					<input type="number" name="umc_display[position][vertical_offset]" value="<?php echo esc_attr( (string) $position['vertical_offset'] ); ?>" data-umc-display-field="vertical_offset" />
-				</label>
-				<label class="umc-display-field">
-					<span><?php esc_html_e( 'Edge offset (px)', 'universal-multicurrency' ); ?></span>
-					<input type="number" min="0" max="200" name="umc_display[position][edge_offset]" value="<?php echo esc_attr( (string) $position['edge_offset'] ); ?>" data-umc-display-field="edge_offset" />
-				</label>
-			<?php else : ?>
-				<?php $this->render_side_field( $position ); ?>
-				<label class="umc-display-field">
-					<span><?php esc_html_e( 'Edge offset (px)', 'universal-multicurrency' ); ?></span>
-					<input type="number" min="0" max="200" name="umc_display[position][edge_offset]" value="<?php echo esc_attr( (string) $position['edge_offset'] ); ?>" data-umc-display-field="edge_offset" />
-				</label>
-				<label class="umc-display-field">
-					<span><?php esc_html_e( 'Bottom offset (px)', 'universal-multicurrency' ); ?></span>
-					<input type="number" min="0" max="500" name="umc_display[position][bottom_offset]" value="<?php echo esc_attr( (string) $position['bottom_offset'] ); ?>" data-umc-display-field="bottom_offset" />
-				</label>
-			<?php endif; ?>
+			<div class="umc-display-position-panels">
+				<div class="umc-display-position-panel<?php echo $side_active ? '' : ' umc-display-panel--hidden'; ?>" data-umc-position-panel="floating_side">
+					<?php $this->render_side_field( $position, ! $side_active ); ?>
+					<label class="umc-display-field">
+						<span><?php esc_html_e( 'Vertical position', 'universal-multicurrency' ); ?></span>
+						<select name="umc_display[position][vertical_alignment]" data-umc-display-field="vertical_alignment"<?php disabled( ! $side_active ); ?>>
+							<?php foreach ( array( SwitcherSettings::ALIGN_TOP, SwitcherSettings::ALIGN_MIDDLE, SwitcherSettings::ALIGN_BOTTOM ) as $align ) : ?>
+								<option value="<?php echo esc_attr( $align ); ?>" <?php selected( $position['vertical_alignment'], $align ); ?>><?php echo esc_html( ucfirst( $align ) ); ?></option>
+							<?php endforeach; ?>
+						</select>
+					</label>
+					<label class="umc-display-field">
+						<span><?php esc_html_e( 'Vertical offset (px)', 'universal-multicurrency' ); ?></span>
+						<input type="number" name="umc_display[position][vertical_offset]" value="<?php echo esc_attr( (string) $position['vertical_offset'] ); ?>" data-umc-display-field="vertical_offset"<?php disabled( ! $side_active ); ?> />
+					</label>
+					<label class="umc-display-field">
+						<span><?php esc_html_e( 'Edge offset (px)', 'universal-multicurrency' ); ?></span>
+						<input type="number" min="0" max="200" name="umc_display[position][edge_offset]" value="<?php echo esc_attr( (string) $position['edge_offset'] ); ?>" data-umc-display-field="edge_offset"<?php disabled( ! $side_active ); ?> />
+					</label>
+				</div>
+				<div class="umc-display-position-panel<?php echo $bottom_active ? '' : ' umc-display-panel--hidden'; ?>" data-umc-position-panel="sticky_footer">
+					<?php $this->render_side_field( $position, ! $bottom_active ); ?>
+					<label class="umc-display-field">
+						<span><?php esc_html_e( 'Edge offset (px)', 'universal-multicurrency' ); ?></span>
+						<input type="number" min="0" max="200" name="umc_display[position][edge_offset]" value="<?php echo esc_attr( (string) $position['edge_offset'] ); ?>" data-umc-display-field="edge_offset"<?php disabled( ! $bottom_active ); ?> />
+					</label>
+					<label class="umc-display-field">
+						<span><?php esc_html_e( 'Bottom offset (px)', 'universal-multicurrency' ); ?></span>
+						<input type="number" min="0" max="500" name="umc_display[position][bottom_offset]" value="<?php echo esc_attr( (string) $position['bottom_offset'] ); ?>" data-umc-display-field="bottom_offset"<?php disabled( ! $bottom_active ); ?> />
+					</label>
+				</div>
+			</div>
 		</div>
 		<?php
 	}
 
 	/**
-	 * Renders the side selector shared by automatic placements.
+	 * Renders the side selector inside one position panel.
 	 *
 	 * @param array<string, int|string> $position Position settings.
+	 * @param bool                      $disabled Whether the panel is inactive.
 	 */
-	private function render_side_field( array $position ): void {
+	private function render_side_field( array $position, bool $disabled ): void {
 		?>
 		<label class="umc-display-field">
 			<span><?php esc_html_e( 'Side', 'universal-multicurrency' ); ?></span>
-			<select name="umc_display[position][side]" data-umc-display-field="side">
+			<select name="umc_display[position][side]" data-umc-display-field="side"<?php disabled( $disabled ); ?>>
 				<option value="<?php echo esc_attr( SwitcherSettings::SIDE_LEFT ); ?>" <?php selected( $position['side'], SwitcherSettings::SIDE_LEFT ); ?>><?php esc_html_e( 'Left', 'universal-multicurrency' ); ?></option>
 				<option value="<?php echo esc_attr( SwitcherSettings::SIDE_RIGHT ); ?>" <?php selected( $position['side'], SwitcherSettings::SIDE_RIGHT ); ?>><?php esc_html_e( 'Right', 'universal-multicurrency' ); ?></option>
 			</select>
@@ -345,26 +442,12 @@ final class DisplaySettingsField {
 		?>
 		<div class="umc-display-card">
 			<h3 class="umc-display-card__title"><?php esc_html_e( 'Content', 'universal-multicurrency' ); ?></h3>
-			<label class="umc-display-toggle">
-				<input type="hidden" name="umc_display[content][show_code]" value="0" />
-				<input type="checkbox" name="umc_display[content][show_code]" value="1" <?php checked( $content['show_code'] ); ?> data-umc-display-field="content_show_code" />
-				<span><?php esc_html_e( 'Show currency code', 'universal-multicurrency' ); ?></span>
-			</label>
-			<label class="umc-display-toggle">
-				<input type="hidden" name="umc_display[content][show_symbol]" value="0" />
-				<input type="checkbox" name="umc_display[content][show_symbol]" value="1" <?php checked( $content['show_symbol'] ); ?> data-umc-display-field="content_show_symbol" />
-				<span><?php esc_html_e( 'Show currency symbol', 'universal-multicurrency' ); ?></span>
-			</label>
-			<label class="umc-display-toggle">
-				<input type="hidden" name="umc_display[content][show_name]" value="0" />
-				<input type="checkbox" name="umc_display[content][show_name]" value="1" <?php checked( $content['show_name'] ); ?> data-umc-display-field="content_show_name" />
-				<span><?php esc_html_e( 'Show currency name', 'universal-multicurrency' ); ?></span>
-			</label>
-			<label class="umc-display-toggle">
-				<input type="hidden" name="umc_display[behavior][active_first]" value="0" />
-				<input type="checkbox" name="umc_display[behavior][active_first]" value="1" <?php checked( $settings->active_first() ); ?> data-umc-display-field="active_first" />
-				<span><?php esc_html_e( 'Show selected currency first', 'universal-multicurrency' ); ?></span>
-			</label>
+			<?php
+			$this->echo_control_markup( $this->controls->toggle_row( 'umc_display[content][show_code]', $content['show_code'], __( 'Show currency code', 'universal-multicurrency' ), '', array( 'data-umc-display-field' => 'content_show_code' ) ) );
+			$this->echo_control_markup( $this->controls->toggle_row( 'umc_display[content][show_symbol]', $content['show_symbol'], __( 'Show currency symbol', 'universal-multicurrency' ), '', array( 'data-umc-display-field' => 'content_show_symbol' ) ) );
+			$this->echo_control_markup( $this->controls->toggle_row( 'umc_display[content][show_name]', $content['show_name'], __( 'Show currency name', 'universal-multicurrency' ), '', array( 'data-umc-display-field' => 'content_show_name' ) ) );
+			$this->echo_control_markup( $this->controls->toggle_row( 'umc_display[behavior][active_first]', $settings->active_first(), __( 'Show selected currency first', 'universal-multicurrency' ), '', array( 'data-umc-display-field' => 'active_first' ) ) );
+			?>
 		</div>
 		<?php
 	}
@@ -416,12 +499,17 @@ final class DisplaySettingsField {
 		?>
 		<div class="umc-display-card">
 			<h3 class="umc-display-card__title"><?php esc_html_e( 'Behavior', 'universal-multicurrency' ); ?></h3>
-			<label class="umc-display-toggle">
-				<input type="hidden" name="umc_display[behavior][remember_selection]" value="0" />
-				<input type="checkbox" name="umc_display[behavior][remember_selection]" value="1" <?php checked( $settings->remember_selection() ); ?> data-umc-display-field="remember_selection" />
-				<span><?php esc_html_e( 'Remember selected currency between visits', 'universal-multicurrency' ); ?></span>
-			</label>
-			<p class="description"><?php esc_html_e( 'When disabled, the selection applies to the current browsing session only.', 'universal-multicurrency' ); ?></p>
+			<?php
+			$this->echo_control_markup(
+				$this->controls->toggle_row(
+					'umc_display[behavior][remember_selection]',
+					$settings->remember_selection(),
+					__( 'Remember selected currency between visits', 'universal-multicurrency' ),
+					__( 'When disabled, the selection applies to the current browsing session only.', 'universal-multicurrency' ),
+					array( 'data-umc-display-field' => 'remember_selection' )
+				)
+			);
+			?>
 		</div>
 		<?php
 	}
@@ -436,16 +524,10 @@ final class DisplaySettingsField {
 		?>
 		<div class="umc-display-card">
 			<h3 class="umc-display-card__title"><?php esc_html_e( 'Device visibility', 'universal-multicurrency' ); ?></h3>
-			<label class="umc-display-toggle">
-				<input type="hidden" name="umc_display[visibility][desktop]" value="0" />
-				<input type="checkbox" name="umc_display[visibility][desktop]" value="1" <?php checked( $visibility['desktop'] ); ?> data-umc-display-field="visibility_desktop" />
-				<span><?php esc_html_e( 'Show on desktop', 'universal-multicurrency' ); ?></span>
-			</label>
-			<label class="umc-display-toggle">
-				<input type="hidden" name="umc_display[visibility][mobile]" value="0" />
-				<input type="checkbox" name="umc_display[visibility][mobile]" value="1" <?php checked( $visibility['mobile'] ); ?> data-umc-display-field="visibility_mobile" />
-				<span><?php esc_html_e( 'Show on mobile', 'universal-multicurrency' ); ?></span>
-			</label>
+			<?php
+			$this->echo_control_markup( $this->controls->toggle_row( 'umc_display[visibility][desktop]', $visibility['desktop'], __( 'Show on desktop', 'universal-multicurrency' ), '', array( 'data-umc-display-field' => 'visibility_desktop' ) ) );
+			$this->echo_control_markup( $this->controls->toggle_row( 'umc_display[visibility][mobile]', $visibility['mobile'], __( 'Show on mobile', 'universal-multicurrency' ), '', array( 'data-umc-display-field' => 'visibility_mobile' ) ) );
+			?>
 			<p class="description"><?php esc_html_e( 'When the switcher is enabled, at least one device option must remain selected.', 'universal-multicurrency' ); ?></p>
 		</div>
 		<?php
@@ -481,11 +563,25 @@ final class DisplaySettingsField {
 					<span class="umc-display-preview-mock__logo"></span>
 					<span class="umc-display-preview-mock__nav"></span>
 				</div>
-				<div class="umc-display-preview-mock__hero"></div>
+				<div class="umc-display-preview-mock__hero">
+					<span class="umc-display-preview-mock__heading"></span>
+				</div>
 				<div class="umc-display-preview-mock__grid">
-					<span class="umc-display-preview-mock__tile"></span>
-					<span class="umc-display-preview-mock__tile"></span>
-					<span class="umc-display-preview-mock__tile"></span>
+					<div class="umc-display-preview-mock__product">
+						<span class="umc-display-preview-mock__tile"></span>
+						<span class="umc-display-preview-mock__name"></span>
+						<span class="umc-display-preview-mock__price"></span>
+					</div>
+					<div class="umc-display-preview-mock__product">
+						<span class="umc-display-preview-mock__tile"></span>
+						<span class="umc-display-preview-mock__name"></span>
+						<span class="umc-display-preview-mock__price"></span>
+					</div>
+					<div class="umc-display-preview-mock__product">
+						<span class="umc-display-preview-mock__tile"></span>
+						<span class="umc-display-preview-mock__name"></span>
+						<span class="umc-display-preview-mock__price"></span>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -493,33 +589,54 @@ final class DisplaySettingsField {
 	}
 
 	/**
-	 * Renders one selectable radio card control.
+	 * Returns stored display settings merged with defaults.
 	 *
-	 * @param string                $name    Input name.
-	 * @param string                $value   Input value.
-	 * @param string                $label   Visible label.
-	 * @param bool                  $checked Whether selected.
-	 * @param array<string, string> $attrs   Extra attributes.
+	 * @return array<string, mixed>
 	 */
-	private function radio_card( string $name, string $value, string $label, bool $checked, array $attrs = array() ): void {
-		$attr_html = '';
+	private function stored_display_raw(): array {
+		$stored = $this->settings->get()['display'] ?? array();
 
-		foreach ( $attrs as $key => $attr_value ) {
-			if ( null === $attr_value ) {
-				continue;
-			}
-
-			$attr_html .= sprintf( ' %s="%s"', esc_attr( $key ), esc_attr( $attr_value ) );
+		if ( ! is_array( $stored ) ) {
+			$stored = array();
 		}
 
-		printf(
-			'<label class="umc-display-radio-card"><input type="radio" name="%1$s" value="%2$s"%3$s%4$s /><span>%5$s</span></label>',
-			esc_attr( $name ),
-			esc_attr( $value ),
-			checked( $checked, true, false ),
-			$attr_html, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Built from escaped attributes.
-			esc_html( $label )
-		);
+		return array_replace_recursive( SwitcherSettings::default_array(), $stored );
+	}
+
+	/**
+	 * Merges active-panel position POST values over stored settings.
+	 *
+	 * @param array<string, mixed> $stored   Stored position settings.
+	 * @param array<string, mixed> $posted   Posted position settings.
+	 * @param string               $placement Active placement mode.
+	 * @return array<string, mixed>
+	 */
+	private function merge_position_preserving_inactive( array $stored, array $posted, string $placement ): array {
+		$merged = $stored;
+
+		if ( SwitcherSettings::PLACEMENT_MANUAL === $placement ) {
+			return $merged;
+		}
+
+		if ( SwitcherSettings::PLACEMENT_FLOATING_SIDE === $placement ) {
+			foreach ( array( 'side', 'vertical_alignment', 'vertical_offset', 'edge_offset' ) as $key ) {
+				if ( array_key_exists( $key, $posted ) ) {
+					$merged[ $key ] = $posted[ $key ];
+				}
+			}
+
+			return $merged;
+		}
+
+		if ( SwitcherSettings::PLACEMENT_STICKY_FOOTER === $placement ) {
+			foreach ( array( 'side', 'edge_offset', 'bottom_offset' ) as $key ) {
+				if ( array_key_exists( $key, $posted ) ) {
+					$merged[ $key ] = $posted[ $key ];
+				}
+			}
+		}
+
+		return $merged;
 	}
 
 	/**

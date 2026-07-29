@@ -33,10 +33,16 @@
 		}
 
 		function fieldValue( name ) {
-			var $field = $root.find( '[data-umc-display-field="' + name + '"]' );
+			var $fields = $root.find( '[data-umc-display-field="' + name + '"]' );
+
+			if ( ! $fields.length ) {
+				return null;
+			}
+
+			var $field = $fields.filter( ':enabled' ).first();
 
 			if ( ! $field.length ) {
-				return null;
+				$field = $fields.first();
 			}
 
 			if ( 'checkbox' === $field.attr( 'type' ) ) {
@@ -117,18 +123,72 @@
 			$canvas.toggleClass( 'umc-display-preview-frame__canvas--floating-bottom', 'sticky_footer' === current );
 		}
 
-		function updatePositionCard() {
+		function panelKeyForPlacement( current ) {
+			if ( 'floating_side' === current ) {
+				return 'floating_side';
+			}
+
+			if ( 'sticky_footer' === current ) {
+				return 'sticky_footer';
+			}
+
+			return null;
+		}
+
+		function setPanelControls( $panel, enabled ) {
+			$panel.find( 'input, select, textarea, button' ).each( function () {
+				$( this ).prop( 'disabled', ! enabled );
+			} );
+		}
+
+		function updatePositionPanels() {
 			var $card = $root.find( '[data-umc-position-card]' );
 			var current = placement();
+			var activeKey = panelKeyForPlacement( current );
+			var isManual = 'manual' === current;
 
-			$card.toggleClass( 'umc-display-card--hidden', 'manual' === current );
+			$card.toggleClass( 'umc-display-card--hidden', isManual );
+
+			$root.find( '[data-umc-position-panel]' ).each( function () {
+				var $panel = $( this );
+				var isActive = ! isManual && $panel.data( 'umc-position-panel' ) === activeKey;
+
+				$panel.toggleClass( 'umc-display-panel--hidden', ! isActive );
+				setPanelControls( $panel, isActive );
+			} );
+		}
+
+		function updateManualPanel() {
+			var current = placement();
+
+			$root.find( '[data-umc-manual-panel]' ).toggleClass( 'umc-display-panel--hidden', 'manual' !== current );
+		}
+
+		function updateEnableStatus() {
+			var enabled = !! fieldValue( 'enabled' );
+			var $status = $root.find( '[data-umc-display-status]' );
+
+			$root.toggleClass( 'umc-display-configurator--switcher-off', ! enabled );
+			$status.toggleClass( 'is-on', enabled ).toggleClass( 'is-off', ! enabled );
+			$status.text( enabled ? ( config.statusOn || 'On' ) : ( config.statusOff || 'Off' ) );
+		}
+
+		function updateDisabledPreviewOverlay() {
+			var enabled = !! fieldValue( 'enabled' );
+			var $overlay = $root.find( '[data-umc-preview-disabled-overlay]' );
+
+			if ( $overlay.length ) {
+				$overlay.prop( 'hidden', enabled );
+			}
 		}
 
 		function updateStyleControls() {
 			var auto = 'manual' !== placement();
 			var $horizontal = $root.find( 'input[name="umc_display[style]"][value="horizontal_list"]' );
+			var $horizontalCard = $horizontal.closest( '.umc-display-choice-card' );
 
 			$horizontal.prop( 'disabled', auto );
+			$horizontalCard.toggleClass( 'umc-display-choice-card--disabled', auto );
 
 			if ( auto && $horizontal.is( ':checked' ) ) {
 				$root.find( 'input[name="umc_display[style]"][value="dropdown"]' ).prop( 'checked', true );
@@ -185,9 +245,9 @@
 		}
 
 		function updateCssVariables() {
-			var edge = $root.find( '[data-umc-display-field="edge_offset"]' ).val();
-			var vertical = $root.find( '[data-umc-display-field="vertical_offset"]' ).val();
-			var bottom = $root.find( '[data-umc-display-field="bottom_offset"]' ).val();
+			var edge = fieldValue( 'edge_offset' );
+			var vertical = fieldValue( 'vertical_offset' );
+			var bottom = fieldValue( 'bottom_offset' );
 
 			if ( edge !== undefined && edge !== '' ) {
 				$switcher.css( '--umc-edge-offset', edge + 'px' );
@@ -268,11 +328,14 @@
 
 		function refreshPreview() {
 			updateStyleControls();
-			updatePositionCard();
+			updatePositionPanels();
+			updateManualPanel();
+			updateEnableStatus();
 			updatePresentationClasses();
 			updatePreviewLayout();
 			updateCssVariables();
 			updateVisibilityClasses();
+			updateDisabledPreviewOverlay();
 			updateLabels();
 			updateOrder();
 		}
