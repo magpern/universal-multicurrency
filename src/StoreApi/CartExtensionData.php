@@ -80,17 +80,33 @@ final class CartExtensionData {
 			return;
 		}
 
-		foreach ( array( 'cart', 'checkout' ) as $endpoint ) {
+		$registration = array(
+			'namespace'       => self::NAMESPACE_KEY,
+			'data_callback'   => array( $this, 'data' ),
+			'schema_callback' => array( $this, 'schema' ),
+			'schema_type'     => ARRAY_A,
+		);
+
+		woocommerce_store_api_register_endpoint_data(
+			array_merge( $registration, array( 'endpoint' => 'cart' ) )
+		);
+
+		if ( $this->supports_checkout_endpoint_extension() ) {
 			woocommerce_store_api_register_endpoint_data(
-				array(
-					'endpoint'        => $endpoint,
-					'namespace'       => self::NAMESPACE_KEY,
-					'data_callback'   => array( $this, 'data' ),
-					'schema_callback' => array( $this, 'schema' ),
-					'schema_type'     => ARRAY_A,
-				)
+				array_merge( $registration, array( 'endpoint' => 'checkout' ) )
 			);
 		}
+	}
+
+	/**
+	 * Whether the installed WooCommerce version accepts checkout endpoint extensions.
+	 *
+	 * WooCommerce 8.2 rejects checkout POST requests when this namespace is also
+	 * registered on the checkout endpoint, even though cart/checkout GET responses
+	 * remain valid with cart-only registration.
+	 */
+	private function supports_checkout_endpoint_extension(): bool {
+		return defined( 'WC_VERSION' ) && version_compare( WC_VERSION, '8.3.0', '>=' );
 	}
 
 	/**
@@ -173,20 +189,6 @@ final class CartExtensionData {
 			'checkout_notice'       => array(
 				'description' => __( 'Checkout transition notice payload for Blocks.', 'universal-multicurrency' ),
 				'type'        => 'object',
-				'properties'  => array(
-					'show'      => array(
-						'type' => 'boolean',
-					),
-					'status'    => array(
-						'type' => 'string',
-					),
-					'signature' => array(
-						'type' => 'string',
-					),
-					'message'   => array(
-						'type' => 'string',
-					),
-				),
 				'readonly'    => true,
 			),
 		);
