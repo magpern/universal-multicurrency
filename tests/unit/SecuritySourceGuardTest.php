@@ -34,6 +34,7 @@ final class SecuritySourceGuardTest extends TestCase {
 		'SettingsPage.php',
 		'ExchangeRateSettingsField.php',
 		'DisplaySettingsField.php',
+		'CheckoutSettingsField.php',
 		'OrderPayCurrencyLock.php',
 		'RateUpdateController.php',
 	);

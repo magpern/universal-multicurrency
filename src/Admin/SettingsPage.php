@@ -76,6 +76,13 @@ final class SettingsPage extends WC_Settings_Page {
 	private DisplaySettingsField $display_field;
 
 	/**
+	 * Checkout policy settings field renderer.
+	 *
+	 * @var CheckoutSettingsField
+	 */
+	private CheckoutSettingsField $checkout_field;
+
+	/**
 	 * Compatibility diagnostics field renderer.
 	 *
 	 * @var CompatibilitySettingsField
@@ -126,6 +133,7 @@ final class SettingsPage extends WC_Settings_Page {
 			new SwitcherRenderer(),
 			$display_repository
 		);
+		$this->checkout_field      = new CheckoutSettingsField( $settings );
 		$conflict_detector         = new ConflictDetector(
 			new DetectorRegistry(),
 			new WordPressEnvironmentProbe(),
@@ -151,6 +159,7 @@ final class SettingsPage extends WC_Settings_Page {
 
 		add_action( 'woocommerce_admin_field_umc_exchange_rates', array( $this->exchange_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_display', array( $this->display_field, 'render' ) );
+		add_action( 'woocommerce_admin_field_umc_checkout', array( $this->checkout_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_compatibility', array( $this->compatibility_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_currencies', array( $this->overview_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_placeholder', array( $this, 'render_placeholder_field' ) );
@@ -311,7 +320,7 @@ final class SettingsPage extends WC_Settings_Page {
 	 * @return array<int, array<string, mixed>>
 	 */
 	protected function get_settings_for_checkout_section() {
-		return $this->placeholder_settings( self::SECTION_CHECKOUT );
+		return $this->checkout_settings();
 	}
 
 	/**
@@ -371,6 +380,16 @@ final class SettingsPage extends WC_Settings_Page {
 				);
 			}
 
+			return;
+		}
+
+		if ( self::SECTION_CHECKOUT === $section ) {
+			$merged = array_merge(
+				$this->settings->get(),
+				array( 'checkout' => $this->checkout_field->parse_post() )
+			);
+			$this->settings->save( $merged );
+			$this->fire_saved_hook();
 			return;
 		}
 
@@ -473,6 +492,33 @@ final class SettingsPage extends WC_Settings_Page {
 			array(
 				'type' => 'sectionend',
 				'id'   => 'umc_display_end',
+			),
+		);
+	}
+
+	/**
+	 * Returns field definitions for the Checkout section.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function checkout_settings(): array {
+		return array(
+			array(
+				'type' => 'umc_conflict',
+				'id'   => 'umc_conflict_notice',
+			),
+			array(
+				'type' => 'title',
+				'name' => __( 'Checkout', 'universal-multicurrency' ),
+				'id'   => 'umc_checkout_title',
+			),
+			array(
+				'type' => 'umc_checkout',
+				'id'   => 'umc_checkout',
+			),
+			array(
+				'type' => 'sectionend',
+				'id'   => 'umc_checkout_end',
 			),
 		);
 	}

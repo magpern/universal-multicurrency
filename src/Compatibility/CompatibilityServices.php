@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace UMC\Compatibility;
 
 use UMC\Compatibility\Checks\CacheCheck;
+use UMC\Compatibility\Checks\CheckoutConfigurationCheck;
 use UMC\Compatibility\Checks\ConfigurationCheck;
 use UMC\Compatibility\Checks\ConflictCheck;
 use UMC\Compatibility\Checks\EnvironmentCheck;
@@ -48,6 +49,7 @@ final class CompatibilityServices {
 			array(
 				new ConflictCheck(),
 				new ConfigurationCheck(),
+				new CheckoutConfigurationCheck(),
 				new IntegrationCheck(),
 				new ThemeCheck(),
 				new CacheCheck(),
