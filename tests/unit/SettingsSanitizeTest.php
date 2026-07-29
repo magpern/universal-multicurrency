@@ -27,6 +27,7 @@ final class SettingsSanitizeTest extends TestCase {
 				'rate_max_age_hours'   => Settings::DEFAULT_RATE_MAX_AGE_HOURS,
 				'currencies'           => array(),
 				'display'              => \UMC\Display\SwitcherSettings::default_array(),
+				'checkout'             => \UMC\Checkout\CheckoutSettings::default_array(),
 			),
 			Settings::defaults()
 		);

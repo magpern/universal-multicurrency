@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace UMC;
 
+use UMC\Checkout\CheckoutSettings;
 use UMC\Display\SwitcherSettings;
 
 /**
@@ -61,6 +62,7 @@ final class SettingsUpgrader {
 			1 => self::MIGRATE_0_TO_1,
 			2 => self::MIGRATE_1_TO_2,
 			3 => self::MIGRATE_2_TO_3,
+			4 => self::MIGRATE_3_TO_4,
 		);
 	}
 
@@ -236,6 +238,35 @@ final class SettingsUpgrader {
 	 * @var callable(array<string, mixed>): array<string, mixed>
 	 */
 	public const MIGRATE_2_TO_3 = array( self::class, 'migrate_2_to_3' );
+
+	/**
+	 * Real v3 → v4 migration.
+	 *
+	 * Adds checkout policy defaults. Existing currency, rate, and display
+	 * configuration is preserved unchanged.
+	 *
+	 * @param array<string, mixed> $data Raw settings at schema version 3.
+	 * @return array<string, mixed>
+	 */
+	public static function migrate_3_to_4( array $data ): array {
+		return array(
+			'schema_version'       => 4,
+			'rate_mode'            => $data['rate_mode'] ?? Settings::RATE_MODE_MANUAL,
+			'rate_provider'        => $data['rate_provider'] ?? Settings::DEFAULT_RATE_PROVIDER,
+			'rate_update_interval' => $data['rate_update_interval'] ?? Settings::DEFAULT_RATE_INTERVAL,
+			'rate_max_age_hours'   => $data['rate_max_age_hours'] ?? Settings::DEFAULT_RATE_MAX_AGE_HOURS,
+			'currencies'           => is_array( $data['currencies'] ?? null ) ? $data['currencies'] : array(),
+			'display'              => is_array( $data['display'] ?? null ) ? $data['display'] : SwitcherSettings::default_array(),
+			'checkout'             => CheckoutSettings::default_array(),
+		);
+	}
+
+	/**
+	 * Migration callable for v3 → v4.
+	 *
+	 * @var callable(array<string, mixed>): array<string, mixed>
+	 */
+	public const MIGRATE_3_TO_4 = array( self::class, 'migrate_3_to_4' );
 
 	/**
 	 * Applies migrations from the stored version up to the target version.
