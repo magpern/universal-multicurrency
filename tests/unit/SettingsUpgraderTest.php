@@ -243,11 +243,35 @@ final class SettingsUpgraderTest extends TestCase {
 
 	public function test_production_runner_registers_v0_to_v1_and_v1_to_v2_migrations(): void {
 		$this->assertSame(
-			array( 1, 2 ),
+			array( 1, 2, 3 ),
 			array_keys( SettingsUpgrader::production_migrations() )
 		);
 		$this->assertSame( SettingsUpgrader::MIGRATE_0_TO_1, SettingsUpgrader::production_migrations()[1] );
 		$this->assertSame( SettingsUpgrader::MIGRATE_1_TO_2, SettingsUpgrader::production_migrations()[2] );
+		$this->assertSame( SettingsUpgrader::MIGRATE_2_TO_3, SettingsUpgrader::production_migrations()[3] );
+	}
+
+	public function test_v2_to_v3_migration_preserves_existing_settings_and_adds_display_defaults(): void {
+		$result = ( new SettingsUpgrader() )->upgrade(
+			array(
+				'schema_version'       => 2,
+				'rate_mode'            => Settings::RATE_MODE_AUTOMATIC,
+				'rate_update_interval' => 'P3D',
+				'currencies'           => array(
+					'EUR' => array(
+						'manual_rate' => '0.92',
+						'enabled'     => true,
+					),
+				),
+			)
+		);
+
+		$this->assertSame( Settings::SCHEMA_VERSION, $result->settings()['schema_version'] );
+		$this->assertSame( Settings::RATE_MODE_AUTOMATIC, $result->settings()['rate_mode'] );
+		$this->assertSame( 'P3D', $result->settings()['rate_update_interval'] );
+		$this->assertSame( '0.92', $result->settings()['currencies']['EUR']['manual_rate'] );
+		$this->assertFalse( $result->settings()['display']['enabled'] );
+		$this->assertSame( \UMC\Display\SwitcherSettings::default_array()['placement'], $result->settings()['display']['placement'] );
 	}
 
 	public function test_migrate_0_to_1_strips_unknown_root_keys(): void {

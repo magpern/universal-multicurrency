@@ -324,13 +324,10 @@ final class StorefrontGuardTest extends WP_UnitTestCase {
 	}
 
 	public function test_no_frontend_assets_are_registered(): void {
-		// This milestone is server-side only: currency switching reloads the page.
-		// Shipping JavaScript would also mean shipping a second place where money
-		// could be formatted or, worse, calculated.
 		$this->assert_pattern_absent_from(
-			$this->umc_source_files_except( array( 'AdminAssets.php' ) ),
+			$this->umc_source_files_except( array( 'AdminAssets.php', 'SwitcherAssets.php' ) ),
 			'/wp_(register|enqueue)_script|IntegrationInterface|woocommerce_blocks_(cart|checkout|mini-cart)_block_registration/',
-			'No frontend assets: the blocks are served entirely by server-side conversion.'
+			'Frontend assets must be registered only through SwitcherAssets (Display M1) or AdminAssets.'
 		);
 	}
 

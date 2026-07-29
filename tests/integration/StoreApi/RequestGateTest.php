@@ -12,6 +12,8 @@ namespace UMC\Tests\Integration\StoreApi;
 
 use UMC\CurrencyContext;
 use UMC\CurrencySwitcher;
+use UMC\Display\SwitcherSettingsRepository;
+use UMC\Settings;
 
 /**
  * Proves the conversion gate admits the Store API and nothing else that was
@@ -134,7 +136,7 @@ final class RequestGateTest extends StoreApiTestCase {
 		try {
 			// A redirect or exit here would fail the test outright: halt() is not
 			// stubbed, so reaching it would terminate the run.
-			( new CurrencySwitcher( $this->context ) )->maybe_switch();
+			( new CurrencySwitcher( $this->context, new SwitcherSettingsRepository( new Settings() ) ) )->maybe_switch();
 
 			$this->assertNull(
 				WC()->session->get( CurrencyContext::SESSION_KEY ),
@@ -159,7 +161,7 @@ final class RequestGateTest extends StoreApiTestCase {
 			// return asserted above, not this.
 			$requested = $this->as_storefront_request(
 				function (): ?string {
-					return ( new CurrencySwitcher( $this->new_context() ) )->requested_code();
+					return ( new CurrencySwitcher( $this->new_context(), new SwitcherSettingsRepository( new Settings() ) ) )->requested_code();
 				}
 			);
 

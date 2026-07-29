@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace UMC;
 
+use UMC\Display\SwitcherSettings;
+
 /**
  * Applies versioned migrations to persisted `umc_settings` before sanitization.
  *
@@ -58,6 +60,7 @@ final class SettingsUpgrader {
 		return array(
 			1 => self::MIGRATE_0_TO_1,
 			2 => self::MIGRATE_1_TO_2,
+			3 => self::MIGRATE_2_TO_3,
 		);
 	}
 
@@ -205,6 +208,34 @@ final class SettingsUpgrader {
 	 * @var callable(array<string, mixed>): array<string, mixed>
 	 */
 	public const MIGRATE_1_TO_2 = array( self::class, 'migrate_1_to_2' );
+
+	/**
+	 * Real v2 → v3 migration.
+	 *
+	 * Adds the Display switcher settings block with safe defaults. Existing
+	 * currency and exchange-rate configuration is preserved unchanged.
+	 *
+	 * @param array<string, mixed> $data Raw settings at schema version 2.
+	 * @return array<string, mixed>
+	 */
+	public static function migrate_2_to_3( array $data ): array {
+		return array(
+			'schema_version'       => 3,
+			'rate_mode'            => $data['rate_mode'] ?? Settings::RATE_MODE_MANUAL,
+			'rate_provider'        => $data['rate_provider'] ?? Settings::DEFAULT_RATE_PROVIDER,
+			'rate_update_interval' => $data['rate_update_interval'] ?? Settings::DEFAULT_RATE_INTERVAL,
+			'rate_max_age_hours'   => $data['rate_max_age_hours'] ?? Settings::DEFAULT_RATE_MAX_AGE_HOURS,
+			'currencies'           => is_array( $data['currencies'] ?? null ) ? $data['currencies'] : array(),
+			'display'              => SwitcherSettings::default_array(),
+		);
+	}
+
+	/**
+	 * Migration callable for v2 → v3.
+	 *
+	 * @var callable(array<string, mixed>): array<string, mixed>
+	 */
+	public const MIGRATE_2_TO_3 = array( self::class, 'migrate_2_to_3' );
 
 	/**
 	 * Applies migrations from the stored version up to the target version.

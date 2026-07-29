@@ -26,6 +26,7 @@ final class SettingsSanitizeTest extends TestCase {
 				'rate_update_interval' => Settings::DEFAULT_RATE_INTERVAL,
 				'rate_max_age_hours'   => Settings::DEFAULT_RATE_MAX_AGE_HOURS,
 				'currencies'           => array(),
+				'display'              => \UMC\Display\SwitcherSettings::default_array(),
 			),
 			Settings::defaults()
 		);

@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace UMC;
 
+use UMC\Display\SwitcherSettings;
 use UMC\Rates\RateResolver;
 
 /**
@@ -27,7 +28,7 @@ final class Settings {
 
 	public const OPTION = 'umc_settings';
 
-	public const SCHEMA_VERSION = 2;
+	public const SCHEMA_VERSION = 3;
 
 	public const RATE_MODE_MANUAL = 'manual';
 
@@ -94,6 +95,7 @@ final class Settings {
 			'rate_update_interval' => self::DEFAULT_RATE_INTERVAL,
 			'rate_max_age_hours'   => self::DEFAULT_RATE_MAX_AGE_HOURS,
 			'currencies'           => array(),
+			'display'              => SwitcherSettings::default_array(),
 		);
 	}
 
@@ -131,7 +133,19 @@ final class Settings {
 			$clean['currencies'][ $code ] = self::sanitize_currency( $config );
 		}
 
+		$clean['display'] = self::sanitize_display( $raw['display'] ?? null );
+
 		return $clean;
+	}
+
+	/**
+	 * Sanitizes the Display switcher settings subtree.
+	 *
+	 * @param mixed $raw Raw display settings.
+	 * @return array<string, mixed>
+	 */
+	public static function sanitize_display( mixed $raw ): array {
+		return SwitcherSettings::sanitize_raw( $raw );
 	}
 
 	/**

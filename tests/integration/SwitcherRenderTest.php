@@ -13,7 +13,11 @@ use UMC\Currency;
 use UMC\CurrencyContext;
 use UMC\CurrencyRegistry;
 use UMC\CurrencyResolver;
-use UMC\Frontend\Switcher;
+use UMC\Currency\WooCommerceCurrencyProvider;
+use UMC\Display\SwitcherRenderer;
+use UMC\Display\SwitcherSettings;
+use UMC\Display\SwitcherSettingsRepository;
+use UMC\Display\SwitcherViewModelFactory;
 use UMC\Rates\ManualRateProvider;
 use UMC\Settings;
 use WP_UnitTestCase;
@@ -29,19 +33,51 @@ final class SwitcherRenderTest extends WP_UnitTestCase {
 		parent::tear_down();
 	}
 
-	private function context( array $currencies, string $active ): CurrencyContext {
-		( new Settings() )->save( array( 'currencies' => $currencies ) );
+	/**
+	 * @param array<string, array<string, mixed>> $currencies Currency rows.
+	 * @param string                              $active       Active currency code.
+	 * @param array<string, mixed>                $display      Display overrides.
+	 */
+	private function render_html( array $currencies, string $active, array $display = array() ): string {
+		( new Settings() )->save(
+			array_merge(
+				Settings::defaults(),
+				array(
+					'currencies' => $currencies,
+					'display'    => array_merge(
+						SwitcherSettings::default_array(),
+						array(
+							'enabled' => true,
+						),
+						$display
+					),
+				)
+			)
+		);
+
 		$settings = new Settings();
 		$registry = new CurrencyRegistry( $settings, new Currency( 'EUR', 2 ) );
 		$rates    = new ManualRateProvider( $settings, 'EUR' );
 
 		$_COOKIE[ CurrencyContext::COOKIE_NAME ] = $active;
 
-		return new CurrencyContext( $registry, $rates, new CurrencyResolver() );
+		$context = new CurrencyContext( $registry, $rates, new CurrencyResolver() );
+		$factory = new SwitcherViewModelFactory(
+			$context,
+			new WooCommerceCurrencyProvider(),
+			new SwitcherSettingsRepository( $settings )
+		);
+		$model   = $factory->create();
+
+		if ( null === $model ) {
+			return '';
+		}
+
+		return ( new SwitcherRenderer() )->render( $model );
 	}
 
-	public function test_select_layout_lists_selectable_and_marks_active(): void {
-		$context = $this->context(
+	public function test_dropdown_lists_selectable_and_marks_active(): void {
+		$html = $this->render_html(
 			array(
 				'SEK' => array(
 					'symbol' => 'kr',
@@ -55,44 +91,43 @@ final class SwitcherRenderTest extends WP_UnitTestCase {
 			'SEK'
 		);
 
-		$html = ( new Switcher( $context ) )->render( array( 'layout' => 'select' ) );
-
-		$this->assertStringContainsString( '<select', $html );
+		$this->assertStringContainsString( 'umc-switcher__trigger', $html );
 		$this->assertStringContainsString( 'EUR', $html );
 		$this->assertStringContainsString( 'JPY', $html );
-		$this->assertStringContainsString( 'selected', $html );
-		$this->assertMatchesRegularExpression( '/currency=SEK[^>]*selected/', $html );
+		$this->assertStringContainsString( 'aria-current="true"', $html );
+		$this->assertStringContainsString( 'currency=SEK', $html );
 	}
 
-	public function test_links_layout_has_nofollow_and_active_marker(): void {
-		$context = $this->context(
+	public function test_horizontal_list_has_nofollow_and_active_marker(): void {
+		$html = $this->render_html(
 			array( 'SEK' => array( 'rate' => '11.50' ) ),
-			'SEK'
+			'SEK',
+			array(
+				'style' => SwitcherSettings::STYLE_HORIZONTAL_LIST,
+			)
 		);
 
-		$html = ( new Switcher( $context ) )->render( array( 'layout' => 'links' ) );
-
+		$this->assertStringContainsString( 'umc-switcher--horizontal-list', $html );
 		$this->assertStringContainsString( 'rel="nofollow"', $html );
 		$this->assertStringContainsString( 'is-active', $html );
 		$this->assertStringContainsString( 'aria-current="true"', $html );
 	}
 
 	public function test_renders_empty_when_only_base_is_selectable(): void {
-		$context = $this->context( array(), 'EUR' );
-
-		$this->assertSame( '', ( new Switcher( $context ) )->render() );
+		$this->assertSame( '', $this->render_html( array(), 'EUR' ) );
 	}
 
 	public function test_rateless_currency_is_not_offered(): void {
-		$context = $this->context(
+		$html = $this->render_html(
 			array(
 				'SEK' => array( 'rate' => '11.50' ),
 				'JPY' => array( 'rate' => '' ),
 			),
-			'SEK'
+			'SEK',
+			array(
+				'style' => SwitcherSettings::STYLE_HORIZONTAL_LIST,
+			)
 		);
-
-		$html = ( new Switcher( $context ) )->render( array( 'layout' => 'links' ) );
 
 		$this->assertStringContainsString( 'SEK', $html );
 		$this->assertStringNotContainsString( 'currency=JPY', $html );

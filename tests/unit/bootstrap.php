@@ -18,6 +18,14 @@ if ( ! defined( 'UMC_VERSION' ) ) {
 	define( 'UMC_VERSION', '0.0.0-test' );
 }
 
+if ( ! defined( 'DAY_IN_SECONDS' ) ) {
+	define( 'DAY_IN_SECONDS', 86400 );
+}
+
+if ( ! defined( 'YEAR_IN_SECONDS' ) ) {
+	define( 'YEAR_IN_SECONDS', 365 * DAY_IN_SECONDS );
+}
+
 if ( ! function_exists( 'apply_filters' ) ) {
 	function apply_filters( $tag, $value ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
 		return $value;
@@ -91,6 +99,36 @@ if ( ! function_exists( '_n' ) ) {
 	}
 }
 
+if ( ! function_exists( 'esc_html' ) ) {
+	function esc_html( $text ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound
+		return htmlspecialchars( (string) $text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8' );
+	}
+}
+
+if ( ! function_exists( 'esc_attr' ) ) {
+	function esc_attr( $text ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound
+		return htmlspecialchars( (string) $text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8' );
+	}
+}
+
+if ( ! function_exists( 'esc_url' ) ) {
+	function esc_url( $url ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound
+		return (string) $url;
+	}
+}
+
+if ( ! function_exists( 'add_query_arg' ) ) {
+	function add_query_arg( $key, $value, $url = false ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound, Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		if ( false === $url ) {
+			$url = '/';
+		}
+
+		$separator = str_contains( (string) $url, '?' ) ? '&' : '?';
+
+		return (string) $url . $separator . rawurlencode( (string) $key ) . '=' . rawurlencode( (string) $value );
+	}
+}
+
 // Test doubles never match *Test.php, so PHPUnit's directory-based
 // discovery never loads them; required explicitly, matching how
 // tests/integration/bootstrap.php loads StoreApiTestCase.
@@ -98,3 +136,4 @@ require_once __DIR__ . '/Doubles/ArrayEnvironmentProbe.php';
 require_once __DIR__ . '/Doubles/CountingEnvironmentProbe.php';
 require_once __DIR__ . '/Doubles/StaticDetectorRegistry.php';
 require_once __DIR__ . '/Doubles/ThrowingRateUpdateState.php';
+require_once __DIR__ . '/Doubles/WooCommerceSwitcherDoubles.php';

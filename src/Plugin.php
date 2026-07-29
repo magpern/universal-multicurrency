@@ -18,7 +18,15 @@ use UMC\Admin\RateUpdateController;
 use UMC\Admin\SettingsPage;
 use UMC\Diagnostics\Diagnostics;
 use UMC\Cart\CartRecalculation;
-use UMC\Frontend\Switcher;
+use UMC\Currency\WooCommerceCurrencyProvider;
+use UMC\Display\AutomaticRenderRegistry;
+use UMC\Display\AutomaticSwitcherPlacement;
+use UMC\Display\StorefrontRequestContext;
+use UMC\Display\SwitcherAssets;
+use UMC\Display\SwitcherRenderer;
+use UMC\Display\SwitcherSettingsRepository;
+use UMC\Display\SwitcherShortcode;
+use UMC\Display\SwitcherViewModelFactory;
 use UMC\Integration\CouponConversion;
 use UMC\Integration\CurrencyFormatting;
 use UMC\Integration\GatewayCompatibility;
@@ -33,7 +41,6 @@ use UMC\Order\OrderPayCurrencyLock;
 use UMC\Order\OrderSnapshot;
 use UMC\Order\OrderSnapshotReader;
 use UMC\Order\RefundSnapshot;
-use UMC\Currency\WooCommerceCurrencyProvider;
 use UMC\Rates\ExchangeRateSource;
 use UMC\Rates\ExchangeRateStore;
 use UMC\Rates\ManualRateProvider;
@@ -148,10 +155,31 @@ final class Plugin {
 				// filter the original gateway set with the explicit order currency.
 				$gateway_compat = new GatewayCompatibility( $context );
 
-				( new CurrencySwitcher( $context ) )->maybe_switch();
+				$display_settings = new SwitcherSettingsRepository( $settings );
+
+				( new CurrencySwitcher( $context, $display_settings ) )->maybe_switch();
+
+				$metadata_provider = new WooCommerceCurrencyProvider();
+				$render_registry   = new AutomaticRenderRegistry();
+				$request_context   = new StorefrontRequestContext();
+				$renderer          = new SwitcherRenderer();
+				$view_factory      = new SwitcherViewModelFactory( $context, $metadata_provider, $display_settings );
+				$assets            = new SwitcherAssets( $request_context, $display_settings, $context );
+
+				$assets->register();
+				( new SwitcherShortcode( $view_factory, $renderer, $assets ) )->register();
+				( new AutomaticSwitcherPlacement(
+					$display_settings,
+					$view_factory,
+					$renderer,
+					$assets,
+					$request_context,
+					$render_registry,
+					$context
+				) )->register();
+
 				( new PriceHooks( $service, $context ) )->register();
 				( new CurrencyFormatting( $context ) )->register();
-				( new Switcher( $context ) )->register();
 				( new CartRecalculation( $context ) )->register();
 				( new CouponConversion( $service, $context ) )->register();
 				( new ShippingConversion( $service, $context ) )->register();

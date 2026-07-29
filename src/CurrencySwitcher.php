@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace UMC;
 
+use UMC\Display\SwitcherSettingsRepository;
+
 /**
  * Handles an explicit currency switch request.
  *
@@ -30,12 +32,21 @@ final class CurrencySwitcher {
 	private CurrencyContext $context;
 
 	/**
+	 * Display settings repository for persistence policy.
+	 *
+	 * @var SwitcherSettingsRepository
+	 */
+	private SwitcherSettingsRepository $settings_repository;
+
+	/**
 	 * Binds the switcher to the currency context.
 	 *
-	 * @param CurrencyContext $context Request-scoped currency facade.
+	 * @param CurrencyContext            $context             Request-scoped currency facade.
+	 * @param SwitcherSettingsRepository $settings_repository Display settings repository.
 	 */
-	public function __construct( CurrencyContext $context ) {
-		$this->context = $context;
+	public function __construct( CurrencyContext $context, SwitcherSettingsRepository $settings_repository ) {
+		$this->context             = $context;
+		$this->settings_repository = $settings_repository;
 	}
 
 	/**
@@ -111,7 +122,19 @@ final class CurrencySwitcher {
 			WC()->session->set( CurrencyContext::SESSION_KEY, $code );
 		}
 
-		wc_setcookie( CurrencyContext::COOKIE_NAME, $code, time() + self::COOKIE_LIFETIME, is_ssl(), false );
+		if ( $this->settings_repository->remember_selection() ) {
+			wc_setcookie( CurrencyContext::COOKIE_NAME, $code, time() + self::COOKIE_LIFETIME, is_ssl(), false );
+			return;
+		}
+
+		$this->delete_remembered_cookie();
+	}
+
+	/**
+	 * Expires any remembered guest currency cookie.
+	 */
+	private function delete_remembered_cookie(): void {
+		wc_setcookie( CurrencyContext::COOKIE_NAME, '', time() - YEAR_IN_SECONDS, is_ssl(), false );
 	}
 
 	/**
