@@ -65,7 +65,7 @@ final class AdminPageShellViewModelFactory {
 			$sections[ $active_section ] ?? __( 'Multicurrency', 'universal-multicurrency' ),
 			$this->icon_for( $active_section ),
 			$this->description_for( $active_section ),
-			$this->page->section_has_saveable_settings( $active_section ),
+			$this->page->section_has_header_save( $active_section ),
 			$notice_html,
 			$this->navigation_items( $active_section, $sections )
 		);

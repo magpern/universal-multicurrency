@@ -196,8 +196,12 @@ final class SettingsPage extends WC_Settings_Page {
 		\WC_Admin_Settings::output_fields( $this->content_settings( $settings ) );
 		echo '</table>';
 
-		if ( $view_model->has_saveable_settings ) {
+		if ( $view_model->has_saveable_settings && self::SECTION_DISPLAY !== $active ) {
 			$this->render_section_save_actions();
+		}
+
+		if ( self::SECTION_DISPLAY === $active ) {
+			$this->render_display_sticky_actions();
 		}
 
 		$this->shell->close_section_card();
@@ -210,6 +214,15 @@ final class SettingsPage extends WC_Settings_Page {
 	 */
 	public function section_has_saveable_settings( string $section ): bool {
 		return in_array( $section, array( self::SECTION_CURRENCIES, self::SECTION_EXCHANGE_RATES, self::SECTION_DISPLAY ), true );
+	}
+
+	/**
+	 * Returns whether a section exposes the header save button.
+	 *
+	 * @param string $section Section slug.
+	 */
+	public function section_has_header_save( string $section ): bool {
+		return in_array( $section, array( self::SECTION_CURRENCIES, self::SECTION_EXCHANGE_RATES ), true );
 	}
 
 	/**
@@ -587,6 +600,20 @@ final class SettingsPage extends WC_Settings_Page {
 				<?php esc_html_e( 'Save changes', 'universal-multicurrency' ); ?>
 			</button>
 		</p>
+		<?php
+	}
+
+	/**
+	 * Renders the sticky Display save bar inside the main settings form.
+	 */
+	private function render_display_sticky_actions(): void {
+		?>
+		<div class="umc-display-actions" data-umc-display-actions>
+			<span class="umc-display-actions__status" data-umc-unsaved-indicator hidden><?php esc_html_e( 'Unsaved changes', 'universal-multicurrency' ); ?></span>
+			<button type="submit" name="save" value="<?php echo esc_attr__( 'Save changes', 'universal-multicurrency' ); ?>" class="button button-primary umc-display-actions__save">
+				<?php esc_html_e( 'Save changes', 'universal-multicurrency' ); ?>
+			</button>
+		</div>
 		<?php
 	}
 

@@ -338,6 +338,77 @@
 			updateDisabledPreviewOverlay();
 			updateLabels();
 			updateOrder();
+			checkDirty();
+		}
+
+		function serializeDisplayState() {
+			var state = {};
+			var $fields = $root.find( '.umc-display-configurator' ).find( 'input, select, textarea' );
+
+			$fields.each( function () {
+				var $el = $( this );
+				var name = $el.attr( 'name' );
+
+				if ( ! name ) {
+					return;
+				}
+
+				var type = ( $el.attr( 'type' ) || '' ).toLowerCase();
+
+				if ( 'checkbox' === type ) {
+					state[ name ] = $el.is( ':checked' ) ? '1' : '0';
+					return;
+				}
+
+				if ( 'radio' === type ) {
+					if ( $el.is( ':checked' ) ) {
+						state[ name ] = String( $el.val() );
+					} else if ( ! Object.prototype.hasOwnProperty.call( state, name ) ) {
+						state[ name ] = '';
+					}
+					return;
+				}
+
+				if ( 'hidden' === type && $root.find( '[name="' + name.replace( /"/g, '\\"' ) + '"][type="checkbox"]' ).length ) {
+					return;
+				}
+
+				state[ name ] = String( $el.val() );
+			} );
+
+			return JSON.stringify( state, Object.keys( state ).sort() );
+		}
+
+		var initialSnapshot = serializeDisplayState();
+
+		function checkDirty() {
+			var $indicator = $( '[data-umc-unsaved-indicator]' );
+
+			if ( ! $indicator.length ) {
+				return;
+			}
+
+			var dirty = serializeDisplayState() !== initialSnapshot;
+			$indicator.prop( 'hidden', ! dirty );
+		}
+
+		function copyShortcode() {
+			var text = $root.find( '[data-umc-shortcode-text]' ).text();
+
+			if ( ! text ) {
+				return;
+			}
+
+			if ( navigator.clipboard && navigator.clipboard.writeText ) {
+				navigator.clipboard.writeText( text ).then( function () {
+					window.alert( config.copySuccess || 'Shortcode copied.' );
+				} ).catch( function () {
+					window.alert( config.copyFailed || 'Could not copy shortcode.' );
+				} );
+				return;
+			}
+
+			window.prompt( config.copyPrompt || 'Copy shortcode:', text );
 		}
 
 		$root.on( 'change input', '[data-umc-display-field], input[name="umc_display[placement]"], input[name="umc_display[style]"]', refreshPreview );
@@ -354,6 +425,11 @@
 
 		$root.on( 'click', '.umc-switcher__link', function ( event ) {
 			event.preventDefault();
+		} );
+
+		$root.on( 'click', '[data-umc-copy-shortcode]', function ( event ) {
+			event.preventDefault();
+			copyShortcode();
 		} );
 
 		refreshPreview();

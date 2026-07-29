@@ -76,16 +76,16 @@ final class AdminAssets {
 				'umc-admin-settings',
 				'umcDisplayPreview',
 				array(
-					'placements' => array(
+					'placements'  => array(
 						SwitcherSettings::PLACEMENT_MANUAL,
 						SwitcherSettings::PLACEMENT_FLOATING_SIDE,
 						SwitcherSettings::PLACEMENT_STICKY_FOOTER,
 					),
-					'styles'     => array(
+					'styles'      => array(
 						SwitcherSettings::STYLE_DROPDOWN,
 						SwitcherSettings::STYLE_HORIZONTAL_LIST,
 					),
-					'samples'    => array(
+					'samples'     => array(
 						array(
 							'code'   => 'EUR',
 							'symbol' => '€',
@@ -102,6 +102,11 @@ final class AdminAssets {
 							'name'   => 'US Dollar',
 						),
 					),
+					'statusOn'    => __( 'On', 'universal-multicurrency' ),
+					'statusOff'   => __( 'Off', 'universal-multicurrency' ),
+					'copySuccess' => __( 'Shortcode copied.', 'universal-multicurrency' ),
+					'copyFailed'  => __( 'Could not copy shortcode.', 'universal-multicurrency' ),
+					'copyPrompt'  => __( 'Copy shortcode:', 'universal-multicurrency' ),
 				)
 			);
 		}

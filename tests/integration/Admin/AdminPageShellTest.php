@@ -139,6 +139,20 @@ final class AdminPageShellTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'form="mainform"', $sections );
 	}
 
+	public function test_display_section_hides_header_save_and_renders_sticky_bar(): void {
+		global $current_section, $hide_save_button;
+
+		$current_section = SettingsPage::SECTION_DISPLAY;
+		$sections        = $this->render_shell_sections();
+		$output          = $this->render_shell_output();
+
+		$this->assertTrue( ! empty( $hide_save_button ) );
+		$this->assertStringNotContainsString( 'umc-shell-header__save', $sections );
+		$this->assertStringContainsString( 'umc-display-actions', $output );
+		$this->assertSame( 1, substr_count( $output, 'class="button button-primary umc-display-actions__save"' ) );
+		$this->assertStringNotContainsString( 'umc-section-card__submit', $output );
+	}
+
 	public function test_shell_output_does_not_introduce_nested_forms(): void {
 		global $current_section;
 

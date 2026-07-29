@@ -67,6 +67,8 @@ final class SettingsPageSectionsTest extends WP_UnitTestCase {
 
 		$this->assertContains( 'umc_display', $types );
 		$this->assertTrue( $page->section_has_saveable_settings( SettingsPage::SECTION_DISPLAY ) );
+		$this->assertFalse( $page->section_has_header_save( SettingsPage::SECTION_DISPLAY ) );
+		$this->assertTrue( $page->section_has_header_save( SettingsPage::SECTION_CURRENCIES ) );
 	}
 
 	private function page(): SettingsPage {

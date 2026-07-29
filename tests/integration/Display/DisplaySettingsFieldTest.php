@@ -82,6 +82,22 @@ final class DisplaySettingsFieldTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'umc-display-card--position umc-display-card--hidden', $html );
 	}
 
+	public function test_render_includes_segmented_appearance_controls(): void {
+		$html = $this->capture_render();
+
+		$this->assertStringContainsString( 'umc-display-segmented', $html );
+		$this->assertStringContainsString( 'name="umc_display[appearance][theme]"', $html );
+		$this->assertStringContainsString( 'name="umc_display[appearance][size]"', $html );
+		$this->assertStringContainsString( 'name="umc_display[appearance][shape]"', $html );
+	}
+
+	public function test_copy_shortcode_control_has_accessible_label(): void {
+		$html = $this->capture_render();
+
+		$this->assertStringContainsString( 'data-umc-copy-shortcode', $html );
+		$this->assertStringContainsString( 'aria-label="Copy shortcode"', $html );
+	}
+
 	public function test_render_includes_configurator_contract_markup(): void {
 		$this->save_display(
 			array(

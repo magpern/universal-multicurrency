@@ -381,14 +381,28 @@ final class DisplaySettingsField {
 			<div class="umc-display-position-panels">
 				<div class="umc-display-position-panel<?php echo $side_active ? '' : ' umc-display-panel--hidden'; ?>" data-umc-position-panel="floating_side">
 					<?php $this->render_side_field( $position, ! $side_active ); ?>
-					<label class="umc-display-field">
-						<span><?php esc_html_e( 'Vertical position', 'universal-multicurrency' ); ?></span>
-						<select name="umc_display[position][vertical_alignment]" data-umc-display-field="vertical_alignment"<?php disabled( ! $side_active ); ?>>
-							<?php foreach ( array( SwitcherSettings::ALIGN_TOP, SwitcherSettings::ALIGN_MIDDLE, SwitcherSettings::ALIGN_BOTTOM ) as $align ) : ?>
-								<option value="<?php echo esc_attr( $align ); ?>" <?php selected( $position['vertical_alignment'], $align ); ?>><?php echo esc_html( ucfirst( $align ) ); ?></option>
-							<?php endforeach; ?>
-						</select>
-					</label>
+					<fieldset class="umc-display-fieldset">
+						<legend><?php esc_html_e( 'Vertical position', 'universal-multicurrency' ); ?></legend>
+						<?php
+						$this->echo_control_markup(
+							$this->controls->segmented_control(
+								'umc_display[position][vertical_alignment]',
+								array(
+									SwitcherSettings::ALIGN_TOP    => __( 'Top', 'universal-multicurrency' ),
+									SwitcherSettings::ALIGN_MIDDLE => __( 'Middle', 'universal-multicurrency' ),
+									SwitcherSettings::ALIGN_BOTTOM => __( 'Bottom', 'universal-multicurrency' ),
+								),
+								(string) $position['vertical_alignment'],
+								array( 'data-umc-display-field' => 'vertical_alignment' ),
+								! $side_active ? array(
+									SwitcherSettings::ALIGN_TOP    => array( 'disabled' => 'disabled' ),
+									SwitcherSettings::ALIGN_MIDDLE => array( 'disabled' => 'disabled' ),
+									SwitcherSettings::ALIGN_BOTTOM => array( 'disabled' => 'disabled' ),
+								) : array()
+							)
+						);
+						?>
+					</fieldset>
 					<label class="umc-display-field">
 						<span><?php esc_html_e( 'Vertical offset (px)', 'universal-multicurrency' ); ?></span>
 						<input type="number" name="umc_display[position][vertical_offset]" value="<?php echo esc_attr( (string) $position['vertical_offset'] ); ?>" data-umc-display-field="vertical_offset"<?php disabled( ! $side_active ); ?> />
@@ -421,14 +435,25 @@ final class DisplaySettingsField {
 	 * @param bool                      $disabled Whether the panel is inactive.
 	 */
 	private function render_side_field( array $position, bool $disabled ): void {
+		$options = array(
+			SwitcherSettings::SIDE_LEFT  => __( 'Left', 'universal-multicurrency' ),
+			SwitcherSettings::SIDE_RIGHT => __( 'Right', 'universal-multicurrency' ),
+		);
 		?>
-		<label class="umc-display-field">
-			<span><?php esc_html_e( 'Side', 'universal-multicurrency' ); ?></span>
-			<select name="umc_display[position][side]" data-umc-display-field="side"<?php disabled( $disabled ); ?>>
-				<option value="<?php echo esc_attr( SwitcherSettings::SIDE_LEFT ); ?>" <?php selected( $position['side'], SwitcherSettings::SIDE_LEFT ); ?>><?php esc_html_e( 'Left', 'universal-multicurrency' ); ?></option>
-				<option value="<?php echo esc_attr( SwitcherSettings::SIDE_RIGHT ); ?>" <?php selected( $position['side'], SwitcherSettings::SIDE_RIGHT ); ?>><?php esc_html_e( 'Right', 'universal-multicurrency' ); ?></option>
-			</select>
-		</label>
+		<fieldset class="umc-display-fieldset">
+			<legend><?php esc_html_e( 'Side', 'universal-multicurrency' ); ?></legend>
+			<?php
+			$this->echo_control_markup(
+				$this->controls->segmented_control(
+					'umc_display[position][side]',
+					$options,
+					(string) $position['side'],
+					array( 'data-umc-display-field' => 'side' ),
+					$disabled ? array_fill_keys( array_keys( $options ), array( 'disabled' => 'disabled' ) ) : array()
+				)
+			);
+			?>
+		</fieldset>
 		<?php
 	}
 
@@ -459,33 +484,63 @@ final class DisplaySettingsField {
 	 */
 	private function render_appearance_card( SwitcherSettings $settings ): void {
 		$appearance = $settings->appearance();
+		$themes     = array(
+			SwitcherSettings::THEME_AUTOMATIC => __( 'Automatic', 'universal-multicurrency' ),
+			SwitcherSettings::THEME_LIGHT     => __( 'Light', 'universal-multicurrency' ),
+			SwitcherSettings::THEME_DARK      => __( 'Dark', 'universal-multicurrency' ),
+		);
+		$sizes      = array(
+			SwitcherSettings::SIZE_COMPACT  => __( 'Compact', 'universal-multicurrency' ),
+			SwitcherSettings::SIZE_STANDARD => __( 'Standard', 'universal-multicurrency' ),
+			SwitcherSettings::SIZE_LARGE    => __( 'Large', 'universal-multicurrency' ),
+		);
+		$shapes     = array(
+			SwitcherSettings::SHAPE_SLIGHT  => __( 'Slight', 'universal-multicurrency' ),
+			SwitcherSettings::SHAPE_ROUNDED => __( 'Rounded', 'universal-multicurrency' ),
+			SwitcherSettings::SHAPE_PILL    => __( 'Pill', 'universal-multicurrency' ),
+		);
 		?>
 		<div class="umc-display-card">
 			<h3 class="umc-display-card__title"><?php esc_html_e( 'Appearance', 'universal-multicurrency' ); ?></h3>
-			<label class="umc-display-field">
-				<span><?php esc_html_e( 'Theme', 'universal-multicurrency' ); ?></span>
-				<select name="umc_display[appearance][theme]" data-umc-display-field="theme">
-					<?php foreach ( array( SwitcherSettings::THEME_AUTOMATIC, SwitcherSettings::THEME_LIGHT, SwitcherSettings::THEME_DARK ) as $theme ) : ?>
-						<option value="<?php echo esc_attr( $theme ); ?>" <?php selected( $appearance['theme'], $theme ); ?>><?php echo esc_html( ucfirst( $theme ) ); ?></option>
-					<?php endforeach; ?>
-				</select>
-			</label>
-			<label class="umc-display-field">
-				<span><?php esc_html_e( 'Size', 'universal-multicurrency' ); ?></span>
-				<select name="umc_display[appearance][size]" data-umc-display-field="size">
-					<?php foreach ( array( SwitcherSettings::SIZE_COMPACT, SwitcherSettings::SIZE_STANDARD, SwitcherSettings::SIZE_LARGE ) as $size ) : ?>
-						<option value="<?php echo esc_attr( $size ); ?>" <?php selected( $appearance['size'], $size ); ?>><?php echo esc_html( ucfirst( $size ) ); ?></option>
-					<?php endforeach; ?>
-				</select>
-			</label>
-			<label class="umc-display-field">
-				<span><?php esc_html_e( 'Shape', 'universal-multicurrency' ); ?></span>
-				<select name="umc_display[appearance][shape]" data-umc-display-field="shape">
-					<option value="<?php echo esc_attr( SwitcherSettings::SHAPE_SLIGHT ); ?>" <?php selected( $appearance['shape'], SwitcherSettings::SHAPE_SLIGHT ); ?>><?php esc_html_e( 'Slightly rounded', 'universal-multicurrency' ); ?></option>
-					<option value="<?php echo esc_attr( SwitcherSettings::SHAPE_ROUNDED ); ?>" <?php selected( $appearance['shape'], SwitcherSettings::SHAPE_ROUNDED ); ?>><?php esc_html_e( 'Rounded', 'universal-multicurrency' ); ?></option>
-					<option value="<?php echo esc_attr( SwitcherSettings::SHAPE_PILL ); ?>" <?php selected( $appearance['shape'], SwitcherSettings::SHAPE_PILL ); ?>><?php esc_html_e( 'Pill', 'universal-multicurrency' ); ?></option>
-				</select>
-			</label>
+			<fieldset class="umc-display-fieldset">
+				<legend><?php esc_html_e( 'Theme', 'universal-multicurrency' ); ?></legend>
+				<?php
+				$this->echo_control_markup(
+					$this->controls->segmented_control(
+						'umc_display[appearance][theme]',
+						$themes,
+						$appearance['theme'],
+						array( 'data-umc-display-field' => 'theme' )
+					)
+				);
+				?>
+			</fieldset>
+			<fieldset class="umc-display-fieldset">
+				<legend><?php esc_html_e( 'Size', 'universal-multicurrency' ); ?></legend>
+				<?php
+				$this->echo_control_markup(
+					$this->controls->segmented_control(
+						'umc_display[appearance][size]',
+						$sizes,
+						$appearance['size'],
+						array( 'data-umc-display-field' => 'size' )
+					)
+				);
+				?>
+			</fieldset>
+			<fieldset class="umc-display-fieldset">
+				<legend><?php esc_html_e( 'Shape', 'universal-multicurrency' ); ?></legend>
+				<?php
+				$this->echo_control_markup(
+					$this->controls->segmented_control(
+						'umc_display[appearance][shape]',
+						$shapes,
+						$appearance['shape'],
+						array( 'data-umc-display-field' => 'shape' )
+					)
+				);
+				?>
+			</fieldset>
 		</div>
 		<?php
 	}
