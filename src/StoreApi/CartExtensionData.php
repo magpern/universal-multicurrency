@@ -108,13 +108,13 @@ final class CartExtensionData {
 			'checkout_mode'         => $settings->mode(),
 			'shopper_currency'      => $this->context->get_shopper_code(),
 			'effective_currency'    => $this->context->get_active_code(),
-			'transition_reason'     => null,
+			'transition_reason'     => '',
 			'fallback_applied'      => false,
 			'checkout_notice'       => $this->notice_service->build_payload( $state, $settings ),
 		);
 
 		if ( null !== $state ) {
-			$payload['transition_reason']  = '' !== $state->reason() ? $state->reason() : null;
+			$payload['transition_reason']  = $state->reason();
 			$payload['fallback_applied']   = $state->fallback_occurred();
 			$payload['effective_currency'] = $state->effective_currency();
 		}
@@ -162,7 +162,7 @@ final class CartExtensionData {
 			),
 			'transition_reason'     => array(
 				'description' => __( 'Checkout transition reason, when applicable.', 'universal-multicurrency' ),
-				'type'        => array( 'string', 'null' ),
+				'type'        => 'string',
 				'readonly'    => true,
 			),
 			'fallback_applied'      => array(
@@ -173,6 +173,20 @@ final class CartExtensionData {
 			'checkout_notice'       => array(
 				'description' => __( 'Checkout transition notice payload for Blocks.', 'universal-multicurrency' ),
 				'type'        => 'object',
+				'properties'  => array(
+					'show'      => array(
+						'type' => 'boolean',
+					),
+					'status'    => array(
+						'type' => 'string',
+					),
+					'signature' => array(
+						'type' => 'string',
+					),
+					'message'   => array(
+						'type' => 'string',
+					),
+				),
 				'readonly'    => true,
 			),
 		);
