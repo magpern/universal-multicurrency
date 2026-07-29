@@ -131,10 +131,10 @@ final class CartExtensionData {
 		);
 
 		if ( null !== $state ) {
-			$payload['transition_reason']    = $state->reason();
-			$payload['fallback_applied']     = $state->fallback_occurred();
-			$payload['effective_currency']   = $state->effective_currency();
-			$payload['settlement_currency']  = $state->settlement_currency();
+			$payload['transition_reason']   = $state->reason();
+			$payload['fallback_applied']    = $state->fallback_occurred();
+			$payload['effective_currency']  = $state->effective_currency();
+			$payload['settlement_currency'] = $state->settlement_currency();
 		}
 
 		return $payload;

@@ -12,8 +12,6 @@ Merchants need configurable checkout currency behaviour:
 - browse/cart in the selected currency but switch to store currency at checkout entry, and
 - when selected mode leaves no payment gateway that explicitly supports the shopper currency, retry once in store currency with an informational notice.
 
-See [ADR-0015](0015-checkout-settle-base-mode.md) for the optional `settle_base` mode (display selected, settle in store currency).
-
 Classic checkout and Checkout Blocks must behave identically. Gateway availability must stay aligned with WooCommerce core.
 
 ## Decision

@@ -60,10 +60,6 @@ final class CheckoutConfigurationCheck implements CompatibilityCheckInterface {
 			return __( 'Checkout uses store currency at entry.', 'universal-multicurrency' );
 		}
 
-		if ( $checkout->is_settle_base_mode() ) {
-			return __( 'Checkout displays selected currency and settles in store currency.', 'universal-multicurrency' );
-		}
-
 		return __( 'Checkout keeps the shopper-selected currency.', 'universal-multicurrency' );
 	}
 }

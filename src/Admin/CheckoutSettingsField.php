@@ -60,21 +60,16 @@ final class CheckoutSettingsField {
 	 * Renders checkout policy settings.
 	 */
 	public function render(): void {
-		$checkout      = CheckoutSettings::from_array( $this->settings->get()['checkout'] ?? array() );
-		$mode          = $checkout->mode();
-		$store_code    = $this->base->code();
-		$store_title   = sprintf(
+		$checkout    = CheckoutSettings::from_array( $this->settings->get()['checkout'] ?? array() );
+		$mode        = $checkout->mode();
+		$store_code  = $this->base->code();
+		$store_title = sprintf(
 			/* translators: %s: store currency code, for example EUR. */
 			__( 'Switch to store currency (%s)', 'universal-multicurrency' ),
 			$store_code
 		);
 		$mode_name     = 'umc_checkout[mode]';
 		$notice_name   = 'umc_checkout[show_notice]';
-		$settle_title = sprintf(
-			/* translators: %s: store currency code, for example EUR. */
-			__( 'Show selected currency, settle in store currency (%s)', 'universal-multicurrency' ),
-			$store_code
-		);
 		$selected_card = $this->controls->choice_card(
 			$mode_name,
 			CheckoutSettings::MODE_SELECTED,
@@ -96,17 +91,6 @@ final class CheckoutSettingsField {
 			'',
 			__( 'This does not change the customer\'s preferred browsing currency.', 'universal-multicurrency' )
 		);
-		$settle_card   = $this->controls->choice_card(
-			$mode_name,
-			CheckoutSettings::MODE_SETTLE_BASE,
-			CheckoutSettings::MODE_SETTLE_BASE === $mode,
-			$settle_title,
-			__( 'Customers see prices in their selected currency at checkout, but payment and the order are processed in the store currency.', 'universal-multicurrency' ),
-			'',
-			array( 'id' => 'umc_checkout_mode_settle_base' ),
-			'',
-			__( 'This does not change the customer\'s preferred browsing currency.', 'universal-multicurrency' )
-		);
 
 		?>
 		<tr valign="top">
@@ -122,8 +106,6 @@ final class CheckoutSettingsField {
 							echo $selected_card;
 							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in DisplayControlRenderer.
 							echo $store_card;
-							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in DisplayControlRenderer.
-							echo $settle_card;
 							?>
 						</div>
 					</fieldset>

@@ -90,9 +90,8 @@ final class CheckoutNoticeService {
 	 * @param CheckoutTransitionState $state Current transition state.
 	 */
 	public function build_message( CheckoutTransitionState $state ): string {
-		$shopper    = $state->shopper_currency();
-		$effective    = $state->effective_currency();
-		$settlement = $state->settlement_currency();
+		$shopper   = $state->shopper_currency();
+		$effective = $state->effective_currency();
 
 		if ( CheckoutTransitionState::REASON_UNSUPPORTED_SELECTED === $state->reason() ) {
 			return sprintf(
@@ -100,15 +99,6 @@ final class CheckoutNoticeService {
 				esc_html__( 'No payment method is available in %1$s. Checkout continues in %2$s.', 'universal-multicurrency' ),
 				esc_html( $shopper ),
 				esc_html( $effective )
-			);
-		}
-
-		if ( CheckoutTransitionState::REASON_SETTLE_BASE === $state->reason() ) {
-			return sprintf(
-				/* translators: 1: displayed shopper currency code, 2: settlement store currency code. */
-				esc_html__( 'Checkout shows prices in %1$s. Payment and your order will be processed in %2$s.', 'universal-multicurrency' ),
-				esc_html( $shopper ),
-				esc_html( $settlement )
 			);
 		}
 

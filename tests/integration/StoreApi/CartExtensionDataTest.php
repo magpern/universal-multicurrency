@@ -118,6 +118,7 @@ final class CartExtensionDataTest extends StoreApiTestCase {
 				'checkout_mode',
 				'shopper_currency',
 				'effective_currency',
+				'settlement_currency',
 				'transition_reason',
 				'fallback_applied',
 				'checkout_notice',

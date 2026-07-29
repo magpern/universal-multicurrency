@@ -130,9 +130,8 @@ final class CheckoutPolicyCoordinator {
 	 * Applies checkout policy for a surface.
 	 *
 	 * @param string $surface Checkout surface identifier.
-	 * @param string $phase   Policy phase: presentation or settlement.
 	 */
-	public function apply( string $surface, string $phase = CheckoutPolicyPhase::PRESENTATION ): void {
+	public function apply( string $surface ): void {
 		if ( $this->applying || ! $this->should_apply( $surface ) ) {
 			return;
 		}
@@ -140,7 +139,7 @@ final class CheckoutPolicyCoordinator {
 		$this->applying = true;
 
 		try {
-			$this->run_policy( $surface, $phase );
+			$this->run_standard_policy( $this->settings_repository->get() );
 		} finally {
 			$this->applying = false;
 			$this->gateway_compatibility->set_coordinator_active( false );
@@ -184,105 +183,6 @@ final class CheckoutPolicyCoordinator {
 	}
 
 	/**
-	 * Runs checkout policy for one phase.
-	 *
-	 * @param string $surface Checkout surface identifier.
-	 * @param string $phase   Policy phase.
-	 */
-	private function run_policy( string $surface, string $phase ): void {
-		unset( $surface );
-
-		$settings = $this->settings_repository->get();
-
-		if ( $settings->is_settle_base_mode() && CheckoutPolicyPhase::SETTLEMENT === $phase ) {
-			$this->run_settle_base_settlement( $settings );
-
-			return;
-		}
-
-		if ( $settings->is_settle_base_mode() && CheckoutPolicyPhase::PRESENTATION === $phase ) {
-			$this->run_settle_base_presentation( $settings );
-
-			return;
-		}
-
-		$this->run_standard_policy( $settings );
-	}
-
-	/**
-	 * Runs settle-base presentation: keep selected display, filter gateways by store currency.
-	 *
-	 * @param CheckoutSettings $settings Checkout settings.
-	 */
-	private function run_settle_base_presentation( CheckoutSettings $settings ): void {
-		$shopper_currency = $this->effective_currency->shopper_currency();
-		$store_currency   = $this->effective_currency->store_currency();
-		$payment_required = WC()->cart->needs_payment();
-
-		$this->gateway_compatibility->set_coordinator_active( true );
-		$this->gateway_compatibility->set_filter_currency( $store_currency );
-		$this->recalculation->begin_pass();
-		$this->effective_currency->clear();
-
-		$decision = $this->policy->decide_pass_one(
-			$settings,
-			$shopper_currency,
-			$store_currency,
-			$payment_required,
-			false,
-			$this->evaluate_gateways( $store_currency )
-		);
-
-		$state = new CheckoutTransitionState(
-			$settings->mode(),
-			$shopper_currency,
-			$decision->effective_currency(),
-			$decision->transition_reason(),
-			false,
-			false,
-			$decision->settlement_currency()
-		);
-
-		$this->transition_repository->save( $state );
-		$this->current_state = $state;
-		$this->notice_service->render_classic_notice( $state, $settings );
-	}
-
-	/**
-	 * Runs settle-base settlement: switch to store currency before order creation.
-	 *
-	 * @param CheckoutSettings $settings Checkout settings.
-	 */
-	private function run_settle_base_settlement( CheckoutSettings $settings ): void {
-		$existing_state   = $this->transition_repository->get();
-		$shopper_currency = $this->effective_currency->shopper_currency();
-		$store_currency   = $this->effective_currency->store_currency();
-		$reason           = null !== $existing_state && '' !== $existing_state->reason()
-			? $existing_state->reason()
-			: CheckoutTransitionState::REASON_SETTLE_BASE;
-
-		$this->gateway_compatibility->set_coordinator_active( true );
-		$this->gateway_compatibility->set_filter_currency( $store_currency );
-		$this->recalculation->begin_pass();
-		$this->effective_currency->apply( $store_currency );
-		$this->recalculation->recalculate_if_needed( $shopper_currency, $store_currency );
-		$this->evaluate_gateways( $store_currency );
-
-		$state = new CheckoutTransitionState(
-			$settings->mode(),
-			$shopper_currency,
-			$store_currency,
-			$reason,
-			false,
-			false,
-			$store_currency
-		);
-
-		$this->transition_repository->save( $state );
-		$this->current_state = $state;
-	}
-
-	/**
 	 * Runs the standard two-pass checkout policy flow for selected and store modes.
 	 *
 	 * @param CheckoutSettings $settings Checkout settings.
@@ -304,12 +204,12 @@ final class CheckoutPolicyCoordinator {
 		$this->gateway_compatibility->set_coordinator_active( true );
 		$this->recalculation->begin_pass();
 
-		$pass_one_effective = $this->effective_currency->resolve_pass_one(
+		$pass_one_effective  = $this->effective_currency->resolve_pass_one(
 			$settings,
 			$shopper_currency,
 			$store_currency
 		);
-		$settlement_currency  = $this->effective_currency->resolve_settlement(
+		$settlement_currency = $this->effective_currency->resolve_settlement(
 			$settings,
 			$shopper_currency,
 			$store_currency
@@ -320,7 +220,7 @@ final class CheckoutPolicyCoordinator {
 		$this->gateway_compatibility->set_filter_currency( $settlement_currency );
 
 		$evaluation = $this->evaluate_gateways( $settlement_currency );
-		$decision     = $this->policy->decide_pass_one(
+		$decision   = $this->policy->decide_pass_one(
 			$settings,
 			$shopper_currency,
 			$store_currency,

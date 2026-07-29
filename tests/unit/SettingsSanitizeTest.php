@@ -283,7 +283,7 @@ final class SettingsSanitizeTest extends TestCase {
 		$this->assertNull( $settings->get_rate( 'USD' ) );
 	}
 
-	public function test_checkout_settle_base_mode_is_sanitized(): void {
+	public function test_checkout_settle_base_mode_migrates_to_store(): void {
 		$clean = Settings::sanitize_checkout(
 			array(
 				'mode'        => 'settle_base',
@@ -291,7 +291,7 @@ final class SettingsSanitizeTest extends TestCase {
 			)
 		);
 
-		$this->assertSame( \UMC\Checkout\CheckoutSettings::MODE_SETTLE_BASE, $clean['mode'] );
+		$this->assertSame( \UMC\Checkout\CheckoutSettings::MODE_STORE, $clean['mode'] );
 		$this->assertTrue( $clean['show_notice'] );
 	}
 }

@@ -18,8 +18,6 @@ final class CheckoutSettings {
 
 	public const MODE_STORE = 'store';
 
-	public const MODE_SETTLE_BASE = 'settle_base';
-
 	/**
 	 * Checkout currency mode.
 	 *
@@ -85,12 +83,12 @@ final class CheckoutSettings {
 	public static function sanitize_mode( mixed $raw ): string {
 		$mode = is_string( $raw ) ? strtolower( trim( $raw ) ) : '';
 
-		if ( self::MODE_STORE === $mode ) {
+		if ( 'settle_base' === $mode ) {
 			return self::MODE_STORE;
 		}
 
-		if ( self::MODE_SETTLE_BASE === $mode ) {
-			return self::MODE_SETTLE_BASE;
+		if ( self::MODE_STORE === $mode ) {
+			return self::MODE_STORE;
 		}
 
 		return self::MODE_SELECTED;
@@ -133,13 +131,6 @@ final class CheckoutSettings {
 	 */
 	public function is_store_mode(): bool {
 		return self::MODE_STORE === $this->mode;
-	}
-
-	/**
-	 * Whether checkout displays selected currency but settles in store currency.
-	 */
-	public function is_settle_base_mode(): bool {
-		return self::MODE_SETTLE_BASE === $this->mode;
 	}
 
 	/**

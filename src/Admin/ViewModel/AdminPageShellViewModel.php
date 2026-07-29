@@ -118,7 +118,7 @@ final class AdminPageShellViewModel {
 		$this->section_icon_class  = $section_icon_class;
 		$this->section_description = $section_description;
 		$this->has_header_save     = $has_header_save;
-		$this->notice_html           = $notice_html;
-		$this->navigation_items      = $navigation_items;
+		$this->notice_html         = $notice_html;
+		$this->navigation_items    = $navigation_items;
 	}
 }

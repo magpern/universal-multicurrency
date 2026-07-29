@@ -96,7 +96,7 @@ final class CheckoutTransitionState {
 		$this->fallback_occurred  = $fallback_occurred;
 		$this->fallback_attempted = $fallback_attempted;
 
-		$settlement = '' !== $settlement_currency ? strtoupper( $settlement_currency ) : $this->effective_currency;
+		$settlement                = '' !== $settlement_currency ? strtoupper( $settlement_currency ) : $this->effective_currency;
 		$this->settlement_currency = $settlement;
 	}
 

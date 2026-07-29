@@ -40,11 +40,11 @@ final class CheckoutEffectiveCurrencyProvider {
 	 * @param string           $store_currency   Store currency code.
 	 */
 	public function resolve_pass_one( CheckoutSettings $settings, string $shopper_currency, string $store_currency ): string {
-		if ( $settings->is_settle_base_mode() || $settings->is_selected_mode() ) {
-			return strtoupper( $shopper_currency );
+		if ( $settings->is_store_mode() ) {
+			return strtoupper( $store_currency );
 		}
 
-		return strtoupper( $store_currency );
+		return strtoupper( $shopper_currency );
 	}
 
 	/**
@@ -55,9 +55,7 @@ final class CheckoutEffectiveCurrencyProvider {
 	 * @param string           $store_currency   Store currency code.
 	 */
 	public function resolve_settlement( CheckoutSettings $settings, string $shopper_currency, string $store_currency ): string {
-		unset( $shopper_currency );
-
-		if ( $settings->is_settle_base_mode() || $settings->is_store_mode() ) {
+		if ( $settings->is_store_mode() ) {
 			return strtoupper( $store_currency );
 		}
 
