@@ -79,6 +79,14 @@ final class GatewayFallbackCausalityTest extends WP_UnitTestCase {
 	public function set_up(): void {
 		parent::set_up();
 
+		if ( null === WC()->session ) {
+			WC()->session = new \WC_Session_Handler();
+			WC()->session->init();
+		}
+
+		WC()->session->set( CheckoutTransitionStateRepository::SESSION_KEY, null );
+		WC()->session->set( CheckoutTransitionStateRepository::SESSION_NOTICE_KEY, null );
+
 		$this->enable_gateway( 'bacs' );
 		$this->enable_gateway( 'cheque' );
 		WC()->payment_gateways()->init();
@@ -414,5 +422,6 @@ final class GatewayFallbackCausalityTest extends WP_UnitTestCase {
 
 		WC()->cart->empty_cart();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
 	}
 }
