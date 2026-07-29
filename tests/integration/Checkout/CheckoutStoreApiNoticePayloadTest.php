@@ -209,6 +209,10 @@ final class CheckoutStoreApiNoticePayloadTest extends StoreApiTestCase {
 		$GLOBALS['wp']->query_vars['rest_route'] = '/wc/store/v1/checkout';
 
 		try {
+			if ( function_exists( 'WC' ) && WC()->cart ) {
+				do_action( 'woocommerce_cart_loaded_from_session' );
+			}
+
 			$data = $this->response_data( $this->store_api_request( 'GET', '/cart' ) );
 		} finally {
 			if ( null === $previous_uri ) {
