@@ -48,12 +48,32 @@ final class GatewayFallbackCausalityTest extends WP_UnitTestCase {
 		'woocommerce_cart_loaded_from_session',
 	);
 
+	/**
+	 * Gateway compatibility service under test.
+	 *
+	 * @var GatewayCompatibility
+	 */
 	private GatewayCompatibility $gateway_compat;
 
+	/**
+	 * Checkout policy coordinator under test.
+	 *
+	 * @var CheckoutPolicyCoordinator
+	 */
 	private CheckoutPolicyCoordinator $coordinator;
 
+	/**
+	 * Transition state repository under test.
+	 *
+	 * @var CheckoutTransitionStateRepository
+	 */
 	private CheckoutTransitionStateRepository $transition_repository;
 
+	/**
+	 * Currency context for the active test case.
+	 *
+	 * @var CurrencyContext
+	 */
 	private CurrencyContext $context;
 
 	public function set_up(): void {
@@ -70,6 +90,8 @@ final class GatewayFallbackCausalityTest extends WP_UnitTestCase {
 			remove_all_actions( $hook );
 		}
 
+		remove_all_filters( 'umc_is_request_convertible' );
+
 		unset( $_COOKIE[ CurrencyContext::COOKIE_NAME ] );
 		delete_option( Settings::OPTION );
 		delete_option( 'woocommerce_bacs_settings' );
@@ -85,7 +107,7 @@ final class GatewayFallbackCausalityTest extends WP_UnitTestCase {
 
 		$evaluation = $this->evaluate_gateways();
 
-		$this->assertTrue( $evaluation->umcCausedEmpty() );
+		$this->assertTrue( $evaluation->umc_caused_empty() );
 		$this->assertTrue( $this->fallback_allowed( $evaluation ) );
 	}
 
@@ -96,8 +118,8 @@ final class GatewayFallbackCausalityTest extends WP_UnitTestCase {
 
 		$evaluation = $this->evaluate_gateways();
 
-		$this->assertSame( 1, $evaluation->beforeUmcCount() );
-		$this->assertFalse( $evaluation->umcCausedEmpty() );
+		$this->assertSame( 1, $evaluation->before_umc_count() );
+		$this->assertFalse( $evaluation->umc_caused_empty() );
 		$this->assertFalse( $this->fallback_allowed( $evaluation ) );
 	}
 
@@ -107,8 +129,8 @@ final class GatewayFallbackCausalityTest extends WP_UnitTestCase {
 
 		$evaluation = $this->evaluate_gateways();
 
-		$this->assertSame( 1, $evaluation->beforeUmcCount() );
-		$this->assertFalse( $evaluation->umcCausedEmpty() );
+		$this->assertSame( 1, $evaluation->before_umc_count() );
+		$this->assertFalse( $evaluation->umc_caused_empty() );
 		$this->assertFalse( $this->fallback_allowed( $evaluation ) );
 	}
 
@@ -117,8 +139,8 @@ final class GatewayFallbackCausalityTest extends WP_UnitTestCase {
 
 		$evaluation = $this->evaluate_gateways();
 
-		$this->assertGreaterThan( 0, $evaluation->unknownSupportCount() );
-		$this->assertFalse( $evaluation->umcCausedEmpty() );
+		$this->assertGreaterThan( 0, $evaluation->unknown_support_count() );
+		$this->assertFalse( $evaluation->umc_caused_empty() );
 		$this->assertFalse( $this->fallback_allowed( $evaluation ) );
 	}
 
@@ -128,9 +150,9 @@ final class GatewayFallbackCausalityTest extends WP_UnitTestCase {
 
 		$evaluation = $this->evaluate_gateways();
 
-		$this->assertSame( array( 'bacs' ), $evaluation->removedForCurrencyGatewayIds() );
-		$this->assertNotEmpty( $evaluation->unknownSupportGatewayIds() );
-		$this->assertFalse( $evaluation->umcCausedEmpty() );
+		$this->assertSame( array( 'bacs' ), $evaluation->removed_for_currency_gateway_ids() );
+		$this->assertNotEmpty( $evaluation->unknown_support_gateway_ids() );
+		$this->assertFalse( $evaluation->umc_caused_empty() );
 		$this->assertFalse( $this->fallback_allowed( $evaluation ) );
 	}
 
@@ -141,7 +163,7 @@ final class GatewayFallbackCausalityTest extends WP_UnitTestCase {
 
 		$evaluation = $this->evaluate_gateways();
 
-		$this->assertTrue( $evaluation->umcCausedEmpty() );
+		$this->assertTrue( $evaluation->umc_caused_empty() );
 		$this->assertTrue( $this->fallback_allowed( $evaluation ) );
 	}
 
@@ -158,7 +180,7 @@ final class GatewayFallbackCausalityTest extends WP_UnitTestCase {
 		$remaining  = WC()->payment_gateways()->get_available_payment_gateways();
 
 		$this->assertSame( array(), $remaining );
-		$this->assertFalse( $evaluation->umcCausedEmpty() );
+		$this->assertFalse( $evaluation->umc_caused_empty() );
 		$this->assertFalse( $this->fallback_allowed( $evaluation ) );
 	}
 
@@ -171,8 +193,8 @@ final class GatewayFallbackCausalityTest extends WP_UnitTestCase {
 
 		$evaluation = $this->evaluate_gateways();
 
-		$this->assertSame( 0, $evaluation->beforeUmcCount() );
-		$this->assertFalse( $evaluation->umcCausedEmpty() );
+		$this->assertSame( 0, $evaluation->before_umc_count() );
+		$this->assertFalse( $evaluation->umc_caused_empty() );
 		$this->assertFalse( $this->fallback_allowed( $evaluation ) );
 	}
 
@@ -208,8 +230,8 @@ final class GatewayFallbackCausalityTest extends WP_UnitTestCase {
 
 		$this->transition_repository->clear();
 
-		$previous_uri = $_SERVER['REQUEST_URI'] ?? null;
-		$_SERVER['REQUEST_URI'] = '/wp-json/wc/store/v1/checkout';
+		$previous_uri                            = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Test harness restores a URI it set itself.
+		$_SERVER['REQUEST_URI']                  = '/wp-json/wc/store/v1/checkout';
 		$GLOBALS['wp']->query_vars['rest_route'] = '/wc/store/v1/checkout';
 
 		try {
@@ -256,8 +278,8 @@ final class GatewayFallbackCausalityTest extends WP_UnitTestCase {
 		$registry = new CurrencyRegistry( $settings, new Currency( 'EUR', 2 ) );
 		$rates    = new ManualRateProvider( $settings, 'EUR' );
 
-		$this->context               = new CurrencyContext( $registry, $rates, new CurrencyResolver() );
-		$this->gateway_compat        = new GatewayCompatibility( $this->context );
+		$this->context        = new CurrencyContext( $registry, $rates, new CurrencyResolver() );
+		$this->gateway_compat = new GatewayCompatibility( $this->context );
 		$this->gateway_compat->register();
 		$this->transition_repository = new CheckoutTransitionStateRepository();
 
@@ -282,6 +304,13 @@ final class GatewayFallbackCausalityTest extends WP_UnitTestCase {
 
 		( new ClassicCheckoutPolicyAdapter( $this->coordinator, $this->context ) )->register();
 		( new StoreApiCheckoutPolicyAdapter( $this->coordinator, $this->context ) )->register();
+
+		if ( null === WC()->session ) {
+			WC()->session = new \WC_Session_Handler();
+			WC()->session->init();
+		}
+
+		add_filter( 'umc_is_request_convertible', '__return_true' );
 
 		$_COOKIE[ CurrencyContext::COOKIE_NAME ] = $active;
 	}

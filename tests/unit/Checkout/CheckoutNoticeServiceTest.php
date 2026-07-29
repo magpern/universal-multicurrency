@@ -20,6 +20,11 @@ use UMC\Checkout\CheckoutTransitionStateRepository;
  */
 final class CheckoutNoticeServiceTest extends TestCase {
 
+	/**
+	 * Notice service under test.
+	 *
+	 * @var CheckoutNoticeService
+	 */
 	private CheckoutNoticeService $service;
 
 	protected function setUp(): void {
@@ -109,7 +114,7 @@ final class CheckoutNoticeServiceTest extends TestCase {
 	}
 
 	public function test_build_payload_returns_full_notice_when_transition_applies(): void {
-		$state = new CheckoutTransitionState(
+		$state    = new CheckoutTransitionState(
 			CheckoutSettings::MODE_STORE,
 			'SEK',
 			'EUR',
@@ -132,7 +137,7 @@ final class CheckoutNoticeServiceTest extends TestCase {
 			'EUR',
 			CheckoutTransitionState::REASON_STORE_CURRENCY
 		);
-		$fallback = new CheckoutTransitionState(
+		$fallback   = new CheckoutTransitionState(
 			CheckoutSettings::MODE_SELECTED,
 			'SEK',
 			'EUR',

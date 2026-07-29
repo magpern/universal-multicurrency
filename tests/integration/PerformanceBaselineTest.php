@@ -83,7 +83,7 @@ final class PerformanceBaselineTest extends WP_UnitTestCase {
 
 	public const CEILING_CART_RESOLUTION_QUERY_DELTA = 4;
 
-	public const CEILING_CHECKOUT_SNAPSHOT_HOOKS = 1;
+	public const CEILING_CHECKOUT_SNAPSHOT_HOOKS = 2;
 
 	public const CEILING_CART_EXTENSION_CALLBACKS = 1;
 
@@ -379,7 +379,7 @@ final class PerformanceBaselineTest extends WP_UnitTestCase {
 
 	public function test_order_snapshot_writes_once_without_refresh(): void {
 		$context = $this->build_currency_context( self::CURRENCIES, 'SEK' );
-		$writer  = new OrderSnapshot( $context, new Settings(), '0.7.0' );
+		$writer  = new OrderSnapshot( $context, new Settings(), '0.7.0', new \UMC\Checkout\CheckoutTransitionStateRepository() );
 		$order   = new WC_Order();
 
 		$this->assertTrue( $writer->write_snapshot_for( $order ) );
@@ -475,7 +475,7 @@ final class PerformanceBaselineTest extends WP_UnitTestCase {
 		$this->assertSame(
 			self::CEILING_CHECKOUT_SNAPSHOT_HOOKS,
 			count( $this->umc_callbacks_on( 'woocommerce_checkout_create_order' ) ),
-			'Order snapshot hook must register exactly one plugin callback.'
+			'Checkout policy and order snapshot must register exactly two plugin callbacks.'
 		);
 
 		$source = (string) file_get_contents( dirname( __DIR__, 2 ) . '/src/Plugin.php' );

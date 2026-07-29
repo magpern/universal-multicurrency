@@ -20,6 +20,11 @@ use UMC\Integration\GatewayCurrencyEvaluation;
  */
 final class CheckoutCurrencyPolicyTest extends TestCase {
 
+	/**
+	 * Policy under test.
+	 *
+	 * @var CheckoutCurrencyPolicy
+	 */
 	private CheckoutCurrencyPolicy $policy;
 
 	protected function setUp(): void {
@@ -254,11 +259,13 @@ final class CheckoutCurrencyPolicyTest extends TestCase {
 	}
 
 	/**
-	 * @param list<string> $before
-	 * @param list<string> $retained
-	 * @param list<string> $removed
-	 * @param list<string> $unknown
-	 * @param list<string> $after
+	 * Builds a gateway evaluation snapshot for policy tests.
+	 *
+	 * @param array<int, string> $before   Pre-UMC gateway ids.
+	 * @param array<int, string> $retained Retained gateway ids.
+	 * @param array<int, string> $removed  Explicitly removed gateway ids.
+	 * @param array<int, string> $unknown  Unknown-support gateway ids.
+	 * @param array<int, string> $after    Post-UMC gateway ids.
 	 */
 	private function evaluation_with(
 		array $before,

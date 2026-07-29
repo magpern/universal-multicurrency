@@ -117,14 +117,14 @@ final class AdminPageShellTest extends WP_UnitTestCase {
 	public function test_placeholder_section_hides_save_button_and_renders_info_panel(): void {
 		global $current_section, $hide_save_button;
 
-		$current_section = SettingsPage::SECTION_CHECKOUT;
+		$current_section = SettingsPage::SECTION_ADVANCED;
 		$output          = $this->render_shell_output();
 
 		$this->assertTrue( ! empty( $hide_save_button ) );
 		$this->assertStringNotContainsString( 'umc-shell-header__save', $this->render_shell_sections() );
 		$this->assertStringContainsString( 'umc-placeholder-panel', $output );
 		$this->assertStringContainsString( 'This section will be implemented in a future milestone.', $output );
-		$this->assertStringContainsString( 'We&#039;re working on checkout currency behavior options for your store.', $output );
+		$this->assertStringContainsString( 'We&#039;re working on advanced configuration options for your store.', $output );
 	}
 
 	public function test_saveable_section_exposes_header_save_button(): void {

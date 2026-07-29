@@ -13,10 +13,15 @@ use PHPUnit\Framework\TestCase;
 use UMC\Integration\GatewayCurrencyClassifier;
 
 /**
- * Classification, umcCausedEmpty derivation, unknown support, and explicit removal.
+ * Classification, umc_caused_empty derivation, unknown support, and explicit removal.
  */
 final class GatewayCurrencyClassifierTest extends TestCase {
 
+	/**
+	 * Classifier under test.
+	 *
+	 * @var GatewayCurrencyClassifier
+	 */
 	private GatewayCurrencyClassifier $classifier;
 
 	protected function setUp(): void {
@@ -33,9 +38,9 @@ final class GatewayCurrencyClassifierTest extends TestCase {
 		);
 
 		$this->assertSame( array( 'bacs' ), array_keys( $result->filtered_gateways() ) );
-		$this->assertSame( array( 'bacs' ), $result->evaluation()->retainedGatewayIds() );
-		$this->assertSame( array(), $result->evaluation()->removedForCurrencyGatewayIds() );
-		$this->assertFalse( $result->evaluation()->umcCausedEmpty() );
+		$this->assertSame( array( 'bacs' ), $result->evaluation()->retained_gateway_ids() );
+		$this->assertSame( array(), $result->evaluation()->removed_for_currency_gateway_ids() );
+		$this->assertFalse( $result->evaluation()->umc_caused_empty() );
 	}
 
 	public function test_explicit_exclusion_removes_gateway(): void {
@@ -46,9 +51,9 @@ final class GatewayCurrencyClassifierTest extends TestCase {
 		);
 
 		$this->assertSame( array(), $result->filtered_gateways() );
-		$this->assertSame( array( 'bacs' ), $result->evaluation()->removedForCurrencyGatewayIds() );
-		$this->assertSame( 0, $result->evaluation()->retainedCount() );
-		$this->assertTrue( $result->evaluation()->umcCausedEmpty() );
+		$this->assertSame( array( 'bacs' ), $result->evaluation()->removed_for_currency_gateway_ids() );
+		$this->assertSame( 0, $result->evaluation()->retained_count() );
+		$this->assertTrue( $result->evaluation()->umc_caused_empty() );
 	}
 
 	public function test_unknown_support_retains_gateway_without_causality(): void {
@@ -59,9 +64,9 @@ final class GatewayCurrencyClassifierTest extends TestCase {
 		);
 
 		$this->assertSame( array( 'cheque' ), array_keys( $result->filtered_gateways() ) );
-		$this->assertSame( array( 'cheque' ), $result->evaluation()->unknownSupportGatewayIds() );
-		$this->assertSame( 1, $result->evaluation()->unknownSupportCount() );
-		$this->assertFalse( $result->evaluation()->umcCausedEmpty() );
+		$this->assertSame( array( 'cheque' ), $result->evaluation()->unknown_support_gateway_ids() );
+		$this->assertSame( 1, $result->evaluation()->unknown_support_count() );
+		$this->assertFalse( $result->evaluation()->umc_caused_empty() );
 	}
 
 	public function test_mixed_explicit_exclusion_and_unknown_prevents_umc_caused_empty(): void {
@@ -77,9 +82,9 @@ final class GatewayCurrencyClassifierTest extends TestCase {
 		);
 
 		$this->assertSame( array( 'cheque' ), array_keys( $result->filtered_gateways() ) );
-		$this->assertSame( array( 'bacs' ), $result->evaluation()->removedForCurrencyGatewayIds() );
-		$this->assertSame( array( 'cheque' ), $result->evaluation()->unknownSupportGatewayIds() );
-		$this->assertFalse( $result->evaluation()->umcCausedEmpty() );
+		$this->assertSame( array( 'bacs' ), $result->evaluation()->removed_for_currency_gateway_ids() );
+		$this->assertSame( array( 'cheque' ), $result->evaluation()->unknown_support_gateway_ids() );
+		$this->assertFalse( $result->evaluation()->umc_caused_empty() );
 	}
 
 	public function test_all_pre_umc_gateways_explicitly_excluded_sets_umc_caused_empty(): void {
@@ -93,12 +98,12 @@ final class GatewayCurrencyClassifierTest extends TestCase {
 		);
 
 		$this->assertSame( array(), $result->filtered_gateways() );
-		$this->assertSame( 2, $result->evaluation()->beforeUmcCount() );
-		$this->assertSame( 2, $result->evaluation()->removedForCurrencyCount() );
-		$this->assertSame( 0, $result->evaluation()->unknownSupportCount() );
-		$this->assertSame( 0, $result->evaluation()->retainedCount() );
-		$this->assertSame( 0, $result->evaluation()->afterUmcCount() );
-		$this->assertTrue( $result->evaluation()->umcCausedEmpty() );
+		$this->assertSame( 2, $result->evaluation()->before_umc_count() );
+		$this->assertSame( 2, $result->evaluation()->removed_for_currency_count() );
+		$this->assertSame( 0, $result->evaluation()->unknown_support_count() );
+		$this->assertSame( 0, $result->evaluation()->retained_count() );
+		$this->assertSame( 0, $result->evaluation()->after_umc_count() );
+		$this->assertTrue( $result->evaluation()->umc_caused_empty() );
 	}
 
 	public function test_empty_incoming_map_never_causes_umc_empty(): void {
@@ -109,8 +114,8 @@ final class GatewayCurrencyClassifierTest extends TestCase {
 		);
 
 		$this->assertSame( array(), $result->filtered_gateways() );
-		$this->assertSame( 0, $result->evaluation()->beforeUmcCount() );
-		$this->assertFalse( $result->evaluation()->umcCausedEmpty() );
+		$this->assertSame( 0, $result->evaluation()->before_umc_count() );
+		$this->assertFalse( $result->evaluation()->umc_caused_empty() );
 	}
 
 	public function test_currency_code_is_normalized_to_uppercase(): void {
@@ -132,7 +137,7 @@ final class GatewayCurrencyClassifierTest extends TestCase {
 			3
 		);
 
-		$this->assertSame( 3, $result->evaluation()->enabledGatewayCount() );
+		$this->assertSame( 3, $result->evaluation()->enabled_gateway_count() );
 	}
 
 	public function test_partial_retention_prevents_umc_caused_empty(): void {
@@ -148,7 +153,7 @@ final class GatewayCurrencyClassifierTest extends TestCase {
 		);
 
 		$this->assertSame( array( 'cheque' ), array_keys( $result->filtered_gateways() ) );
-		$this->assertSame( 1, $result->evaluation()->retainedCount() );
-		$this->assertFalse( $result->evaluation()->umcCausedEmpty() );
+		$this->assertSame( 1, $result->evaluation()->retained_count() );
+		$this->assertFalse( $result->evaluation()->umc_caused_empty() );
 	}
 }

@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace UMC\Tests\Integration;
 
+use UMC\Checkout\CheckoutTransitionStateRepository;
 use UMC\Currency;
 use UMC\CurrencyContext;
 use UMC\CurrencyRegistry;
@@ -50,7 +51,7 @@ final class TransactionOrderTest extends WP_UnitTestCase {
 
 		$_COOKIE[ CurrencyContext::COOKIE_NAME ] = $active;
 
-		return new OrderSnapshot( $context, $settings, '0.3.0' );
+		return new OrderSnapshot( $context, $settings, '0.3.0', new CheckoutTransitionStateRepository() );
 	}
 
 	public function test_snapshot_written_with_full_audit_meta(): void {
