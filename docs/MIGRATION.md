@@ -54,13 +54,14 @@ These run automatically inside UMC when it first reads `umc_settings` after an
 upgrade. They are **not** a foreign-switcher import: `SettingsUpgrader` only
 ever reads UMC's own option.
 
-`Settings::SCHEMA_VERSION` is **2**. Two production migrations exist, keyed by
+`Settings::SCHEMA_VERSION` is **3**. Three production migrations exist, keyed by
 the version they produce, and are applied in ascending order:
 
 | From → To | Migration | Change |
 |---|---|---|
 | 0 → 1 | `SettingsUpgrader::migrate_0_to_1` | Adds `schema_version: 1`; currency rows copied unchanged |
 | 1 → 2 | `SettingsUpgrader::migrate_1_to_2` | Introduces the automatic-rate shape (below) |
+| 2 → 3 | `SettingsUpgrader::migrate_2_to_3` | Adds the Display switcher settings block with safe defaults |
 
 ### What v1 → v2 changes
 
@@ -75,6 +76,20 @@ the version they produce, and are applied in ascending order:
 | Global interval | *(absent)* | `rate_update_interval` defaults to `P1D` |
 | Global staleness limit | *(absent)* | `rate_max_age_hours` defaults to `48` |
 | Schema marker | `schema_version: 1` | **`schema_version: 2`** |
+
+### What v2 → v3 changes
+
+| Field | Before (v2) | After (v3) |
+|---|---|---|
+| Display switcher | *(absent)* | **`display`** block initialized from `SwitcherSettings::default_array()` |
+| Schema marker | `schema_version: 2` | **`schema_version: 3`** |
+
+The upgrade preserves all currency and exchange-rate configuration. The
+switcher remains disabled (`display.enabled: false`) until a merchant enables
+it in WooCommerce → Settings → Multicurrency → Display.
+
+Defaults for the initialized display fields come from `Settings::sanitize()`,
+which every migration result passes through.
 
 Defaults for the initialized per-currency fields come from
 `Settings::sanitize()`, which every migration result passes through.

@@ -335,13 +335,14 @@ final class ReleaseAuditTest extends TestCase {
 		$this->assertSame( '>=8.1', $composer['require']['php'] ?? null );
 	}
 
-	public function test_settings_schema_is_v2_with_production_migrations(): void {
-		$this->assertSame( 2, Settings::SCHEMA_VERSION );
+	public function test_settings_schema_is_v3_with_production_migrations(): void {
+		$this->assertSame( 3, Settings::SCHEMA_VERSION );
 
 		$migrations = SettingsUpgrader::production_migrations();
-		$this->assertSame( array( 1, 2 ), array_keys( $migrations ) );
+		$this->assertSame( array( 1, 2, 3 ), array_keys( $migrations ) );
 		$this->assertSame( SettingsUpgrader::MIGRATE_0_TO_1, $migrations[1] );
 		$this->assertSame( SettingsUpgrader::MIGRATE_1_TO_2, $migrations[2] );
+		$this->assertSame( SettingsUpgrader::MIGRATE_2_TO_3, $migrations[3] );
 	}
 
 	public function test_persisted_keys_inventory_version_is_documented(): void {

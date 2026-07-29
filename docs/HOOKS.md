@@ -60,16 +60,37 @@ apply.
 
 | Hook | Args | Why |
 |---|---|---|
-| `woocommerce_init` | — | Builds the request graph, runs the switch handler, and registers the filters above once the WC session is available. |
+| `woocommerce_init` | — | Builds the request graph, runs the switch handler, registers conversion filters, and wires the Display switcher stack once the WC session is available. |
 | `woocommerce_get_settings_pages` | `($pages)` | Adds the "Multicurrency" settings tab (`Admin\SettingsPage`), instantiated only when WooCommerce builds its settings. |
 | `woocommerce_settings_tabs_array`, `woocommerce_settings_{id}`, `woocommerce_settings_save_{id}` | — | Wired by the `WC_Settings_Page` base class for tab registration, output and save. |
 | `woocommerce_admin_field_umc_currencies` | `($field)` | Renders the custom currencies table field. |
-| `add_shortcode('umc_switcher')` | — | The currency switcher (`Frontend\Switcher::render()`), reusable by future block/Elementor wrappers. |
+| `woocommerce_admin_field_umc_display` | `($field)` | Renders the Display settings cards and live preview shell (`Admin\DisplaySettingsField`). |
 
 The switch itself is a `?currency=<code>` request handled by
 `CurrencySwitcher` on `woocommerce_init`: it validates the code against the
-selectable allow-list, persists to the WC session + a 30-day cookie
-(`wc_setcookie`), and `wp_safe_redirect`s to the same URL without the parameter.
+selectable allow-list, persists to the WC session, optionally to a 30-day guest
+cookie when remember-selection is enabled (otherwise any existing remembered
+cookie is expired), and `wp_safe_redirect`s to the same URL without the parameter.
+
+## Display M1 — storefront currency switcher
+
+Registered on `woocommerce_init` alongside the conversion stack. Presentation
+only — currency resolution, validation, and switching remain in
+`CurrencyContext` / `CurrencySwitcher`.
+
+| Hook | Args | Prio | Owner | Why |
+|---|---|---|---|---|
+| `add_shortcode('universal_multicurrency_switcher')` | — | — | `Display\SwitcherShortcode` | Primary manual switcher shortcode. |
+| `add_shortcode('umc_switcher')` | — | — | `Display\SwitcherShortcode` | Legacy alias for the same renderer. |
+| `wp_enqueue_scripts` | — | 5 | `Display\SwitcherAssets::register_assets()` | Registers switcher CSS/JS handles (does not enqueue globally). |
+| `wp_enqueue_scripts` | — | 15 | `Display\SwitcherAssets::maybe_enqueue_from_post_content()` | Enqueues assets when post content contains a switcher shortcode. |
+| `wp_enqueue_scripts` | — | 20 | `Display\SwitcherAssets::maybe_enqueue_automatic()` | Enqueues assets when automatic floating placement is enabled. |
+| `language_attributes` | `($output)` | 10 | `Display\SwitcherAssets::append_no_js_class()` | Adds the `no-js` document class for progressive dropdown enhancement. |
+| `wp_footer` | — | 20 | `Display\AutomaticSwitcherPlacement::maybe_render()` | Renders the automatic floating switcher once per request when enabled. |
+
+Assets may also print a late `<link>` fallback when a shortcode renders after
+styles were already printed. Guard tests allow `Display\SwitcherAssets` as the
+sole storefront asset registrar besides admin assets.
 
 ## Milestone 3 — cart, checkout & order currency
 
@@ -190,11 +211,10 @@ ever. Order-status hooks carry no callback either.
 Milestone 6 adds: no `deactivate_plugins` or related deactivation APIs; no
 frontend conflict notice; no JavaScript or other frontend assets for diagnostics.
 
-No JavaScript is registered. The Cart and Checkout blocks are served entirely by
-server-side conversion, so there is no `IntegrationInterface`, no
-`woocommerce_blocks_*_block_registration` callback and no `registerCheckoutFilters`
-usage; currency switching reloads the page, which makes block data refetch on its
-own.
+Display M1 registers conditional storefront CSS/JS for the currency switcher
+only (`Display\SwitcherAssets`). The Cart and Checkout blocks are still served
+entirely by server-side conversion; currency switching reloads the page via
+`?currency=`, which makes block data refetch on its own.
 
 Guard tests (`StorefrontGuardTest`, `StoreApiHooksStructureTest`,
 `DiagnosticsGuardTest`) assert that no plugin-origin callbacks land on the fee,

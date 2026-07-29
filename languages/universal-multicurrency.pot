@@ -31,7 +31,10 @@ msgstr ""
 msgid "magpern"
 msgstr ""
 
+#: src/Admin/AdminPageShell.php:104
 #: src/Admin/AdminPageShell.php:105
+#: src/Admin/SettingsPage.php:586
+#: src/Admin/SettingsPage.php:587
 msgid "Save changes"
 msgstr ""
 
@@ -46,8 +49,8 @@ msgid "for WooCommerce"
 msgstr ""
 
 #: src/Admin/AdminPageShellViewModelFactory.php:65
-#: src/Admin/SettingsPage.php:89
-#: src/Admin/SettingsPage.php:483
+#: src/Admin/SettingsPage.php:103
+#: src/Admin/SettingsPage.php:601
 msgid "Multicurrency"
 msgstr ""
 
@@ -128,6 +131,22 @@ msgstr ""
 msgid "You do not have permission to manage currencies."
 msgstr ""
 
+#: src/Admin/CurrencyFormatPreview.php:42
+msgid "Before amount (no space)"
+msgstr ""
+
+#: src/Admin/CurrencyFormatPreview.php:43
+msgid "After amount (no space)"
+msgstr ""
+
+#: src/Admin/CurrencyFormatPreview.php:44
+msgid "Before amount (with space)"
+msgstr ""
+
+#: src/Admin/CurrencyFormatPreview.php:45
+msgid "After amount (with space)"
+msgstr ""
+
 #: src/Admin/CurrencyOverviewField.php:51
 #: src/Admin/CurrencyOverviewField.php:209
 #: src/Admin/CurrencyTableField.php:100
@@ -135,7 +154,6 @@ msgid "Enabled"
 msgstr ""
 
 #: src/Admin/CurrencyOverviewField.php:52
-#: src/Frontend/Switcher.php:146
 msgid "Currency"
 msgstr ""
 
@@ -233,51 +251,57 @@ msgstr ""
 msgid "Symbol position"
 msgstr ""
 
-#: src/Admin/CurrencyOverviewField.php:221
+#. translators: %s: formatted price example
+#: src/Admin/CurrencyOverviewField.php:224
+#, php-format
+msgid "Storefront preview: %s"
+msgstr ""
+
+#: src/Admin/CurrencyOverviewField.php:230
 #: src/Admin/CurrencyTableField.php:104
 #: src/Admin/OrderCurrencyMetaBox.php:230
 msgid "Decimals"
 msgstr ""
 
-#: src/Admin/CurrencyOverviewField.php:226
+#: src/Admin/CurrencyOverviewField.php:235
 msgid "Exchange rate"
 msgstr ""
 
-#: src/Admin/CurrencyOverviewField.php:228
+#: src/Admin/CurrencyOverviewField.php:237
 #: src/Admin/ExchangeRateSettingsField.php:66
 msgid "Rate mode"
 msgstr ""
 
-#: src/Admin/CurrencyOverviewField.php:232
+#: src/Admin/CurrencyOverviewField.php:241
 #: src/Admin/CurrencyTableField.php:107
 msgid "Provider rate"
 msgstr ""
 
-#: src/Admin/CurrencyOverviewField.php:236
+#: src/Admin/CurrencyOverviewField.php:245
 msgid "Adjustment percentage"
 msgstr ""
 
-#: src/Admin/CurrencyOverviewField.php:240
+#: src/Admin/CurrencyOverviewField.php:249
 #: src/Admin/CurrencyTableField.php:109
 msgid "Effective rate"
 msgstr ""
 
-#: src/Admin/CurrencyOverviewField.php:247
+#: src/Admin/CurrencyOverviewField.php:256
 #: src/Admin/CurrencyTableField.php:106
 msgid "Manual rate"
 msgstr ""
 
-#: src/Admin/CurrencyOverviewField.php:253
+#: src/Admin/CurrencyOverviewField.php:262
 #: src/Admin/CurrencyTableField.php:189
 msgid "Update now"
 msgstr ""
 
-#: src/Admin/CurrencyOverviewField.php:273
+#: src/Admin/CurrencyOverviewField.php:282
 #: src/Admin/CurrencyTableField.php:249
 msgid "Inherit global"
 msgstr ""
 
-#: src/Admin/CurrencyOverviewField.php:274
+#: src/Admin/CurrencyOverviewField.php:283
 #: src/Admin/CurrencyTableField.php:250
 #: src/Admin/ExchangeRateSettingsField.php:69
 #: src/Admin/OrderCurrencyMetaBox.php:279
@@ -288,7 +312,7 @@ msgstr ""
 msgid "Manual"
 msgstr ""
 
-#: src/Admin/CurrencyOverviewField.php:275
+#: src/Admin/CurrencyOverviewField.php:284
 #: src/Admin/CurrencyTableField.php:251
 #: src/Admin/ExchangeRateSettingsField.php:70
 #: src/Admin/ViewModel/CurrencyViewModelFactory.php:247
@@ -297,29 +321,9 @@ msgstr ""
 msgid "Automatic"
 msgstr ""
 
-#: src/Admin/CurrencyOverviewField.php:300
-#: src/Admin/CurrencyTableField.php:276
-msgid "Left"
-msgstr ""
-
-#: src/Admin/CurrencyOverviewField.php:301
-#: src/Admin/CurrencyTableField.php:277
-msgid "Right"
-msgstr ""
-
-#: src/Admin/CurrencyOverviewField.php:302
-#: src/Admin/CurrencyTableField.php:278
-msgid "Left with space"
-msgstr ""
-
-#: src/Admin/CurrencyOverviewField.php:303
-#: src/Admin/CurrencyTableField.php:279
-msgid "Right with space"
-msgstr ""
-
 #: src/Admin/CurrencyTableField.php:95
-#: src/Admin/SettingsPage.php:121
-#: src/Admin/SettingsPage.php:333
+#: src/Admin/SettingsPage.php:146
+#: src/Admin/SettingsPage.php:405
 msgid "Currencies"
 msgstr ""
 
@@ -333,6 +337,7 @@ msgid "Symbol"
 msgstr ""
 
 #: src/Admin/CurrencyTableField.php:103
+#: src/Admin/DisplaySettingsField.php:287
 msgid "Position"
 msgstr ""
 
@@ -350,6 +355,183 @@ msgstr ""
 
 #: src/Admin/CurrencyTableField.php:143
 msgid "Base currency (configured in WooCommerce → Settings → General)"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:110
+msgid "Preview"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:111
+msgid "Preview viewport"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:112
+msgid "Desktop"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:113
+msgid "Mobile"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:127
+msgid "Preview simulates a storefront viewport. Currency links do not change the customer selection."
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:181
+msgid "Automatic placement is enabled and a currency switcher shortcode was detected on an important page or menu link. Both may appear on the storefront."
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:188
+msgid "Automatic placement injects the switcher on every storefront page. Use manual placement with a shortcode when you need precise control."
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:218
+msgid "Switcher"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:222
+msgid "Enable storefront switcher"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:225
+msgid "Placement"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:230
+msgid "Manual placement"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:231
+msgid "Floating side"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:232
+msgid "Floating bottom"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:247
+msgid "Style"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:253
+msgid "Dropdown"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:260
+msgid "Horizontal list"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:269
+msgid "Horizontal list is available with manual placement only. Automatic placements always use the dropdown style."
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:291
+msgid "Vertical position"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:299
+msgid "Vertical offset (px)"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:303
+#: src/Admin/DisplaySettingsField.php:309
+msgid "Edge offset (px)"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:313
+msgid "Bottom offset (px)"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:329
+msgid "Side"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:331
+msgid "Left"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:332
+msgid "Right"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:347
+msgid "Content"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:351
+msgid "Show currency code"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:356
+msgid "Show currency symbol"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:361
+msgid "Show currency name"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:366
+msgid "Show selected currency first"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:381
+msgid "Appearance"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:383
+msgid "Theme"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:391
+msgid "Size"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:399
+msgid "Shape"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:401
+msgid "Slightly rounded"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:402
+msgid "Rounded"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:403
+msgid "Pill"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:418
+msgid "Behavior"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:422
+msgid "Remember selected currency between visits"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:424
+msgid "When disabled, the selection applies to the current browsing session only."
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:438
+msgid "Device visibility"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:442
+msgid "Show on desktop"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:447
+msgid "Show on mobile"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:449
+msgid "When the switcher is enabled, at least one device option must remain selected."
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:477
+msgid "yourstore.example/shop"
 msgstr ""
 
 #: src/Admin/ExchangeRateSettingsField.php:63
@@ -491,25 +673,34 @@ msgstr ""
 msgid "Multicurrency settings sections"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:122
-#: src/Admin/SettingsPage.php:360
+#: src/Admin/SettingsPage.php:147
+#: src/Admin/SettingsPage.php:459
 msgid "Exchange Rates"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:123
+#: src/Admin/SettingsPage.php:148
+#: src/Admin/SettingsPage.php:432
 msgid "Display"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:124
+#: src/Admin/SettingsPage.php:149
 msgid "Checkout"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:125
+#: src/Admin/SettingsPage.php:150
 msgid "Compatibility"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:126
+#: src/Admin/SettingsPage.php:151
 msgid "Advanced"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:318
+msgid "When the switcher is enabled, at least one device visibility option must be selected."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:335
+msgid "Horizontal list is only available with manual placement. Style was saved as Dropdown."
 msgstr ""
 
 #: src/Admin/ViewModel/CurrencyViewModelFactory.php:145

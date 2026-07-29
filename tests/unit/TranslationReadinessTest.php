@@ -30,6 +30,7 @@ final class TranslationReadinessTest extends TestCase {
 	 */
 	private const APPROVED_JS_FILES = array(
 		'assets/admin/umc-settings.js',
+		'assets/js/switcher.js',
 	);
 
 	private function root(): string {

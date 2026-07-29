@@ -68,9 +68,9 @@ fitting SPL type (`InvalidArgumentException` / `RuntimeException`).
 
 ### Settings schema upgrade (Milestones 7–8)
 
-`Settings::SCHEMA_VERSION` is **2** and must not be bumped unless a genuine
-settings shape change requires it. Both production migrations exist because the
-stored shape actually changed; neither is an artificial bump.
+`Settings::SCHEMA_VERSION` is **3** and must not be bumped unless a genuine
+settings shape change requires it. Production migrations exist because the
+stored shape actually changed; none is an artificial bump.
 
 Legacy stores (schema version **0**) persisted only a `currencies` array inside
 `umc_settings`, with no explicit `schema_version` key. `SettingsUpgrader::migrate_0_to_1`
@@ -82,6 +82,11 @@ per-currency `rate` key becomes `manual_rate`, and the global keys `rate_mode`,
 `rate_provider`, `rate_update_interval`, and `rate_max_age_hours` gain defaults.
 Upgraded stores stay in **manual** mode, so conversion output is unchanged across
 the boundary — proven byte-for-byte by `tests/unit/SettingsMigrationFidelityTest.php`.
+
+`SettingsUpgrader::migrate_2_to_3` adds the Display switcher settings block
+(`display`) with safe defaults. Currency and exchange-rate configuration is
+preserved unchanged; `display.enabled` remains `false` so storefront output is
+not activated by the upgrade alone.
 See [`MIGRATION.md`](MIGRATION.md) § Internal settings schema migrations.
 
 `SettingsUpgrader` responsibilities:
@@ -114,7 +119,8 @@ Request flow and collaborators:
 - `CurrencyResolver` — pure priority resolution (explicit → session → cookie →
   base) against the selectable allow-list.
 - `CurrencySwitcher` — validates a `?currency=` request, persists to the WC
-  session + a 30-day cookie, and safe-redirects without the parameter.
+  session, optionally to a remembered guest cookie (Display M1 policy), and
+  safe-redirects without the parameter.
 - `CurrencyContext` — request-scoped facade: resolves the active `Currency`,
   computes the base→active rate once, builds the selectable set (enabled **and**
   rated, plus base), and decides `is_convertible_request()`. Memoized.
@@ -125,10 +131,14 @@ Request flow and collaborators:
 - `Integration\PriceHooks` / `Integration\CurrencyFormatting` — thin
   view-context filters delegating to the seam and reporting the active currency's
   identity/formatting. Attached unconditionally, gated per request.
-- `Frontend\Switcher` — one reusable `render()` behind `[umc_switcher]`; future
-  block/Elementor wrappers reuse it.
-- `Admin\SettingsPage` / `Admin\CurrencyTableField` — a WooCommerce settings tab
-  whose currencies table persists through `Settings::save()` (M1 sanitizer).
+- `Display\*` — storefront switcher presentation and placement (schema v3
+  settings, shared renderer, shortcodes, automatic floating placement, conditional
+  assets). Currency resolution and switching remain in `CurrencyContext` /
+  `CurrencySwitcher`.
+- `Admin\SettingsPage` / `Admin\CurrencyTableField` / `Admin\DisplaySettingsField`
+  — WooCommerce settings tab whose currencies table persists through
+  `Settings::save()` (M1 sanitizer) and whose Display section configures the
+  switcher with a live preview.
 
 The base `Currency` is built at the composition root (`Plugin::init()`) from
 `woocommerce_currency` and WooCommerce's price options, then injected into
@@ -313,7 +323,7 @@ changing monetary behaviour. Authoritative records:
 | Persisted-key inventory | [`PERSISTED_DATA.md`](PERSISTED_DATA.md), `PersistedKeys`, `PersistedKeysInventoryTest` |
 | Uninstall retention | ADR-0009, `uninstall.php`, `UninstallPolicyGuardTest` |
 | Manual merchant migration only | [`MIGRATION.md`](MIGRATION.md) — no foreign import, no RC CSV parser |
-| Settings schema | `Settings::SCHEMA_VERSION === 2`; production migrations v0→v1 and v1→v2 via `SettingsUpgrader` |
+| Settings schema | `Settings::SCHEMA_VERSION === 3`; production migrations v0→v1, v1→v2, and v2→v3 via `SettingsUpgrader` |
 | Translation readiness | [`TRANSLATION.md`](TRANSLATION.md), `languages/universal-multicurrency.pot`, `composer make-pot:check` |
 | Security audit | [`SECURITY_REVIEW.md`](SECURITY_REVIEW.md) — zero open Critical/High; accepted M/L risks documented |
 | Performance baselines | [`PERFORMANCE_BASELINES.md`](PERFORMANCE_BASELINES.md) — deterministic query/write ceilings only |

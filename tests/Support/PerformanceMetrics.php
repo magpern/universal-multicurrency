@@ -200,8 +200,12 @@ trait PerformanceMetrics {
 			$_COOKIE[ \UMC\CurrencyContext::COOKIE_NAME ] = $cookie;
 		}
 
-		if ( null !== $session && null !== WC()->session ) {
-			WC()->session->set( \UMC\CurrencyContext::SESSION_KEY, $session );
+		if ( null !== WC()->session ) {
+			if ( null !== $session ) {
+				WC()->session->set( \UMC\CurrencyContext::SESSION_KEY, $session );
+			} else {
+				WC()->session->set( \UMC\CurrencyContext::SESSION_KEY, null );
+			}
 		}
 
 		if ( null !== $query ) {

@@ -33,6 +33,7 @@ final class SecuritySourceGuardTest extends TestCase {
 		'NoticeDismissal.php',
 		'SettingsPage.php',
 		'ExchangeRateSettingsField.php',
+		'DisplaySettingsField.php',
 		'OrderPayCurrencyLock.php',
 		'RateUpdateController.php',
 	);
@@ -50,6 +51,7 @@ final class SecuritySourceGuardTest extends TestCase {
 		'ExchangeRateSettingsField.php',
 		'CurrencyTableField.php',
 		'CurrencyViewModelFactory.php',
+		'DisplaySettingsField.php',
 	);
 
 	private function root(): string {
