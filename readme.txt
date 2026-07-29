@@ -4,7 +4,7 @@ Tags: woocommerce, currency, multicurrency, exchange rates, money
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.8.1
+Stable tag: 0.9.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -50,6 +50,17 @@ The plugin ships a POT template (`languages/universal-multicurrency.pot`) for tr
 
 == Changelog ==
 
+= 0.9.0 =
+* Display settings configurator with visual placement and style controls
+* Floating Side and Floating Bottom positioning with edge and offset controls
+* Manual shortcode helper with copy action for manual placement
+* Live responsive preview with desktop and mobile viewport modes
+* Sticky Display save bar with unsaved-change indicator
+* Accessible native controls, segmented appearance options, and keyboard-friendly dropdown behavior
+* Inactive placement panel values preserved when switching placement modes
+* Storefront currency switcher renderer and assets (dropdown and horizontal list)
+* No settings schema change; safe in-place upgrade from 0.8.x
+
 = 0.8.1 =
 * Fixes recurring rate-update scheduling when the configured interval changes
 * Refreshes rate timestamps when merchants edit manual rate, adjustment, or per-currency rate mode inputs
@@ -78,6 +89,9 @@ The plugin ships a POT template (`languages/universal-multicurrency.pot`) for tr
 * Storefront conversion, classic cart/checkout, order snapshots, historical order display, refunds, and Store API / blocks parity (milestones 2–5)
 
 == Upgrade Notice ==
+
+= 0.9.0 =
+Display configurator release. No settings schema change — safe upgrade from 0.8.x. Requires WooCommerce 8.2+, PHP 8.1+, and HPOS.
 
 = 0.8.1 =
 Maintenance release. No settings schema change — safe upgrade from 0.8.0. Requires WooCommerce 8.2+, PHP 8.1+, and HPOS.

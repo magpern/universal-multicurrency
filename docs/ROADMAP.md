@@ -91,6 +91,26 @@
 
     No settings schema change. Safe in-place upgrade from **0.8.0**.
 
+9.  Display configurator (**v0.9.0**) — **prepared on `main`**.
+
+    ### Shipped in v0.9.0
+
+    | Milestone 9 work item | Status |
+    |---|---|
+    | Display settings configurator and AdminPageShell integration | **Prepared** |
+    | Visual placement and style controls | **Prepared** |
+    | Floating Side and Floating Bottom positioning | **Prepared** |
+    | Manual shortcode helper and copy action | **Prepared** |
+    | Live responsive preview and sticky Display save | **Prepared** |
+    | Storefront switcher renderer, assets, and shortcode | **Prepared** |
+    | Settings schema v3 display subtree (v2 → v3 migration) | **Prepared** — already on `main` |
+
+    **Prepared as:** **v0.9.0** (`UMC_VERSION`, plugin header, readme Stable
+    tag). Git tag `v0.9.0` and GitHub release pending release verification.
+
+    No new settings schema bump beyond schema v3 already shipped on `main`.
+    Safe in-place upgrade from **0.8.x**.
+
 ## Future milestones — not started, not implemented
 
 None of the following exists in the codebase today:

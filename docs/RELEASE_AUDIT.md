@@ -1,16 +1,15 @@
-# Release audit — v0.8.1 maintenance release
+# Release audit — v0.9.0 Display Configurator
 
-Executable release-blocking gate for Universal Multicurrency **v0.8.1**. This
+Executable release-blocking gate for Universal Multicurrency **v0.9.0**. This
 document records scope, criteria, commands, audit results, and the current
 release-preparation state.
 
 **Governing question:** If we published this release tomorrow, is there anything
 left in the repository that clearly should not ship?
 
-**Repository status:** **prepared for v0.8.1** on `main`. Milestone 8 shipped at
-**v0.8.0**; post-release review findings are closed. Git tag **`v0.8.1`** and
-GitHub release publication are **not yet created** — pending explicit approval.
-Milestone 9 has not started.
+**Repository status:** **prepared for v0.9.0** on `main`. Milestone 9 (Display
+configurator) is feature-complete on `main`. Git tag **`v0.9.0`** and GitHub
+release publication follow release verification.
 
 ---
 
@@ -18,10 +17,10 @@ Milestone 9 has not started.
 
 | Item | Value |
 |---|---|
-| Version | **0.8.1** |
-| Settings schema | **2** (unchanged from v0.8.0) |
+| Version | **0.9.0** |
+| Settings schema | **3** (unchanged from v0.8.x display work on `main`) |
 | Persisted-data inventory version | **3** |
-| Production migrations | **v0 → v1**, **v1 → v2** (unchanged) |
+| Production migrations | **v0 → v1**, **v1 → v2**, **v2 → v3** (unchanged) |
 | Unresolved Critical security findings | **0** |
 | Unresolved High security findings | **0** |
 | Unresolved release blockers | **0** |
@@ -32,13 +31,45 @@ Milestone 9 has not started.
 | Package inspection | **Passing** |
 | Git tag `v0.8.0` | **Created** (superseded) |
 | GitHub release `v0.8.0` | **Published** (superseded) |
-| Git tag `v0.8.1` | **Not yet created** |
-| GitHub release `v0.8.1` | **Not yet published** |
+| Git tag `v0.8.1` | **Not created** (superseded by v0.9.0 line) |
+| GitHub release `v0.8.1` | **Not published** (superseded by v0.9.0 line) |
+| Git tag `v0.9.0` | **Not yet created** |
+| GitHub release `v0.9.0` | **Not yet created** |
 | Milestone 8 | **Complete** — released and review-closed at v0.8.0 |
+| Milestone 9 | **Prepared** — Display configurator on `main` |
 
 ---
 
-## v0.8.1 maintenance scope
+## v0.9.0 Display Configurator scope
+
+Prepared feature release. **No new settings schema bump** beyond schema v3
+already on `main` — safe in-place upgrade from **0.8.x**.
+
+### Merchant-visible features
+
+| Capability | Implementation |
+|---|---|
+| Display settings configurator | `Admin\DisplaySettingsField`, `Admin\DisplayControlRenderer`, `Admin\AdminPageShell` |
+| Visual placement and style controls | Choice cards, segmented controls, dual position panels |
+| Floating Side / Floating Bottom | `Display\SwitcherSettings` placement modes + storefront CSS |
+| Manual shortcode helper | Copy action for `[umc_currency_switcher]` |
+| Live responsive preview | Admin preview frame, `assets/admin/umc-settings.js` |
+| Sticky Display save + unsaved indicator | `SettingsPage::render_display_sticky_actions()` |
+| Storefront switcher | `Display\SwitcherRenderer`, `assets/css/switcher.css`, `assets/js/switcher.js`, shortcode |
+| Inactive placement preservation | `DisplaySettingsField::merge_position_preserving_inactive()` |
+
+### Post-redesign verification fixes on `main`
+
+| Change | Commit |
+|---|---|
+| Disabled preview overlay when switcher is on | `3b196ad` |
+| Segmented appearance controls update live preview | `44742cc` |
+| Display save clears WooCommerce leave-site prompt | `59d83ff` |
+| Right-side dropdown opens inward | `59d83ff` |
+
+---
+
+## v0.8.1 maintenance scope (historical)
 
 Prepared maintenance release. **No settings schema change** — safe in-place
 upgrade from v0.8.0.
@@ -194,13 +225,13 @@ Exit code **non-zero** when any release-blocking step fails.
 
 ## Release-blocking criteria
 
-| ID | Criterion | Result (v0.8.1) |
+| ID | Criterion | Result (v0.9.0) |
 |---|---|---|
 | RB1 | No tracked secrets, dumps, caches, or `dist/` artifacts | **Pass** |
 | RB2 | `docs/plans/` remains untracked (local-only planning) | **Pass** |
 | RB3 | No foreign switcher runtime coupling outside allowlisted manifest | **Pass** |
 | RB4 | Plugin header, `UMC_VERSION`, readme Stable tag, text domain, PHP/WC metadata consistent | **Pass** |
-| RB5 | `Settings::SCHEMA_VERSION === 2`; production migrations v0 → v1 → v2 only | **Pass** |
+| RB5 | `Settings::SCHEMA_VERSION === 3`; production migrations v0 → v1 → v2 → v3 only | **Pass** |
 | RB6 | Persisted-key inventory matches docs + implementation (`umc_settings`, `umc_rate_state`, `umc_dismissed_notices`) | **Pass** |
 | RB7 | Uninstall deletes configuration options (`umc_settings`, `umc_rate_state`); preserves commerce + dismissal meta | **Pass** |
 | RB8 | `SECURITY_REVIEW.md`: zero open Critical/High | **Pass** |
@@ -242,10 +273,10 @@ needles remain confined to `Diagnostics/DetectorManifest.php` only.
 
 ## Metadata and compatibility
 
-| Field | Value (v0.8.1) |
+| Field | Value (v0.9.0) |
 |---|---|
-| Plugin version (header + `UMC_VERSION`) | **0.8.1** |
-| readme.txt Stable tag | **0.8.1** |
+| Plugin version (header + `UMC_VERSION`) | **0.9.0** |
+| readme.txt Stable tag | **0.9.0** |
 | Text domain | `universal-multicurrency` |
 | Requires PHP | 8.1 |
 | Requires Plugins | woocommerce |
@@ -270,8 +301,8 @@ Authoritative registry: [`PERSISTED_DATA.md`](PERSISTED_DATA.md) +
 
 ## Settings upgrade audit
 
-- `Settings::SCHEMA_VERSION` is **2**
-- Production migration map: **v0 → v1** and **v1 → v2**
+- `Settings::SCHEMA_VERSION` is **3**
+- Production migration map: **v0 → v1**, **v1 → v2**, and **v2 → v3**
 - v1 → v2 is a real schema change (renames `rate` to `manual_rate`, adds the
   automatic-rate fields), not an artificial bump
 - Canonical reads avoid writes; failed migrations do not persist partial data
@@ -327,11 +358,13 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Expected artifact: **`dist/universal-multicurrency-0.8.1.zip`**
+Expected artifact: **`dist/universal-multicurrency-0.9.0.zip`**
 
 ### Included
 
-- `universal-multicurrency.php` (header Version **0.8.1**), `uninstall.php`, `readme.txt` (Stable tag **0.8.1**)
+- `universal-multicurrency.php` (header Version **0.9.0**), `uninstall.php`, `readme.txt` (Stable tag **0.9.0**)
+- `src/` production PHP including `src/Admin/DisplayControlRenderer.php`, `src/Admin/DisplaySettingsField.php`, `src/Display/`
+- `assets/admin/umc-settings.css`, `assets/admin/umc-settings.js`, `assets/css/switcher.css`, `assets/js/switcher.js`
 - `src/` production PHP
 - `vendor/autoload.php` (+ production autoload only)
 - `languages/universal-multicurrency.pot`

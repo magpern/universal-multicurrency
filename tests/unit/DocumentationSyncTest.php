@@ -25,7 +25,7 @@ use ZipArchive;
  */
 final class DocumentationSyncTest extends TestCase {
 
-	private const CURRENT_VERSION = '0.8.1';
+	private const CURRENT_VERSION = '0.9.0';
 
 	/**
 	 * Tracked documentation sources that must exist and stay internally consistent.
@@ -330,7 +330,7 @@ final class DocumentationSyncTest extends TestCase {
 		$this->assertStringContainsString( 'Unresolved release blockers | **0**', $audit );
 		$this->assertStringContainsString( 'Open Milestone 8 review findings | **0**', $audit );
 		$this->assertStringContainsString( 'Git tag `v' . self::CURRENT_VERSION . '` | **Not yet created**', $audit );
-		$this->assertStringContainsString( 'GitHub release `v' . self::CURRENT_VERSION . '` | **Not yet published**', $audit );
+		$this->assertStringContainsString( 'GitHub release `v' . self::CURRENT_VERSION . '` | **Not yet created**', $audit );
 		$this->assertStringContainsString( 'Git tag `v0.8.0` | **Created**', $audit );
 		$this->assertStringContainsString( 'Milestone 8 | **Complete**', $audit );
 		$this->assertStringContainsString( '## Post-release review findings', $audit );

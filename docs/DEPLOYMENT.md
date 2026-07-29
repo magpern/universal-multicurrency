@@ -26,7 +26,7 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Produces `dist/universal-multicurrency-0.8.1.zip`. The archive includes `readme.txt`,
+Produces `dist/universal-multicurrency-0.9.0.zip`. The archive includes `readme.txt`,
 production `src/`, `vendor/`, and `languages/universal-multicurrency.pot`.
 
 Performance subset:
@@ -36,8 +36,8 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Prepared release:** **v0.8.1** on `main`. Git tag and GitHub release are not
-yet created — do not create without explicit approval.
+**Prepared release:** **v0.9.0** on `main`. Git tag and GitHub release follow
+release verification — do not create without explicit approval.
 
 ---
 
@@ -958,3 +958,35 @@ the uninstall performance ceiling (`045ac34`, `470ba45`, `7ee8e9b`).
 
 Downgrade to the **0.8.0** zip if needed. Settings schema remains v2; order
 snapshots are unaffected.
+
+---
+
+## v0.9.0 — Display Configurator (prepared)
+
+### Summary
+
+Packages the Display settings configurator and storefront currency switcher on
+`main` under version **0.9.0**. Settings schema remains **v3** — no new
+migration beyond the v2 → v3 path already on `main`.
+
+### Merchant-visible changes
+
+| Area | Change |
+|---|---|
+| Display settings | Visual configurator with placement, style, appearance, behavior, and visibility controls |
+| Positioning | Floating Side and Floating Bottom with offset controls; manual shortcode placement |
+| Preview | Live responsive preview with sticky Display save and unsaved-change indicator |
+| Storefront | Currency switcher renderer (dropdown / horizontal list), shortcode, and switcher assets |
+
+### Deployment sequence
+
+1. Run `composer release-audit` on the **0.9.0** tree.
+2. Build `dist/universal-multicurrency-0.9.0.zip` with `composer install --no-dev`
+   + `bin/build-zip.sh`.
+3. Deploy over **0.8.x** in place. No migration step for stores already on schema v3.
+
+### Rollback
+
+Downgrade to the **0.8.x** zip if needed. Display settings in `umc_settings` may
+include a `display` subtree that older builds ignore safely; order snapshots are
+unaffected.
