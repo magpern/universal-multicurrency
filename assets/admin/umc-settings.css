@@ -764,6 +764,12 @@
 	margin-top: 8px;
 }
 
+.umc-display-preview .umc-switcher--side-right.umc-switcher--dropdown.umc-switcher--preview-show-names .umc-switcher__menu {
+	margin-inline-start: auto;
+	max-width: 100%;
+	width: max-content;
+}
+
 .umc-display-preview .umc-switcher--dropdown.umc-switcher--preview-show-names .umc-switcher__menu[hidden] {
 	display: block;
 }

@@ -72,6 +72,14 @@
 	z-index: calc(var(--umc-switcher-z-index) + 1);
 }
 
+.umc-switcher--side-right .umc-switcher__menu {
+	inset-inline-end: 0;
+	inset-inline-start: auto;
+	max-width: calc(100vw - (2 * var(--umc-edge-offset)));
+	min-width: 100%;
+	width: max-content;
+}
+
 .umc-switcher--open-up .umc-switcher__menu {
 	bottom: calc(100% + calc(var(--umc-spacing) * 0.5));
 	margin-bottom: 0;

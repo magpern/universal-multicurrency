@@ -438,6 +438,14 @@
 			copyShortcode();
 		} );
 
+		$root.closest( 'form' ).on( 'submit', function () {
+			window.onbeforeunload = '';
+		} );
+
+		$( '[data-umc-display-actions]' ).on( 'click', 'button[type="submit"]', function () {
+			window.onbeforeunload = '';
+		} );
+
 		refreshPreview();
 	}
 

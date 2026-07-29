@@ -609,7 +609,7 @@ final class SettingsPage extends WC_Settings_Page {
 	 */
 	private function render_display_sticky_actions(): void {
 		?>
-		<div class="umc-display-actions" data-umc-display-actions>
+		<div class="umc-display-actions submit" data-umc-display-actions>
 			<span class="umc-display-actions__status" data-umc-unsaved-indicator hidden><?php esc_html_e( 'Unsaved changes', 'universal-multicurrency' ); ?></span>
 			<button type="submit" name="save" value="<?php echo esc_attr__( 'Save changes', 'universal-multicurrency' ); ?>" class="button button-primary umc-display-actions__save">
 				<?php esc_html_e( 'Save changes', 'universal-multicurrency' ); ?>
