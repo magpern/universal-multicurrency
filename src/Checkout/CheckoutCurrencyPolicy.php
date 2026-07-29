@@ -111,26 +111,26 @@ final class CheckoutCurrencyPolicy {
 			return false;
 		}
 
-		if ( $evaluation->beforeUmcCount() <= 0 ) {
+		if ( $evaluation->before_umc_count() <= 0 ) {
 			return false;
 		}
 
-		if ( $evaluation->unknownSupportCount() > 0 ) {
+		if ( $evaluation->unknown_support_count() > 0 ) {
 			return false;
 		}
 
-		if ( $evaluation->retainedCount() > 0 ) {
+		if ( $evaluation->retained_count() > 0 ) {
 			return false;
 		}
 
-		if ( $evaluation->removedForCurrencyCount() !== $evaluation->beforeUmcCount() ) {
+		if ( $evaluation->removed_for_currency_count() !== $evaluation->before_umc_count() ) {
 			return false;
 		}
 
-		if ( $evaluation->afterUmcCount() !== 0 ) {
+		if ( $evaluation->after_umc_count() !== 0 ) {
 			return false;
 		}
 
-		return $evaluation->umcCausedEmpty();
+		return $evaluation->umc_caused_empty();
 	}
 }

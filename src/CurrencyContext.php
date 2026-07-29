@@ -185,8 +185,8 @@ final class CurrencyContext {
 		}
 
 		$this->effective_override = $normalized;
-		$this->active               = null;
-		$this->rate                 = null;
+		$this->active             = null;
+		$this->rate               = null;
 	}
 
 	/**

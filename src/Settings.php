@@ -135,7 +135,7 @@ final class Settings {
 			$clean['currencies'][ $code ] = self::sanitize_currency( $config );
 		}
 
-		$clean['display'] = self::sanitize_display( $raw['display'] ?? null );
+		$clean['display']  = self::sanitize_display( $raw['display'] ?? null );
 		$clean['checkout'] = self::sanitize_checkout( $raw['checkout'] ?? null );
 
 		return $clean;

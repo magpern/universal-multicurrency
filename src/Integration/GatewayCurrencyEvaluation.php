@@ -76,14 +76,14 @@ final class GatewayCurrencyEvaluation {
 	/**
 	 * Creates an evaluation snapshot.
 	 *
-	 * @param string       $currency                       Evaluated currency code.
-	 * @param list<string> $before_umc_gateway_ids         Pre-UMC gateway ids.
-	 * @param list<string> $retained_gateway_ids           Retained gateway ids.
-	 * @param list<string> $removed_for_currency_gateway_ids Explicitly removed ids.
-	 * @param list<string> $unknown_support_gateway_ids    Unknown-support ids.
-	 * @param list<string> $after_umc_gateway_ids          Post-UMC gateway ids.
-	 * @param int          $enabled_gateway_count          Enabled gateway count.
-	 * @param bool         $umc_caused_empty               Derived causality flag.
+	 * @param string             $currency                       Evaluated currency code.
+	 * @param array<int, string> $before_umc_gateway_ids         Pre-UMC gateway ids.
+	 * @param array<int, string> $retained_gateway_ids           Retained gateway ids.
+	 * @param array<int, string> $removed_for_currency_gateway_ids Explicitly removed ids.
+	 * @param array<int, string> $unknown_support_gateway_ids    Unknown-support ids.
+	 * @param array<int, string> $after_umc_gateway_ids          Post-UMC gateway ids.
+	 * @param int                $enabled_gateway_count          Enabled gateway count.
+	 * @param bool               $umc_caused_empty               Derived causality flag.
 	 */
 	public function __construct(
 		string $currency,
@@ -97,12 +97,12 @@ final class GatewayCurrencyEvaluation {
 	) {
 		$this->currency                         = strtoupper( $currency );
 		$this->before_umc_gateway_ids           = array_values( $before_umc_gateway_ids );
-		$this->retained_gateway_ids               = array_values( $retained_gateway_ids );
-		$this->removed_for_currency_gateway_ids   = array_values( $removed_for_currency_gateway_ids );
-		$this->unknown_support_gateway_ids        = array_values( $unknown_support_gateway_ids );
-		$this->after_umc_gateway_ids              = array_values( $after_umc_gateway_ids );
-		$this->enabled_gateway_count              = max( 0, $enabled_gateway_count );
-		$this->umc_caused_empty                   = $umc_caused_empty;
+		$this->retained_gateway_ids             = array_values( $retained_gateway_ids );
+		$this->removed_for_currency_gateway_ids = array_values( $removed_for_currency_gateway_ids );
+		$this->unknown_support_gateway_ids      = array_values( $unknown_support_gateway_ids );
+		$this->after_umc_gateway_ids            = array_values( $after_umc_gateway_ids );
+		$this->enabled_gateway_count            = max( 0, $enabled_gateway_count );
+		$this->umc_caused_empty                 = $umc_caused_empty;
 	}
 
 	/**
@@ -117,14 +117,14 @@ final class GatewayCurrencyEvaluation {
 	 *
 	 * @return list<string>
 	 */
-	public function beforeUmcGatewayIds(): array {
+	public function before_umc_gateway_ids(): array {
 		return $this->before_umc_gateway_ids;
 	}
 
 	/**
 	 * Count of gateways WooCommerce supplied before UMC filtering.
 	 */
-	public function beforeUmcCount(): int {
+	public function before_umc_count(): int {
 		return count( $this->before_umc_gateway_ids );
 	}
 
@@ -133,14 +133,14 @@ final class GatewayCurrencyEvaluation {
 	 *
 	 * @return list<string>
 	 */
-	public function retainedGatewayIds(): array {
+	public function retained_gateway_ids(): array {
 		return $this->retained_gateway_ids;
 	}
 
 	/**
 	 * Count of gateways retained by UMC.
 	 */
-	public function retainedCount(): int {
+	public function retained_count(): int {
 		return count( $this->retained_gateway_ids );
 	}
 
@@ -149,14 +149,14 @@ final class GatewayCurrencyEvaluation {
 	 *
 	 * @return list<string>
 	 */
-	public function removedForCurrencyGatewayIds(): array {
+	public function removed_for_currency_gateway_ids(): array {
 		return $this->removed_for_currency_gateway_ids;
 	}
 
 	/**
 	 * Count of gateways explicitly removed for currency.
 	 */
-	public function removedForCurrencyCount(): int {
+	public function removed_for_currency_count(): int {
 		return count( $this->removed_for_currency_gateway_ids );
 	}
 
@@ -165,14 +165,14 @@ final class GatewayCurrencyEvaluation {
 	 *
 	 * @return list<string>
 	 */
-	public function unknownSupportGatewayIds(): array {
+	public function unknown_support_gateway_ids(): array {
 		return $this->unknown_support_gateway_ids;
 	}
 
 	/**
 	 * Count of gateways with unknown currency support.
 	 */
-	public function unknownSupportCount(): int {
+	public function unknown_support_count(): int {
 		return count( $this->unknown_support_gateway_ids );
 	}
 
@@ -181,28 +181,28 @@ final class GatewayCurrencyEvaluation {
 	 *
 	 * @return list<string>
 	 */
-	public function afterUmcGatewayIds(): array {
+	public function after_umc_gateway_ids(): array {
 		return $this->after_umc_gateway_ids;
 	}
 
 	/**
 	 * Count of gateways after UMC filtering.
 	 */
-	public function afterUmcCount(): int {
+	public function after_umc_count(): int {
 		return count( $this->after_umc_gateway_ids );
 	}
 
 	/**
 	 * Enabled gateways configured in the store.
 	 */
-	public function enabledGatewayCount(): int {
+	public function enabled_gateway_count(): int {
 		return $this->enabled_gateway_count;
 	}
 
 	/**
 	 * Whether UMC conclusively caused the post-UMC gateway map to be empty.
 	 */
-	public function umcCausedEmpty(): bool {
+	public function umc_caused_empty(): bool {
 		return $this->umc_caused_empty;
 	}
 }

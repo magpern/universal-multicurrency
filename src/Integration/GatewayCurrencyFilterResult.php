@@ -31,7 +31,7 @@ final class GatewayCurrencyFilterResult {
 	/**
 	 * Creates a filter result.
 	 *
-	 * @param array<string, object>   $filtered_gateways Filtered gateway map.
+	 * @param array<string, object>     $filtered_gateways Filtered gateway map.
 	 * @param GatewayCurrencyEvaluation $evaluation      Evaluation snapshot.
 	 */
 	public function __construct( array $filtered_gateways, GatewayCurrencyEvaluation $evaluation ) {

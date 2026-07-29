@@ -97,7 +97,7 @@ final class GatewayCompatibility {
 	 * @return mixed
 	 */
 	public function filter_gateways( $gateways ) {
-		if ( ! is_array( $gateways ) || array() === $gateways || ! $this->context->is_convertible_request() ) {
+		if ( ! is_array( $gateways ) || ! $this->context->is_convertible_request() ) {
 			return $gateways;
 		}
 
@@ -137,11 +137,11 @@ final class GatewayCompatibility {
 		$this->request_evaluation = $result->evaluation();
 		$filtered                 = $result->filtered_gateways();
 
-		if ( $result->evaluation()->umcCausedEmpty() && ! $this->coordinator_active ) {
+		if ( $result->evaluation()->umc_caused_empty() && ! $this->coordinator_active ) {
 			$this->notify_no_gateway( strtoupper( $currency ) );
 		}
 
-		foreach ( $result->evaluation()->removedForCurrencyGatewayIds() as $id ) {
+		foreach ( $result->evaluation()->removed_for_currency_gateway_ids() as $id ) {
 			/**
 			 * Fires when a gateway is hidden because it does not support the
 			 * active currency.

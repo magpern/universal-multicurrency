@@ -195,15 +195,15 @@ final class Plugin {
 				( new ShippingConversion( $service, $context ) )->register();
 				$gateway_compat->register();
 
-				$checkout_settings   = new CheckoutSettingsRepository( $settings );
-				$transition_repo     = new CheckoutTransitionStateRepository();
-				$notice_service      = new CheckoutNoticeService( $transition_repo );
-				$effective_currency  = new CheckoutEffectiveCurrencyProvider( $context );
-				$recalculation       = new CheckoutRecalculationService( $context );
-				$reader              = new OrderSnapshotReader();
-				$resolver            = new HistoricalFormattingResolver( $registry );
-				$order_context       = new OrderCurrencyContext( $reader, $resolver );
-				$coordinator         = new CheckoutPolicyCoordinator(
+				$checkout_settings  = new CheckoutSettingsRepository( $settings );
+				$transition_repo    = new CheckoutTransitionStateRepository();
+				$notice_service     = new CheckoutNoticeService( $transition_repo );
+				$effective_currency = new CheckoutEffectiveCurrencyProvider( $context );
+				$recalculation      = new CheckoutRecalculationService( $context );
+				$reader             = new OrderSnapshotReader();
+				$resolver           = new HistoricalFormattingResolver( $registry );
+				$order_context      = new OrderCurrencyContext( $reader, $resolver );
+				$coordinator        = new CheckoutPolicyCoordinator(
 					$checkout_settings,
 					new CheckoutCurrencyPolicy(),
 					$effective_currency,
