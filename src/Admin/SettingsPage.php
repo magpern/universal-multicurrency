@@ -243,7 +243,7 @@ final class SettingsPage extends WC_Settings_Page {
 	 * @param string $section Section slug.
 	 */
 	public function section_has_saveable_settings( string $section ): bool {
-		return in_array( $section, array( self::SECTION_CURRENCIES, self::SECTION_EXCHANGE_RATES, self::SECTION_DISPLAY ), true );
+		return in_array( $section, array( self::SECTION_CURRENCIES, self::SECTION_EXCHANGE_RATES, self::SECTION_DISPLAY, self::SECTION_CHECKOUT ), true );
 	}
 
 	/**

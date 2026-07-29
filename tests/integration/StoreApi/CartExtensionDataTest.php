@@ -111,7 +111,17 @@ final class CartExtensionDataTest extends StoreApiTestCase {
 		$this->boot_plugin( self::CURRENCIES, 'SEK' );
 
 		$this->assertSame(
-			array( 'active_currency', 'base_currency', 'selectable_currencies' ),
+			array(
+				'active_currency',
+				'base_currency',
+				'selectable_currencies',
+				'checkout_mode',
+				'shopper_currency',
+				'effective_currency',
+				'transition_reason',
+				'fallback_applied',
+				'checkout_notice',
+			),
 			array_keys( $this->extension_data() ),
 			'Amounts belong to the core fields, and the rate is an implementation detail.'
 		);

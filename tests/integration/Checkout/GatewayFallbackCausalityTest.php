@@ -97,6 +97,11 @@ final class GatewayFallbackCausalityTest extends WP_UnitTestCase {
 		delete_option( 'woocommerce_bacs_settings' );
 		delete_option( 'woocommerce_cheque_settings' );
 
+		if ( function_exists( 'WC' ) && WC()->session ) {
+			WC()->session->set( CheckoutTransitionStateRepository::SESSION_KEY, null );
+			WC()->session->set( CheckoutTransitionStateRepository::SESSION_NOTICE_KEY, null );
+		}
+
 		parent::tear_down();
 	}
 
