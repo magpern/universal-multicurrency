@@ -124,11 +124,24 @@ final class DiagnosticsGuardTest extends WP_UnitTestCase {
 	}
 
 	private function outside_manifest_files(): array {
+		$allowed = array(
+			'DetectorManifest.php',
+			'IntegrationRegistry.php',
+			'CachePluginRegistry.php',
+			'ThemeCompatibilityRegistry.php',
+		);
+
 		return array_values(
 			array_filter(
 				$this->umc_source_files(),
-				static function ( string $file ): bool {
-					return false === strpos( $file, 'DetectorManifest.php' );
+				static function ( string $file ) use ( $allowed ): bool {
+					foreach ( $allowed as $allowed_file ) {
+						if ( false !== strpos( $file, $allowed_file ) ) {
+							return false;
+						}
+					}
+
+					return true;
 				}
 			)
 		);
@@ -211,18 +224,40 @@ final class DiagnosticsGuardTest extends WP_UnitTestCase {
 	}
 
 	public function test_g5a_detection_stays_inside_diagnostics(): void {
+		$files = array_values(
+			array_filter(
+				$this->non_diagnostics_files( 'Plugin.php' ),
+				static function ( string $file ): bool {
+					$basename = basename( $file );
+
+					return 'SettingsPage.php' !== $basename && false === strpos( $file, '/Compatibility/' );
+				}
+			)
+		);
+
 		$this->assert_pattern_absent_from(
-			$this->non_diagnostics_files( 'Plugin.php' ),
+			$files,
 			'/DetectorRegistry|DetectorManifest|ConflictDetector|ConflictScorer|EnvironmentProbe|SignatureKind|umc_conflict_detectors|Confidence::/',
 			'G5a: detection types must not leak outside src/Diagnostics/.'
 		);
 	}
 
-	public function test_g5b_plugin_php_is_the_only_diagnostics_seam(): void {
+	public function test_g5b_plugin_and_settings_page_are_diagnostics_seams(): void {
+		$files = array_values(
+			array_filter(
+				$this->non_diagnostics_files( 'Plugin.php' ),
+				static function ( string $file ): bool {
+					$basename = basename( $file );
+
+					return 'SettingsPage.php' !== $basename && false === strpos( $file, '/Compatibility/' );
+				}
+			)
+		);
+
 		$this->assert_pattern_absent_from(
-			$this->non_diagnostics_files( 'Plugin.php' ),
+			$files,
 			'/UMC\\\\Diagnostics|Diagnostics\\\\/',
-			'G5b: only Plugin.php may reference the Diagnostics namespace.'
+			'G5b: only Plugin.php and SettingsPage.php may reference the Diagnostics namespace.'
 		);
 	}
 
@@ -240,7 +275,7 @@ final class DiagnosticsGuardTest extends WP_UnitTestCase {
 		$this->assert_pattern_absent_from(
 			$this->outside_manifest_files(),
 			$pattern,
-			'G6: third-party identifiers may only appear in DetectorManifest.php.'
+			'G6: third-party identifiers may only appear in the explicit allowlist files.'
 		);
 	}
 

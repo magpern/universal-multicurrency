@@ -124,8 +124,8 @@ final class AdminAssets {
 				'umc-admin-compatibility',
 				'umcCompatibility',
 				array(
-					'copySuccess' => __( 'Report copied.', 'universal-multicurrency' ),
-					'copyFailed'  => __( 'Could not copy report.', 'universal-multicurrency' ),
+					'copySuccess'  => __( 'Report copied.', 'universal-multicurrency' ),
+					'copyFailed'   => __( 'Could not copy report.', 'universal-multicurrency' ),
 					'showEvidence' => __( 'Show technical evidence', 'universal-multicurrency' ),
 					'hideEvidence' => __( 'Hide technical evidence', 'universal-multicurrency' ),
 				)

@@ -58,7 +58,7 @@ final class IntegrationCheck implements CompatibilityCheckInterface {
 				)
 				: sprintf(
 					/* translators: %s: integration label */
-					__( '%s is installed but inactive.', 'universal-multicurrency' ),
+					__( '%s is present but inactive.', 'universal-multicurrency' ),
 					(string) $definition['label']
 				);
 

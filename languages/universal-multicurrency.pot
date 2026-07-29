@@ -32,12 +32,12 @@ msgid "magpern"
 msgstr ""
 
 #: src/Admin/AdminAssets.php:105
-#: src/Admin/DisplaySettingsField.php:230
+#: src/Admin/DisplaySettingsField.php:231
 msgid "On"
 msgstr ""
 
 #: src/Admin/AdminAssets.php:106
-#: src/Admin/DisplaySettingsField.php:230
+#: src/Admin/DisplaySettingsField.php:231
 msgid "Off"
 msgstr ""
 
@@ -53,16 +53,34 @@ msgstr ""
 msgid "Copy shortcode:"
 msgstr ""
 
+#: src/Admin/AdminAssets.php:127
+msgid "Report copied."
+msgstr ""
+
+#: src/Admin/AdminAssets.php:128
+msgid "Could not copy report."
+msgstr ""
+
+#: src/Admin/AdminAssets.php:129
+#: src/Admin/CompatibilitySettingsField.php:216
+msgid "Show technical evidence"
+msgstr ""
+
+#: src/Admin/AdminAssets.php:130
+msgid "Hide technical evidence"
+msgstr ""
+
 #: src/Admin/AdminPageShell.php:104
 #: src/Admin/AdminPageShell.php:105
-#: src/Admin/SettingsPage.php:600
-#: src/Admin/SettingsPage.php:601
-#: src/Admin/SettingsPage.php:614
-#: src/Admin/SettingsPage.php:615
+#: src/Admin/SettingsPage.php:644
+#: src/Admin/SettingsPage.php:645
+#: src/Admin/SettingsPage.php:658
+#: src/Admin/SettingsPage.php:659
 msgid "Save changes"
 msgstr ""
 
 #: src/Admin/AdminPageShellViewModelFactory.php:61
+#: src/Compatibility/Checks/EnvironmentCheck.php:37
 #: src/Diagnostics/SiteHealthReport.php:607
 #: src/Diagnostics/SiteHealthReport.php:851
 msgid "Universal Multicurrency"
@@ -73,8 +91,8 @@ msgid "for WooCommerce"
 msgstr ""
 
 #: src/Admin/AdminPageShellViewModelFactory.php:65
-#: src/Admin/SettingsPage.php:103
-#: src/Admin/SettingsPage.php:629
+#: src/Admin/SettingsPage.php:115
+#: src/Admin/SettingsPage.php:673
 msgid "Multicurrency"
 msgstr ""
 
@@ -95,7 +113,7 @@ msgid "Control how selected currencies behave during checkout."
 msgstr ""
 
 #: src/Admin/AdminPageShellViewModelFactory.php:90
-msgid "Review compatibility with WooCommerce and other currency plugins."
+msgid "Review store compatibility, conflicts, cache interactions, and support diagnostics."
 msgstr ""
 
 #: src/Admin/AdminPageShellViewModelFactory.php:92
@@ -120,6 +138,110 @@ msgstr ""
 
 #: src/Admin/AdminPageShellViewModelFactory.php:115
 msgid "We're working on additional settings for this section."
+msgstr ""
+
+#: src/Admin/CompatibilitySettingsField.php:58
+msgid "Critical conflicts"
+msgstr ""
+
+#: src/Admin/CompatibilitySettingsField.php:64
+msgid "Configuration"
+msgstr ""
+
+#: src/Admin/CompatibilitySettingsField.php:69
+msgid "Integrations"
+msgstr ""
+
+#: src/Admin/CompatibilitySettingsField.php:74
+#: src/Admin/DisplaySettingsField.php:507
+msgid "Theme"
+msgstr ""
+
+#: src/Admin/CompatibilitySettingsField.php:79
+msgid "Cache"
+msgstr ""
+
+#: src/Admin/CompatibilitySettingsField.php:84
+msgid "Environment"
+msgstr ""
+
+#: src/Admin/CompatibilitySettingsField.php:110
+msgid "Local compatibility checks for this store configuration."
+msgstr ""
+
+#: src/Admin/CompatibilitySettingsField.php:112
+#: src/Admin/CompatibilitySettingsField.php:282
+msgid "Passed"
+msgstr ""
+
+#: src/Admin/CompatibilitySettingsField.php:113
+msgid "Informational"
+msgstr ""
+
+#: src/Admin/CompatibilitySettingsField.php:114
+msgid "Warnings"
+msgstr ""
+
+#: src/Admin/CompatibilitySettingsField.php:115
+msgid "Conflicts"
+msgstr ""
+
+#: src/Admin/CompatibilitySettingsField.php:156
+msgid "No items to show in this section."
+msgstr ""
+
+#: src/Admin/CompatibilitySettingsField.php:240
+msgid "Support report"
+msgstr ""
+
+#: src/Admin/CompatibilitySettingsField.php:241
+msgid "Copy this redacted report when contacting support."
+msgstr ""
+
+#: src/Admin/CompatibilitySettingsField.php:244
+msgid "Support environment report"
+msgstr ""
+
+#: src/Admin/CompatibilitySettingsField.php:252
+msgid "Copy report"
+msgstr ""
+
+#: src/Admin/CompatibilitySettingsField.php:264
+msgid "Conflict detected"
+msgstr ""
+
+#: src/Admin/CompatibilitySettingsField.php:265
+msgid "Configuration incomplete"
+msgstr ""
+
+#: src/Admin/CompatibilitySettingsField.php:266
+msgid "Attention recommended"
+msgstr ""
+
+#: src/Admin/CompatibilitySettingsField.php:267
+msgid "Some checks unavailable"
+msgstr ""
+
+#: src/Admin/CompatibilitySettingsField.php:268
+msgid "All checks passed"
+msgstr ""
+
+#: src/Admin/CompatibilitySettingsField.php:279
+msgid "Conflict"
+msgstr ""
+
+#: src/Admin/CompatibilitySettingsField.php:280
+msgid "Warning"
+msgstr ""
+
+#: src/Admin/CompatibilitySettingsField.php:281
+#: src/Admin/ExchangeRateSettingsField.php:164
+#: src/Admin/ViewModel/CurrencyViewModelFactory.php:332
+msgid "Unavailable"
+msgstr ""
+
+#: src/Admin/CompatibilitySettingsField.php:283
+msgid "Information"
 msgstr ""
 
 #: src/Admin/CurrencyActionController.php:55
@@ -235,6 +357,7 @@ msgstr ""
 #: src/Admin/CurrencyOverviewField.php:140
 #: src/Admin/ViewModel/CurrencyViewModelFactory.php:85
 #: src/Admin/ViewModel/CurrencyViewModelFactory.php:89
+#: src/Compatibility/Checks/EnvironmentCheck.php:51
 #: src/Diagnostics/SiteHealthReport.php:615
 msgid "Base currency"
 msgstr ""
@@ -338,7 +461,7 @@ msgstr ""
 
 #: src/Admin/CurrencyOverviewField.php:284
 #: src/Admin/CurrencyTableField.php:251
-#: src/Admin/DisplaySettingsField.php:488
+#: src/Admin/DisplaySettingsField.php:489
 #: src/Admin/ExchangeRateSettingsField.php:70
 #: src/Admin/ViewModel/CurrencyViewModelFactory.php:247
 #: src/Admin/ViewModel/CurrencyViewModelFactory.php:253
@@ -347,8 +470,8 @@ msgid "Automatic"
 msgstr ""
 
 #: src/Admin/CurrencyTableField.php:95
-#: src/Admin/SettingsPage.php:146
-#: src/Admin/SettingsPage.php:418
+#: src/Admin/SettingsPage.php:167
+#: src/Admin/SettingsPage.php:439
 msgid "Currencies"
 msgstr ""
 
@@ -362,7 +485,7 @@ msgid "Symbol"
 msgstr ""
 
 #: src/Admin/CurrencyTableField.php:103
-#: src/Admin/DisplaySettingsField.php:380
+#: src/Admin/DisplaySettingsField.php:381
 msgid "Position"
 msgstr ""
 
@@ -382,252 +505,248 @@ msgstr ""
 msgid "Base currency (configured in WooCommerce → Settings → General)"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:122
+#: src/Admin/DisplaySettingsField.php:123
 msgid "Live preview"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:123
+#: src/Admin/DisplaySettingsField.php:124
 msgid "Preview viewport"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:124
+#: src/Admin/DisplaySettingsField.php:125
 msgid "Desktop"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:125
+#: src/Admin/DisplaySettingsField.php:126
 msgid "Mobile"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:138
+#: src/Admin/DisplaySettingsField.php:139
 msgid "Switcher is currently disabled"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:142
+#: src/Admin/DisplaySettingsField.php:143
 msgid "Preview simulates a storefront viewport. Currency links do not change the customer selection."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:222
+#: src/Admin/DisplaySettingsField.php:223
 msgid "Enable storefront switcher"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:250
+#: src/Admin/DisplaySettingsField.php:251
 msgid "Automatic placement is enabled and a currency switcher shortcode was detected on an important page or menu link. Both may appear on the storefront."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:259
+#: src/Admin/DisplaySettingsField.php:260
 msgid "Automatic placement injects the switcher on every storefront page. Use manual placement with a shortcode when you need precise control."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:277
+#: src/Admin/DisplaySettingsField.php:278
 msgid "Switcher"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:279
+#: src/Admin/DisplaySettingsField.php:280
 msgid "Placement"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:284
+#: src/Admin/DisplaySettingsField.php:285
 msgid "Manual placement"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:285
+#: src/Admin/DisplaySettingsField.php:286
 msgid "Place the switcher with a shortcode."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:289
+#: src/Admin/DisplaySettingsField.php:290
 msgid "Floating side"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:290
+#: src/Admin/DisplaySettingsField.php:291
 msgid "Fixed to the left or right edge."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:294
+#: src/Admin/DisplaySettingsField.php:295
 msgid "Floating bottom"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:295
+#: src/Admin/DisplaySettingsField.php:296
 msgid "Fixed above the bottom edge."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:317
+#: src/Admin/DisplaySettingsField.php:318
 msgid "Style"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:325
+#: src/Admin/DisplaySettingsField.php:326
 msgid "Dropdown"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:326
+#: src/Admin/DisplaySettingsField.php:327
 msgid "Compact trigger with a menu."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:342
+#: src/Admin/DisplaySettingsField.php:343
 msgid "Horizontal list"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:343
+#: src/Admin/DisplaySettingsField.php:344
 msgid "Inline currency links."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:350
+#: src/Admin/DisplaySettingsField.php:351
 msgid "Horizontal list is available with manual placement only. Automatic placements always use the dropdown style."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:353
+#: src/Admin/DisplaySettingsField.php:354
 msgid "Manual shortcode"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:354
+#: src/Admin/DisplaySettingsField.php:355
 msgid "Add this shortcode to a page, post, or widget area."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:357
+#: src/Admin/DisplaySettingsField.php:358
 msgid "Copy shortcode"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:358
+#: src/Admin/DisplaySettingsField.php:359
 msgid "Copy"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:385
+#: src/Admin/DisplaySettingsField.php:386
 msgid "Vertical position"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:391
+#: src/Admin/DisplaySettingsField.php:392
 msgid "Top"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:392
+#: src/Admin/DisplaySettingsField.php:393
 msgid "Middle"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:393
+#: src/Admin/DisplaySettingsField.php:394
 msgid "Bottom"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:407
+#: src/Admin/DisplaySettingsField.php:408
 msgid "Vertical offset (px)"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:411
-#: src/Admin/DisplaySettingsField.php:418
+#: src/Admin/DisplaySettingsField.php:412
+#: src/Admin/DisplaySettingsField.php:419
 msgid "Edge offset (px)"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:422
+#: src/Admin/DisplaySettingsField.php:423
 msgid "Bottom offset (px)"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:439
+#: src/Admin/DisplaySettingsField.php:440
 msgid "Left"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:440
+#: src/Admin/DisplaySettingsField.php:441
 msgid "Right"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:444
+#: src/Admin/DisplaySettingsField.php:445
 msgid "Side"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:469
+#: src/Admin/DisplaySettingsField.php:470
 msgid "Content"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:471
+#: src/Admin/DisplaySettingsField.php:472
 msgid "Show currency code"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:472
+#: src/Admin/DisplaySettingsField.php:473
 msgid "Show currency symbol"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:473
+#: src/Admin/DisplaySettingsField.php:474
 msgid "Show currency name"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:474
+#: src/Admin/DisplaySettingsField.php:475
 msgid "Show selected currency first"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:489
+#: src/Admin/DisplaySettingsField.php:490
 msgid "Light"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:490
+#: src/Admin/DisplaySettingsField.php:491
 msgid "Dark"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:493
+#: src/Admin/DisplaySettingsField.php:494
 msgid "Compact"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:494
+#: src/Admin/DisplaySettingsField.php:495
 msgid "Standard"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:495
+#: src/Admin/DisplaySettingsField.php:496
 msgid "Large"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:498
+#: src/Admin/DisplaySettingsField.php:499
 msgid "Slight"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:499
+#: src/Admin/DisplaySettingsField.php:500
 msgid "Rounded"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:500
+#: src/Admin/DisplaySettingsField.php:501
 msgid "Pill"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:504
+#: src/Admin/DisplaySettingsField.php:505
 msgid "Appearance"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:506
-msgid "Theme"
-msgstr ""
-
-#: src/Admin/DisplaySettingsField.php:519
+#: src/Admin/DisplaySettingsField.php:520
 msgid "Size"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:532
+#: src/Admin/DisplaySettingsField.php:533
 msgid "Shape"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:556
+#: src/Admin/DisplaySettingsField.php:557
 msgid "Behavior"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:562
+#: src/Admin/DisplaySettingsField.php:563
 msgid "Remember selected currency between visits"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:563
+#: src/Admin/DisplaySettingsField.php:564
 msgid "When disabled, the selection applies to the current browsing session only."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:581
+#: src/Admin/DisplaySettingsField.php:582
 msgid "Device visibility"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:583
+#: src/Admin/DisplaySettingsField.php:584
 msgid "Show on desktop"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:584
+#: src/Admin/DisplaySettingsField.php:585
 msgid "Show on mobile"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:586
+#: src/Admin/DisplaySettingsField.php:587
 msgid "When the switcher is enabled, at least one device option must remain selected."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:614
+#: src/Admin/DisplaySettingsField.php:615
 msgid "yourstore.example/shop"
 msgstr ""
 
@@ -666,11 +785,6 @@ msgstr ""
 #: src/Admin/ExchangeRateSettingsField.php:153
 #: src/Rates/RateStatusEvaluator.php:87
 msgid "Never"
-msgstr ""
-
-#: src/Admin/ExchangeRateSettingsField.php:164
-#: src/Admin/ViewModel/CurrencyViewModelFactory.php:332
-msgid "Unavailable"
 msgstr ""
 
 #: src/Admin/ExchangeRateSettingsField.php:170
@@ -770,37 +884,38 @@ msgstr ""
 msgid "Multicurrency settings sections"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:147
-#: src/Admin/SettingsPage.php:472
+#: src/Admin/SettingsPage.php:168
+#: src/Admin/SettingsPage.php:493
 msgid "Exchange Rates"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:148
-#: src/Admin/SettingsPage.php:445
+#: src/Admin/SettingsPage.php:169
+#: src/Admin/SettingsPage.php:466
 msgid "Display"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:149
+#: src/Admin/SettingsPage.php:170
 msgid "Checkout"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:150
+#: src/Admin/SettingsPage.php:171
+#: src/Admin/SettingsPage.php:516
 msgid "Compatibility"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:151
+#: src/Admin/SettingsPage.php:172
 msgid "Advanced"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:331
+#: src/Admin/SettingsPage.php:352
 msgid "When the switcher is enabled, at least one device visibility option must be selected."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:348
+#: src/Admin/SettingsPage.php:369
 msgid "Horizontal list is only available with manual placement. Style was saved as Dropdown."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:613
+#: src/Admin/SettingsPage.php:657
 msgid "Unsaved changes"
 msgstr ""
 
@@ -835,6 +950,349 @@ msgstr ""
 
 #: src/Admin/ViewModel/CurrencyViewModelFactory.php:336
 msgid "Current"
+msgstr ""
+
+#: src/Compatibility/Checks/CacheCheck.php:41
+msgid "External object cache detected"
+msgstr ""
+
+#: src/Compatibility/Checks/CacheCheck.php:42
+msgid "An external object cache is active. Object caching is usually safe for Universal Multicurrency."
+msgstr ""
+
+#: src/Compatibility/Checks/CacheCheck.php:85
+msgid "No page-cache plugin detected from WordPress"
+msgstr ""
+
+#: src/Compatibility/Checks/CacheCheck.php:86
+msgid "No supported page-cache plugin was detected. Server-level or edge cache configuration cannot be verified from WordPress alone."
+msgstr ""
+
+#: src/Compatibility/Checks/CacheCheck.php:94
+msgid "Server and edge cache may still be present"
+msgstr ""
+
+#: src/Compatibility/Checks/CacheCheck.php:95
+msgid "Reverse proxies, CDN edge caches, and web-server caches cannot always be detected from WordPress."
+msgstr ""
+
+#. translators: %s: cache plugin name
+#: src/Compatibility/Checks/CacheCheck.php:113
+#, php-format
+msgid "%s is active. Object caching is usually safe."
+msgstr ""
+
+#. translators: %s: cache plugin name
+#: src/Compatibility/Checks/CacheCheck.php:120
+#, php-format
+msgid "%s is active. Full-page caching may serve the wrong currency unless cache varies by selection state."
+msgstr ""
+
+#. translators: %s: cookie name used by Universal Multicurrency
+#: src/Compatibility/Checks/CacheCheck.php:139
+#, php-format
+msgid "Vary or bypass page cache when the selected currency changes (%1$s cookie, WooCommerce session key %2$s, or explicit currency query requests)."
+msgstr ""
+
+#: src/Compatibility/Checks/CacheCheck.php:143
+msgid "Exclude cart, checkout, and account pages from full-page cache when prices must reflect the selected currency."
+msgstr ""
+
+#: src/Compatibility/Checks/CacheCheck.php:144
+msgid "Confirm AJAX or fragment behavior for the currency switcher under cache."
+msgstr ""
+
+#. translators: %s: third-party plugin name
+#: src/Compatibility/Checks/ConflictCheck.php:61
+#, php-format
+msgid "%s is installed but inactive."
+msgstr ""
+
+#: src/Compatibility/Checks/ConflictCheck.php:78
+msgid "No currency-switcher conflicts detected"
+msgstr ""
+
+#: src/Compatibility/Checks/ConflictCheck.php:79
+msgid "No active conflicting currency switcher was detected."
+msgstr ""
+
+#. translators: %s: third-party plugin name
+#: src/Compatibility/Checks/ConflictCheck.php:120
+#, php-format
+msgid "%s appears to be active and conflicts with Universal Multicurrency."
+msgstr ""
+
+#: src/Compatibility/Checks/ConflictCheck.php:127
+#: src/Compatibility/Checks/IntegrationCheck.php:88
+msgid "Review installed plugins"
+msgstr ""
+
+#: src/Compatibility/Checks/ConflictCheck.php:132
+msgid "Deactivate the conflicting currency switcher or disable the Universal Multicurrency storefront switcher until only one switcher controls prices."
+msgstr ""
+
+#: src/Compatibility/Checks/EnvironmentCheck.php:38
+msgid "Settings schema"
+msgstr ""
+
+#: src/Compatibility/Checks/EnvironmentCheck.php:39
+msgid "WordPress"
+msgstr ""
+
+#: src/Compatibility/Checks/EnvironmentCheck.php:40
+msgid "WooCommerce"
+msgstr ""
+
+#: src/Compatibility/Checks/EnvironmentCheck.php:41
+msgid "PHP"
+msgstr ""
+
+#: src/Compatibility/Checks/EnvironmentCheck.php:42
+msgid "Database"
+msgstr ""
+
+#: src/Compatibility/Checks/EnvironmentCheck.php:43
+msgid "Multisite"
+msgstr ""
+
+#: src/Compatibility/Checks/EnvironmentCheck.php:44
+msgid "HPOS"
+msgstr ""
+
+#: src/Compatibility/Checks/EnvironmentCheck.php:45
+msgid "Object cache"
+msgstr ""
+
+#: src/Compatibility/Checks/EnvironmentCheck.php:46
+msgid "WP-Cron disabled"
+msgstr ""
+
+#: src/Compatibility/Checks/EnvironmentCheck.php:47
+msgid "Permalink structure"
+msgstr ""
+
+#: src/Compatibility/Checks/EnvironmentCheck.php:48
+msgid "PHP memory limit"
+msgstr ""
+
+#: src/Compatibility/Checks/EnvironmentCheck.php:49
+msgid "Max execution time"
+msgstr ""
+
+#: src/Compatibility/Checks/EnvironmentCheck.php:50
+msgid "Locale"
+msgstr ""
+
+#: src/Compatibility/Checks/EnvironmentCheck.php:52
+msgid "Enabled currencies"
+msgstr ""
+
+#: src/Compatibility/Checks/EnvironmentCheck.php:78
+msgid "Display placement and style"
+msgstr ""
+
+#. translators: 1: placement, 2: style
+#: src/Compatibility/Checks/EnvironmentCheck.php:81
+#, php-format
+msgid "Display placement: %1$s. Style: %2$s."
+msgstr ""
+
+#: src/Compatibility/Checks/EnvironmentCheck.php:98
+msgid "Plain permalinks detected"
+msgstr ""
+
+#: src/Compatibility/Checks/EnvironmentCheck.php:99
+msgid "Plain permalinks can make currency switching and redirects less reliable."
+msgstr ""
+
+#: src/Compatibility/Checks/EnvironmentCheck.php:109
+msgid "WordPress pseudo-cron is disabled"
+msgstr ""
+
+#: src/Compatibility/Checks/EnvironmentCheck.php:110
+msgid "DISABLE_WP_CRON is set. Ensure a system cron task triggers wp-cron.php if automatic rate updates are used."
+msgstr ""
+
+#. translators: %s: integration label
+#: src/Compatibility/Checks/IntegrationCheck.php:56
+#, php-format
+msgid "%s is active."
+msgstr ""
+
+#. translators: %s: integration label
+#: src/Compatibility/Checks/IntegrationCheck.php:61
+#, php-format
+msgid "%s is present but inactive."
+msgstr ""
+
+#. translators: %s: integration label
+#: src/Compatibility/Checks/IntegrationCheck.php:68
+#, php-format
+msgid "%s was detected. Status: Detected / Untested."
+msgstr ""
+
+#: src/Compatibility/Checks/IntegrationCheck.php:100
+msgid "No tracked integrations detected"
+msgstr ""
+
+#: src/Compatibility/Checks/IntegrationCheck.php:101
+msgid "No integrations from the compatibility registry were detected on this site."
+msgstr ""
+
+#: src/Compatibility/Checks/ThemeCheck.php:42
+msgid "Active theme"
+msgstr ""
+
+#. translators: 1: theme name, 2: theme version
+#: src/Compatibility/Checks/ThemeCheck.php:45
+#, php-format
+msgid "Active theme: %1$s (%2$s). Compatibility status: %3$s."
+msgstr ""
+
+#: src/Compatibility/Checks/ThemeCheck.php:64
+msgid "Parent theme"
+msgstr ""
+
+#. translators: 1: parent theme name, 2: parent theme version
+#: src/Compatibility/Checks/ThemeCheck.php:67
+#, php-format
+msgid "Parent theme: %1$s (%2$s)."
+msgstr ""
+
+#: src/Compatibility/Checks/ThemeCheck.php:84
+msgid "Automatic switcher placement uses generic hooks"
+msgstr ""
+
+#: src/Compatibility/Checks/ThemeCheck.php:85
+msgid "Automatic switcher placement currently relies on generic WooCommerce and WordPress hooks rather than a theme-specific integration."
+msgstr ""
+
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:55
+msgid "No enabled currencies"
+msgstr ""
+
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:56
+msgid "Universal Multicurrency has no enabled currencies configured."
+msgstr ""
+
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:61
+msgid "Review currencies"
+msgstr ""
+
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:73
+msgid "Store base currency is not enabled"
+msgstr ""
+
+#. translators: %s: currency code
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:76
+#, php-format
+msgid "The WooCommerce base currency (%s) is not enabled in Universal Multicurrency."
+msgstr ""
+
+#. translators: %s: currency code
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:97
+#, php-format
+msgid "Missing symbol for %s"
+msgstr ""
+
+#. translators: %s: currency code
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:102
+#, php-format
+msgid "Enabled currency %s has no symbol configured."
+msgstr ""
+
+#. translators: %s: currency code
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:121
+#, php-format
+msgid "Missing exchange rate for %s"
+msgstr ""
+
+#. translators: %s: currency code
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:126
+#, php-format
+msgid "Enabled currency %s has no usable manual exchange rate."
+msgstr ""
+
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:133
+msgid "Review exchange rates"
+msgstr ""
+
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:147
+msgid "Settings schema may be partially migrated"
+msgstr ""
+
+#. translators: 1: stored schema version, 2: current schema version
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:150
+#, php-format
+msgid "Stored schema version %1$d is older than the current schema %2$d."
+msgstr ""
+
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:181
+#: src/Diagnostics/SiteHealthReport.php:222
+msgid "Recent exchange-rate fetch failures detected"
+msgstr ""
+
+#. translators: %d: number of currencies with failed fetches
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:184
+#: src/Diagnostics/SiteHealthReport.php:227
+#, php-format
+msgid "%d automatic currency has a failed fetch on record."
+msgid_plural "%d automatic currencies have failed fetches on record."
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:199
+msgid "Multiple stale automatic exchange rates"
+msgstr ""
+
+#. translators: %d: number of currencies
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:202
+#, php-format
+msgid "%d automatic currency has a stale exchange rate."
+msgid_plural "%d automatic currencies have stale exchange rates."
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:221
+#: src/Diagnostics/SiteHealthReport.php:213
+msgid "Automatic rate updates are not scheduled"
+msgstr ""
+
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:222
+#: src/Diagnostics/SiteHealthReport.php:215
+msgid "Automatic mode is enabled but no recurring update is scheduled."
+msgstr ""
+
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:243
+msgid "Switcher enabled without multiple currencies"
+msgstr ""
+
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:244
+msgid "The storefront switcher is enabled but fewer than two currencies are enabled."
+msgstr ""
+
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:255
+msgid "Switcher has no device visibility"
+msgstr ""
+
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:256
+msgid "The storefront switcher is enabled but no desktop or mobile visibility option is active."
+msgstr ""
+
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:267
+msgid "Manual switcher shortcode detected with automatic placement"
+msgstr ""
+
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:268
+msgid "A switcher shortcode appears on a key storefront page while automatic placement is also enabled."
+msgstr ""
+
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:278
+msgid "Configuration checks passed"
+msgstr ""
+
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:279
+msgid "Universal Multicurrency settings look usable."
 msgstr ""
 
 #. translators: 1: currency name, 2: ISO currency code
@@ -960,26 +1418,6 @@ msgstr ""
 #: src/Diagnostics/SiteHealthReport.php:187
 msgid "Rate health diagnostics were not initialized."
 msgstr ""
-
-#: src/Diagnostics/SiteHealthReport.php:213
-msgid "Automatic rate updates are not scheduled"
-msgstr ""
-
-#: src/Diagnostics/SiteHealthReport.php:215
-msgid "Automatic mode is enabled but no recurring update is scheduled."
-msgstr ""
-
-#: src/Diagnostics/SiteHealthReport.php:222
-msgid "Recent exchange-rate fetch failures detected"
-msgstr ""
-
-#. translators: %d: number of currencies with failed fetches
-#: src/Diagnostics/SiteHealthReport.php:227
-#, php-format
-msgid "%d automatic currency has a failed fetch on record."
-msgid_plural "%d automatic currencies have failed fetches on record."
-msgstr[0] ""
-msgstr[1] ""
 
 #: src/Diagnostics/SiteHealthReport.php:242
 msgid "Multiple automatic exchange rates are stale"

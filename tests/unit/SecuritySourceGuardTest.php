@@ -52,6 +52,8 @@ final class SecuritySourceGuardTest extends TestCase {
 		'CurrencyTableField.php',
 		'CurrencyViewModelFactory.php',
 		'DisplaySettingsField.php',
+		'CompatibilityInventory.php',
+		'SwitcherShortcodeScanner.php',
 	);
 
 	private function root(): string {

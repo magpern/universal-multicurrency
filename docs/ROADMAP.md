@@ -111,6 +111,19 @@
     No new settings schema bump beyond schema v3 already shipped on `main`.
     Safe in-place upgrade from **0.8.x**.
 
+10. Compatibility diagnostics center — **prepared on `main` (no version bump)**.
+
+    ### Prepared on `main`
+
+    | Work item | Status |
+    |---|---|
+    | Compatibility scan domain and grouped checks | **Prepared** |
+    | Configuration, integration, theme, cache, and environment diagnostics | **Prepared** |
+    | Support report with redaction and Copy Report action | **Prepared** |
+    | Admin Compatibility tab replacing the placeholder | **Prepared** |
+
+    No settings schema change. Live REST/AJAX probes remain deferred.
+
 ## Future milestones — not started, not implemented
 
 None of the following exists in the codebase today:

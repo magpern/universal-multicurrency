@@ -126,9 +126,9 @@ final class CompatibilitySettingsField {
 	 */
 	private function render_count_chip( string $label, int $count, string $type ): void {
 		printf(
-			'<li class="umc-compat-count umc-compat-count--%1$s"><span class="umc-compat-count__value">%2$d</span><span class="umc-compat-count__label">%3$s</span></li>',
+			'<li class="umc-compat-count umc-compat-count--%1$s"><span class="umc-compat-count__value">%2$s</span><span class="umc-compat-count__label">%3$s</span></li>',
 			esc_attr( $type ),
-			$count,
+			esc_html( (string) $count ),
 			esc_html( $label )
 		);
 	}
@@ -136,10 +136,10 @@ final class CompatibilitySettingsField {
 	/**
 	 * Renders one results section.
 	 *
-	 * @param string                       $title   Section title.
-	 * @param string                       $slug    Section slug.
+	 * @param string                          $title   Section title.
+	 * @param string                          $slug    Section slug.
 	 * @param array<int, CompatibilityResult> $results Section results.
-	 * @param bool                         $hide_empty Whether to hide empty sections.
+	 * @param bool                            $hide_empty Whether to hide empty sections.
 	 */
 	private function render_section( string $title, string $slug, array $results, bool $hide_empty = false ): void {
 		if ( $hide_empty && array() === $results ) {
@@ -171,9 +171,9 @@ final class CompatibilitySettingsField {
 	 * @param CompatibilityResult $result Compatibility result.
 	 */
 	private function render_result_card( CompatibilityResult $result ): void {
-		$panel_id  = 'umc-compat-evidence-' . sanitize_html_class( $result->id() );
-		$severity  = $result->severity();
-		$badge     = $this->severity_label( $severity );
+		$panel_id = 'umc-compat-evidence-' . sanitize_html_class( $result->id() );
+		$severity = $result->severity();
+		$badge    = $this->severity_label( $severity );
 
 		printf(
 			'<article class="umc-compat-result umc-compat-result--%1$s">',

@@ -180,7 +180,7 @@ final class SettingsConfigurationValidator {
 				CompatibilitySeverity::WARNING,
 				__( 'Recent exchange-rate fetch failures detected', 'universal-multicurrency' ),
 				sprintf(
-					/* translators: %d: number of currencies */
+					/* translators: %d: number of currencies with failed fetches */
 					_n(
 						'%d automatic currency has a failed fetch on record.',
 						'%d automatic currencies have failed fetches on record.',

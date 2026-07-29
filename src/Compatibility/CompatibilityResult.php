@@ -91,6 +91,8 @@ final class CompatibilityResult {
 	 * @param array<string, string>           $evidence     Structured evidence.
 	 * @param array<int, CompatibilityAction> $actions     Recommended actions.
 	 * @param array<int, string>              $details      Optional detail lines.
+	 *
+	 * @throws InvalidArgumentException When identifiers or enums are invalid.
 	 */
 	public function __construct(
 		string $id,
@@ -214,6 +216,9 @@ final class CompatibilityResult {
 
 	/**
 	 * Compares two results for deterministic ordering.
+	 *
+	 * @param self $left  Left result.
+	 * @param self $right Right result.
 	 */
 	public static function compare( self $left, self $right ): int {
 		$left_rank  = CompatibilitySeverity::RANK[ $left->severity() ] ?? 0;

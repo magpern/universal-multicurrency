@@ -60,6 +60,16 @@ final class SettingsPageSectionsTest extends WP_UnitTestCase {
 		$this->assertNotContains( 'umc_currencies', $types );
 	}
 
+	public function test_compatibility_section_exposes_compatibility_field(): void {
+		$page = $this->page();
+
+		$types = array_column( $page->get_settings_for_section( SettingsPage::SECTION_COMPATIBILITY ), 'type' );
+
+		$this->assertContains( 'umc_compatibility', $types );
+		$this->assertNotContains( 'umc_placeholder', $types );
+		$this->assertFalse( $page->section_has_saveable_settings( SettingsPage::SECTION_COMPATIBILITY ) );
+	}
+
 	public function test_display_section_exposes_display_field(): void {
 		$page = $this->page();
 

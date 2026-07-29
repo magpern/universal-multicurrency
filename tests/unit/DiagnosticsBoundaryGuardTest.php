@@ -26,7 +26,7 @@ final class DiagnosticsBoundaryGuardTest extends TestCase {
 
 	/**
 	 * Foreign identifiers a future detector might legitimately need to
-	 * name. Confined to DetectorManifest.php by guard, not by convention.
+	 * name. Confined to the explicit allowlist by guard, not by convention.
 	 *
 	 * @var array<int, string>
 	 */
@@ -112,23 +112,36 @@ final class DiagnosticsBoundaryGuardTest extends TestCase {
 		$all_files = $this->source_files();
 		$this->assertNotSame( array(), $all_files, 'Expected source files to scan.' );
 
-		$outside_manifest = array_values(
+		$allowed = array(
+			'DetectorManifest.php',
+			'IntegrationRegistry.php',
+			'CachePluginRegistry.php',
+			'ThemeCompatibilityRegistry.php',
+		);
+
+		$outside_allowed = array_values(
 			array_filter(
 				$all_files,
-				static function ( string $file ): bool {
-					return false === strpos( $file, 'DetectorManifest.php' );
+				static function ( string $file ) use ( $allowed ): bool {
+					foreach ( $allowed as $allowed_file ) {
+						if ( false !== strpos( $file, $allowed_file ) ) {
+							return false;
+						}
+					}
+
+					return true;
 				}
 			)
 		);
 
-		$this->assertNotSame( array(), $outside_manifest, 'Expected source files outside DetectorManifest.php.' );
+		$this->assertNotSame( array(), $outside_allowed, 'Expected source files outside the third-party allowlist.' );
 
 		$pattern = '/(' . implode( '|', array_map( 'preg_quote', self::FOREIGN_IDENTIFIERS ) ) . ')/i';
 
 		$this->assert_pattern_absent_from(
-			$outside_manifest,
+			$outside_allowed,
 			$pattern,
-			'Third-party plugin identifiers may only appear in DetectorManifest.php.'
+			'Third-party plugin identifiers may only appear in the explicit allowlist files.'
 		);
 	}
 
@@ -144,8 +157,13 @@ final class DiagnosticsBoundaryGuardTest extends TestCase {
 						return false;
 					}
 
-					// Plugin.php is the sole registration seam for Diagnostics (M6).
-					if ( false !== strpos( $file, '/Plugin.php' ) ) {
+					// Plugin.php and SettingsPage.php are registration seams for Diagnostics (M6 + Compatibility).
+					if ( false !== strpos( $file, '/Plugin.php' ) || false !== strpos( $file, '/SettingsPage.php' ) ) {
+						return false;
+					}
+
+					// Compatibility is an admin diagnostics composition layer over Diagnostics.
+					if ( false !== strpos( $file, '/Compatibility/' ) ) {
 						return false;
 					}
 
@@ -210,11 +228,12 @@ final class DiagnosticsBoundaryGuardTest extends TestCase {
 		);
 	}
 
-	public function test_settings_page_does_not_reference_diagnostics(): void {
+	public function test_settings_page_may_reference_diagnostics_only_for_compatibility_wiring(): void {
 		$source = (string) file_get_contents( $this->src_root() . '/Admin/SettingsPage.php' );
 
-		$this->assertDoesNotMatchRegularExpression( '/UMC\\\\Diagnostics|Diagnostics\\\\/', $source );
+		$this->assertMatchesRegularExpression( '/ConflictDetector|CompatibilityServices/', $source );
 		$this->assertStringContainsString( "'umc_conflict'", $source );
+		$this->assertStringContainsString( "'umc_compatibility'", $source );
 	}
 
 	public function test_probe_code_does_not_read_foreign_runtime_state(): void {

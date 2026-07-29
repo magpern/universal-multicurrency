@@ -111,22 +111,22 @@ final class SettingsPage extends WC_Settings_Page {
 	 * @param ExchangeRateStore $store    Rate persistence boundary.
 	 */
 	public function __construct( Settings $settings, Currency $base, ExchangeRateStore $store ) {
-		$this->id             = 'umc';
-		$this->label          = __( 'Multicurrency', 'universal-multicurrency' );
-		$this->settings       = $settings;
-		$this->parser         = new CurrencySettingsParser( $settings, $base );
-		$this->exchange_field = new ExchangeRateSettingsField( $settings, $store );
-		$registry             = new CurrencyRegistry( $settings, $base );
-		$rates                = new ManualRateProvider( $settings, $base->code() );
-		$context              = new CurrencyContext( $registry, $rates, new CurrencyResolver() );
-		$display_repository   = new SwitcherSettingsRepository( $settings );
-		$this->display_field  = new DisplaySettingsField(
+		$this->id                  = 'umc';
+		$this->label               = __( 'Multicurrency', 'universal-multicurrency' );
+		$this->settings            = $settings;
+		$this->parser              = new CurrencySettingsParser( $settings, $base );
+		$this->exchange_field      = new ExchangeRateSettingsField( $settings, $store );
+		$registry                  = new CurrencyRegistry( $settings, $base );
+		$rates                     = new ManualRateProvider( $settings, $base->code() );
+		$context                   = new CurrencyContext( $registry, $rates, new CurrencyResolver() );
+		$display_repository        = new SwitcherSettingsRepository( $settings );
+		$this->display_field       = new DisplaySettingsField(
 			$settings,
 			new SwitcherViewModelFactory( $context, new WooCommerceCurrencyProvider(), $display_repository ),
 			new SwitcherRenderer(),
 			$display_repository
 		);
-		$conflict_detector   = new ConflictDetector(
+		$conflict_detector         = new ConflictDetector(
 			new DetectorRegistry(),
 			new WordPressEnvironmentProbe(),
 			new ConflictScorer()
@@ -134,9 +134,9 @@ final class SettingsPage extends WC_Settings_Page {
 		$this->compatibility_field = new CompatibilitySettingsField(
 			CompatibilityServices::scanner( $settings, $store, $base, $conflict_detector )
 		);
-		$this->section_header = new SectionHeader();
-		$this->shell          = new AdminPageShell( new SectionNavigation() );
-		$this->overview_field = new CurrencyOverviewField(
+		$this->section_header      = new SectionHeader();
+		$this->shell               = new AdminPageShell( new SectionNavigation() );
+		$this->overview_field      = new CurrencyOverviewField(
 			new CurrencyViewModelFactory(
 				$settings,
 				$base,
