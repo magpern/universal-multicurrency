@@ -54,10 +54,19 @@ final class SettingsPageSectionsTest extends WP_UnitTestCase {
 	public function test_placeholder_section_renders_without_currency_fields(): void {
 		$page = $this->page();
 
-		$types = array_column( $page->get_settings_for_section( SettingsPage::SECTION_DISPLAY ), 'type' );
+		$types = array_column( $page->get_settings_for_section( SettingsPage::SECTION_CHECKOUT ), 'type' );
 
 		$this->assertContains( 'umc_placeholder', $types );
 		$this->assertNotContains( 'umc_currencies', $types );
+	}
+
+	public function test_display_section_exposes_display_field(): void {
+		$page = $this->page();
+
+		$types = array_column( $page->get_settings_for_section( SettingsPage::SECTION_DISPLAY ), 'type' );
+
+		$this->assertContains( 'umc_display', $types );
+		$this->assertTrue( $page->section_has_saveable_settings( SettingsPage::SECTION_DISPLAY ) );
 	}
 
 	private function page(): SettingsPage {

@@ -101,7 +101,7 @@ final class AdminPageShell {
 
 			<?php if ( $view_model->has_saveable_settings ) : ?>
 				<div class="umc-shell-header__actions">
-					<button type="submit" name="save" form="mainform" class="button button-primary umc-shell-header__save">
+					<button type="submit" name="save" value="<?php echo esc_attr__( 'Save changes', 'universal-multicurrency' ); ?>" form="mainform" class="button button-primary umc-shell-header__save">
 						<?php esc_html_e( 'Save changes', 'universal-multicurrency' ); ?>
 					</button>
 				</div>

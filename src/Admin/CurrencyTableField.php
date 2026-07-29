@@ -210,7 +210,7 @@ final class CurrencyTableField {
 			checked( $enabled, true, false ),
 			$code_cell,
 			esc_attr( $symbol ),
-			$this->position_select( $name . '[position]', $position ),
+			$this->position_select( $name . '[position]', $position, $symbol ),
 			Currency::MAX_DECIMALS,
 			$decimals,
 			$this->mode_select( $name . '[rate_mode]', $mode ),
@@ -270,23 +270,21 @@ final class CurrencyTableField {
 	 *
 	 * @param string $name    Field name.
 	 * @param string $current Current selected value.
+	 * @param string $symbol  Currency symbol for format examples.
 	 */
-	private function position_select( string $name, string $current ): string {
-		$labels = array(
-			'left'        => __( 'Left', 'universal-multicurrency' ),
-			'right'       => __( 'Right', 'universal-multicurrency' ),
-			'left_space'  => __( 'Left with space', 'universal-multicurrency' ),
-			'right_space' => __( 'Right with space', 'universal-multicurrency' ),
-		);
+	private function position_select( string $name, string $current, string $symbol = '' ): string {
+		$labels = CurrencyFormatPreview::position_labels();
 
 		$options = '';
 
 		foreach ( $labels as $value => $label ) {
+			$example  = CurrencyFormatPreview::example( $value, $symbol );
 			$options .= sprintf(
-				'<option value="%1$s"%2$s>%3$s</option>',
+				'<option value="%1$s"%2$s>%3$s — %4$s</option>',
 				esc_attr( $value ),
 				selected( $current, $value, false ),
-				esc_html( $label )
+				esc_html( $label ),
+				esc_html( $example )
 			);
 		}
 

@@ -129,7 +129,7 @@ final class WooCommerceCurrencyProvider implements CurrencyMetadataProvider {
 			$name,
 			$symbol,
 			$decimals,
-			CurrencyVo::DEFAULT_POSITION
+			CurrencyPositionDefaults::for_currency( $code, $symbol )
 		);
 	}
 }

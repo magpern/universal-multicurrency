@@ -11,8 +11,15 @@ namespace UMC\Admin;
 
 use UMC\Admin\ViewModel\CurrencyViewModelFactory;
 use UMC\Currency;
+use UMC\CurrencyRegistry;
 use UMC\Currency\WooCommerceCurrencyProvider;
+use UMC\CurrencyContext;
+use UMC\CurrencyResolver;
+use UMC\Display\SwitcherRenderer;
+use UMC\Display\SwitcherSettingsRepository;
+use UMC\Display\SwitcherViewModelFactory;
 use UMC\Rates\ExchangeRateStore;
+use UMC\Rates\ManualRateProvider;
 use UMC\Settings;
 use WC_Settings_Page;
 
@@ -57,6 +64,13 @@ final class SettingsPage extends WC_Settings_Page {
 	private ExchangeRateSettingsField $exchange_field;
 
 	/**
+	 * Display switcher settings field renderer.
+	 *
+	 * @var DisplaySettingsField
+	 */
+	private DisplaySettingsField $display_field;
+
+	/**
 	 * Placeholder section renderer callback target.
 	 *
 	 * @var AdminPageShellViewModelFactory
@@ -90,6 +104,16 @@ final class SettingsPage extends WC_Settings_Page {
 		$this->settings       = $settings;
 		$this->parser         = new CurrencySettingsParser( $settings, $base );
 		$this->exchange_field = new ExchangeRateSettingsField( $settings, $store );
+		$registry             = new CurrencyRegistry( $settings, $base );
+		$rates                = new ManualRateProvider( $settings, $base->code() );
+		$context              = new CurrencyContext( $registry, $rates, new CurrencyResolver() );
+		$display_repository   = new SwitcherSettingsRepository( $settings );
+		$this->display_field  = new DisplaySettingsField(
+			$settings,
+			new SwitcherViewModelFactory( $context, new WooCommerceCurrencyProvider(), $display_repository ),
+			new SwitcherRenderer(),
+			$display_repository
+		);
 		$this->section_header = new SectionHeader();
 		$this->shell          = new AdminPageShell( new SectionNavigation() );
 		$this->overview_field = new CurrencyOverviewField(
@@ -106,6 +130,7 @@ final class SettingsPage extends WC_Settings_Page {
 		$this->shell_factory = new AdminPageShellViewModelFactory( $this );
 
 		add_action( 'woocommerce_admin_field_umc_exchange_rates', array( $this->exchange_field, 'render' ) );
+		add_action( 'woocommerce_admin_field_umc_display', array( $this->display_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_currencies', array( $this->overview_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_placeholder', array( $this, 'render_placeholder_field' ) );
 		add_action( 'admin_notices', array( $this, 'maybe_render_notice' ) );
@@ -162,9 +187,18 @@ final class SettingsPage extends WC_Settings_Page {
 
 		$this->shell->open_section_card( $view_model, $this->section_header );
 
+		printf(
+			'<input type="hidden" name="section" value="%s" />',
+			esc_attr( $active )
+		);
+
 		echo '<table class="form-table umc-form-table">';
 		\WC_Admin_Settings::output_fields( $this->content_settings( $settings ) );
 		echo '</table>';
+
+		if ( $view_model->has_saveable_settings ) {
+			$this->render_section_save_actions();
+		}
 
 		$this->shell->close_section_card();
 	}
@@ -175,7 +209,7 @@ final class SettingsPage extends WC_Settings_Page {
 	 * @param string $section Section slug.
 	 */
 	public function section_has_saveable_settings( string $section ): bool {
-		return in_array( $section, array( self::SECTION_CURRENCIES, self::SECTION_EXCHANGE_RATES ), true );
+		return in_array( $section, array( self::SECTION_CURRENCIES, self::SECTION_EXCHANGE_RATES, self::SECTION_DISPLAY ), true );
 	}
 
 	/**
@@ -234,7 +268,7 @@ final class SettingsPage extends WC_Settings_Page {
 	 * @return array<int, array<string, mixed>>
 	 */
 	protected function get_settings_for_display_section() {
-		return $this->placeholder_settings( self::SECTION_DISPLAY );
+		return $this->display_settings();
 	}
 
 	/**
@@ -277,11 +311,45 @@ final class SettingsPage extends WC_Settings_Page {
 			return;
 		}
 
+		if ( self::SECTION_DISPLAY === $section ) {
+			$parsed = $this->display_field->parse_post();
+
+			if ( null === $parsed ) {
+				$message = __( 'When the switcher is enabled, at least one device visibility option must be selected.', 'universal-multicurrency' );
+
+				if ( headers_sent() ) {
+					\WC_Admin_Settings::add_error( $message );
+					return;
+				}
+
+				$this->redirect_display_notice( $message, 'error' );
+				return;
+			}
+
+			$merged = array_merge( $this->settings->get(), array( 'display' => $parsed['display'] ) );
+			$this->settings->save( $merged );
+			$this->fire_saved_hook();
+
+			if ( ! empty( $parsed['show_coercion_notice'] ) ) {
+				$this->redirect_display_notice(
+					__( 'Horizontal list is only available with manual placement. Style was saved as Dropdown.', 'universal-multicurrency' ),
+					'warning'
+				);
+			}
+
+			return;
+		}
+
 		if ( self::SECTION_CURRENCIES !== $section ) {
 			return;
 		}
 
-		$raw = isset( $_POST['umc_currencies'] ) ? wp_unslash( $_POST['umc_currencies'] ) : array(); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Verified by WooCommerce settings save.
+		if ( ! isset( $_POST['umc_currencies'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Verified by WooCommerce settings save.
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Verified by WooCommerce settings save.
+		$raw = wp_unslash( $_POST['umc_currencies'] );
 
 		$currencies = $this->parser->parse( is_array( $raw ) ? $raw : array() );
 		$merged     = array_merge( $this->settings->get(), array( 'currencies' => $currencies ) );
@@ -308,7 +376,11 @@ final class SettingsPage extends WC_Settings_Page {
 		$message = sanitize_text_field( rawurldecode( $raw_msg ) );
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$type  = sanitize_key( wp_unslash( (string) $_GET['umc_typ'] ) );
-		$class = 'warning' === $type ? 'notice-warning' : 'notice-success';
+		$class = match ( $type ) {
+			'error'   => 'notice-error',
+			'warning' => 'notice-warning',
+			default   => 'notice-success',
+		};
 
 		printf(
 			'<div class="notice %1$s is-dismissible"><p>%2$s</p></div>',
@@ -340,6 +412,33 @@ final class SettingsPage extends WC_Settings_Page {
 			array(
 				'type' => 'sectionend',
 				'id'   => 'umc_currencies_end',
+			),
+		);
+	}
+
+	/**
+	 * Returns field definitions for the exchange rates section.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function display_settings(): array {
+		return array(
+			array(
+				'type' => 'umc_conflict',
+				'id'   => 'umc_conflict_notice',
+			),
+			array(
+				'type' => 'title',
+				'name' => __( 'Display', 'universal-multicurrency' ),
+				'id'   => 'umc_display_title',
+			),
+			array(
+				'type' => 'umc_display',
+				'id'   => 'umc_display',
+			),
+			array(
+				'type' => 'sectionend',
+				'id'   => 'umc_display_end',
 			),
 		);
 	}
@@ -469,7 +568,26 @@ final class SettingsPage extends WC_Settings_Page {
 	private function active_section(): string {
 		global $current_section;
 
-		return $this->normalize_section( is_string( $current_section ) ? $current_section : '' );
+		$section = is_string( $current_section ) ? $current_section : '';
+
+		if ( '' === $section && isset( $_REQUEST['section'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Section routing only; save nonce verified by WooCommerce.
+			$section = sanitize_title( wp_unslash( (string) $_REQUEST['section'] ) );
+		}
+
+		return $this->normalize_section( $section );
+	}
+
+	/**
+	 * Renders the in-card save actions for saveable sections.
+	 */
+	private function render_section_save_actions(): void {
+		?>
+		<p class="submit umc-section-card__submit">
+			<button type="submit" name="save" value="<?php echo esc_attr__( 'Save changes', 'universal-multicurrency' ); ?>" class="button button-primary">
+				<?php esc_html_e( 'Save changes', 'universal-multicurrency' ); ?>
+			</button>
+		</p>
+		<?php
 	}
 
 	/**
@@ -493,5 +611,33 @@ final class SettingsPage extends WC_Settings_Page {
 		 * @since 0.8.0
 		 */
 		do_action( 'umc_settings_saved' );
+	}
+
+	/**
+	 * Redirects back to the Display section with a one-time notice.
+	 *
+	 * @param string $message Notice message.
+	 * @param string $type    Notice type: success, warning, error.
+	 *
+	 * @codeCoverageIgnore
+	 */
+	private function redirect_display_notice( string $message, string $type ): void {
+		if ( headers_sent() ) {
+			return;
+		}
+
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'page'    => 'wc-settings',
+					'tab'     => $this->id,
+					'section' => self::SECTION_DISPLAY,
+					'umc_msg' => rawurlencode( $message ),
+					'umc_typ' => sanitize_key( $type ),
+				),
+				admin_url( 'admin.php' )
+			)
+		);
+		exit;
 	}
 }

@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace UMC\Admin;
 
+use UMC\Display\SwitcherSettings;
+
 /**
  * Loads admin CSS/JS only on the Multicurrency settings screens.
  */
@@ -58,6 +60,51 @@ final class AdminAssets {
 			(string) filemtime( $path . 'umc-settings.js' ),
 			true
 		);
+
+		if ( $this->is_display_section() ) {
+			$switcher_base = plugin_dir_url( UMC_PLUGIN_FILE ) . 'assets/css/switcher.css';
+			$switcher_path = plugin_dir_path( UMC_PLUGIN_FILE ) . 'assets/css/switcher.css';
+
+			wp_enqueue_style(
+				'umc-switcher',
+				$switcher_base,
+				array(),
+				(string) filemtime( $switcher_path )
+			);
+
+			wp_localize_script(
+				'umc-admin-settings',
+				'umcDisplayPreview',
+				array(
+					'placements' => array(
+						SwitcherSettings::PLACEMENT_MANUAL,
+						SwitcherSettings::PLACEMENT_FLOATING_SIDE,
+						SwitcherSettings::PLACEMENT_STICKY_FOOTER,
+					),
+					'styles'     => array(
+						SwitcherSettings::STYLE_DROPDOWN,
+						SwitcherSettings::STYLE_HORIZONTAL_LIST,
+					),
+					'samples'    => array(
+						array(
+							'code'   => 'EUR',
+							'symbol' => '€',
+							'name'   => 'Euro',
+						),
+						array(
+							'code'   => 'SEK',
+							'symbol' => 'kr',
+							'name'   => 'Swedish krona',
+						),
+						array(
+							'code'   => 'USD',
+							'symbol' => '$',
+							'name'   => 'US Dollar',
+						),
+					),
+				)
+			);
+		}
 	}
 
 	/**
@@ -76,5 +123,15 @@ final class AdminAssets {
 		}
 
 		return trim( $classes . ' umc-settings-page' );
+	}
+
+	/**
+	 * Whether the active Multicurrency tab section is Display.
+	 */
+	private function is_display_section(): bool {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Display-only query args.
+		$section = isset( $_GET['section'] ) ? sanitize_key( wp_unslash( (string) $_GET['section'] ) ) : '';
+
+		return SettingsPage::SECTION_DISPLAY === $section;
 	}
 }
