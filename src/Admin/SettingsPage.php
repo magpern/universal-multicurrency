@@ -10,11 +10,16 @@ declare(strict_types=1);
 namespace UMC\Admin;
 
 use UMC\Admin\ViewModel\CurrencyViewModelFactory;
+use UMC\Compatibility\CompatibilityServices;
 use UMC\Currency;
 use UMC\CurrencyRegistry;
 use UMC\Currency\WooCommerceCurrencyProvider;
 use UMC\CurrencyContext;
 use UMC\CurrencyResolver;
+use UMC\Diagnostics\ConflictDetector;
+use UMC\Diagnostics\ConflictScorer;
+use UMC\Diagnostics\DetectorRegistry;
+use UMC\Diagnostics\WordPressEnvironmentProbe;
 use UMC\Display\SwitcherRenderer;
 use UMC\Display\SwitcherSettingsRepository;
 use UMC\Display\SwitcherViewModelFactory;
@@ -71,6 +76,13 @@ final class SettingsPage extends WC_Settings_Page {
 	private DisplaySettingsField $display_field;
 
 	/**
+	 * Compatibility diagnostics field renderer.
+	 *
+	 * @var CompatibilitySettingsField
+	 */
+	private CompatibilitySettingsField $compatibility_field;
+
+	/**
 	 * Placeholder section renderer callback target.
 	 *
 	 * @var AdminPageShellViewModelFactory
@@ -114,6 +126,14 @@ final class SettingsPage extends WC_Settings_Page {
 			new SwitcherRenderer(),
 			$display_repository
 		);
+		$conflict_detector   = new ConflictDetector(
+			new DetectorRegistry(),
+			new WordPressEnvironmentProbe(),
+			new ConflictScorer()
+		);
+		$this->compatibility_field = new CompatibilitySettingsField(
+			CompatibilityServices::scanner( $settings, $store, $base, $conflict_detector )
+		);
 		$this->section_header = new SectionHeader();
 		$this->shell          = new AdminPageShell( new SectionNavigation() );
 		$this->overview_field = new CurrencyOverviewField(
@@ -131,6 +151,7 @@ final class SettingsPage extends WC_Settings_Page {
 
 		add_action( 'woocommerce_admin_field_umc_exchange_rates', array( $this->exchange_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_display', array( $this->display_field, 'render' ) );
+		add_action( 'woocommerce_admin_field_umc_compatibility', array( $this->compatibility_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_currencies', array( $this->overview_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_placeholder', array( $this, 'render_placeholder_field' ) );
 		add_action( 'admin_notices', array( $this, 'maybe_render_notice' ) );
@@ -299,7 +320,7 @@ final class SettingsPage extends WC_Settings_Page {
 	 * @return array<int, array<string, mixed>>
 	 */
 	protected function get_settings_for_compatibility_section() {
-		return $this->placeholder_settings( self::SECTION_COMPATIBILITY );
+		return $this->compatibility_settings();
 	}
 
 	/**
@@ -479,6 +500,29 @@ final class SettingsPage extends WC_Settings_Page {
 			array(
 				'type' => 'sectionend',
 				'id'   => 'umc_exchange_rates_end',
+			),
+		);
+	}
+
+	/**
+	 * Returns field definitions for the Compatibility section.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function compatibility_settings(): array {
+		return array(
+			array(
+				'type' => 'title',
+				'name' => __( 'Compatibility', 'universal-multicurrency' ),
+				'id'   => 'umc_compatibility_title',
+			),
+			array(
+				'type' => 'umc_compatibility',
+				'id'   => 'umc_compatibility',
+			),
+			array(
+				'type' => 'sectionend',
+				'id'   => 'umc_compatibility_end',
 			),
 		);
 	}

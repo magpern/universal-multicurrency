@@ -87,7 +87,7 @@ final class AdminPageShellViewModelFactory {
 			case SettingsPage::SECTION_CHECKOUT:
 				return __( 'Control how selected currencies behave during checkout.', 'universal-multicurrency' );
 			case SettingsPage::SECTION_COMPATIBILITY:
-				return __( 'Review compatibility with WooCommerce and other currency plugins.', 'universal-multicurrency' );
+				return __( 'Review store compatibility, conflicts, cache interactions, and support diagnostics.', 'universal-multicurrency' );
 			case SettingsPage::SECTION_ADVANCED:
 				return __( 'Manage advanced behavior and diagnostic settings.', 'universal-multicurrency' );
 		}

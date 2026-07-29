@@ -110,6 +110,27 @@ final class AdminAssets {
 				)
 			);
 		}
+
+		if ( $this->is_compatibility_section() ) {
+			wp_enqueue_script(
+				'umc-admin-compatibility',
+				$base . 'umc-compatibility.js',
+				array(),
+				(string) filemtime( $path . 'umc-compatibility.js' ),
+				true
+			);
+
+			wp_localize_script(
+				'umc-admin-compatibility',
+				'umcCompatibility',
+				array(
+					'copySuccess' => __( 'Report copied.', 'universal-multicurrency' ),
+					'copyFailed'  => __( 'Could not copy report.', 'universal-multicurrency' ),
+					'showEvidence' => __( 'Show technical evidence', 'universal-multicurrency' ),
+					'hideEvidence' => __( 'Hide technical evidence', 'universal-multicurrency' ),
+				)
+			);
+		}
 	}
 
 	/**
@@ -138,5 +159,15 @@ final class AdminAssets {
 		$section = isset( $_GET['section'] ) ? sanitize_key( wp_unslash( (string) $_GET['section'] ) ) : '';
 
 		return SettingsPage::SECTION_DISPLAY === $section;
+	}
+
+	/**
+	 * Whether the active Multicurrency tab section is Compatibility.
+	 */
+	private function is_compatibility_section(): bool {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Display-only query args.
+		$section = isset( $_GET['section'] ) ? sanitize_key( wp_unslash( (string) $_GET['section'] ) ) : '';
+
+		return SettingsPage::SECTION_COMPATIBILITY === $section;
 	}
 }
