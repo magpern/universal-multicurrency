@@ -189,11 +189,19 @@ final class CheckoutPolicyCoordinator {
 	private function run_policy( string $surface ): void {
 		unset( $surface );
 
-		$settings           = $this->settings_repository->get();
+		$settings       = $this->settings_repository->get();
+		$existing_state = $this->transition_repository->get();
+
+		if ( null !== $existing_state && $existing_state->fallback_attempted() ) {
+			$this->reapply_settled_transition( $existing_state, $settings );
+
+			return;
+		}
+
 		$shopper_currency   = $this->effective_currency->shopper_currency();
 		$store_currency     = $this->effective_currency->store_currency();
 		$payment_required   = WC()->cart->needs_payment();
-		$fallback_attempted = $this->transition_repository->fallback_attempted();
+		$fallback_attempted = false;
 
 		$this->gateway_compatibility->set_coordinator_active( true );
 		$this->recalculation->begin_pass();
@@ -245,6 +253,25 @@ final class CheckoutPolicyCoordinator {
 		}
 
 		$this->transition_repository->save( $state );
+		$this->current_state = $state;
+		$this->notice_service->render_classic_notice( $state, $settings );
+	}
+
+	/**
+	 * Reapplies a settled fallback transition without rerunning pass one.
+	 *
+	 * @param CheckoutTransitionState $state    Persisted transition state.
+	 * @param CheckoutSettings        $settings Checkout settings.
+	 */
+	private function reapply_settled_transition( CheckoutTransitionState $state, CheckoutSettings $settings ): void {
+		$this->gateway_compatibility->set_coordinator_active( true );
+		$this->recalculation->begin_pass();
+		$this->effective_currency->apply( $state->effective_currency() );
+		$this->recalculation->recalculate_if_needed(
+			$state->shopper_currency(),
+			$state->effective_currency()
+		);
+		$this->evaluate_gateways( $state->effective_currency() );
 		$this->current_state = $state;
 		$this->notice_service->render_classic_notice( $state, $settings );
 	}
