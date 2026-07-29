@@ -48,8 +48,11 @@ ADR-0006). Permanent audit data — **never deleted on uninstall**.
 | `_umc_rate_source` | `OrderSnapshot::META_RATE_SOURCE` | M3 |
 | `_umc_plugin_version` | `OrderSnapshot::META_PLUGIN_VERSION` | M3 |
 | `_umc_rate_identity` | `OrderSnapshot::META_RATE_IDENTITY` | M3 |
-| `_umc_snapshot_version` | `OrderSnapshot::META_SNAPSHOT_VERSION` | M4 (`2` for new orders) |
+| `_umc_snapshot_version` | `OrderSnapshot::META_SNAPSHOT_VERSION` | M4 (`2` for orders through v0.9.x); M11 (`3` for checkout policy metadata) |
 | `_umc_transaction_decimals` | `OrderSnapshot::META_TRANSACTION_DECIMALS` | M4 |
+| `_umc_checkout_mode` | `OrderSnapshot::META_CHECKOUT_MODE` | M11 |
+| `_umc_shopper_currency` | `OrderSnapshot::META_SHOPPER_CURRENCY` | M11 |
+| `_umc_fallback_occurred` | `OrderSnapshot::META_FALLBACK_OCCURRED` | M11 |
 
 Writer: `Order\OrderSnapshot` (classic checkout and Store API checkout adapter).
 
@@ -89,6 +92,8 @@ when the session expires or the customer clears their session — **not touched 
 |---|---|---|
 | `umc_currency` | `CurrencyContext` | Active shopper currency code |
 | `umc_cart_signature` | `Cart\CartRecalculation` | Last cart currency/rate signature used to detect recalculation need |
+| `umc_checkout_transition` | `Checkout\CheckoutTransitionStateRepository` | Current checkout transition state for policy/notices |
+| `umc_checkout_notice_signature` | `Checkout\CheckoutTransitionStateRepository` | Last classic checkout notice signature rendered |
 
 ---
 
@@ -104,7 +109,7 @@ when the session expires or the customer clears their session — **not touched 
 
 | Namespace | Owner | Persisted? |
 |---|---|---|
-| `umc` | `StoreApi\CartExtensionData` | **No** — read-only cart response extension (`active_currency`, `base_currency`, `selectable_currencies`). No database write. No update callback. |
+| `umc` | `StoreApi\CartExtensionData` | **No** — read-only cart/checkout response extension (`active_currency`, `base_currency`, `selectable_currencies`, checkout policy fields, `checkout_notice`). No database write. No update callback. |
 
 ---
 
@@ -154,7 +159,7 @@ with `PersistedKeys::inventory()` — never edit one without the other.
 
 ```umc:persisted-inventory
 {
-  "inventory_version": 3,
+  "inventory_version": 4,
   "options": [
     "umc_settings",
     "umc_rate_state"
@@ -168,7 +173,10 @@ with `PersistedKeys::inventory()` — never edit one without the other.
     "_umc_plugin_version",
     "_umc_rate_identity",
     "_umc_snapshot_version",
-    "_umc_transaction_decimals"
+    "_umc_transaction_decimals",
+    "_umc_checkout_mode",
+    "_umc_shopper_currency",
+    "_umc_fallback_occurred"
   ],
   "refund_meta": [
     "_umc_parent_transaction_currency",
@@ -179,7 +187,9 @@ with `PersistedKeys::inventory()` — never edit one without the other.
   ],
   "session_keys": [
     "umc_currency",
-    "umc_cart_signature"
+    "umc_cart_signature",
+    "umc_checkout_transition",
+    "umc_checkout_notice_signature"
   ],
   "cookies": [
     "umc_currency"
@@ -203,7 +213,10 @@ with `PersistedKeys::inventory()` — never edit one without the other.
       "_umc_plugin_version",
       "_umc_rate_identity",
       "_umc_snapshot_version",
-      "_umc_transaction_decimals"
+      "_umc_transaction_decimals",
+      "_umc_checkout_mode",
+      "_umc_shopper_currency",
+      "_umc_fallback_occurred"
     ],
     "preserve_refund_meta": [
       "_umc_parent_transaction_currency",

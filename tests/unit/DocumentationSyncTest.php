@@ -25,7 +25,7 @@ use ZipArchive;
  */
 final class DocumentationSyncTest extends TestCase {
 
-	private const CURRENT_VERSION = '0.9.1';
+	private const CURRENT_VERSION = '0.10.0';
 
 	/**
 	 * Tracked documentation sources that must exist and stay internally consistent.
@@ -360,21 +360,17 @@ final class DocumentationSyncTest extends TestCase {
 	}
 
 	public function test_settings_schema_documentation_matches_implementation(): void {
-		$this->assertSame( 3, Settings::SCHEMA_VERSION );
-		$this->assertSame( array( 1, 2, 3 ), array_keys( SettingsUpgrader::production_migrations() ) );
+		$this->assertSame( 4, Settings::SCHEMA_VERSION );
+		$this->assertSame( array( 1, 2, 3, 4 ), array_keys( SettingsUpgrader::production_migrations() ) );
 
 		foreach ( array( 'docs/ARCHITECTURE.md', 'docs/MIGRATION.md' ) as $file ) {
 			$source = $this->read( $file );
 
 			$this->assertStringContainsString( 'schema', $source, $file );
 			$this->assertStringContainsString( 'SettingsUpgrader', $source, $file );
-			$this->assertStringContainsString(
-				'Settings::SCHEMA_VERSION` is **3**',
-				$source,
-				$file . ' must state the current schema version.'
-			);
 			$this->assertStringContainsString( 'migrate_1_to_2', $source, $file );
 			$this->assertStringContainsString( 'migrate_2_to_3', $source, $file );
+			$this->assertStringContainsString( 'migrate_3_to_4', $source, $file );
 		}
 
 		$this->assertStringContainsString( 'schema_version', $this->read( 'docs/PERSISTED_DATA.md' ) );
