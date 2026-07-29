@@ -81,7 +81,7 @@ final class RateUpdateService {
 			$metadata = $this->store->get_last_provider_metadata();
 			$result   = $this->source->fetch( $this->base_currency_code, $targets, $metadata );
 
-			$this->store->apply_fetch_result( $result );
+			$this->store->apply_fetch_result( $result, $targets );
 
 			/**
 			 * Fires after a rate fetch attempt completes.

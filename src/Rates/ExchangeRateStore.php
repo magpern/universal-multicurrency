@@ -148,11 +148,12 @@ final class ExchangeRateStore {
 	/**
 	 * Persists settings and operational state from a fetch result.
 	 *
-	 * @param RateFetchResult $result Fetch outcome to apply.
+	 * @param RateFetchResult $result  Fetch outcome to apply.
+	 * @param string[]|null   $targets Automatic currency codes targeted by this fetch; null = all automatic currencies.
 	 */
-	public function apply_fetch_result( RateFetchResult $result ): void {
+	public function apply_fetch_result( RateFetchResult $result, ?array $targets = null ): void {
 		$fetched_at = $result->fetched_at();
-		$targets    = $this->get_automatic_currency_codes();
+		$targets    = $this->normalize_fetch_targets( $targets );
 
 		if ( $result->is_not_modified() ) {
 			$this->apply_not_modified_state( $targets, $fetched_at );
@@ -161,6 +162,35 @@ final class ExchangeRateStore {
 
 		$this->apply_settings_from_result( $result );
 		$this->apply_state_from_result( $result, $targets );
+	}
+
+	/**
+	 * Normalizes the currency codes affected by one fetch attempt.
+	 *
+	 * @param string[]|null $targets Requested targets, or null for every automatic currency.
+	 * @return string[]
+	 */
+	private function normalize_fetch_targets( ?array $targets ): array {
+		if ( null === $targets ) {
+			return $this->get_automatic_currency_codes();
+		}
+
+		$allowed = array_fill_keys( $this->get_automatic_currency_codes(), true );
+		$clean   = array();
+
+		foreach ( $targets as $code ) {
+			$code = strtoupper( trim( (string) $code ) );
+
+			if ( '' === $code || ! isset( $allowed[ $code ] ) ) {
+				continue;
+			}
+
+			$clean[] = $code;
+		}
+
+		sort( $clean );
+
+		return array_values( array_unique( $clean ) );
 	}
 
 	/**

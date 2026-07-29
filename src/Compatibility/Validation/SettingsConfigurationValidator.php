@@ -15,6 +15,9 @@ use UMC\Compatibility\CompatibilityDeterminism;
 use UMC\Compatibility\CompatibilityInventory;
 use UMC\Compatibility\CompatibilityResult;
 use UMC\Compatibility\CompatibilitySeverity;
+use UMC\Currency;
+use UMC\Currency\CurrencyMetadataProvider;
+use UMC\Currency\WooCommerceCurrencyProvider;
 use UMC\Display\SwitcherSettings;
 use UMC\Display\SwitcherSettingsRepository;
 use UMC\Display\SwitcherShortcodeScanner;
@@ -26,6 +29,22 @@ use UMC\Settings;
  * Validates persisted configuration without running the save pipeline.
  */
 final class SettingsConfigurationValidator {
+
+	/**
+	 * Currency metadata source for default symbol resolution.
+	 *
+	 * @var CurrencyMetadataProvider
+	 */
+	private CurrencyMetadataProvider $metadata;
+
+	/**
+	 * Creates the validator.
+	 *
+	 * @param CurrencyMetadataProvider|null $metadata Optional metadata provider.
+	 */
+	public function __construct( ?CurrencyMetadataProvider $metadata = null ) {
+		$this->metadata = $metadata ?? new WooCommerceCurrencyProvider();
+	}
 
 	/**
 	 * Validates current settings and returns compatibility results.
@@ -40,14 +59,15 @@ final class SettingsConfigurationValidator {
 		$base       = strtoupper( $inventory->base()->code() );
 		$currencies = $settings->get_currencies();
 
-		$enabled_codes = array();
+		$enabled_codes = array( $base );
 		foreach ( $currencies as $code => $config ) {
 			if ( ! empty( $config['enabled'] ) ) {
 				$enabled_codes[] = strtoupper( (string) $code );
 			}
 		}
+		$enabled_codes = array_values( array_unique( $enabled_codes ) );
 
-		if ( array() === $enabled_codes ) {
+		if ( 1 === count( $enabled_codes ) && in_array( $base, $enabled_codes, true ) ) {
 			$results[] = new CompatibilityResult(
 				'config.no_enabled_currencies',
 				CompatibilityCategory::CONFIGURATION,
@@ -65,21 +85,6 @@ final class SettingsConfigurationValidator {
 			);
 		}
 
-		if ( ! in_array( $base, $enabled_codes, true ) && array() !== $enabled_codes ) {
-			$results[] = new CompatibilityResult(
-				'config.base_not_enabled',
-				CompatibilityCategory::CONFIGURATION,
-				CompatibilitySeverity::WARNING,
-				__( 'Store base currency is not enabled', 'universal-multicurrency' ),
-				sprintf(
-					/* translators: %s: currency code */
-					__( 'The WooCommerce base currency (%s) is not enabled in Universal Multicurrency.', 'universal-multicurrency' ),
-					$base
-				),
-				CompatibilityDeterminism::DETERMINISTIC
-			);
-		}
-
 		foreach ( $currencies as $code => $config ) {
 			if ( empty( $config['enabled'] ) ) {
 				continue;
@@ -87,7 +92,7 @@ final class SettingsConfigurationValidator {
 
 			$upper = strtoupper( (string) $code );
 
-			if ( '' === trim( (string) ( $config['symbol'] ?? '' ) ) ) {
+			if ( ! $this->has_usable_symbol( $upper, $config, $inventory->base() ) ) {
 				$results[] = new CompatibilityResult(
 					'config.missing_symbol.' . strtolower( $upper ),
 					CompatibilityCategory::CONFIGURATION,
@@ -282,5 +287,28 @@ final class SettingsConfigurationValidator {
 		}
 
 		return $results;
+	}
+
+	/**
+	 * Whether an enabled currency has a usable symbol from override or metadata.
+	 *
+	 * @param string               $code   Currency code.
+	 * @param array<string, mixed> $config Currency configuration row.
+	 * @param Currency             $base   Store base currency.
+	 */
+	private function has_usable_symbol( string $code, array $config, Currency $base ): bool {
+		$override = trim( (string) ( $config['symbol'] ?? '' ) );
+
+		if ( '' !== $override ) {
+			return true;
+		}
+
+		if ( strtoupper( $code ) === $base->code() && '' !== trim( $base->symbol() ) ) {
+			return true;
+		}
+
+		$metadata = $this->metadata->get( $code );
+
+		return null !== $metadata && '' !== trim( $metadata->symbol() );
 	}
 }

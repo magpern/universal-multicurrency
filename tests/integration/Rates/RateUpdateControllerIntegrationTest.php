@@ -147,6 +147,70 @@ final class RateUpdateControllerIntegrationTest extends WP_UnitTestCase {
 		$this->assertSame( 'provider_unavailable', $status->last_error() );
 	}
 
+	public function test_single_currency_update_does_not_change_other_currency_status(): void {
+		( new Settings() )->save(
+			array(
+				'rate_mode'  => Settings::RATE_MODE_AUTOMATIC,
+				'currencies' => array(
+					'SEK' => array(
+						'enabled'         => true,
+						'rate_mode'       => Settings::RATE_MODE_AUTOMATIC,
+						'provider_rate'   => '11.0625',
+						'rate_updated_at' => 1_600_000_000,
+					),
+					'USD' => array(
+						'enabled'         => true,
+						'rate_mode'       => Settings::RATE_MODE_AUTOMATIC,
+						'provider_rate'   => '1.10',
+						'rate_updated_at' => 1_600_000_100,
+					),
+				),
+			)
+		);
+
+		$state = new RateUpdateState(
+			array(
+				'currencies' => array(
+					'SEK' => array(
+						'last_fetch_at'        => 1_600_000_000,
+						'last_status'          => RateUpdateState::STATUS_SUCCESS,
+						'last_error'           => '',
+						'consecutive_failures' => 0,
+					),
+					'USD' => array(
+						'last_fetch_at'        => 1_599_000_000,
+						'last_status'          => RateUpdateState::STATUS_FAILED,
+						'last_error'           => 'not_returned_by_provider',
+						'consecutive_failures' => 1,
+					),
+				),
+			)
+		);
+		$state->save( $state->get() );
+
+		$this->authorize();
+		$_GET['scope'] = 'single';
+		$_GET['code']  = 'USD';
+
+		$this->transport->register(
+			'https://api.frankfurter.dev/v1/latest?base=EUR&symbols=USD',
+			new HttpResponse(
+				200,
+				array(),
+				'{"amount":1,"base":"EUR","date":"2026-07-29","rates":{"USD":1.1367}}'
+			)
+		);
+
+		$store    = $this->boot_controller_with_state( $state );
+		$redirect = $this->dispatch();
+
+		$this->assertSame( 'Exchange rates updated successfully.', $redirect->query_arg( 'umc_msg' ) );
+		$this->assertSame( RateUpdateState::STATUS_SUCCESS, $store->get_operational_status( 'SEK' )->last_status() );
+		$this->assertSame( 0, $store->get_operational_status( 'SEK' )->consecutive_failures() );
+		$this->assertSame( RateUpdateState::STATUS_SUCCESS, $store->get_operational_status( 'USD' )->last_status() );
+		$this->assertSame( 0, $store->get_operational_status( 'USD' )->consecutive_failures() );
+	}
+
 	public function test_unauthorized_request_cannot_trigger_an_update(): void {
 		$this->seed_settings( '10.00', 1_600_000_000 );
 
@@ -197,11 +261,17 @@ final class RateUpdateControllerIntegrationTest extends WP_UnitTestCase {
 		$this->assertSame( '10.00', get_option( Settings::OPTION )['currencies']['SEK']['provider_rate'] );
 	}
 
-	/**
-	 * Registers the production controller over real rate services.
-	 */
 	private function boot_controller(): ExchangeRateStore {
-		$store = new ExchangeRateStore( new Settings(), new RateUpdateState(), 'EUR', 'test-lock' );
+		return $this->boot_controller_with_state( new RateUpdateState() );
+	}
+
+	/**
+	 * Registers the production controller with a prepared operational state store.
+	 *
+	 * @param RateUpdateState $state Operational state store.
+	 */
+	private function boot_controller_with_state( RateUpdateState $state ): ExchangeRateStore {
+		$store = new ExchangeRateStore( new Settings(), $state, 'EUR', 'test-lock' );
 
 		( new RateUpdateController(
 			new RateUpdateService( new FrankfurterRateSource( $this->transport ), $store, 'EUR' )

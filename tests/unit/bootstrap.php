@@ -134,6 +134,7 @@ if ( ! function_exists( 'add_query_arg' ) ) {
 // tests/integration/bootstrap.php loads StoreApiTestCase.
 require_once __DIR__ . '/Doubles/ArrayEnvironmentProbe.php';
 require_once __DIR__ . '/Doubles/CountingEnvironmentProbe.php';
+require_once __DIR__ . '/Doubles/MapMetadataProvider.php';
 require_once __DIR__ . '/Doubles/StaticDetectorRegistry.php';
 require_once __DIR__ . '/Doubles/ThrowingRateUpdateState.php';
 require_once __DIR__ . '/Doubles/WooCommerceSwitcherDoubles.php';

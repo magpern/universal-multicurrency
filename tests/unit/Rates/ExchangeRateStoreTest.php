@@ -123,4 +123,65 @@ final class ExchangeRateStoreTest extends TestCase {
 
 		$this->assertSame( 1_700_000_500, $settings->get_currency_config( 'SEK' )['rate_updated_at'] ?? null );
 	}
+
+	public function test_single_currency_fetch_does_not_mark_other_automatic_currencies_failed(): void {
+		$settings = new Settings(
+			array(
+				'rate_mode'  => Settings::RATE_MODE_AUTOMATIC,
+				'currencies' => array(
+					'SEK' => array(
+						'enabled'     => true,
+						'manual_rate' => '',
+						'rate_mode'   => Settings::RATE_MODE_AUTOMATIC,
+					),
+					'USD' => array(
+						'enabled'     => true,
+						'manual_rate' => '',
+						'rate_mode'   => Settings::RATE_MODE_AUTOMATIC,
+					),
+				),
+			)
+		);
+
+		$state = new RateUpdateState(
+			array(
+				'currencies' => array(
+					'SEK' => array(
+						'last_fetch_at'        => 1_700_000_000,
+						'last_status'          => RateUpdateState::STATUS_SUCCESS,
+						'last_error'           => '',
+						'consecutive_failures' => 0,
+					),
+					'USD' => array(
+						'last_fetch_at'        => 1_699_000_000,
+						'last_status'          => RateUpdateState::STATUS_FAILED,
+						'last_error'           => 'not_returned_by_provider',
+						'consecutive_failures' => 1,
+					),
+				),
+			)
+		);
+
+		$store = new ExchangeRateStore( $settings, $state, 'EUR', 'lock' );
+		$meta  = new ProviderMetadata( ProviderMetadata::SCHEMA_VERSION, 'frankfurter', '2026-07-24' );
+		$store->apply_fetch_result(
+			RateFetchResult::success(
+				array( new RateQuote( 'EUR', 'USD', '1.1367' ) ),
+				array(),
+				$meta,
+				1_700_000_600
+			),
+			array( 'USD' )
+		);
+
+		$sek_status = $store->get_operational_status( 'SEK' );
+		$usd_status = $store->get_operational_status( 'USD' );
+
+		$this->assertSame( RateUpdateState::STATUS_SUCCESS, $sek_status->last_status() );
+		$this->assertSame( 1_700_000_000, $sek_status->last_fetch_at() );
+		$this->assertSame( 0, $sek_status->consecutive_failures() );
+		$this->assertSame( RateUpdateState::STATUS_SUCCESS, $usd_status->last_status() );
+		$this->assertSame( 0, $usd_status->consecutive_failures() );
+		$this->assertSame( '1.1367', $settings->get_currency_config( 'USD' )['provider_rate'] ?? null );
+	}
 }
