@@ -72,7 +72,7 @@ final class StoreApiCheckoutPolicyAdapter {
 	 * @return mixed
 	 */
 	public function maybe_apply_on_checkout_route( $response, $handler, $request ) {
-		unset( $response, $handler );
+		unset( $handler );
 
 		if ( ! $request instanceof \WP_REST_Request || ! $this->is_checkout_route( $request->get_route() ) ) {
 			return $response;
