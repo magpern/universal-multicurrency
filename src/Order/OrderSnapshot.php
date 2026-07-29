@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace UMC\Order;
 
+use UMC\Checkout\CheckoutTransitionStateRepository;
 use UMC\CurrencyContext;
 use UMC\Settings;
 use WC_Order;
@@ -39,6 +40,9 @@ final class OrderSnapshot {
 	public const META_RATE_IDENTITY        = '_umc_rate_identity';
 	public const META_SNAPSHOT_VERSION     = '_umc_snapshot_version';
 	public const META_TRANSACTION_DECIMALS = '_umc_transaction_decimals';
+	public const META_CHECKOUT_MODE        = '_umc_checkout_mode';
+	public const META_SHOPPER_CURRENCY     = '_umc_shopper_currency';
+	public const META_FALLBACK_OCCURRED    = '_umc_fallback_occurred';
 
 	/**
 	 * Rate source identifier for the manual (admin-entered) provider.
@@ -72,16 +76,30 @@ final class OrderSnapshot {
 	private string $version;
 
 	/**
+	 * Checkout transition state repository.
+	 *
+	 * @var CheckoutTransitionStateRepository
+	 */
+	private CheckoutTransitionStateRepository $transition_repository;
+
+	/**
 	 * Binds the snapshot writer to its collaborators.
 	 *
-	 * @param CurrencyContext $context  Request-scoped currency facade.
-	 * @param Settings        $settings Settings store.
-	 * @param string          $version  Plugin version.
+	 * @param CurrencyContext                   $context               Request-scoped currency facade.
+	 * @param Settings                          $settings              Settings store.
+	 * @param string                            $version               Plugin version.
+	 * @param CheckoutTransitionStateRepository $transition_repository Checkout transition repository.
 	 */
-	public function __construct( CurrencyContext $context, Settings $settings, string $version ) {
-		$this->context  = $context;
-		$this->settings = $settings;
-		$this->version  = $version;
+	public function __construct(
+		CurrencyContext $context,
+		Settings $settings,
+		string $version,
+		CheckoutTransitionStateRepository $transition_repository
+	) {
+		$this->context               = $context;
+		$this->settings              = $settings;
+		$this->version               = $version;
+		$this->transition_repository = $transition_repository;
 	}
 
 	/**
@@ -137,6 +155,7 @@ final class OrderSnapshot {
 		$rate_source = Settings::RATE_MODE_AUTOMATIC === $this->settings->get_effective_rate_mode( $active_code )
 			? self::SOURCE_AUTOMATIC
 			: self::SOURCE_MANUAL;
+		$transition  = $this->transition_repository->get();
 
 		$meta = self::snapshot_meta(
 			$this->context->get_base_currency()->code(),
@@ -146,8 +165,11 @@ final class OrderSnapshot {
 			$rate_source,
 			$this->version,
 			$this->context->get_currency_signature(),
-			2, // Schema version for M4 and later.
-			$this->context->get_active_currency()->decimals()
+			3,
+			$this->context->get_active_currency()->decimals(),
+			null !== $transition ? $transition->mode() : '',
+			null !== $transition ? $transition->shopper_currency() : $this->context->get_shopper_code(),
+			null !== $transition && $transition->fallback_occurred()
 		);
 
 		/**
@@ -239,8 +261,11 @@ final class OrderSnapshot {
 	 * @param string $rate_source          Rate source identifier.
 	 * @param string $plugin_version       Plugin version.
 	 * @param string $rate_identity        Rate identity (code:rate).
-	 * @param int    $schema_version       Snapshot schema version (2 for M4+).
+	 * @param int    $schema_version       Snapshot schema version (3 for M11+).
 	 * @param int    $transaction_decimals Transaction currency decimals.
+	 * @param string $checkout_mode        Configured checkout mode.
+	 * @param string $shopper_currency     Shopper-selected currency code.
+	 * @param bool   $fallback_occurred    Whether checkout fell back to store currency.
 	 * @return array<string, scalar>
 	 */
 	public static function snapshot_meta(
@@ -251,10 +276,13 @@ final class OrderSnapshot {
 		string $rate_source,
 		string $plugin_version,
 		string $rate_identity,
-		int $schema_version = 2,
-		int $transaction_decimals = 2
+		int $schema_version = 3,
+		int $transaction_decimals = 2,
+		string $checkout_mode = '',
+		string $shopper_currency = '',
+		bool $fallback_occurred = false
 	): array {
-		return array(
+		$meta = array(
 			self::META_BASE_CURRENCY        => $base_currency,
 			self::META_TRANSACTION_CURRENCY => $transaction_currency,
 			self::META_EXCHANGE_RATE        => $exchange_rate,
@@ -265,6 +293,14 @@ final class OrderSnapshot {
 			self::META_SNAPSHOT_VERSION     => $schema_version,
 			self::META_TRANSACTION_DECIMALS => $transaction_decimals,
 		);
+
+		if ( $schema_version >= 3 ) {
+			$meta[ self::META_CHECKOUT_MODE ]     = $checkout_mode;
+			$meta[ self::META_SHOPPER_CURRENCY ]  = $shopper_currency;
+			$meta[ self::META_FALLBACK_OCCURRED ] = $fallback_occurred ? 'yes' : 'no';
+		}
+
+		return $meta;
 	}
 
 	/**

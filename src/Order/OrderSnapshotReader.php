@@ -34,6 +34,11 @@ final class OrderSnapshotReader {
 	private const SCHEMA_VERSION_2 = 2;
 
 	/**
+	 * Snapshot version for M11+ orders (checkout policy metadata).
+	 */
+	private const SCHEMA_VERSION_3 = 3;
+
+	/**
 	 * Reads and classifies the snapshot from an order.
 	 *
 	 * @param WC_Order $order Order to read from.
@@ -69,7 +74,7 @@ final class OrderSnapshotReader {
 			// Validate that the version can be parsed as an integer.
 			if ( (string) $version_int !== (string) $snapshot_version || $version_int < 1 ) {
 				$is_malformed = true;
-			} elseif ( $version_int > self::SCHEMA_VERSION_2 ) {
+			} elseif ( $version_int > self::SCHEMA_VERSION_3 ) {
 				// Unknown future version.
 				$is_future      = true;
 				$schema_version = $version_int;
