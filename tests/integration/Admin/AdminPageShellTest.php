@@ -11,6 +11,7 @@ namespace UMC\Tests\Integration\Admin;
 
 use UMC\Admin\AdminAssets;
 use UMC\Admin\SettingsPage;
+use UMC\Checkout\CheckoutSettings;
 use UMC\Currency;
 use UMC\Diagnostics\DetectorRegistry;
 use UMC\Diagnostics\Diagnostics;
@@ -117,14 +118,14 @@ final class AdminPageShellTest extends WP_UnitTestCase {
 	public function test_placeholder_section_hides_save_button_and_renders_info_panel(): void {
 		global $current_section, $hide_save_button;
 
-		$current_section = SettingsPage::SECTION_CHECKOUT;
+		$current_section = SettingsPage::SECTION_ADVANCED;
 		$output          = $this->render_shell_output();
 
 		$this->assertTrue( ! empty( $hide_save_button ) );
 		$this->assertStringNotContainsString( 'umc-shell-header__save', $this->render_shell_sections() );
 		$this->assertStringContainsString( 'umc-placeholder-panel', $output );
 		$this->assertStringContainsString( 'This section will be implemented in a future milestone.', $output );
-		$this->assertStringContainsString( 'We&#039;re working on checkout currency behavior options for your store.', $output );
+		$this->assertStringContainsString( 'We&#039;re working on advanced configuration options for your store.', $output );
 	}
 
 	public function test_saveable_section_exposes_header_save_button(): void {
@@ -137,6 +138,44 @@ final class AdminPageShellTest extends WP_UnitTestCase {
 		$this->assertTrue( ! empty( $hide_save_button ) );
 		$this->assertStringContainsString( 'umc-shell-header__save', $sections );
 		$this->assertStringContainsString( 'form="mainform"', $sections );
+	}
+
+	public function test_checkout_section_exposes_header_and_in_card_save_buttons(): void {
+		global $current_section, $hide_save_button;
+
+		$current_section = SettingsPage::SECTION_CHECKOUT;
+		$sections        = $this->render_shell_sections();
+		$output          = $this->render_shell_output();
+
+		$this->assertTrue( ! empty( $hide_save_button ) );
+		$this->assertStringContainsString( 'umc-shell-header__save', $sections );
+		$this->assertStringContainsString( 'umc-section-card__submit', $output );
+	}
+
+	public function test_checkout_save_persists_policy_settings(): void {
+		$settings = new Settings();
+		$page     = new SettingsPage(
+			$settings,
+			new Currency( 'EUR', 2 ),
+			new ExchangeRateStore( $settings, new RateUpdateState(), 'EUR', 'test-lock' )
+		);
+
+		global $current_section;
+
+		$current_section = SettingsPage::SECTION_CHECKOUT;
+		$_POST           = array(
+			'umc_checkout' => array(
+				'mode'        => CheckoutSettings::MODE_STORE,
+				'show_notice' => '0',
+			),
+		);
+
+		$page->save();
+
+		$checkout = CheckoutSettings::from_array( $settings->get()['checkout'] ?? array() );
+
+		$this->assertSame( CheckoutSettings::MODE_STORE, $checkout->mode() );
+		$this->assertFalse( $checkout->show_notice() );
 	}
 
 	public function test_display_section_hides_header_save_and_renders_sticky_bar(): void {

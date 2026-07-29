@@ -127,6 +127,26 @@
 
     No settings schema change. Live REST/AJAX probes remain deferred.
 
+11. Checkout currency policy (**v0.10.0**) — **prepared on `feature/m11-checkout-policy`**.
+
+    ### Scope for v0.10.0
+
+    | Work item | Status |
+    |---|---|
+    | Checkout settings schema v4 (`checkout.mode`, `checkout.show_notice`) | **Prepared** |
+    | Selected-currency checkout and store-currency checkout entry mode | **Prepared** |
+    | Causality-proven gateway fallback to store currency | **Prepared** |
+    | Classic and Checkout Blocks policy parity | **Prepared** |
+    | Checkout Blocks transition notices via Store API extension + JS | **Prepared** |
+    | Order snapshot v3 checkout metadata | **Prepared** |
+    | Checkout admin settings UI and diagnostics | **Prepared** |
+
+    **Prepared as:** **v0.10.0** (`UMC_VERSION`, plugin header, readme Stable tag).
+    Git tag **`v0.10.0`** pending CI verification.
+
+    Settings schema v3→v4 migration adds checkout defaults (`mode: selected`,
+    `show_notice: true`). Default behaviour matches v0.9.x.
+
 ## Future milestones — not started, not implemented
 
 None of the following exists in the codebase today:

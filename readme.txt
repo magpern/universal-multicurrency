@@ -4,7 +4,7 @@ Tags: woocommerce, currency, multicurrency, exchange rates, money
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.9.1
+Stable tag: 0.10.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,6 +49,13 @@ Not for production traffic. Two runtime converters can double-convert prices. De
 The plugin ships a POT template (`languages/universal-multicurrency.pot`) for translators. Bundled locale `.mo` files are not included in this release.
 
 == Changelog ==
+
+= 0.10.0 =
+* Checkout currency policy settings (`selected` or store currency at checkout entry)
+* Causality-proven payment-gateway fallback with informational customer notices
+* Classic and Checkout Blocks parity, including Blocks notice delivery via Store API extension data
+* Order snapshot v3 checkout metadata
+* Settings schema v4 with safe v3→v4 migration (defaults preserve v0.9.x checkout behaviour)
 
 = 0.9.1 =
 * Compatibility diagnostics center with local scans, support report, and Copy Report action
@@ -95,6 +102,9 @@ The plugin ships a POT template (`languages/universal-multicurrency.pot`) for tr
 * Storefront conversion, classic cart/checkout, order snapshots, historical order display, refunds, and Store API / blocks parity (milestones 2–5)
 
 == Upgrade Notice ==
+
+= 0.10.0 =
+Checkout currency policy release. Settings schema v3→v4 adds checkout defaults that preserve selected-currency checkout behaviour. Requires WooCommerce 8.2+, PHP 8.1+, and HPOS.
 
 = 0.9.1 =
 Compatibility diagnostics and rate-update fixes. No settings schema change — safe upgrade from 0.9.0. Requires WooCommerce 8.2+, PHP 8.1+, and HPOS.

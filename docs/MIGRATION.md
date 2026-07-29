@@ -54,7 +54,7 @@ These run automatically inside UMC when it first reads `umc_settings` after an
 upgrade. They are **not** a foreign-switcher import: `SettingsUpgrader` only
 ever reads UMC's own option.
 
-`Settings::SCHEMA_VERSION` is **3**. Three production migrations exist, keyed by
+`Settings::SCHEMA_VERSION` is **4**. Four production migrations exist, keyed by
 the version they produce, and are applied in ascending order:
 
 | From → To | Migration | Change |
@@ -62,6 +62,7 @@ the version they produce, and are applied in ascending order:
 | 0 → 1 | `SettingsUpgrader::migrate_0_to_1` | Adds `schema_version: 1`; currency rows copied unchanged |
 | 1 → 2 | `SettingsUpgrader::migrate_1_to_2` | Introduces the automatic-rate shape (below) |
 | 2 → 3 | `SettingsUpgrader::migrate_2_to_3` | Adds the Display switcher settings block with safe defaults |
+| 3 → 4 | `SettingsUpgrader::migrate_3_to_4` | Adds checkout policy defaults (`checkout.mode`, `checkout.show_notice`) |
 
 ### What v1 → v2 changes
 
@@ -87,6 +88,17 @@ the version they produce, and are applied in ascending order:
 The upgrade preserves all currency and exchange-rate configuration. The
 switcher remains disabled (`display.enabled: false`) until a merchant enables
 it in WooCommerce → Settings → Multicurrency → Display.
+
+### What v3 → v4 changes
+
+| Field | Before (v3) | After (v4) |
+|---|---|---|
+| Checkout policy | *(absent)* | **`checkout`** block initialized with `mode: selected`, `show_notice: true` |
+| Schema marker | `schema_version: 3` | **`schema_version: 4`** |
+
+Existing currency, exchange-rate, and display configuration is preserved
+unchanged. Default checkout mode keeps v0.9.x behaviour (selected currency
+through checkout).
 
 Defaults for the initialized display fields come from `Settings::sanitize()`,
 which every migration result passes through.

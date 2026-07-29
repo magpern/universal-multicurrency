@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Universal Multicurrency for WooCommerce 0.9.1\n"
+"Project-Id-Version: Universal Multicurrency for WooCommerce 0.10.0\n"
 "Report-Msgid-Bugs-To: https://github.com/magpern/universal-multicurrency/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -72,10 +72,10 @@ msgstr ""
 
 #: src/Admin/AdminPageShell.php:104
 #: src/Admin/AdminPageShell.php:105
-#: src/Admin/SettingsPage.php:644
-#: src/Admin/SettingsPage.php:645
-#: src/Admin/SettingsPage.php:658
-#: src/Admin/SettingsPage.php:659
+#: src/Admin/SettingsPage.php:694
+#: src/Admin/SettingsPage.php:695
+#: src/Admin/SettingsPage.php:708
+#: src/Admin/SettingsPage.php:709
 msgid "Save changes"
 msgstr ""
 
@@ -91,8 +91,8 @@ msgid "for WooCommerce"
 msgstr ""
 
 #: src/Admin/AdminPageShellViewModelFactory.php:65
-#: src/Admin/SettingsPage.php:115
-#: src/Admin/SettingsPage.php:673
+#: src/Admin/SettingsPage.php:122
+#: src/Admin/SettingsPage.php:723
 msgid "Multicurrency"
 msgstr ""
 
@@ -109,7 +109,8 @@ msgid "Configure how prices and currency information are displayed across your s
 msgstr ""
 
 #: src/Admin/AdminPageShellViewModelFactory.php:88
-msgid "Control how selected currencies behave during checkout."
+#: src/Admin/CheckoutSettingsField.php:100
+msgid "Choose which currency customers use during checkout."
 msgstr ""
 
 #: src/Admin/AdminPageShellViewModelFactory.php:90
@@ -138,6 +139,45 @@ msgstr ""
 
 #: src/Admin/AdminPageShellViewModelFactory.php:115
 msgid "We're working on additional settings for this section."
+msgstr ""
+
+#. translators: %s: store currency code, for example EUR.
+#: src/Admin/CheckoutSettingsField.php:68
+#, php-format
+msgid "Switch to store currency (%s)"
+msgstr ""
+
+#: src/Admin/CheckoutSettingsField.php:77
+msgid "Keep selected currency"
+msgstr ""
+
+#: src/Admin/CheckoutSettingsField.php:78
+msgid "Customers continue checkout in the currency they selected while browsing."
+msgstr ""
+
+#: src/Admin/CheckoutSettingsField.php:81
+msgid "Recommended"
+msgstr ""
+
+#: src/Admin/CheckoutSettingsField.php:88
+msgid "Customers browse and use the cart in their selected currency, then checkout switches to the store currency."
+msgstr ""
+
+#: src/Admin/CheckoutSettingsField.php:92
+msgid "This does not change the customer's preferred browsing currency."
+msgstr ""
+
+#: src/Admin/CheckoutSettingsField.php:99
+#: src/Admin/CheckoutSettingsField.php:102
+msgid "Checkout currency"
+msgstr ""
+
+#: src/Admin/CheckoutSettingsField.php:121
+msgid "Show an informational notice when checkout currency changes."
+msgstr ""
+
+#: src/Admin/CheckoutSettingsField.php:122
+msgid "Displays a customer-friendly notice whenever checkout switches to another currency."
 msgstr ""
 
 #: src/Admin/CompatibilitySettingsField.php:58
@@ -470,8 +510,8 @@ msgid "Automatic"
 msgstr ""
 
 #: src/Admin/CurrencyTableField.php:95
-#: src/Admin/SettingsPage.php:167
-#: src/Admin/SettingsPage.php:439
+#: src/Admin/SettingsPage.php:176
+#: src/Admin/SettingsPage.php:462
 msgid "Currencies"
 msgstr ""
 
@@ -884,38 +924,39 @@ msgstr ""
 msgid "Multicurrency settings sections"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:168
-#: src/Admin/SettingsPage.php:493
+#: src/Admin/SettingsPage.php:177
+#: src/Admin/SettingsPage.php:543
 msgid "Exchange Rates"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:169
-#: src/Admin/SettingsPage.php:466
+#: src/Admin/SettingsPage.php:178
+#: src/Admin/SettingsPage.php:489
 msgid "Display"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:170
+#: src/Admin/SettingsPage.php:179
+#: src/Admin/SettingsPage.php:516
 msgid "Checkout"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:171
-#: src/Admin/SettingsPage.php:516
+#: src/Admin/SettingsPage.php:180
+#: src/Admin/SettingsPage.php:566
 msgid "Compatibility"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:172
+#: src/Admin/SettingsPage.php:181
 msgid "Advanced"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:352
+#: src/Admin/SettingsPage.php:365
 msgid "When the switcher is enabled, at least one device visibility option must be selected."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:369
+#: src/Admin/SettingsPage.php:382
 msgid "Horizontal list is only available with manual placement. Style was saved as Dropdown."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:657
+#: src/Admin/SettingsPage.php:707
 msgid "Unsaved changes"
 msgstr ""
 
@@ -950,6 +991,18 @@ msgstr ""
 
 #: src/Admin/ViewModel/CurrencyViewModelFactory.php:336
 msgid "Current"
+msgstr ""
+
+#. translators: 1: shopper currency code, 2: effective checkout currency code.
+#: src/Checkout/CheckoutNoticeService.php:99
+#, php-format
+msgid "No payment method is available in %1$s. Checkout continues in %2$s."
+msgstr ""
+
+#. translators: 1: effective checkout currency code, 2: shopper currency code.
+#: src/Checkout/CheckoutNoticeService.php:107
+#, php-format
+msgid "Checkout continues in %1$s. Your selected currency (%2$s) is still used when browsing the store."
 msgstr ""
 
 #: src/Compatibility/Checks/CacheCheck.php:41
@@ -1000,6 +1053,18 @@ msgstr ""
 
 #: src/Compatibility/Checks/CacheCheck.php:144
 msgid "Confirm AJAX or fragment behavior for the currency switcher under cache."
+msgstr ""
+
+#: src/Compatibility/Checks/CheckoutConfigurationCheck.php:41
+msgid "Checkout currency mode"
+msgstr ""
+
+#: src/Compatibility/Checks/CheckoutConfigurationCheck.php:60
+msgid "Checkout uses store currency at entry."
+msgstr ""
+
+#: src/Compatibility/Checks/CheckoutConfigurationCheck.php:63
+msgid "Checkout keeps the shopper-selected currency."
 msgstr ""
 
 #. translators: %s: third-party plugin name
@@ -1600,7 +1665,7 @@ msgid "High-Performance Order Storage (HPOS) is not enabled. Universal Multicurr
 msgstr ""
 
 #. translators: %s: active currency code.
-#: src/Integration/GatewayCompatibility.php:174
+#: src/Integration/GatewayCompatibility.php:250
 #, php-format
 msgid "No payment method is available for %s. Please choose a different currency to continue."
 msgstr ""
@@ -1619,16 +1684,44 @@ msgstr ""
 msgid "Unsupported settings schema version %1$d (current plugin supports up to %2$d)."
 msgstr ""
 
-#: src/StoreApi/CartExtensionData.php:94
+#: src/StoreApi/CartExtensionData.php:151
 msgid "Currency code the cart is presented in."
 msgstr ""
 
-#: src/StoreApi/CartExtensionData.php:99
+#: src/StoreApi/CartExtensionData.php:156
 msgid "Currency code prices are authored in."
 msgstr ""
 
-#: src/StoreApi/CartExtensionData.php:104
+#: src/StoreApi/CartExtensionData.php:161
 msgid "Currency codes the shopper may choose."
+msgstr ""
+
+#: src/StoreApi/CartExtensionData.php:167
+msgid "Configured checkout currency mode."
+msgstr ""
+
+#: src/StoreApi/CartExtensionData.php:172
+msgid "Shopper-selected currency code."
+msgstr ""
+
+#: src/StoreApi/CartExtensionData.php:177
+msgid "Effective checkout currency code."
+msgstr ""
+
+#: src/StoreApi/CartExtensionData.php:182
+msgid "Settlement currency code used for gateways and order creation."
+msgstr ""
+
+#: src/StoreApi/CartExtensionData.php:187
+msgid "Checkout transition reason, when applicable."
+msgstr ""
+
+#: src/StoreApi/CartExtensionData.php:192
+msgid "Whether checkout fell back to store currency."
+msgstr ""
+
+#: src/StoreApi/CartExtensionData.php:197
+msgid "Checkout transition notice payload for Blocks."
 msgstr ""
 
 #: universal-multicurrency.php:33

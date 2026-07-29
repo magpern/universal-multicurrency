@@ -1,15 +1,15 @@
-# Release audit — v0.9.1 Compatibility diagnostics
+# Release audit — v0.10.0 Checkout currency policy
 
-Executable release-blocking gate for Universal Multicurrency **v0.9.1**. This
+Executable release-blocking gate for Universal Multicurrency **v0.10.0**. This
 document records scope, criteria, commands, audit results, and the current
 release-preparation state.
 
 **Governing question:** If we published this release tomorrow, is there anything
 left in the repository that clearly should not ship?
 
-**Repository status:** **prepared for v0.9.1** on `main`. Milestone 10
-(Compatibility diagnostics) is feature-complete on `main`. Git tag **`v0.9.1`**
-and GitHub release publication follow release verification.
+**Repository status:** **prepared for v0.10.0** on `feature/m11-checkout-policy`.
+Milestone 11 (Checkout currency policy) awaits CI verification. Git tag
+**`v0.10.0`** and GitHub release publication follow full CI matrix pass.
 
 ---
 
@@ -17,36 +17,59 @@ and GitHub release publication follow release verification.
 
 | Item | Value |
 |---|---|
-| Version | **0.9.1** |
-| Settings schema | **3** (unchanged from v0.8.x display work on `main`) |
-| Persisted-data inventory version | **3** |
-| Production migrations | **v0 → v1**, **v1 → v2**, **v2 → v3** (unchanged) |
+| Version | **0.10.0** |
+| Settings schema | **4** (checkout policy subtree; v3→v4 migration) |
+| Order snapshot schema | **3** (checkout policy metadata) |
+| Persisted-data inventory version | **4** |
+| Production migrations | **v0 → v1**, **v1 → v2**, **v2 → v3**, **v3 → v4** |
 | Unresolved Critical security findings | **0** |
 | Unresolved High security findings | **0** |
-| Unresolved release blockers | **0** |
+| Unresolved release blockers | **0** (pending CI) |
 | Open Milestone 8 review findings | **0** |
-| Deterministic performance gates | **Passing** |
-| POT drift | **Passing** |
-| Dependency audit (`composer audit`) | **Passing** |
-| Package inspection | **Passing** |
+| Deterministic performance gates | **Pending CI** |
+| POT drift | **Pending CI / make-pot** |
+| Dependency audit (`composer audit`) | **Pending CI** |
+| Package inspection | **Pending CI** |
 | Git tag `v0.8.0` | **Created** (superseded) |
 | GitHub release `v0.8.0` | **Published** (superseded) |
-| Git tag `v0.8.1` | **Not created** (superseded by v0.9.0 line) |
-| GitHub release `v0.8.1` | **Not published** (superseded by v0.9.0 line) |
-| Git tag `v0.9.0` | **Created** |
-| GitHub release `v0.9.0` | **Published** (superseded by v0.9.1 line) |
-| Git tag `v0.9.1` | **Not yet created** |
-| GitHub release `v0.9.1` | **Not yet created** |
+| Git tag `v0.9.1` | **Created** (superseded) |
+| GitHub release `v0.9.1` | **Published** (superseded) |
+| Git tag `v0.10.0` | **Not yet created** |
+| GitHub release `v0.10.0` | **Not yet created** |
 | Milestone 8 | **Complete** — released and review-closed at v0.8.0 |
 | Milestone 9 | **Complete** — Display configurator at v0.9.0 |
-| Milestone 10 | **Prepared** — Compatibility diagnostics on `main` |
+| Milestone 10 | **Complete** — Compatibility diagnostics at v0.9.1 |
+| Milestone 11 | **Prepared** — Checkout currency policy on feature branch |
 
 ---
 
-## v0.9.1 Compatibility diagnostics scope
+## v0.10.0 Checkout currency policy scope
 
-Patch release shipping Milestone 10 on `main` plus post-release fixes. **No new
-settings schema bump** beyond schema v3 — safe in-place upgrade from **0.9.0**.
+Minor release shipping Milestone 11 (Product Milestone 5 — Checkout). Settings
+schema v3→v4 adds checkout defaults preserving v0.9.x behaviour. Order snapshot
+v3 adds checkout audit metadata.
+
+### Shipped capabilities
+
+| Area | Summary |
+|---|---|
+| Checkout settings | `checkout.mode` (`selected` \| `store`), `checkout.show_notice` |
+| Policy orchestration | `CheckoutPolicyCoordinator` with WooCommerce-authoritative gateway evaluation |
+| Gateway causality | `GatewayCurrencyClassifier` + request-scoped `GatewayCurrencyEvaluation` |
+| Classic + Blocks parity | Shared policy; Blocks notices via `extensions.umc.checkout_notice` + `checkout-notice.js` |
+| Order snapshot v3 | `_umc_checkout_mode`, `_umc_shopper_currency`, `_umc_fallback_occurred` |
+| Admin | Checkout settings tab; `CheckoutConfigurationCheck` diagnostics |
+
+See [`docs/adr/0014-checkout-currency-policy.md`](adr/0014-checkout-currency-policy.md).
+
+---
+
+## Prior release — v0.9.1 Compatibility diagnostics
+
+Executable release-blocking gate for Universal Multicurrency **v0.9.1**. This
+section is retained for historical audit context.
+
+**Repository status:** **released as v0.9.1** on `main`.
 
 ### Merchant-visible features
 

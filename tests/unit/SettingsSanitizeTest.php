@@ -27,6 +27,7 @@ final class SettingsSanitizeTest extends TestCase {
 				'rate_max_age_hours'   => Settings::DEFAULT_RATE_MAX_AGE_HOURS,
 				'currencies'           => array(),
 				'display'              => \UMC\Display\SwitcherSettings::default_array(),
+				'checkout'             => \UMC\Checkout\CheckoutSettings::default_array(),
 			),
 			Settings::defaults()
 		);
@@ -280,5 +281,17 @@ final class SettingsSanitizeTest extends TestCase {
 	public function test_blank_rate_reads_as_null(): void {
 		$settings = new Settings( array( 'currencies' => array( 'USD' => array( 'rate' => 'bad' ) ) ) );
 		$this->assertNull( $settings->get_rate( 'USD' ) );
+	}
+
+	public function test_checkout_settle_base_mode_migrates_to_store(): void {
+		$clean = Settings::sanitize_checkout(
+			array(
+				'mode'        => 'settle_base',
+				'show_notice' => '1',
+			)
+		);
+
+		$this->assertSame( \UMC\Checkout\CheckoutSettings::MODE_STORE, $clean['mode'] );
+		$this->assertTrue( $clean['show_notice'] );
 	}
 }

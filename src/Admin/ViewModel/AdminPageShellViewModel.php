@@ -64,11 +64,11 @@ final class AdminPageShellViewModel {
 	public string $section_description;
 
 	/**
-	 * Whether the active section exposes saveable settings.
+	 * Whether the shell header exposes a Save changes button.
 	 *
 	 * @var bool
 	 */
-	public bool $has_saveable_settings;
+	public bool $has_header_save;
 
 	/**
 	 * Optional compatibility notice markup for the header card.
@@ -94,7 +94,7 @@ final class AdminPageShellViewModel {
 	 * @param string                              $section_label          Active section label.
 	 * @param string                              $section_icon_class     Active section icon class.
 	 * @param string                              $section_description    Active section description.
-	 * @param bool                                $has_saveable_settings  Whether save is available.
+	 * @param bool                                $has_header_save        Whether the header save button is shown.
 	 * @param string                              $notice_html            Optional notice markup.
 	 * @param array<int, SectionNavItemViewModel> $navigation_items    Navigation items.
 	 */
@@ -106,19 +106,19 @@ final class AdminPageShellViewModel {
 		string $section_label,
 		string $section_icon_class,
 		string $section_description,
-		bool $has_saveable_settings,
+		bool $has_header_save,
 		string $notice_html,
 		array $navigation_items
 	) {
-		$this->plugin_title          = $plugin_title;
-		$this->version               = $version;
-		$this->subtitle              = $subtitle;
-		$this->active_section        = $active_section;
-		$this->section_label         = $section_label;
-		$this->section_icon_class    = $section_icon_class;
-		$this->section_description   = $section_description;
-		$this->has_saveable_settings = $has_saveable_settings;
-		$this->notice_html           = $notice_html;
-		$this->navigation_items      = $navigation_items;
+		$this->plugin_title        = $plugin_title;
+		$this->version             = $version;
+		$this->subtitle            = $subtitle;
+		$this->active_section      = $active_section;
+		$this->section_label       = $section_label;
+		$this->section_icon_class  = $section_icon_class;
+		$this->section_description = $section_description;
+		$this->has_header_save     = $has_header_save;
+		$this->notice_html         = $notice_html;
+		$this->navigation_items    = $navigation_items;
 	}
 }

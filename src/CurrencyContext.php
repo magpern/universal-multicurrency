@@ -69,6 +69,13 @@ final class CurrencyContext {
 	private ?bool $convertible = null;
 
 	/**
+	 * Checkout effective-currency override, when set.
+	 *
+	 * @var string|null
+	 */
+	private ?string $effective_override = null;
+
+	/**
 	 * Binds the facade to its collaborators.
 	 *
 	 * @param CurrencyRegistry $registry Currency registry.
@@ -125,6 +132,15 @@ final class CurrencyContext {
 			return $this->active;
 		}
 
+		$override = $this->effective_override;
+
+		if ( is_string( $override ) && '' !== $override ) {
+			$currency     = $this->registry->get_currency( $override );
+			$this->active = $currency ?? $this->registry->get_base_currency();
+
+			return $this->active;
+		}
+
 		$base = $this->registry->get_base_code();
 		$code = $this->resolver->resolve(
 			$this->read_explicit(),
@@ -138,6 +154,46 @@ final class CurrencyContext {
 		$this->active = $currency ?? $this->registry->get_base_currency();
 
 		return $this->active;
+	}
+
+	/**
+	 * The shopper-selected currency code without checkout overrides.
+	 */
+	public function get_shopper_code(): string {
+		$base = $this->registry->get_base_code();
+		$code = $this->resolver->resolve(
+			$this->read_explicit(),
+			$this->read_session(),
+			$this->read_cookie(),
+			$base,
+			$this->get_selectable_codes()
+		);
+
+		return strtoupper( $code );
+	}
+
+	/**
+	 * Applies a checkout effective-currency override for this request.
+	 *
+	 * @param string|null $code Currency code, or null to clear.
+	 */
+	public function set_effective_override( ?string $code ): void {
+		$normalized = is_string( $code ) ? strtoupper( trim( $code ) ) : null;
+
+		if ( is_string( $normalized ) && 1 !== preg_match( '/^[A-Z]{3}$/', $normalized ) ) {
+			$normalized = null;
+		}
+
+		$this->effective_override = $normalized;
+		$this->active             = null;
+		$this->rate               = null;
+	}
+
+	/**
+	 * Clears any checkout effective-currency override.
+	 */
+	public function clear_effective_override(): void {
+		$this->set_effective_override( null );
 	}
 
 	/**

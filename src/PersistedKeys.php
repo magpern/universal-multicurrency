@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace UMC;
 
 use UMC\Cart\CartRecalculation;
+use UMC\Checkout\CheckoutTransitionStateRepository;
 use UMC\Order\OrderSnapshot;
 use UMC\Order\RefundSnapshot;
 use UMC\StoreApi\CartExtensionData;
@@ -26,7 +27,7 @@ final class PersistedKeys {
 	/**
 	 * Bump when the inventory shape or membership changes.
 	 */
-	public const INVENTORY_VERSION = 3;
+	public const INVENTORY_VERSION = 4;
 
 	/**
 	 * WordPress options written by the plugin.
@@ -56,6 +57,9 @@ final class PersistedKeys {
 			OrderSnapshot::META_RATE_IDENTITY,
 			OrderSnapshot::META_SNAPSHOT_VERSION,
 			OrderSnapshot::META_TRANSACTION_DECIMALS,
+			OrderSnapshot::META_CHECKOUT_MODE,
+			OrderSnapshot::META_SHOPPER_CURRENCY,
+			OrderSnapshot::META_FALLBACK_OCCURRED,
 		);
 	}
 
@@ -91,6 +95,8 @@ final class PersistedKeys {
 		return array(
 			CurrencyContext::SESSION_KEY,
 			CartRecalculation::SESSION_KEY,
+			CheckoutTransitionStateRepository::SESSION_KEY,
+			CheckoutTransitionStateRepository::SESSION_NOTICE_KEY,
 		);
 	}
 

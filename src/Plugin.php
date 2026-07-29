@@ -18,6 +18,13 @@ use UMC\Admin\RateUpdateController;
 use UMC\Admin\SettingsPage;
 use UMC\Diagnostics\Diagnostics;
 use UMC\Cart\CartRecalculation;
+use UMC\Checkout\CheckoutCurrencyPolicy;
+use UMC\Checkout\CheckoutEffectiveCurrencyProvider;
+use UMC\Checkout\CheckoutNoticeService;
+use UMC\Checkout\CheckoutPolicyCoordinator;
+use UMC\Checkout\CheckoutRecalculationService;
+use UMC\Checkout\CheckoutSettingsRepository;
+use UMC\Checkout\CheckoutTransitionStateRepository;
 use UMC\Currency\WooCommerceCurrencyProvider;
 use UMC\Display\AutomaticRenderRegistry;
 use UMC\Display\AutomaticSwitcherPlacement;
@@ -27,6 +34,7 @@ use UMC\Display\SwitcherRenderer;
 use UMC\Display\SwitcherSettingsRepository;
 use UMC\Display\SwitcherShortcode;
 use UMC\Display\SwitcherViewModelFactory;
+use UMC\Integration\ClassicCheckoutPolicyAdapter;
 use UMC\Integration\CouponConversion;
 use UMC\Integration\CurrencyFormatting;
 use UMC\Integration\GatewayCompatibility;
@@ -49,8 +57,10 @@ use UMC\Rates\RateUpdateService;
 use UMC\Rates\RateUpdateState;
 use UMC\Rates\Scheduler;
 use UMC\StoreApi\CartExtensionData;
+use UMC\StoreApi\CheckoutBlocksNoticeAssets;
 use UMC\StoreApi\CheckoutSnapshotAdapter;
 use UMC\StoreApi\OrderCurrencyLock;
+use UMC\StoreApi\StoreApiCheckoutPolicyAdapter;
 
 /**
  * Instantiates services once and registers their hooks.
@@ -185,17 +195,35 @@ final class Plugin {
 				( new ShippingConversion( $service, $context ) )->register();
 				$gateway_compat->register();
 
+				$checkout_settings  = new CheckoutSettingsRepository( $settings );
+				$transition_repo    = new CheckoutTransitionStateRepository();
+				$notice_service     = new CheckoutNoticeService( $transition_repo );
+				$effective_currency = new CheckoutEffectiveCurrencyProvider( $context );
+				$recalculation      = new CheckoutRecalculationService( $context );
+				$reader             = new OrderSnapshotReader();
+				$resolver           = new HistoricalFormattingResolver( $registry );
+				$order_context      = new OrderCurrencyContext( $reader, $resolver );
+				$coordinator        = new CheckoutPolicyCoordinator(
+					$checkout_settings,
+					new CheckoutCurrencyPolicy(),
+					$effective_currency,
+					$gateway_compat,
+					$recalculation,
+					$transition_repo,
+					$notice_service,
+					$order_context
+				);
+
+				( new ClassicCheckoutPolicyAdapter( $coordinator, $context ) )->register();
+				( new StoreApiCheckoutPolicyAdapter( $coordinator, $context ) )->register();
+
 				// One OrderSnapshot instance serves both checkout flows: classic
 				// checkout hooks it directly, the Store API adapter drives the same
 				// writer at the equivalent points in its own lifecycle.
-				$order_snapshot = new OrderSnapshot( $context, $settings, $version );
+				$order_snapshot = new OrderSnapshot( $context, $settings, $version, $transition_repo );
 				$order_snapshot->register();
 
 				// M4 services: historical orders, refunds, order-pay.
-				$reader        = new OrderSnapshotReader();
-				$resolver      = new HistoricalFormattingResolver( $registry );
-				$order_context = new OrderCurrencyContext( $reader, $resolver );
-
 				( new OrderCurrencyFormatting( $order_context, $resolver ) )->register();
 				( new HistoricalOrderDisplay( $order_context ) )->register();
 				( new OrderPayCurrencyLock( $order_context, $gateway_compat, $registry ) )->register();
@@ -204,7 +232,8 @@ final class Plugin {
 				// M5 services: Cart and Checkout blocks via the Store API.
 				( new CheckoutSnapshotAdapter( $order_snapshot ) )->register();
 				( new OrderCurrencyLock( $order_context, $gateway_compat ) )->register();
-				( new CartExtensionData( $context ) )->register();
+				( new CartExtensionData( $context, $coordinator, $checkout_settings, $notice_service ) )->register();
+				( new CheckoutBlocksNoticeAssets( $context ) )->register();
 			}
 		);
 

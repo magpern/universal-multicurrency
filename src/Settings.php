@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace UMC;
 
+use UMC\Checkout\CheckoutSettings;
 use UMC\Display\SwitcherSettings;
 use UMC\Rates\RateResolver;
 
@@ -28,7 +29,7 @@ final class Settings {
 
 	public const OPTION = 'umc_settings';
 
-	public const SCHEMA_VERSION = 3;
+	public const SCHEMA_VERSION = 4;
 
 	public const RATE_MODE_MANUAL = 'manual';
 
@@ -96,6 +97,7 @@ final class Settings {
 			'rate_max_age_hours'   => self::DEFAULT_RATE_MAX_AGE_HOURS,
 			'currencies'           => array(),
 			'display'              => SwitcherSettings::default_array(),
+			'checkout'             => CheckoutSettings::default_array(),
 		);
 	}
 
@@ -133,7 +135,8 @@ final class Settings {
 			$clean['currencies'][ $code ] = self::sanitize_currency( $config );
 		}
 
-		$clean['display'] = self::sanitize_display( $raw['display'] ?? null );
+		$clean['display']  = self::sanitize_display( $raw['display'] ?? null );
+		$clean['checkout'] = self::sanitize_checkout( $raw['checkout'] ?? null );
 
 		return $clean;
 	}
@@ -146,6 +149,16 @@ final class Settings {
 	 */
 	public static function sanitize_display( mixed $raw ): array {
 		return SwitcherSettings::sanitize_raw( $raw );
+	}
+
+	/**
+	 * Sanitizes the checkout policy settings subtree.
+	 *
+	 * @param mixed $raw Raw checkout settings.
+	 * @return array<string, mixed>
+	 */
+	public static function sanitize_checkout( mixed $raw ): array {
+		return CheckoutSettings::sanitize_raw( $raw );
 	}
 
 	/**

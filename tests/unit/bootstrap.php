@@ -99,6 +99,18 @@ if ( ! function_exists( '_n' ) ) {
 	}
 }
 
+if ( ! function_exists( 'esc_html__' ) ) {
+	/**
+	 * Identity translation stub for unit tests without WordPress loaded.
+	 *
+	 * @param string $text   Source string.
+	 * @param string $domain Text domain (ignored).
+	 */
+	function esc_html__( $text, $domain = 'default' ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound, Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		return $text;
+	}
+}
+
 if ( ! function_exists( 'esc_html' ) ) {
 	function esc_html( $text ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound
 		return htmlspecialchars( (string) $text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8' );

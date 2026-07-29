@@ -76,6 +76,13 @@ final class SettingsPage extends WC_Settings_Page {
 	private DisplaySettingsField $display_field;
 
 	/**
+	 * Checkout policy settings field renderer.
+	 *
+	 * @var CheckoutSettingsField
+	 */
+	private CheckoutSettingsField $checkout_field;
+
+	/**
 	 * Compatibility diagnostics field renderer.
 	 *
 	 * @var CompatibilitySettingsField
@@ -126,6 +133,7 @@ final class SettingsPage extends WC_Settings_Page {
 			new SwitcherRenderer(),
 			$display_repository
 		);
+		$this->checkout_field      = new CheckoutSettingsField( $settings, $base );
 		$conflict_detector         = new ConflictDetector(
 			new DetectorRegistry(),
 			new WordPressEnvironmentProbe(),
@@ -151,6 +159,7 @@ final class SettingsPage extends WC_Settings_Page {
 
 		add_action( 'woocommerce_admin_field_umc_exchange_rates', array( $this->exchange_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_display', array( $this->display_field, 'render' ) );
+		add_action( 'woocommerce_admin_field_umc_checkout', array( $this->checkout_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_compatibility', array( $this->compatibility_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_currencies', array( $this->overview_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_placeholder', array( $this, 'render_placeholder_field' ) );
@@ -217,7 +226,7 @@ final class SettingsPage extends WC_Settings_Page {
 		\WC_Admin_Settings::output_fields( $this->content_settings( $settings ) );
 		echo '</table>';
 
-		if ( $view_model->has_saveable_settings && self::SECTION_DISPLAY !== $active ) {
+		if ( $this->section_has_saveable_settings( $active ) && self::SECTION_DISPLAY !== $active ) {
 			$this->render_section_save_actions();
 		}
 
@@ -234,7 +243,7 @@ final class SettingsPage extends WC_Settings_Page {
 	 * @param string $section Section slug.
 	 */
 	public function section_has_saveable_settings( string $section ): bool {
-		return in_array( $section, array( self::SECTION_CURRENCIES, self::SECTION_EXCHANGE_RATES, self::SECTION_DISPLAY ), true );
+		return in_array( $section, array( self::SECTION_CURRENCIES, self::SECTION_EXCHANGE_RATES, self::SECTION_DISPLAY, self::SECTION_CHECKOUT ), true );
 	}
 
 	/**
@@ -243,7 +252,11 @@ final class SettingsPage extends WC_Settings_Page {
 	 * @param string $section Section slug.
 	 */
 	public function section_has_header_save( string $section ): bool {
-		return in_array( $section, array( self::SECTION_CURRENCIES, self::SECTION_EXCHANGE_RATES ), true );
+		return in_array(
+			$section,
+			array( self::SECTION_CURRENCIES, self::SECTION_EXCHANGE_RATES, self::SECTION_CHECKOUT ),
+			true
+		);
 	}
 
 	/**
@@ -311,7 +324,7 @@ final class SettingsPage extends WC_Settings_Page {
 	 * @return array<int, array<string, mixed>>
 	 */
 	protected function get_settings_for_checkout_section() {
-		return $this->placeholder_settings( self::SECTION_CHECKOUT );
+		return $this->checkout_settings();
 	}
 
 	/**
@@ -371,6 +384,16 @@ final class SettingsPage extends WC_Settings_Page {
 				);
 			}
 
+			return;
+		}
+
+		if ( self::SECTION_CHECKOUT === $section ) {
+			$merged = array_merge(
+				$this->settings->get(),
+				array( 'checkout' => $this->checkout_field->parse_post() )
+			);
+			$this->settings->save( $merged );
+			$this->fire_saved_hook();
 			return;
 		}
 
@@ -473,6 +496,33 @@ final class SettingsPage extends WC_Settings_Page {
 			array(
 				'type' => 'sectionend',
 				'id'   => 'umc_display_end',
+			),
+		);
+	}
+
+	/**
+	 * Returns field definitions for the Checkout section.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function checkout_settings(): array {
+		return array(
+			array(
+				'type' => 'umc_conflict',
+				'id'   => 'umc_conflict_notice',
+			),
+			array(
+				'type' => 'title',
+				'name' => __( 'Checkout', 'universal-multicurrency' ),
+				'id'   => 'umc_checkout_title',
+			),
+			array(
+				'type' => 'umc_checkout',
+				'id'   => 'umc_checkout',
+			),
+			array(
+				'type' => 'sectionend',
+				'id'   => 'umc_checkout_end',
 			),
 		);
 	}

@@ -26,7 +26,7 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Produces `dist/universal-multicurrency-0.9.1.zip`. The archive includes `readme.txt`,
+Produces `dist/universal-multicurrency-0.10.0.zip`. The archive includes `readme.txt`,
 production `src/`, `vendor/`, and `languages/universal-multicurrency.pot`.
 
 Performance subset:
@@ -36,8 +36,8 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release:** **v0.9.1** on `main`. Git tag and GitHub release follow
-release verification — do not create without explicit approval.
+**Current release:** **v0.10.0** on `feature/m11-checkout-policy`. Git tag and
+GitHub release follow CI verification — do not create without explicit approval.
 
 ---
 
@@ -993,7 +993,30 @@ unaffected.
 
 ---
 
-## v0.9.1 — Compatibility diagnostics (current)
+## v0.10.0 — Checkout currency policy (current)
+
+### Summary
+
+Ships Milestone 11 checkout currency policy under version **0.10.0**. Settings
+schema **v3→v4** adds checkout defaults (`mode: selected`, `show_notice: true`)
+that preserve v0.9.x checkout behaviour. Order snapshot schema **v3** adds
+checkout audit metadata.
+
+### Deployment sequence
+
+1. Run `composer release-audit` on the **0.10.0** tree.
+2. Build `dist/universal-multicurrency-0.10.0.zip` with `composer install --no-dev`
+   + `bin/build-zip.sh`.
+3. Deploy over **0.9.x** in place. Settings migration runs automatically on first load.
+
+### Rollback
+
+Downgrade to the **0.9.x** zip if needed. v4 checkout settings and v3 order
+snapshot fields are ignored safely by older builds; order snapshots remain readable.
+
+---
+
+## v0.9.1 — Compatibility diagnostics
 
 ### Summary
 

@@ -13,6 +13,7 @@ use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use RuntimeException;
 use UMC\Cart\CartRecalculation;
+use UMC\Checkout\CheckoutTransitionStateRepository;
 use UMC\CurrencyContext;
 use UMC\Diagnostics\NoticeDismissal;
 use UMC\Order\OrderSnapshot;
@@ -134,6 +135,8 @@ final class PersistedKeysInventoryTest extends TestCase {
 			array(
 				CurrencyContext::SESSION_KEY,
 				CartRecalculation::SESSION_KEY,
+				CheckoutTransitionStateRepository::SESSION_KEY,
+				CheckoutTransitionStateRepository::SESSION_NOTICE_KEY,
 			),
 			PersistedKeys::session_keys()
 		);

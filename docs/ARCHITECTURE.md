@@ -68,7 +68,7 @@ fitting SPL type (`InvalidArgumentException` / `RuntimeException`).
 
 ### Settings schema upgrade (Milestones 7–8)
 
-`Settings::SCHEMA_VERSION` is **3** and must not be bumped unless a genuine
+`Settings::SCHEMA_VERSION` is **4** and must not be bumped unless a genuine
 settings shape change requires it. Production migrations exist because the
 stored shape actually changed; none is an artificial bump.
 
@@ -87,6 +87,10 @@ the boundary — proven byte-for-byte by `tests/unit/SettingsMigrationFidelityTe
 (`display`) with safe defaults. Currency and exchange-rate configuration is
 preserved unchanged; `display.enabled` remains `false` so storefront output is
 not activated by the upgrade alone.
+
+`SettingsUpgrader::migrate_3_to_4` adds checkout policy defaults (`checkout`)
+with `mode: selected` and `show_notice: true`, preserving v0.9.x checkout
+behaviour for upgraded stores.
 See [`MIGRATION.md`](MIGRATION.md) § Internal settings schema migrations.
 
 `SettingsUpgrader` responsibilities:
@@ -323,7 +327,7 @@ changing monetary behaviour. Authoritative records:
 | Persisted-key inventory | [`PERSISTED_DATA.md`](PERSISTED_DATA.md), `PersistedKeys`, `PersistedKeysInventoryTest` |
 | Uninstall retention | ADR-0009, `uninstall.php`, `UninstallPolicyGuardTest` |
 | Manual merchant migration only | [`MIGRATION.md`](MIGRATION.md) — no foreign import, no RC CSV parser |
-| Settings schema | `Settings::SCHEMA_VERSION === 3`; production migrations v0→v1, v1→v2, and v2→v3 via `SettingsUpgrader` |
+| Settings schema | `Settings::SCHEMA_VERSION === 4`; production migrations v0→v1, v1→v2, v2→v3, and v3→v4 via `SettingsUpgrader` |
 | Translation readiness | [`TRANSLATION.md`](TRANSLATION.md), `languages/universal-multicurrency.pot`, `composer make-pot:check` |
 | Security audit | [`SECURITY_REVIEW.md`](SECURITY_REVIEW.md) — zero open Critical/High; accepted M/L risks documented |
 | Performance baselines | [`PERFORMANCE_BASELINES.md`](PERFORMANCE_BASELINES.md) — deterministic query/write ceilings only |

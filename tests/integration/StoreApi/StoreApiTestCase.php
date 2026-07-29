@@ -10,10 +10,18 @@ declare( strict_types=1 );
 namespace UMC\Tests\Integration\StoreApi;
 
 use UMC\Cart\CartRecalculation;
+use UMC\Checkout\CheckoutCurrencyPolicy;
+use UMC\Checkout\CheckoutEffectiveCurrencyProvider;
+use UMC\Checkout\CheckoutNoticeService;
+use UMC\Checkout\CheckoutPolicyCoordinator;
+use UMC\Checkout\CheckoutRecalculationService;
+use UMC\Checkout\CheckoutSettingsRepository;
+use UMC\Checkout\CheckoutTransitionStateRepository;
 use UMC\Currency;
 use UMC\CurrencyContext;
 use UMC\CurrencyRegistry;
 use UMC\CurrencyResolver;
+use UMC\Integration\ClassicCheckoutPolicyAdapter;
 use UMC\Integration\CouponConversion;
 use UMC\Integration\CurrencyFormatting;
 use UMC\Integration\GatewayCompatibility;
@@ -28,8 +36,10 @@ use UMC\Order\OrderSnapshotReader;
 use UMC\Rates\ManualRateProvider;
 use UMC\Settings;
 use UMC\StoreApi\CartExtensionData;
+use UMC\StoreApi\CheckoutBlocksNoticeAssets;
 use UMC\StoreApi\CheckoutSnapshotAdapter;
 use UMC\StoreApi\OrderCurrencyLock;
+use UMC\StoreApi\StoreApiCheckoutPolicyAdapter;
 use WC_Product_Simple;
 use WC_Product_Variable;
 use WC_Product_Variation;
@@ -104,10 +114,13 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 		'woocommerce_cart_shipping_packages',
 		'woocommerce_available_payment_gateways',
 		'woocommerce_checkout_create_order',
+		'woocommerce_before_checkout_form',
+		'woocommerce_checkout_update_order_review',
 		'woocommerce_store_api_checkout_update_order_meta',
 		'woocommerce_store_api_cart_update_order_from_request',
 		'rest_request_before_callbacks',
 		'rest_request_after_callbacks',
+		'wp_enqueue_scripts',
 		// Plugin-provided filters, through which a test states how the host is
 		// configured. Rebuilding the graph re-states that configuration, so these
 		// are cleared alongside the hooks the plugin itself registers.
@@ -241,8 +254,15 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 	 * @param string|null                         $active     Currency to select via cookie.
 	 * @param string                              $base       Store base currency code.
 	 * @param int                                 $decimals   Store base decimals.
+	 * @param array<string, mixed>                $settings_overrides Optional settings overrides.
 	 */
-	protected function boot_plugin( array $currencies, ?string $active = null, string $base = 'EUR', int $decimals = 2 ): void {
+	protected function boot_plugin(
+		array $currencies,
+		?string $active = null,
+		string $base = 'EUR',
+		int $decimals = 2,
+		array $settings_overrides = array()
+	): void {
 		$this->clear_managed_hooks();
 
 		$this->base_code         = $base;
@@ -252,7 +272,7 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 		update_option( 'woocommerce_currency', $base );
 		update_option( 'woocommerce_price_num_decimals', $decimals );
 
-		( new Settings() )->save( array( 'currencies' => $currencies ) );
+		( new Settings() )->save( array_merge( array( 'currencies' => $currencies ), $settings_overrides ) );
 
 		$settings = new Settings();
 		$registry = new CurrencyRegistry( $settings, new Currency( $base, $decimals ) );
@@ -271,15 +291,45 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 		// this exact callback so its order-currency rule sees the original set.
 		$this->gateway_compat = new GatewayCompatibility( $this->context );
 		$this->gateway_compat->register();
-		( new OrderSnapshot( $this->context, $settings, $this->plugin_version() ) )->register();
 
+		$checkout_settings   = new CheckoutSettingsRepository( $settings );
+		$transition_repo     = new CheckoutTransitionStateRepository();
+		$notice_service      = new CheckoutNoticeService( $transition_repo );
+		$effective_currency  = new CheckoutEffectiveCurrencyProvider( $this->context );
+		$recalculation       = new CheckoutRecalculationService( $this->context );
 		$reader              = new OrderSnapshotReader();
 		$resolver            = new HistoricalFormattingResolver( $registry );
 		$this->order_context = new OrderCurrencyContext( $reader, $resolver );
+		$coordinator         = new CheckoutPolicyCoordinator(
+			$checkout_settings,
+			new CheckoutCurrencyPolicy(),
+			$effective_currency,
+			$this->gateway_compat,
+			$recalculation,
+			$transition_repo,
+			$notice_service,
+			$this->order_context
+		);
+
+		( new ClassicCheckoutPolicyAdapter( $coordinator, $this->context ) )->register();
+		( new StoreApiCheckoutPolicyAdapter( $coordinator, $this->context ) )->register();
+
+		$order_snapshot = new OrderSnapshot( $this->context, $settings, $this->plugin_version(), $transition_repo );
+		$order_snapshot->register();
 
 		( new OrderCurrencyFormatting( $this->order_context, $resolver ) )->register();
 
-		$this->register_store_api_services( $this->context, $this->order_context, $settings );
+		$this->register_store_api_services(
+			$this->context,
+			$this->order_context,
+			$settings,
+			$coordinator,
+			$checkout_settings,
+			$notice_service,
+			$order_snapshot
+		);
+
+		( new CheckoutBlocksNoticeAssets( $this->context ) )->register();
 
 		if ( null === $active ) {
 			unset( $_COOKIE[ CurrencyContext::COOKIE_NAME ] );
@@ -291,16 +341,28 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 	/**
 	 * Registers the Store API adapters, mirroring `Plugin::init()`.
 	 *
-	 * @param CurrencyContext      $context       Live currency context.
-	 * @param OrderCurrencyContext $order_context Order-scope currency context.
-	 * @param Settings             $settings      Settings store.
+	 * @param CurrencyContext            $context           Live currency context.
+	 * @param OrderCurrencyContext       $order_context     Order-scope currency context.
+	 * @param Settings                   $settings          Settings store.
+	 * @param CheckoutPolicyCoordinator  $coordinator       Checkout policy coordinator.
+	 * @param CheckoutSettingsRepository $checkout_settings Checkout settings repository.
+	 * @param CheckoutNoticeService      $notice_service    Checkout notice service.
+	 * @param OrderSnapshot              $order_snapshot    Shared order snapshot writer.
 	 */
-	protected function register_store_api_services( CurrencyContext $context, OrderCurrencyContext $order_context, Settings $settings ): void {
-		$snapshot = new OrderSnapshot( $context, $settings, $this->plugin_version() );
+	protected function register_store_api_services(
+		CurrencyContext $context,
+		OrderCurrencyContext $order_context,
+		Settings $settings,
+		CheckoutPolicyCoordinator $coordinator,
+		CheckoutSettingsRepository $checkout_settings,
+		CheckoutNoticeService $notice_service,
+		OrderSnapshot $order_snapshot
+	): void {
+		unset( $settings );
 
-		( new CheckoutSnapshotAdapter( $snapshot ) )->register();
+		( new CheckoutSnapshotAdapter( $order_snapshot ) )->register();
 		( new OrderCurrencyLock( $order_context, $this->gateway_compat ) )->register();
-		( new CartExtensionData( $context ) )->register();
+		( new CartExtensionData( $context, $coordinator, $checkout_settings, $notice_service ) )->register();
 	}
 
 	/**
@@ -538,6 +600,8 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 		// report on — an order a previous test already completed.
 		WC()->session->set( CurrencyContext::SESSION_KEY, null );
 		WC()->session->set( CartRecalculation::SESSION_KEY, null );
+		WC()->session->set( CheckoutTransitionStateRepository::SESSION_KEY, null );
+		WC()->session->set( CheckoutTransitionStateRepository::SESSION_NOTICE_KEY, null );
 		WC()->session->set( 'store_api_draft_order', null );
 		WC()->session->set( 'chosen_payment_method', null );
 
