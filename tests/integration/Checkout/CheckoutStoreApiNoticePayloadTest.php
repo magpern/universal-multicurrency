@@ -103,7 +103,7 @@ final class CheckoutStoreApiNoticePayloadTest extends StoreApiTestCase {
 		$this->assertSame( CheckoutSettings::MODE_SELECTED, $umc['checkout_mode'] );
 		$this->assertSame( 'EUR', $umc['shopper_currency'] );
 		$this->assertSame( 'EUR', $umc['effective_currency'] );
-		$this->assertNull( $umc['transition_reason'] );
+		$this->assertSame( '', $umc['transition_reason'] );
 		$this->assertFalse( $umc['fallback_applied'] );
 		$this->assertSame( array( 'show' => false ), $umc['checkout_notice'] );
 	}
