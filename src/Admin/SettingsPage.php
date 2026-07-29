@@ -57,11 +57,25 @@ final class SettingsPage extends WC_Settings_Page {
 	private ExchangeRateSettingsField $exchange_field;
 
 	/**
-	 * Placeholder section renderer.
+	 * Placeholder section renderer callback target.
 	 *
-	 * @var PlaceholderSectionField
+	 * @var AdminPageShellViewModelFactory
 	 */
-	private PlaceholderSectionField $placeholder_field;
+	private AdminPageShellViewModelFactory $shell_factory;
+
+	/**
+	 * Page shell renderer.
+	 *
+	 * @var AdminPageShell
+	 */
+	private AdminPageShell $shell;
+
+	/**
+	 * Active section header renderer.
+	 *
+	 * @var SectionHeader
+	 */
+	private SectionHeader $section_header;
 
 	/**
 	 * Builds the settings tab and its custom field renderers.
@@ -71,13 +85,14 @@ final class SettingsPage extends WC_Settings_Page {
 	 * @param ExchangeRateStore $store    Rate persistence boundary.
 	 */
 	public function __construct( Settings $settings, Currency $base, ExchangeRateStore $store ) {
-		$this->id                = 'umc';
-		$this->label             = __( 'Multicurrency', 'universal-multicurrency' );
-		$this->settings          = $settings;
-		$this->parser            = new CurrencySettingsParser( $settings, $base );
-		$this->exchange_field    = new ExchangeRateSettingsField( $settings, $store );
-		$this->placeholder_field = new PlaceholderSectionField();
-		$this->overview_field    = new CurrencyOverviewField(
+		$this->id             = 'umc';
+		$this->label          = __( 'Multicurrency', 'universal-multicurrency' );
+		$this->settings       = $settings;
+		$this->parser         = new CurrencySettingsParser( $settings, $base );
+		$this->exchange_field = new ExchangeRateSettingsField( $settings, $store );
+		$this->section_header = new SectionHeader();
+		$this->shell          = new AdminPageShell( new SectionNavigation() );
+		$this->overview_field = new CurrencyOverviewField(
 			new CurrencyViewModelFactory(
 				$settings,
 				$base,
@@ -88,9 +103,11 @@ final class SettingsPage extends WC_Settings_Page {
 
 		parent::__construct();
 
+		$this->shell_factory = new AdminPageShellViewModelFactory( $this );
+
 		add_action( 'woocommerce_admin_field_umc_exchange_rates', array( $this->exchange_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_currencies', array( $this->overview_field, 'render' ) );
-		add_action( 'woocommerce_admin_field_umc_placeholder', array( $this->placeholder_field, 'render' ) );
+		add_action( 'woocommerce_admin_field_umc_placeholder', array( $this, 'render_placeholder_field' ) );
 		add_action( 'admin_notices', array( $this, 'maybe_render_notice' ) );
 	}
 
@@ -108,6 +125,80 @@ final class SettingsPage extends WC_Settings_Page {
 			self::SECTION_COMPATIBILITY  => __( 'Compatibility', 'universal-multicurrency' ),
 			self::SECTION_ADVANCED       => __( 'Advanced', 'universal-multicurrency' ),
 		);
+	}
+
+	/**
+	 * Renders the Multicurrency page shell instead of the default subsubsub links.
+	 */
+	public function output_sections(): void {
+		global $current_section;
+
+		$section    = is_string( $current_section ) ? $current_section : '';
+		$active     = $this->normalize_section( $section );
+		$settings   = $this->get_settings( $section );
+		$view_model = $this->shell_factory->build(
+			$active,
+			$this->capture_conflict_notice( $settings )
+		);
+
+		$this->shell->render( $view_model );
+	}
+
+	/**
+	 * Renders section fields inside the shell content card.
+	 */
+	public function output(): void {
+		global $current_section;
+
+		$section    = is_string( $current_section ) ? $current_section : '';
+		$active     = $this->normalize_section( $section );
+		$settings   = $this->get_settings( $section );
+		$view_model = $this->shell_factory->build(
+			$active,
+			$this->capture_conflict_notice( $settings )
+		);
+
+		$GLOBALS['hide_save_button'] = true;
+
+		$this->shell->open_section_card( $view_model, $this->section_header );
+
+		echo '<table class="form-table umc-form-table">';
+		\WC_Admin_Settings::output_fields( $this->content_settings( $settings ) );
+		echo '</table>';
+
+		$this->shell->close_section_card();
+	}
+
+	/**
+	 * Returns whether a section exposes saveable settings fields.
+	 *
+	 * @param string $section Section slug.
+	 */
+	public function section_has_saveable_settings( string $section ): bool {
+		return in_array( $section, array( self::SECTION_CURRENCIES, self::SECTION_EXCHANGE_RATES ), true );
+	}
+
+	/**
+	 * Returns the admin URL for one settings section.
+	 *
+	 * @param string $section Section slug.
+	 */
+	public function section_url( string $section ): string {
+		return admin_url( 'admin.php?page=wc-settings&tab=' . $this->id . '&section=' . rawurlencode( $section ) );
+	}
+
+	/**
+	 * Renders the placeholder field for the active section.
+	 *
+	 * @param array<string, mixed> $value Field definition.
+	 */
+	public function render_placeholder_field( array $value ): void {
+		unset( $value );
+
+		$field = new PlaceholderSectionField(
+			$this->shell_factory->placeholder_secondary_line( $this->active_section() )
+		);
+		$field->render();
 	}
 
 	/**
@@ -305,18 +396,80 @@ final class SettingsPage extends WC_Settings_Page {
 	}
 
 	/**
+	 * Normalizes the active WooCommerce section slug.
+	 *
+	 * @param string $section Raw current section value.
+	 */
+	private function normalize_section( string $section ): string {
+		if ( '' === $section || self::SECTION_CURRENCIES === $section ) {
+			return self::SECTION_CURRENCIES;
+		}
+
+		return $section;
+	}
+
+	/**
+	 * Captures the compatibility notice markup when present in a section schema.
+	 *
+	 * @param array<int, array<string, mixed>> $settings Settings field definitions.
+	 */
+	private function capture_conflict_notice( array $settings ): string {
+		foreach ( $settings as $field ) {
+			if ( ! is_array( $field ) ) {
+				continue;
+			}
+
+			if ( 'umc_conflict' !== ( $field['type'] ?? '' ) ) {
+				continue;
+			}
+
+			ob_start();
+			/**
+			 * Renders the Multicurrency compatibility notice field on the settings tab.
+			 *
+			 * @since 0.8.0
+			 */
+			do_action( 'woocommerce_admin_field_umc_conflict', $field );
+
+			return (string) ob_get_clean();
+		}
+
+		return '';
+	}
+
+	/**
+	 * Returns only field definitions that belong inside the section card body.
+	 *
+	 * @param array<int, array<string, mixed>> $settings Settings field definitions.
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function content_settings( array $settings ): array {
+		$filtered = array();
+
+		foreach ( $settings as $field ) {
+			if ( ! is_array( $field ) ) {
+				continue;
+			}
+
+			$type = (string) ( $field['type'] ?? '' );
+
+			if ( in_array( $type, array( 'title', 'sectionend', 'umc_conflict' ), true ) ) {
+				continue;
+			}
+
+			$filtered[] = $field;
+		}
+
+		return $filtered;
+	}
+
+	/**
 	 * Resolves the active settings section key.
 	 */
 	private function active_section(): string {
 		global $current_section;
 
-		$section = is_string( $current_section ) ? $current_section : '';
-
-		if ( '' === $section ) {
-			return self::SECTION_CURRENCIES;
-		}
-
-		return $section;
+		return $this->normalize_section( is_string( $current_section ) ? $current_section : '' );
 	}
 
 	/**

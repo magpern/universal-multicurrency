@@ -31,6 +31,70 @@ msgstr ""
 msgid "magpern"
 msgstr ""
 
+#: src/Admin/AdminPageShell.php:105
+msgid "Save changes"
+msgstr ""
+
+#: src/Admin/AdminPageShellViewModelFactory.php:61
+#: src/Diagnostics/SiteHealthReport.php:607
+#: src/Diagnostics/SiteHealthReport.php:851
+msgid "Universal Multicurrency"
+msgstr ""
+
+#: src/Admin/AdminPageShellViewModelFactory.php:63
+msgid "for WooCommerce"
+msgstr ""
+
+#: src/Admin/AdminPageShellViewModelFactory.php:65
+#: src/Admin/SettingsPage.php:89
+#: src/Admin/SettingsPage.php:483
+msgid "Multicurrency"
+msgstr ""
+
+#: src/Admin/AdminPageShellViewModelFactory.php:82
+msgid "Manage the currencies available across your store."
+msgstr ""
+
+#: src/Admin/AdminPageShellViewModelFactory.php:84
+msgid "Configure providers, update schedules, and effective rates."
+msgstr ""
+
+#: src/Admin/AdminPageShellViewModelFactory.php:86
+msgid "Configure how prices and currency information are displayed across your store."
+msgstr ""
+
+#: src/Admin/AdminPageShellViewModelFactory.php:88
+msgid "Control how selected currencies behave during checkout."
+msgstr ""
+
+#: src/Admin/AdminPageShellViewModelFactory.php:90
+msgid "Review compatibility with WooCommerce and other currency plugins."
+msgstr ""
+
+#: src/Admin/AdminPageShellViewModelFactory.php:92
+msgid "Manage advanced behavior and diagnostic settings."
+msgstr ""
+
+#: src/Admin/AdminPageShellViewModelFactory.php:106
+msgid "We're working on display customization options for your store."
+msgstr ""
+
+#: src/Admin/AdminPageShellViewModelFactory.php:108
+msgid "We're working on checkout currency behavior options for your store."
+msgstr ""
+
+#: src/Admin/AdminPageShellViewModelFactory.php:110
+msgid "We're working on compatibility guidance and tooling for your store."
+msgstr ""
+
+#: src/Admin/AdminPageShellViewModelFactory.php:112
+msgid "We're working on advanced configuration options for your store."
+msgstr ""
+
+#: src/Admin/AdminPageShellViewModelFactory.php:115
+msgid "We're working on additional settings for this section."
+msgstr ""
+
 #: src/Admin/CurrencyActionController.php:55
 #: src/Admin/CurrencyActionController.php:64
 msgid "That currency could not be added. It may already exist or is not recognised."
@@ -254,8 +318,8 @@ msgid "Right with space"
 msgstr ""
 
 #: src/Admin/CurrencyTableField.php:95
-#: src/Admin/SettingsPage.php:104
-#: src/Admin/SettingsPage.php:242
+#: src/Admin/SettingsPage.php:121
+#: src/Admin/SettingsPage.php:333
 msgid "Currencies"
 msgstr ""
 
@@ -385,7 +449,7 @@ msgstr ""
 msgid "%s UTC"
 msgstr ""
 
-#: src/Admin/PlaceholderSectionField.php:25
+#: src/Admin/PlaceholderSectionField.php:44
 msgid "This section will be implemented in a future milestone."
 msgstr ""
 
@@ -423,29 +487,28 @@ msgstr ""
 msgid "Exchange rates updated successfully."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:75
-#: src/Admin/SettingsPage.php:330
-msgid "Multicurrency"
+#: src/Admin/SectionNavigation.php:27
+msgid "Multicurrency settings sections"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:105
-#: src/Admin/SettingsPage.php:269
+#: src/Admin/SettingsPage.php:122
+#: src/Admin/SettingsPage.php:360
 msgid "Exchange Rates"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:106
+#: src/Admin/SettingsPage.php:123
 msgid "Display"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:107
+#: src/Admin/SettingsPage.php:124
 msgid "Checkout"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:108
+#: src/Admin/SettingsPage.php:125
 msgid "Compatibility"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:109
+#: src/Admin/SettingsPage.php:126
 msgid "Advanced"
 msgstr ""
 
@@ -706,11 +769,6 @@ msgstr ""
 
 #: src/Diagnostics/SiteHealthReport.php:439
 msgid "Environment should be reviewed"
-msgstr ""
-
-#: src/Diagnostics/SiteHealthReport.php:607
-#: src/Diagnostics/SiteHealthReport.php:851
-msgid "Universal Multicurrency"
 msgstr ""
 
 #: src/Diagnostics/SiteHealthReport.php:608

@@ -19,6 +19,7 @@ final class AdminAssets {
 	 */
 	public function register(): void {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue' ) );
+		add_filter( 'admin_body_class', array( $this, 'body_class' ) );
 	}
 
 	/**
@@ -46,7 +47,7 @@ final class AdminAssets {
 		wp_enqueue_style(
 			'umc-admin-settings',
 			$base . 'umc-settings.css',
-			array(),
+			array( 'dashicons' ),
 			(string) filemtime( $path . 'umc-settings.css' )
 		);
 
@@ -57,5 +58,23 @@ final class AdminAssets {
 			(string) filemtime( $path . 'umc-settings.js' ),
 			true
 		);
+	}
+
+	/**
+	 * Adds a body class on the Multicurrency settings screens.
+	 *
+	 * @param string $classes Space-separated admin body classes.
+	 */
+	public function body_class( string $classes ): string {
+		if ( ! is_admin() ) {
+			return $classes;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Display-only query args.
+		if ( ! isset( $_GET['page'], $_GET['tab'] ) || 'wc-settings' !== sanitize_key( wp_unslash( (string) $_GET['page'] ) ) || 'umc' !== sanitize_key( wp_unslash( (string) $_GET['tab'] ) ) ) {
+			return $classes;
+		}
+
+		return trim( $classes . ' umc-settings-page' );
 	}
 }
