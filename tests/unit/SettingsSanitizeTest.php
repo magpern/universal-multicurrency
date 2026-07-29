@@ -282,4 +282,16 @@ final class SettingsSanitizeTest extends TestCase {
 		$settings = new Settings( array( 'currencies' => array( 'USD' => array( 'rate' => 'bad' ) ) ) );
 		$this->assertNull( $settings->get_rate( 'USD' ) );
 	}
+
+	public function test_checkout_settle_base_mode_is_sanitized(): void {
+		$clean = Settings::sanitize_checkout(
+			array(
+				'mode'        => 'settle_base',
+				'show_notice' => '1',
+			)
+		);
+
+		$this->assertSame( \UMC\Checkout\CheckoutSettings::MODE_SETTLE_BASE, $clean['mode'] );
+		$this->assertTrue( $clean['show_notice'] );
+	}
 }

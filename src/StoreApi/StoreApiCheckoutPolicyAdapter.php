@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace UMC\StoreApi;
 
 use UMC\Checkout\CheckoutPolicyCoordinator;
+use UMC\Checkout\CheckoutPolicyPhase;
 use UMC\Checkout\CheckoutSurface;
 use UMC\CurrencyContext;
 
@@ -78,7 +79,11 @@ final class StoreApiCheckoutPolicyAdapter {
 			return $response;
 		}
 
-		$this->apply_policy();
+		$phase = 'POST' === strtoupper( $request->get_method() )
+			? CheckoutPolicyPhase::SETTLEMENT
+			: CheckoutPolicyPhase::PRESENTATION;
+
+		$this->apply_policy( $phase );
 
 		return $response;
 	}
@@ -91,18 +96,20 @@ final class StoreApiCheckoutPolicyAdapter {
 			return;
 		}
 
-		$this->apply_policy();
+		$this->apply_policy( CheckoutPolicyPhase::PRESENTATION );
 	}
 
 	/**
 	 * Applies checkout policy for the Store API checkout surface.
+	 *
+	 * @param string $phase Policy phase.
 	 */
-	private function apply_policy(): void {
+	private function apply_policy( string $phase ): void {
 		if ( ! $this->context->is_convertible_request() ) {
 			return;
 		}
 
-		$this->coordinator->apply( CheckoutSurface::STORE_API_CHECKOUT );
+		$this->coordinator->apply( CheckoutSurface::STORE_API_CHECKOUT, $phase );
 	}
 
 	/**

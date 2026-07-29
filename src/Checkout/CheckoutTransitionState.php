@@ -18,6 +18,8 @@ final class CheckoutTransitionState {
 
 	public const REASON_UNSUPPORTED_SELECTED = 'unsupported_selected_currency';
 
+	public const REASON_SETTLE_BASE = 'settle_base_at_checkout';
+
 	/**
 	 * Configured checkout mode.
 	 *
@@ -38,6 +40,13 @@ final class CheckoutTransitionState {
 	 * @var string
 	 */
 	private string $effective_currency;
+
+	/**
+	 * Settlement currency code used for gateways and order creation.
+	 *
+	 * @var string
+	 */
+	private string $settlement_currency;
 
 	/**
 	 * Transition reason, or empty when none applies.
@@ -69,6 +78,7 @@ final class CheckoutTransitionState {
 	 * @param string $reason               Transition reason.
 	 * @param bool   $fallback_occurred    Whether fallback occurred.
 	 * @param bool   $fallback_attempted   Whether fallback was attempted.
+	 * @param string $settlement_currency  Settlement currency code.
 	 */
 	public function __construct(
 		string $mode,
@@ -76,7 +86,8 @@ final class CheckoutTransitionState {
 		string $effective_currency,
 		string $reason = '',
 		bool $fallback_occurred = false,
-		bool $fallback_attempted = false
+		bool $fallback_attempted = false,
+		string $settlement_currency = ''
 	) {
 		$this->mode               = CheckoutSettings::sanitize_mode( $mode );
 		$this->shopper_currency   = strtoupper( $shopper_currency );
@@ -84,13 +95,20 @@ final class CheckoutTransitionState {
 		$this->reason             = trim( $reason );
 		$this->fallback_occurred  = $fallback_occurred;
 		$this->fallback_attempted = $fallback_attempted;
+
+		$settlement = '' !== $settlement_currency ? strtoupper( $settlement_currency ) : $this->effective_currency;
+		$this->settlement_currency = $settlement;
 	}
 
 	/**
 	 * Whether a customer-visible transition exists.
 	 */
 	public function has_transition(): bool {
-		return '' !== $this->reason && $this->shopper_currency !== $this->effective_currency;
+		if ( '' === $this->reason ) {
+			return false;
+		}
+
+		return $this->shopper_currency !== $this->settlement_currency;
 	}
 
 	/**
@@ -98,10 +116,11 @@ final class CheckoutTransitionState {
 	 */
 	public function notice_signature(): string {
 		return sprintf(
-			'%s|%s|%s|%s',
+			'%s|%s|%s|%s|%s',
 			$this->mode,
 			$this->shopper_currency,
 			$this->effective_currency,
+			$this->settlement_currency,
 			$this->reason
 		);
 	}
@@ -125,6 +144,13 @@ final class CheckoutTransitionState {
 	 */
 	public function effective_currency(): string {
 		return $this->effective_currency;
+	}
+
+	/**
+	 * Settlement currency code for gateways and order creation.
+	 */
+	public function settlement_currency(): string {
+		return $this->settlement_currency;
 	}
 
 	/**
@@ -155,12 +181,13 @@ final class CheckoutTransitionState {
 	 */
 	public function to_array(): array {
 		return array(
-			'mode'               => $this->mode,
-			'shopper_currency'   => $this->shopper_currency,
-			'effective_currency' => $this->effective_currency,
-			'reason'             => $this->reason,
-			'fallback_occurred'  => $this->fallback_occurred,
-			'fallback_attempted' => $this->fallback_attempted,
+			'mode'                => $this->mode,
+			'shopper_currency'    => $this->shopper_currency,
+			'effective_currency'  => $this->effective_currency,
+			'settlement_currency' => $this->settlement_currency,
+			'reason'              => $this->reason,
+			'fallback_occurred'   => $this->fallback_occurred,
+			'fallback_attempted'  => $this->fallback_attempted,
 		);
 	}
 
@@ -174,13 +201,16 @@ final class CheckoutTransitionState {
 			return null;
 		}
 
+		$effective = (string) ( $raw['effective_currency'] ?? '' );
+
 		return new self(
 			(string) ( $raw['mode'] ?? CheckoutSettings::MODE_SELECTED ),
 			(string) ( $raw['shopper_currency'] ?? '' ),
-			(string) ( $raw['effective_currency'] ?? '' ),
+			$effective,
 			(string) ( $raw['reason'] ?? '' ),
 			! empty( $raw['fallback_occurred'] ),
-			! empty( $raw['fallback_attempted'] )
+			! empty( $raw['fallback_attempted'] ),
+			(string) ( $raw['settlement_currency'] ?? $effective )
 		);
 	}
 }

@@ -39,9 +39,7 @@ final class CheckoutConfigurationCheck implements CompatibilityCheckInterface {
 				CompatibilityCategory::CONFIGURATION,
 				CompatibilitySeverity::INFO,
 				__( 'Checkout currency mode', 'universal-multicurrency' ),
-				$checkout->is_store_mode()
-					? __( 'Checkout uses store currency at entry.', 'universal-multicurrency' )
-					: __( 'Checkout keeps the shopper-selected currency.', 'universal-multicurrency' ),
+				$this->description_for_mode( $checkout ),
 				CompatibilityDeterminism::DETERMINISTIC,
 				array(
 					'mode'            => $checkout->mode(),
@@ -50,5 +48,22 @@ final class CheckoutConfigurationCheck implements CompatibilityCheckInterface {
 				)
 			),
 		);
+	}
+
+	/**
+	 * Returns the diagnostics description for one checkout mode.
+	 *
+	 * @param CheckoutSettings $checkout Checkout settings.
+	 */
+	private function description_for_mode( CheckoutSettings $checkout ): string {
+		if ( $checkout->is_store_mode() ) {
+			return __( 'Checkout uses store currency at entry.', 'universal-multicurrency' );
+		}
+
+		if ( $checkout->is_settle_base_mode() ) {
+			return __( 'Checkout displays selected currency and settles in store currency.', 'universal-multicurrency' );
+		}
+
+		return __( 'Checkout keeps the shopper-selected currency.', 'universal-multicurrency' );
 	}
 }

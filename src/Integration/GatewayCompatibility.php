@@ -58,6 +58,13 @@ final class GatewayCompatibility {
 	private bool $coordinator_active = false;
 
 	/**
+	 * Optional currency override for gateway filtering during checkout policy.
+	 *
+	 * @var string|null
+	 */
+	private ?string $filter_currency = null;
+
+	/**
 	 * Binds the service to the context.
 	 *
 	 * @param CurrencyContext $context Request-scoped currency facade.
@@ -84,6 +91,20 @@ final class GatewayCompatibility {
 	}
 
 	/**
+	 * Overrides the currency code used when filtering gateway availability.
+	 *
+	 * @param string|null $currency Currency code, or null to use the active currency.
+	 */
+	public function set_filter_currency( ?string $currency ): void {
+		if ( null === $currency || '' === $currency ) {
+			$this->filter_currency = null;
+			return;
+		}
+
+		$this->filter_currency = strtoupper( $currency );
+	}
+
+	/**
 	 * Returns the evaluation produced by the latest UMC filter invocation.
 	 */
 	public function get_request_evaluation(): ?GatewayCurrencyEvaluation {
@@ -101,7 +122,10 @@ final class GatewayCompatibility {
 			return $gateways;
 		}
 
-		return $this->filter_gateways_for_currency( $gateways, $this->context->get_active_code() );
+		return $this->filter_gateways_for_currency(
+			$gateways,
+			$this->filter_currency ?? $this->context->get_active_code()
+		);
 	}
 
 	/**

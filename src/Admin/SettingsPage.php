@@ -133,7 +133,7 @@ final class SettingsPage extends WC_Settings_Page {
 			new SwitcherRenderer(),
 			$display_repository
 		);
-		$this->checkout_field      = new CheckoutSettingsField( $settings );
+		$this->checkout_field      = new CheckoutSettingsField( $settings, $base );
 		$conflict_detector         = new ConflictDetector(
 			new DetectorRegistry(),
 			new WordPressEnvironmentProbe(),
@@ -226,7 +226,7 @@ final class SettingsPage extends WC_Settings_Page {
 		\WC_Admin_Settings::output_fields( $this->content_settings( $settings ) );
 		echo '</table>';
 
-		if ( $view_model->has_saveable_settings && self::SECTION_DISPLAY !== $active ) {
+		if ( $this->section_has_saveable_settings( $active ) && self::SECTION_DISPLAY !== $active ) {
 			$this->render_section_save_actions();
 		}
 
@@ -252,7 +252,11 @@ final class SettingsPage extends WC_Settings_Page {
 	 * @param string $section Section slug.
 	 */
 	public function section_has_header_save( string $section ): bool {
-		return in_array( $section, array( self::SECTION_CURRENCIES, self::SECTION_EXCHANGE_RATES ), true );
+		return in_array(
+			$section,
+			array( self::SECTION_CURRENCIES, self::SECTION_EXCHANGE_RATES, self::SECTION_CHECKOUT ),
+			true
+		);
 	}
 
 	/**

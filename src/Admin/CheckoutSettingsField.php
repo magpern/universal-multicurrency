@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace UMC\Admin;
 
 use UMC\Checkout\CheckoutSettings;
+use UMC\Currency;
 use UMC\Settings;
 
 /**
@@ -25,68 +26,121 @@ final class CheckoutSettingsField {
 	private Settings $settings;
 
 	/**
+	 * Store base currency.
+	 *
+	 * @var Currency
+	 */
+	private Currency $base;
+
+	/**
+	 * Presentation markup helper.
+	 *
+	 * @var DisplayControlRenderer
+	 */
+	private DisplayControlRenderer $controls;
+
+	/**
 	 * Binds the checkout settings field to the settings store.
 	 *
-	 * @param Settings $settings Merchant settings store.
+	 * @param Settings                    $settings Merchant settings store.
+	 * @param Currency                    $base     Store base currency.
+	 * @param DisplayControlRenderer|null $controls Optional presentation helper.
 	 */
-	public function __construct( Settings $settings ) {
+	public function __construct(
+		Settings $settings,
+		Currency $base,
+		?DisplayControlRenderer $controls = null
+	) {
 		$this->settings = $settings;
+		$this->base     = $base;
+		$this->controls = $controls ?? new DisplayControlRenderer();
 	}
 
 	/**
 	 * Renders checkout policy settings.
 	 */
 	public function render(): void {
-		$checkout = CheckoutSettings::from_array( $this->settings->get()['checkout'] ?? array() );
-		$mode     = $checkout->mode();
+		$checkout      = CheckoutSettings::from_array( $this->settings->get()['checkout'] ?? array() );
+		$mode          = $checkout->mode();
+		$store_code    = $this->base->code();
+		$store_title   = sprintf(
+			/* translators: %s: store currency code, for example EUR. */
+			__( 'Switch to store currency (%s)', 'universal-multicurrency' ),
+			$store_code
+		);
+		$mode_name     = 'umc_checkout[mode]';
+		$notice_name   = 'umc_checkout[show_notice]';
+		$settle_title = sprintf(
+			/* translators: %s: store currency code, for example EUR. */
+			__( 'Show selected currency, settle in store currency (%s)', 'universal-multicurrency' ),
+			$store_code
+		);
+		$selected_card = $this->controls->choice_card(
+			$mode_name,
+			CheckoutSettings::MODE_SELECTED,
+			CheckoutSettings::MODE_SELECTED === $mode,
+			__( 'Keep selected currency', 'universal-multicurrency' ),
+			__( 'Customers continue checkout in the currency they selected while browsing.', 'universal-multicurrency' ),
+			'',
+			array( 'id' => 'umc_checkout_mode_selected' ),
+			__( 'Recommended', 'universal-multicurrency' )
+		);
+		$store_card    = $this->controls->choice_card(
+			$mode_name,
+			CheckoutSettings::MODE_STORE,
+			CheckoutSettings::MODE_STORE === $mode,
+			$store_title,
+			__( 'Customers browse and use the cart in their selected currency, then checkout switches to the store currency.', 'universal-multicurrency' ),
+			'',
+			array( 'id' => 'umc_checkout_mode_store' ),
+			'',
+			__( 'This does not change the customer\'s preferred browsing currency.', 'universal-multicurrency' )
+		);
+		$settle_card   = $this->controls->choice_card(
+			$mode_name,
+			CheckoutSettings::MODE_SETTLE_BASE,
+			CheckoutSettings::MODE_SETTLE_BASE === $mode,
+			$settle_title,
+			__( 'Customers see prices in their selected currency at checkout, but payment and the order are processed in the store currency.', 'universal-multicurrency' ),
+			'',
+			array( 'id' => 'umc_checkout_mode_settle_base' ),
+			'',
+			__( 'This does not change the customer\'s preferred browsing currency.', 'universal-multicurrency' )
+		);
+
 		?>
 		<tr valign="top">
-			<th scope="row">
-				<label for="umc_checkout_mode"><?php esc_html_e( 'Checkout currency mode', 'universal-multicurrency' ); ?></label>
-			</th>
-			<td class="forminp">
-				<fieldset>
-					<legend class="screen-reader-text"><span><?php esc_html_e( 'Checkout currency mode', 'universal-multicurrency' ); ?></span></legend>
-					<label for="umc_checkout_mode_selected">
-						<input
-							type="radio"
-							name="umc_checkout[mode]"
-							id="umc_checkout_mode_selected"
-							value="<?php echo esc_attr( CheckoutSettings::MODE_SELECTED ); ?>"
-							<?php checked( CheckoutSettings::MODE_SELECTED, $mode ); ?>
-						/>
-						<?php esc_html_e( 'Selected currency', 'universal-multicurrency' ); ?>
-					</label>
-					<p class="description"><?php esc_html_e( 'Keep the shopper’s selected currency through checkout.', 'universal-multicurrency' ); ?></p>
-					<label for="umc_checkout_mode_store">
-						<input
-							type="radio"
-							name="umc_checkout[mode]"
-							id="umc_checkout_mode_store"
-							value="<?php echo esc_attr( CheckoutSettings::MODE_STORE ); ?>"
-							<?php checked( CheckoutSettings::MODE_STORE, $mode ); ?>
-						/>
-						<?php esc_html_e( 'Store currency at checkout entry', 'universal-multicurrency' ); ?>
-					</label>
-					<p class="description"><?php esc_html_e( 'Browse and cart in the selected currency, but switch to the store currency when checkout begins.', 'universal-multicurrency' ); ?></p>
-				</fieldset>
-			</td>
-		</tr>
-		<tr valign="top">
-			<th scope="row">
-				<label for="umc_checkout_show_notice"><?php esc_html_e( 'Customer notice', 'universal-multicurrency' ); ?></label>
-			</th>
-			<td class="forminp">
-				<label for="umc_checkout_show_notice">
-					<input
-						type="checkbox"
-						name="umc_checkout[show_notice]"
-						id="umc_checkout_show_notice"
-						value="1"
-						<?php checked( $checkout->show_notice() ); ?>
-					/>
-					<?php esc_html_e( 'Show an informational notice when checkout currency changes.', 'universal-multicurrency' ); ?>
-				</label>
+			<td class="forminp umc-settings umc-checkout-settings" colspan="2">
+				<div class="umc-display-card">
+					<h3 class="umc-display-card__title"><?php esc_html_e( 'Checkout currency', 'universal-multicurrency' ); ?></h3>
+					<p class="umc-checkout-settings__intro"><?php esc_html_e( 'Choose which currency customers use during checkout.', 'universal-multicurrency' ); ?></p>
+					<fieldset class="umc-display-fieldset umc-checkout-settings__modes">
+						<legend class="screen-reader-text"><?php esc_html_e( 'Checkout currency', 'universal-multicurrency' ); ?></legend>
+						<div class="umc-display-choice-cards umc-checkout-choice-cards">
+							<?php
+							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in DisplayControlRenderer.
+							echo $selected_card;
+							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in DisplayControlRenderer.
+							echo $store_card;
+							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in DisplayControlRenderer.
+							echo $settle_card;
+							?>
+						</div>
+					</fieldset>
+					<div class="umc-checkout-notice-panel">
+						<label class="umc-display-toggle-row umc-checkout-notice-panel__toggle" for="umc_checkout_show_notice">
+							<input
+								type="checkbox"
+								name="<?php echo esc_attr( $notice_name ); ?>"
+								id="umc_checkout_show_notice"
+								value="1"
+								<?php checked( $checkout->show_notice() ); ?>
+							/>
+							<span class="umc-display-toggle-row__label"><?php esc_html_e( 'Show an informational notice when checkout currency changes.', 'universal-multicurrency' ); ?></span>
+							<span class="umc-display-toggle-row__description"><?php esc_html_e( 'Displays a customer-friendly notice whenever checkout switches to another currency.', 'universal-multicurrency' ); ?></span>
+						</label>
+					</div>
+				</div>
 			</td>
 		</tr>
 		<?php

@@ -244,6 +244,35 @@ final class CheckoutCurrencyPolicyTest extends TestCase {
 		$this->assertSame( '', $decision->transition_reason() );
 	}
 
+	public function test_settle_base_mode_keeps_shopper_display_and_store_settlement(): void {
+		$decision = $this->policy->decide_pass_one(
+			new CheckoutSettings( CheckoutSettings::MODE_SETTLE_BASE, true ),
+			'SEK',
+			'EUR',
+			true,
+			false,
+			$this->eligible_evaluation()
+		);
+
+		$this->assertFalse( $decision->should_fallback() );
+		$this->assertSame( 'SEK', $decision->effective_currency() );
+		$this->assertSame( 'EUR', $decision->settlement_currency() );
+		$this->assertSame( CheckoutTransitionState::REASON_SETTLE_BASE, $decision->transition_reason() );
+	}
+
+	public function test_settle_base_mode_disallows_selected_currency_fallback(): void {
+		$decision = $this->policy->decide_pass_one(
+			new CheckoutSettings( CheckoutSettings::MODE_SETTLE_BASE, true ),
+			'SEK',
+			'EUR',
+			true,
+			false,
+			$this->eligible_evaluation()
+		);
+
+		$this->assertFalse( $decision->should_fallback() );
+	}
+
 	/**
 	 * Builds an evaluation that satisfies every fallback eligibility condition.
 	 */

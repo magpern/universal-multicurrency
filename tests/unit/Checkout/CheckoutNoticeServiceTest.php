@@ -42,7 +42,7 @@ final class CheckoutNoticeServiceTest extends TestCase {
 		);
 
 		$this->assertSame(
-			'store|SEK|EUR|store_currency_at_checkout',
+			'store|SEK|EUR|EUR|store_currency_at_checkout',
 			$state->notice_signature()
 		);
 	}
@@ -60,6 +60,24 @@ final class CheckoutNoticeServiceTest extends TestCase {
 		$this->assertStringContainsString( 'EUR', $message );
 		$this->assertStringContainsString( 'SEK', $message );
 		$this->assertStringContainsString( 'browsing the store', strtolower( $message ) );
+	}
+
+	public function test_build_message_for_settle_base_transition(): void {
+		$state = new CheckoutTransitionState(
+			CheckoutSettings::MODE_SETTLE_BASE,
+			'SEK',
+			'SEK',
+			CheckoutTransitionState::REASON_SETTLE_BASE,
+			false,
+			false,
+			'EUR'
+		);
+
+		$message = $this->service->build_message( $state );
+
+		$this->assertStringContainsString( 'SEK', $message );
+		$this->assertStringContainsString( 'EUR', $message );
+		$this->assertStringContainsString( 'processed in', strtolower( $message ) );
 	}
 
 	public function test_build_message_for_unsupported_selected_currency(): void {

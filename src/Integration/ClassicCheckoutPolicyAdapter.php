@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace UMC\Integration;
 
 use UMC\Checkout\CheckoutPolicyCoordinator;
+use UMC\Checkout\CheckoutPolicyPhase;
 use UMC\Checkout\CheckoutSurface;
 use UMC\CurrencyContext;
 
@@ -47,19 +48,30 @@ final class ClassicCheckoutPolicyAdapter {
 	 * Registers classic checkout hooks.
 	 */
 	public function register(): void {
-		add_action( 'woocommerce_before_checkout_form', array( $this, 'apply_policy' ), 5 );
-		add_action( 'woocommerce_checkout_update_order_review', array( $this, 'apply_policy' ), 5 );
-		add_action( 'woocommerce_checkout_create_order', array( $this, 'apply_policy' ), 5 );
+		add_action( 'woocommerce_before_checkout_form', array( $this, 'apply_presentation_policy' ), 5 );
+		add_action( 'woocommerce_checkout_update_order_review', array( $this, 'apply_presentation_policy' ), 5 );
+		add_action( 'woocommerce_checkout_create_order', array( $this, 'apply_settlement_policy' ), 5 );
 	}
 
 	/**
-	 * Applies checkout policy when the classic checkout surface is active.
+	 * Applies presentation checkout policy when the classic checkout surface is active.
 	 */
-	public function apply_policy(): void {
+	public function apply_presentation_policy(): void {
 		if ( ! $this->context->is_convertible_request() ) {
 			return;
 		}
 
-		$this->coordinator->apply( CheckoutSurface::CLASSIC_CHECKOUT );
+		$this->coordinator->apply( CheckoutSurface::CLASSIC_CHECKOUT, CheckoutPolicyPhase::PRESENTATION );
+	}
+
+	/**
+	 * Applies settlement checkout policy before order creation.
+	 */
+	public function apply_settlement_policy(): void {
+		if ( ! $this->context->is_convertible_request() ) {
+			return;
+		}
+
+		$this->coordinator->apply( CheckoutSurface::CLASSIC_CHECKOUT, CheckoutPolicyPhase::SETTLEMENT );
 	}
 }

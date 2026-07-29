@@ -63,9 +63,10 @@ final class CheckoutStoreApiNoticePayloadTest extends StoreApiTestCase {
 		$this->assertStringContainsString( 'EUR', (string) $notice['message'] );
 		$this->assertSame(
 			sprintf(
-				'%s|%s|%s|%s',
+				'%s|%s|%s|%s|%s',
 				CheckoutSettings::MODE_STORE,
 				'SEK',
+				'EUR',
 				'EUR',
 				CheckoutTransitionState::REASON_STORE_CURRENCY
 			),
@@ -103,9 +104,37 @@ final class CheckoutStoreApiNoticePayloadTest extends StoreApiTestCase {
 		$this->assertSame( CheckoutSettings::MODE_SELECTED, $umc['checkout_mode'] );
 		$this->assertSame( 'EUR', $umc['shopper_currency'] );
 		$this->assertSame( 'EUR', $umc['effective_currency'] );
+		$this->assertSame( 'EUR', $umc['settlement_currency'] );
 		$this->assertSame( '', $umc['transition_reason'] );
 		$this->assertFalse( $umc['fallback_applied'] );
 		$this->assertSame( array( 'show' => false ), $umc['checkout_notice'] );
+	}
+
+	public function test_settle_base_mode_exposes_settlement_currency_and_notice_on_checkout(): void {
+		$this->boot_plugin(
+			self::CURRENCIES,
+			'SEK',
+			'EUR',
+			2,
+			array(
+				'checkout' => array(
+					'mode'        => CheckoutSettings::MODE_SETTLE_BASE,
+					'show_notice' => true,
+				),
+			)
+		);
+		$this->restrict_gateway( 'bacs', array( 'EUR' ) );
+		$this->restrict_gateway( 'cheque', array( 'EUR' ) );
+		$this->add_item();
+
+		$umc = $this->checkout_extension();
+
+		$this->assertSame( CheckoutSettings::MODE_SETTLE_BASE, $umc['checkout_mode'] );
+		$this->assertSame( 'SEK', $umc['shopper_currency'] );
+		$this->assertSame( 'SEK', $umc['effective_currency'] );
+		$this->assertSame( 'EUR', $umc['settlement_currency'] );
+		$this->assertSame( CheckoutTransitionState::REASON_SETTLE_BASE, $umc['transition_reason'] );
+		$this->assertTrue( $umc['checkout_notice']['show'] );
 	}
 
 	public function test_fallback_notice_signature_reflects_unsupported_selected_reason(): void {
@@ -121,9 +150,10 @@ final class CheckoutStoreApiNoticePayloadTest extends StoreApiTestCase {
 		$this->assertTrue( $umc['checkout_notice']['show'] );
 		$this->assertSame(
 			sprintf(
-				'%s|%s|%s|%s',
+				'%s|%s|%s|%s|%s',
 				CheckoutSettings::MODE_SELECTED,
 				'SEK',
+				'EUR',
 				'EUR',
 				CheckoutTransitionState::REASON_UNSUPPORTED_SELECTED
 			),

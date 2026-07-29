@@ -18,6 +18,8 @@ final class CheckoutSettings {
 
 	public const MODE_STORE = 'store';
 
+	public const MODE_SETTLE_BASE = 'settle_base';
+
 	/**
 	 * Checkout currency mode.
 	 *
@@ -87,6 +89,10 @@ final class CheckoutSettings {
 			return self::MODE_STORE;
 		}
 
+		if ( self::MODE_SETTLE_BASE === $mode ) {
+			return self::MODE_SETTLE_BASE;
+		}
+
 		return self::MODE_SELECTED;
 	}
 
@@ -127,6 +133,13 @@ final class CheckoutSettings {
 	 */
 	public function is_store_mode(): bool {
 		return self::MODE_STORE === $this->mode;
+	}
+
+	/**
+	 * Whether checkout displays selected currency but settles in store currency.
+	 */
+	public function is_settle_base_mode(): bool {
+		return self::MODE_SETTLE_BASE === $this->mode;
 	}
 
 	/**

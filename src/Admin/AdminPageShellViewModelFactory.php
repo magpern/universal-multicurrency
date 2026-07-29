@@ -85,7 +85,7 @@ final class AdminPageShellViewModelFactory {
 			case SettingsPage::SECTION_DISPLAY:
 				return __( 'Configure how prices and currency information are displayed across your store.', 'universal-multicurrency' );
 			case SettingsPage::SECTION_CHECKOUT:
-				return __( 'Control how selected currencies behave during checkout.', 'universal-multicurrency' );
+				return __( 'Choose which currency customers use during checkout.', 'universal-multicurrency' );
 			case SettingsPage::SECTION_COMPATIBILITY:
 				return __( 'Review store compatibility, conflicts, cache interactions, and support diagnostics.', 'universal-multicurrency' );
 			case SettingsPage::SECTION_ADVANCED:

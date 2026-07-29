@@ -124,15 +124,17 @@ final class CartExtensionData {
 			'checkout_mode'         => $settings->mode(),
 			'shopper_currency'      => $this->context->get_shopper_code(),
 			'effective_currency'    => $this->context->get_active_code(),
+			'settlement_currency'   => $this->context->get_active_code(),
 			'transition_reason'     => '',
 			'fallback_applied'      => false,
 			'checkout_notice'       => $this->notice_service->build_payload( $state, $settings ),
 		);
 
 		if ( null !== $state ) {
-			$payload['transition_reason']  = $state->reason();
-			$payload['fallback_applied']   = $state->fallback_occurred();
-			$payload['effective_currency'] = $state->effective_currency();
+			$payload['transition_reason']    = $state->reason();
+			$payload['fallback_applied']     = $state->fallback_occurred();
+			$payload['effective_currency']   = $state->effective_currency();
+			$payload['settlement_currency']  = $state->settlement_currency();
 		}
 
 		return $payload;
@@ -173,6 +175,11 @@ final class CartExtensionData {
 			),
 			'effective_currency'    => array(
 				'description' => __( 'Effective checkout currency code.', 'universal-multicurrency' ),
+				'type'        => 'string',
+				'readonly'    => true,
+			),
+			'settlement_currency'   => array(
+				'description' => __( 'Settlement currency code used for gateways and order creation.', 'universal-multicurrency' ),
 				'type'        => 'string',
 				'readonly'    => true,
 			),

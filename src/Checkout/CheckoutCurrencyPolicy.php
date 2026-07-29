@@ -39,12 +39,20 @@ final class CheckoutCurrencyPolicy {
 		$shopper = strtoupper( $shopper_currency );
 		$store   = strtoupper( $store_currency );
 
+		if ( $settings->is_settle_base_mode() ) {
+			$reason = ( $shopper !== $store )
+				? CheckoutTransitionState::REASON_SETTLE_BASE
+				: '';
+
+			return new CheckoutCurrencyDecision( $shopper, $reason, false, false, $store );
+		}
+
 		if ( $settings->is_store_mode() ) {
 			$reason = ( $shopper !== $store )
 				? CheckoutTransitionState::REASON_STORE_CURRENCY
 				: '';
 
-			return new CheckoutCurrencyDecision( $store, $reason );
+			return new CheckoutCurrencyDecision( $store, $reason, false, false, $store );
 		}
 
 		$should_fallback = $this->is_fallback_eligible(
@@ -73,7 +81,8 @@ final class CheckoutCurrencyPolicy {
 			strtoupper( $store_currency ),
 			CheckoutTransitionState::REASON_UNSUPPORTED_SELECTED,
 			false,
-			true
+			true,
+			strtoupper( $store_currency )
 		);
 	}
 
@@ -95,7 +104,7 @@ final class CheckoutCurrencyPolicy {
 		bool $fallback_attempted,
 		GatewayCurrencyEvaluation $evaluation
 	): bool {
-		if ( ! $settings->is_selected_mode() ) {
+		if ( ! $settings->is_selected_mode() || $settings->is_settle_base_mode() ) {
 			return false;
 		}
 

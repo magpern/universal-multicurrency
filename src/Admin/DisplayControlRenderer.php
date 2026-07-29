@@ -24,6 +24,8 @@ final class DisplayControlRenderer {
 	 * @param string                $description  Supporting description.
 	 * @param string                $diagram_html Optional decorative diagram markup.
 	 * @param array<string, string> $attrs        Extra input attributes.
+	 * @param string                $badge        Optional badge label (for example, Recommended).
+	 * @param string                $note         Optional secondary note below the description.
 	 */
 	public function choice_card(
 		string $name,
@@ -32,7 +34,9 @@ final class DisplayControlRenderer {
 		string $title,
 		string $description = '',
 		string $diagram_html = '',
-		array $attrs = array()
+		array $attrs = array(),
+		string $badge = '',
+		string $note = ''
 	): string {
 		$attr_html = '';
 
@@ -48,18 +52,28 @@ final class DisplayControlRenderer {
 			? sprintf( '<span class="umc-display-choice-card__description">%s</span>', esc_html( $description ) )
 			: '';
 
+		$badge_html = '' !== $badge
+			? sprintf( '<span class="umc-display-choice-card__badge">%s</span>', esc_html( $badge ) )
+			: '';
+
+		$note_html = '' !== $note
+			? sprintf( '<span class="umc-display-choice-card__note">%s</span>', esc_html( $note ) )
+			: '';
+
 		$diagram = '' !== $diagram_html
 			? sprintf( '<span class="umc-display-choice-card__diagram">%s</span>', $diagram_html ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Static plugin-owned SVG fragments only.
 			: '';
 
 		return sprintf(
-			'<label class="umc-display-choice-card"><input type="radio" name="%1$s" value="%2$s"%3$s%4$s /><span class="umc-display-choice-card__content"><span class="umc-display-choice-card__title">%5$s</span>%6$s%7$s</span></label>',
+			'<label class="umc-display-choice-card"><input type="radio" name="%1$s" value="%2$s"%3$s%4$s /><span class="umc-display-choice-card__content"><span class="umc-display-choice-card__title">%5$s</span>%6$s%7$s%8$s%9$s</span></label>',
 			esc_attr( $name ),
 			esc_attr( $value ),
 			checked( $checked, true, false ),
 			$attr_html,
 			esc_html( $title ),
 			$description_html,
+			$badge_html,
+			$note_html,
 			$diagram
 		);
 	}

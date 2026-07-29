@@ -64,7 +64,8 @@ final class CheckoutTransitionStateRepository {
 				$state->effective_currency(),
 				$state->reason(),
 				$state->fallback_occurred(),
-				true
+				true,
+				$state->settlement_currency()
 			)
 		);
 	}
