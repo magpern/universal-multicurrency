@@ -25,7 +25,7 @@ use ZipArchive;
  */
 final class DocumentationSyncTest extends TestCase {
 
-	private const CURRENT_VERSION = '0.9.0';
+	private const CURRENT_VERSION = '0.9.1';
 
 	/**
 	 * Tracked documentation sources that must exist and stay internally consistent.
@@ -278,8 +278,8 @@ final class DocumentationSyncTest extends TestCase {
 
 	public function test_no_documentation_claims_an_unreleased_version_has_shipped(): void {
 		$forbidden = array(
-			'/`?v0\.9\.0`?[^\n]{0,60}(?:tagged|published|released|shipped)/i',
-			'/Milestone 9[^\n]{0,60}(?:complete|shipped|released)/i',
+			'/`?v0\.10\.0`?[^\n]{0,60}(?:tagged|published|released|shipped)/i',
+			'/Milestone 11[^\n]{0,60}(?:complete|shipped|released)/i',
 		);
 
 		foreach ( self::PUBLICATION_CLAIM_SCAN_FILES as $file ) {

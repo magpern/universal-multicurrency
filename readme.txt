@@ -4,7 +4,7 @@ Tags: woocommerce, currency, multicurrency, exchange rates, money
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.9.0
+Stable tag: 0.9.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -50,6 +50,12 @@ The plugin ships a POT template (`languages/universal-multicurrency.pot`) for tr
 
 == Changelog ==
 
+= 0.9.1 =
+* Compatibility diagnostics center with local scans, support report, and Copy Report action
+* Fix false-positive Compatibility warnings for base currency and empty symbol overrides
+* Fix single-currency Update now actions incorrectly marking other automatic currencies as failed
+* No settings schema change; safe in-place upgrade from 0.9.0
+
 = 0.9.0 =
 * Display settings configurator with visual placement and style controls
 * Floating Side and Floating Bottom positioning with edge and offset controls
@@ -89,6 +95,9 @@ The plugin ships a POT template (`languages/universal-multicurrency.pot`) for tr
 * Storefront conversion, classic cart/checkout, order snapshots, historical order display, refunds, and Store API / blocks parity (milestones 2–5)
 
 == Upgrade Notice ==
+
+= 0.9.1 =
+Compatibility diagnostics and rate-update fixes. No settings schema change — safe upgrade from 0.9.0. Requires WooCommerce 8.2+, PHP 8.1+, and HPOS.
 
 = 0.9.0 =
 Display configurator release. No settings schema change — safe upgrade from 0.8.x. Requires WooCommerce 8.2+, PHP 8.1+, and HPOS.

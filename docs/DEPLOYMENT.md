@@ -26,7 +26,7 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Produces `dist/universal-multicurrency-0.9.0.zip`. The archive includes `readme.txt`,
+Produces `dist/universal-multicurrency-0.9.1.zip`. The archive includes `readme.txt`,
 production `src/`, `vendor/`, and `languages/universal-multicurrency.pot`.
 
 Performance subset:
@@ -36,7 +36,7 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Prepared release:** **v0.9.0** on `main`. Git tag and GitHub release follow
+**Current release:** **v0.9.1** on `main`. Git tag and GitHub release follow
 release verification — do not create without explicit approval.
 
 ---
@@ -990,3 +990,32 @@ migration beyond the v2 → v3 path already on `main`.
 Downgrade to the **0.8.x** zip if needed. Display settings in `umc_settings` may
 include a `display` subtree that older builds ignore safely; order snapshots are
 unaffected.
+
+---
+
+## v0.9.1 — Compatibility diagnostics (current)
+
+### Summary
+
+Packages the Compatibility diagnostics center and post-release validation/rate
+fixes on `main` under version **0.9.1**. Settings schema remains **v3** — safe
+in-place upgrade from **0.9.0**.
+
+### Merchant-visible changes
+
+| Area | Change |
+|---|---|
+| Compatibility tab | Read-only diagnostics center with grouped findings and support report |
+| Configuration accuracy | Base currency and default symbol warnings no longer false-positive |
+| Exchange rates | Single-currency Update now no longer marks other currencies failed |
+
+### Deployment sequence
+
+1. Run `composer release-audit` on the **0.9.1** tree.
+2. Build `dist/universal-multicurrency-0.9.1.zip` with `composer install --no-dev`
+   + `bin/build-zip.sh`.
+3. Deploy over **0.9.0** in place. No migration step.
+
+### Rollback
+
+Downgrade to the **0.9.0** zip if needed. Order snapshots are unaffected.

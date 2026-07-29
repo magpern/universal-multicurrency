@@ -1,15 +1,15 @@
-# Release audit — v0.9.0 Display Configurator
+# Release audit — v0.9.1 Compatibility diagnostics
 
-Executable release-blocking gate for Universal Multicurrency **v0.9.0**. This
+Executable release-blocking gate for Universal Multicurrency **v0.9.1**. This
 document records scope, criteria, commands, audit results, and the current
 release-preparation state.
 
 **Governing question:** If we published this release tomorrow, is there anything
 left in the repository that clearly should not ship?
 
-**Repository status:** **prepared for v0.9.0** on `main`. Milestone 9 (Display
-configurator) is feature-complete on `main`. Git tag **`v0.9.0`** and GitHub
-release publication follow release verification.
+**Repository status:** **prepared for v0.9.1** on `main`. Milestone 10
+(Compatibility diagnostics) is feature-complete on `main`. Git tag **`v0.9.1`**
+and GitHub release publication follow release verification.
 
 ---
 
@@ -17,7 +17,7 @@ release publication follow release verification.
 
 | Item | Value |
 |---|---|
-| Version | **0.9.0** |
+| Version | **0.9.1** |
 | Settings schema | **3** (unchanged from v0.8.x display work on `main`) |
 | Persisted-data inventory version | **3** |
 | Production migrations | **v0 → v1**, **v1 → v2**, **v2 → v3** (unchanged) |
@@ -33,12 +33,29 @@ release publication follow release verification.
 | GitHub release `v0.8.0` | **Published** (superseded) |
 | Git tag `v0.8.1` | **Not created** (superseded by v0.9.0 line) |
 | GitHub release `v0.8.1` | **Not published** (superseded by v0.9.0 line) |
-| Git tag `v0.9.0` | **Not yet created** |
-| GitHub release `v0.9.0` | **Not yet created** |
+| Git tag `v0.9.0` | **Created** |
+| GitHub release `v0.9.0` | **Published** (superseded by v0.9.1 line) |
+| Git tag `v0.9.1` | **Not yet created** |
+| GitHub release `v0.9.1` | **Not yet created** |
 | Milestone 8 | **Complete** — released and review-closed at v0.8.0 |
-| Milestone 9 | **Prepared** — Display configurator on `main` |
+| Milestone 9 | **Complete** — Display configurator at v0.9.0 |
+| Milestone 10 | **Prepared** — Compatibility diagnostics on `main` |
 
 ---
+
+## v0.9.1 Compatibility diagnostics scope
+
+Patch release shipping Milestone 10 on `main` plus post-release fixes. **No new
+settings schema bump** beyond schema v3 — safe in-place upgrade from **0.9.0**.
+
+### Merchant-visible features
+
+| Capability | Implementation |
+|---|---|
+| Compatibility diagnostics center | `CompatibilitySettingsField`, grouped local checks, support report |
+| Copy Report action | `assets/admin/umc-compatibility.js` |
+| Configuration warning accuracy | `SettingsConfigurationValidator` metadata/base handling |
+| Single-currency rate updates | Scoped operational status in `ExchangeRateStore` |
 
 ## v0.9.0 Display Configurator scope
 
@@ -275,8 +292,8 @@ needles remain confined to `Diagnostics/DetectorManifest.php` only.
 
 | Field | Value (v0.9.0) |
 |---|---|
-| Plugin version (header + `UMC_VERSION`) | **0.9.0** |
-| readme.txt Stable tag | **0.9.0** |
+| Plugin version (header + `UMC_VERSION`) | **0.9.1** |
+| readme.txt Stable tag | **0.9.1** |
 | Text domain | `universal-multicurrency` |
 | Requires PHP | 8.1 |
 | Requires Plugins | woocommerce |
@@ -358,11 +375,11 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Expected artifact: **`dist/universal-multicurrency-0.9.0.zip`**
+Expected artifact: **`dist/universal-multicurrency-0.9.1.zip`**
 
 ### Included
 
-- `universal-multicurrency.php` (header Version **0.9.0**), `uninstall.php`, `readme.txt` (Stable tag **0.9.0**)
+- `universal-multicurrency.php` (header Version **0.9.1**), `uninstall.php`, `readme.txt` (Stable tag **0.9.1**)
 - `src/` production PHP including `src/Admin/DisplayControlRenderer.php`, `src/Admin/DisplaySettingsField.php`, `src/Display/`
 - `assets/admin/umc-settings.css`, `assets/admin/umc-settings.js`, `assets/css/switcher.css`, `assets/js/switcher.js`
 - `src/` production PHP

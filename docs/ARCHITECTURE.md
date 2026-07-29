@@ -423,7 +423,6 @@ conditional headers simply never returns 304; there is no new failure mode
 6. **The storefront money path is unaware of providers.** Conversion reads
    `Settings`; no storefront request fetches, schedules, or writes rates.
 
-Plugin version is **0.9.0**. Milestone 9 (Display configurator) is prepared on
-`main` (tag and GitHub release pending). Milestone 8 shipped at v0.8.0; v0.8.1
-was a maintenance release. See [`RELEASE_AUDIT.md`](RELEASE_AUDIT.md) and
+Plugin version is **0.9.1**. Milestone 10 (Compatibility diagnostics) shipped at
+v0.9.1. Milestone 9 shipped at v0.9.0; v0.8.1 was a maintenance release. See [`RELEASE_AUDIT.md`](RELEASE_AUDIT.md) and
 [`ROADMAP.md`](ROADMAP.md).

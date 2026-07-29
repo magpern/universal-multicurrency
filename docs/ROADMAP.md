@@ -105,22 +105,25 @@
     | Storefront switcher renderer, assets, and shortcode | **Prepared** |
     | Settings schema v3 display subtree (v2 → v3 migration) | **Prepared** — already on `main` |
 
-    **Prepared as:** **v0.9.0** (`UMC_VERSION`, plugin header, readme Stable
-    tag). Git tag `v0.9.0` and GitHub release pending release verification.
+    **Shipped as:** **v0.9.0** (`UMC_VERSION`, plugin header, readme Stable tag).
+    Git tag **`v0.9.0`**.
 
     No new settings schema bump beyond schema v3 already shipped on `main`.
     Safe in-place upgrade from **0.8.x**.
 
-10. Compatibility diagnostics center — **prepared on `main` (no version bump)**.
+10. Compatibility diagnostics center — **shipped in v0.9.1**.
 
-    ### Prepared on `main`
+    ### Shipped in v0.9.1
 
     | Work item | Status |
     |---|---|
-    | Compatibility scan domain and grouped checks | **Prepared** |
-    | Configuration, integration, theme, cache, and environment diagnostics | **Prepared** |
-    | Support report with redaction and Copy Report action | **Prepared** |
-    | Admin Compatibility tab replacing the placeholder | **Prepared** |
+    | Compatibility scan domain and grouped checks | **Shipped** |
+    | Configuration, integration, theme, cache, and environment diagnostics | **Shipped** |
+    | Support report with redaction and Copy Report action | **Shipped** |
+    | Admin Compatibility tab replacing the placeholder | **Shipped** |
+
+    **Prepared as:** **v0.9.1** (`UMC_VERSION`, plugin header, readme Stable tag).
+    Git tag **`v0.9.1`**.
 
     No settings schema change. Live REST/AJAX probes remain deferred.
 

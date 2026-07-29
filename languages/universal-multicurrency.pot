@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Universal Multicurrency for WooCommerce 0.9.0\n"
+"Project-Id-Version: Universal Multicurrency for WooCommerce 0.9.1\n"
 "Report-Msgid-Bugs-To: https://github.com/magpern/universal-multicurrency/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1167,73 +1167,63 @@ msgstr ""
 msgid "Automatic switcher placement currently relies on generic WooCommerce and WordPress hooks rather than a theme-specific integration."
 msgstr ""
 
-#: src/Compatibility/Validation/SettingsConfigurationValidator.php:55
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:75
 msgid "No enabled currencies"
 msgstr ""
 
-#: src/Compatibility/Validation/SettingsConfigurationValidator.php:56
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:76
 msgid "Universal Multicurrency has no enabled currencies configured."
 msgstr ""
 
-#: src/Compatibility/Validation/SettingsConfigurationValidator.php:61
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:81
 msgid "Review currencies"
-msgstr ""
-
-#: src/Compatibility/Validation/SettingsConfigurationValidator.php:73
-msgid "Store base currency is not enabled"
-msgstr ""
-
-#. translators: %s: currency code
-#: src/Compatibility/Validation/SettingsConfigurationValidator.php:76
-#, php-format
-msgid "The WooCommerce base currency (%s) is not enabled in Universal Multicurrency."
-msgstr ""
-
-#. translators: %s: currency code
-#: src/Compatibility/Validation/SettingsConfigurationValidator.php:97
-#, php-format
-msgid "Missing symbol for %s"
 msgstr ""
 
 #. translators: %s: currency code
 #: src/Compatibility/Validation/SettingsConfigurationValidator.php:102
 #, php-format
-msgid "Enabled currency %s has no symbol configured."
+msgid "Missing symbol for %s"
 msgstr ""
 
 #. translators: %s: currency code
-#: src/Compatibility/Validation/SettingsConfigurationValidator.php:121
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:107
 #, php-format
-msgid "Missing exchange rate for %s"
+msgid "Enabled currency %s has no symbol configured."
 msgstr ""
 
 #. translators: %s: currency code
 #: src/Compatibility/Validation/SettingsConfigurationValidator.php:126
 #, php-format
+msgid "Missing exchange rate for %s"
+msgstr ""
+
+#. translators: %s: currency code
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:131
+#, php-format
 msgid "Enabled currency %s has no usable manual exchange rate."
 msgstr ""
 
-#: src/Compatibility/Validation/SettingsConfigurationValidator.php:133
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:138
 msgid "Review exchange rates"
 msgstr ""
 
-#: src/Compatibility/Validation/SettingsConfigurationValidator.php:147
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:152
 msgid "Settings schema may be partially migrated"
 msgstr ""
 
 #. translators: 1: stored schema version, 2: current schema version
-#: src/Compatibility/Validation/SettingsConfigurationValidator.php:150
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:155
 #, php-format
 msgid "Stored schema version %1$d is older than the current schema %2$d."
 msgstr ""
 
-#: src/Compatibility/Validation/SettingsConfigurationValidator.php:181
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:186
 #: src/Diagnostics/SiteHealthReport.php:222
 msgid "Recent exchange-rate fetch failures detected"
 msgstr ""
 
 #. translators: %d: number of currencies with failed fetches
-#: src/Compatibility/Validation/SettingsConfigurationValidator.php:184
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:189
 #: src/Diagnostics/SiteHealthReport.php:227
 #, php-format
 msgid "%d automatic currency has a failed fetch on record."
@@ -1241,57 +1231,57 @@ msgid_plural "%d automatic currencies have failed fetches on record."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Compatibility/Validation/SettingsConfigurationValidator.php:199
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:204
 msgid "Multiple stale automatic exchange rates"
 msgstr ""
 
 #. translators: %d: number of currencies
-#: src/Compatibility/Validation/SettingsConfigurationValidator.php:202
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:207
 #, php-format
 msgid "%d automatic currency has a stale exchange rate."
 msgid_plural "%d automatic currencies have stale exchange rates."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Compatibility/Validation/SettingsConfigurationValidator.php:221
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:226
 #: src/Diagnostics/SiteHealthReport.php:213
 msgid "Automatic rate updates are not scheduled"
 msgstr ""
 
-#: src/Compatibility/Validation/SettingsConfigurationValidator.php:222
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:227
 #: src/Diagnostics/SiteHealthReport.php:215
 msgid "Automatic mode is enabled but no recurring update is scheduled."
 msgstr ""
 
-#: src/Compatibility/Validation/SettingsConfigurationValidator.php:243
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:248
 msgid "Switcher enabled without multiple currencies"
 msgstr ""
 
-#: src/Compatibility/Validation/SettingsConfigurationValidator.php:244
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:249
 msgid "The storefront switcher is enabled but fewer than two currencies are enabled."
 msgstr ""
 
-#: src/Compatibility/Validation/SettingsConfigurationValidator.php:255
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:260
 msgid "Switcher has no device visibility"
 msgstr ""
 
-#: src/Compatibility/Validation/SettingsConfigurationValidator.php:256
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:261
 msgid "The storefront switcher is enabled but no desktop or mobile visibility option is active."
 msgstr ""
 
-#: src/Compatibility/Validation/SettingsConfigurationValidator.php:267
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:272
 msgid "Manual switcher shortcode detected with automatic placement"
 msgstr ""
 
-#: src/Compatibility/Validation/SettingsConfigurationValidator.php:268
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:273
 msgid "A switcher shortcode appears on a key storefront page while automatic placement is also enabled."
 msgstr ""
 
-#: src/Compatibility/Validation/SettingsConfigurationValidator.php:278
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:283
 msgid "Configuration checks passed"
 msgstr ""
 
-#: src/Compatibility/Validation/SettingsConfigurationValidator.php:279
+#: src/Compatibility/Validation/SettingsConfigurationValidator.php:284
 msgid "Universal Multicurrency settings look usable."
 msgstr ""
 
