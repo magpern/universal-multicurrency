@@ -82,6 +82,31 @@ final class DisplaySettingsFieldTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'umc-display-card--position umc-display-card--hidden', $html );
 	}
 
+	public function test_disabled_preview_overlay_hidden_when_switcher_enabled(): void {
+		$this->save_display(
+			array(
+				'enabled' => true,
+			)
+		);
+
+		$html = $this->capture_render();
+
+		$this->assertStringContainsString( 'data-umc-preview-disabled-overlay hidden', $html );
+	}
+
+	public function test_disabled_preview_overlay_visible_when_switcher_disabled(): void {
+		$this->save_display(
+			array(
+				'enabled' => false,
+			)
+		);
+
+		$html = $this->capture_render();
+
+		$this->assertStringContainsString( 'data-umc-preview-disabled-overlay', $html );
+		$this->assertStringNotContainsString( 'data-umc-preview-disabled-overlay hidden', $html );
+	}
+
 	public function test_render_includes_segmented_appearance_controls(): void {
 		$html = $this->capture_render();
 
@@ -127,8 +152,8 @@ final class DisplaySettingsFieldTest extends WP_UnitTestCase {
 			)
 		);
 
-		$html = $this->capture_render();
-		$side = $this->extract_panel_subtree( $html, 'floating_side' );
+		$html   = $this->capture_render();
+		$side   = $this->extract_panel_subtree( $html, 'floating_side' );
 		$bottom = $this->extract_panel_subtree( $html, 'sticky_footer' );
 
 		$this->assertStringContainsString( 'name="umc_display[position][vertical_alignment]"', $side );
@@ -145,8 +170,8 @@ final class DisplaySettingsFieldTest extends WP_UnitTestCase {
 			)
 		);
 
-		$html = $this->capture_render();
-		$side = $this->extract_panel_subtree( $html, 'floating_side' );
+		$html   = $this->capture_render();
+		$side   = $this->extract_panel_subtree( $html, 'floating_side' );
 		$bottom = $this->extract_panel_subtree( $html, 'sticky_footer' );
 
 		$this->assertStringContainsString( 'disabled', $side );
@@ -156,9 +181,9 @@ final class DisplaySettingsFieldTest extends WP_UnitTestCase {
 	public function test_parse_post_preserves_inactive_bottom_offset_when_saving_floating_side(): void {
 		$this->save_display(
 			array(
-				'enabled'   => true,
-				'placement' => SwitcherSettings::PLACEMENT_STICKY_FOOTER,
-				'position'  => array(
+				'enabled'    => true,
+				'placement'  => SwitcherSettings::PLACEMENT_STICKY_FOOTER,
+				'position'   => array(
 					'bottom_offset' => 40,
 				),
 				'visibility' => array(
@@ -176,7 +201,7 @@ final class DisplaySettingsFieldTest extends WP_UnitTestCase {
 				'side'               => SwitcherSettings::SIDE_LEFT,
 				'vertical_alignment' => SwitcherSettings::ALIGN_TOP,
 				'vertical_offset'    => '12',
-				'edge_offset'          => '24',
+				'edge_offset'        => '24',
 			),
 			'visibility' => array(
 				'desktop' => '1',
@@ -193,9 +218,9 @@ final class DisplaySettingsFieldTest extends WP_UnitTestCase {
 	public function test_parse_post_preserves_position_subtree_when_manual_placement_submitted(): void {
 		$this->save_display(
 			array(
-				'enabled'   => true,
-				'placement' => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
-				'position'  => array(
+				'enabled'    => true,
+				'placement'  => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
+				'position'   => array(
 					'side'               => SwitcherSettings::SIDE_LEFT,
 					'vertical_alignment' => SwitcherSettings::ALIGN_TOP,
 					'vertical_offset'    => 12,

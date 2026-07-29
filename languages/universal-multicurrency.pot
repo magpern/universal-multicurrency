@@ -55,10 +55,10 @@ msgstr ""
 
 #: src/Admin/AdminPageShell.php:104
 #: src/Admin/AdminPageShell.php:105
-#: src/Admin/SettingsPage.php:599
 #: src/Admin/SettingsPage.php:600
-#: src/Admin/SettingsPage.php:613
+#: src/Admin/SettingsPage.php:601
 #: src/Admin/SettingsPage.php:614
+#: src/Admin/SettingsPage.php:615
 msgid "Save changes"
 msgstr ""
 
@@ -74,7 +74,7 @@ msgstr ""
 
 #: src/Admin/AdminPageShellViewModelFactory.php:65
 #: src/Admin/SettingsPage.php:103
-#: src/Admin/SettingsPage.php:628
+#: src/Admin/SettingsPage.php:629
 msgid "Multicurrency"
 msgstr ""
 
@@ -800,7 +800,7 @@ msgstr ""
 msgid "Horizontal list is only available with manual placement. Style was saved as Dropdown."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:612
+#: src/Admin/SettingsPage.php:613
 msgid "Unsaved changes"
 msgstr ""
 

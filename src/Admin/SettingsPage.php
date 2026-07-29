@@ -584,6 +584,7 @@ final class SettingsPage extends WC_Settings_Page {
 		$section = is_string( $current_section ) ? $current_section : '';
 
 		if ( '' === $section && isset( $_REQUEST['section'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Section routing only; save nonce verified by WooCommerce.
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Section routing only; save nonce verified by WooCommerce.
 			$section = sanitize_title( wp_unslash( (string) $_REQUEST['section'] ) );
 		}
 

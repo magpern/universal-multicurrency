@@ -134,7 +134,7 @@ final class DisplaySettingsField {
 									echo $preview;
 									?>
 								</div>
-								<div class="umc-display-preview-disabled" data-umc-preview-disabled-overlay hidden>
+								<div class="umc-display-preview-disabled" data-umc-preview-disabled-overlay<?php echo $settings->is_enabled() ? ' hidden' : ''; ?>>
 									<p><?php esc_html_e( 'Switcher is currently disabled', 'universal-multicurrency' ); ?></p>
 								</div>
 							</div>

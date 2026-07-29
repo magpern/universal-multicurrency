@@ -706,6 +706,10 @@
 	text-align: center;
 }
 
+.umc-display-preview-disabled[hidden] {
+	display: none !important;
+}
+
 .umc-display-preview-disabled p {
 	margin: 0;
 	padding: 12px 16px;
