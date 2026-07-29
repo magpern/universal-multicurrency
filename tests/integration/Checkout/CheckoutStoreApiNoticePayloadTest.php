@@ -183,7 +183,7 @@ final class CheckoutStoreApiNoticePayloadTest extends StoreApiTestCase {
 	 * @return array<string, mixed>
 	 */
 	private function checkout_extension(): array {
-		if ( $this->checkout_endpoint_extension_supported() ) {
+		if ( CartExtensionData::supports_checkout_endpoint_extension() ) {
 			$data = $this->response_data( $this->store_api_request( 'GET', '/checkout' ) );
 
 			$this->assertArrayHasKey( 'extensions', $data );
@@ -202,7 +202,7 @@ final class CheckoutStoreApiNoticePayloadTest extends StoreApiTestCase {
 	 * @return array<string, mixed>
 	 */
 	private function cart_extension_during_checkout(): array {
-		$previous_uri = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Test harness restores a URI it set itself.
+		$previous_uri   = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Test harness restores a URI it set itself.
 		$previous_route = $GLOBALS['wp']->query_vars['rest_route'] ?? null;
 
 		$_SERVER['REQUEST_URI']                  = '/wp-json/wc/store/v1/checkout';
@@ -227,13 +227,6 @@ final class CheckoutStoreApiNoticePayloadTest extends StoreApiTestCase {
 		$this->assertArrayHasKey( 'extensions', $data );
 
 		return (array) $data['extensions'][ CartExtensionData::NAMESPACE_KEY ];
-	}
-
-	/**
-	 * Whether WooCommerce exposes umc data on the checkout endpoint itself.
-	 */
-	private function checkout_endpoint_extension_supported(): bool {
-		return defined( 'WC_VERSION' ) && version_compare( WC_VERSION, '8.3.0', '>=' );
 	}
 
 	/**

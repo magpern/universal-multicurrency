@@ -91,7 +91,7 @@ final class CartExtensionData {
 			array_merge( $registration, array( 'endpoint' => 'cart' ) )
 		);
 
-		if ( $this->supports_checkout_endpoint_extension() ) {
+		if ( self::supports_checkout_endpoint_extension() ) {
 			woocommerce_store_api_register_endpoint_data(
 				array_merge( $registration, array( 'endpoint' => 'checkout' ) )
 			);
@@ -105,7 +105,7 @@ final class CartExtensionData {
 	 * registered on the checkout endpoint, even though cart/checkout GET responses
 	 * remain valid with cart-only registration.
 	 */
-	private function supports_checkout_endpoint_extension(): bool {
+	public static function supports_checkout_endpoint_extension(): bool {
 		return defined( 'WC_VERSION' ) && version_compare( WC_VERSION, '8.3.0', '>=' );
 	}
 
