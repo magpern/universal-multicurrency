@@ -25,6 +25,7 @@ final class AdminPageShellViewModelFactory {
 	private const SECTION_ICONS = array(
 		SettingsPage::SECTION_CURRENCIES     => 'dashicons-money-alt',
 		SettingsPage::SECTION_EXCHANGE_RATES => 'dashicons-update',
+		SettingsPage::SECTION_GEO_DETECTION  => 'dashicons-location-alt',
 		SettingsPage::SECTION_DISPLAY        => 'dashicons-art',
 		SettingsPage::SECTION_CHECKOUT       => 'dashicons-cart',
 		SettingsPage::SECTION_COMPATIBILITY  => 'dashicons-admin-plugins',
@@ -82,6 +83,8 @@ final class AdminPageShellViewModelFactory {
 				return __( 'Manage the currencies available across your store.', 'universal-multicurrency' );
 			case SettingsPage::SECTION_EXCHANGE_RATES:
 				return __( 'Configure providers, update schedules, and effective rates.', 'universal-multicurrency' );
+			case SettingsPage::SECTION_GEO_DETECTION:
+				return __( 'Suggest a currency based on the visitor\'s country while respecting manual selection.', 'universal-multicurrency' );
 			case SettingsPage::SECTION_DISPLAY:
 				return __( 'Configure how prices and currency information are displayed across your store.', 'universal-multicurrency' );
 			case SettingsPage::SECTION_CHECKOUT:

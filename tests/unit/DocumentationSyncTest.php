@@ -25,7 +25,7 @@ use ZipArchive;
  */
 final class DocumentationSyncTest extends TestCase {
 
-	private const CURRENT_VERSION = '0.10.0';
+	private const CURRENT_VERSION = '0.12.0';
 
 	/**
 	 * Tracked documentation sources that must exist and stay internally consistent.
@@ -54,6 +54,9 @@ final class DocumentationSyncTest extends TestCase {
 		'docs/adr/0011-action-scheduler-rate-updates.md',
 		'docs/adr/0012-operational-rate-state-separation.md',
 		'docs/adr/0013-conditional-http-rate-caching.md',
+		'docs/adr/0016-geo-detection-ordered-routing.md',
+		'docs/adr/0017-geocontext-admin-hub.md',
+		'docs/GEO_DETECTION.md',
 	);
 
 	/**
@@ -278,8 +281,8 @@ final class DocumentationSyncTest extends TestCase {
 
 	public function test_no_documentation_claims_an_unreleased_version_has_shipped(): void {
 		$forbidden = array(
-			'/`?v0\.10\.0`?[^\n]{0,60}(?:tagged|published|released|shipped)/i',
-			'/Milestone 11[^\n]{0,60}(?:complete|shipped|released)/i',
+			'/`?v0\.11\.0`?[^\n]{0,60}(?:tagged|published|released|shipped)/i',
+			'/Milestone 12[^\n]{0,60}(?:complete|shipped|released)/i',
 		);
 
 		foreach ( self::PUBLICATION_CLAIM_SCAN_FILES as $file ) {
@@ -360,8 +363,8 @@ final class DocumentationSyncTest extends TestCase {
 	}
 
 	public function test_settings_schema_documentation_matches_implementation(): void {
-		$this->assertSame( 4, Settings::SCHEMA_VERSION );
-		$this->assertSame( array( 1, 2, 3, 4 ), array_keys( SettingsUpgrader::production_migrations() ) );
+		$this->assertSame( 5, Settings::SCHEMA_VERSION );
+		$this->assertSame( array( 1, 2, 3, 4, 5 ), array_keys( SettingsUpgrader::production_migrations() ) );
 
 		foreach ( array( 'docs/ARCHITECTURE.md', 'docs/MIGRATION.md' ) as $file ) {
 			$source = $this->read( $file );
@@ -371,6 +374,7 @@ final class DocumentationSyncTest extends TestCase {
 			$this->assertStringContainsString( 'migrate_1_to_2', $source, $file );
 			$this->assertStringContainsString( 'migrate_2_to_3', $source, $file );
 			$this->assertStringContainsString( 'migrate_3_to_4', $source, $file );
+			$this->assertStringContainsString( 'migrate_4_to_5', $source, $file );
 		}
 
 		$this->assertStringContainsString( 'schema_version', $this->read( 'docs/PERSISTED_DATA.md' ) );

@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace UMC\Admin;
 
+use UMC\Admin\Geo\GeoPanelRegistry;
 use UMC\Display\SwitcherSettings;
 
 /**
@@ -111,6 +112,39 @@ final class AdminAssets {
 			);
 		}
 
+		if ( $this->is_geo_detection_section() ) {
+			if ( GeoPanelRegistry::PANEL_DETECTION === GeoPanelRegistry::active_panel() ) {
+				wp_enqueue_script(
+					'umc-admin-geo-rules',
+					$base . 'umc-geo-rules.js',
+					array( 'jquery', 'umc-admin-settings' ),
+					(string) filemtime( $path . 'umc-geo-rules.js' ),
+					true
+				);
+
+				wp_localize_script(
+					'umc-admin-geo-rules',
+					'umcGeoRules',
+					array(
+						/* translators: 1: rule type label, 2: new position */
+						'movedTemplate'   => __( '%1$s rule moved to position %2$d', 'universal-multicurrency' ),
+						/* translators: %s: rule type label */
+						'removedTemplate' => __( '%1$s rule removed', 'universal-multicurrency' ),
+					)
+				);
+			}
+
+			if ( GeoPanelRegistry::PANEL_SANDBOX === GeoPanelRegistry::active_panel() ) {
+				wp_enqueue_script(
+					'umc-admin-geo-sandbox',
+					$base . 'umc-geo-sandbox.js',
+					array( 'jquery' ),
+					(string) filemtime( $path . 'umc-geo-sandbox.js' ),
+					true
+				);
+			}
+		}
+
 		if ( $this->is_compatibility_section() ) {
 			wp_enqueue_script(
 				'umc-admin-compatibility',
@@ -169,5 +203,15 @@ final class AdminAssets {
 		$section = isset( $_GET['section'] ) ? sanitize_key( wp_unslash( (string) $_GET['section'] ) ) : '';
 
 		return SettingsPage::SECTION_COMPATIBILITY === $section;
+	}
+
+	/**
+	 * Whether the active Multicurrency tab section is Geo Detection.
+	 */
+	private function is_geo_detection_section(): bool {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Display-only query args.
+		$section = isset( $_GET['section'] ) ? sanitize_key( wp_unslash( (string) $_GET['section'] ) ) : '';
+
+		return SettingsPage::SECTION_GEO_DETECTION === $section;
 	}
 }

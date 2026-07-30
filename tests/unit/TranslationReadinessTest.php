@@ -31,6 +31,8 @@ final class TranslationReadinessTest extends TestCase {
 	private const APPROVED_JS_FILES = array(
 		'assets/admin/umc-settings.js',
 		'assets/admin/umc-compatibility.js',
+		'assets/admin/umc-geo-rules.js',
+		'assets/admin/umc-geo-sandbox.js',
 		'assets/js/switcher.js',
 		'assets/js/checkout-notice.js',
 	);

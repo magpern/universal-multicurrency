@@ -11,6 +11,8 @@ namespace UMC;
 
 use UMC\Cart\CartRecalculation;
 use UMC\Checkout\CheckoutTransitionStateRepository;
+use UMC\CurrencySwitcher;
+use UMC\Geo\GeoCurrencyDecisionService;
 use UMC\Order\OrderSnapshot;
 use UMC\Order\RefundSnapshot;
 use UMC\StoreApi\CartExtensionData;
@@ -27,7 +29,7 @@ final class PersistedKeys {
 	/**
 	 * Bump when the inventory shape or membership changes.
 	 */
-	public const INVENTORY_VERSION = 4;
+	public const INVENTORY_VERSION = 5;
 
 	/**
 	 * WordPress options written by the plugin.
@@ -97,6 +99,11 @@ final class PersistedKeys {
 			CartRecalculation::SESSION_KEY,
 			CheckoutTransitionStateRepository::SESSION_KEY,
 			CheckoutTransitionStateRepository::SESSION_NOTICE_KEY,
+			CurrencySwitcher::SESSION_MANUAL_SELECTION,
+			GeoCurrencyDecisionService::SESSION_GEO_APPLIED,
+			GeoCurrencyDecisionService::SESSION_GEO_SESSION_DONE,
+			'umc_geo_prev_billing_country',
+			'umc_geo_prev_shipping_country',
 		);
 	}
 

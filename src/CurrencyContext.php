@@ -339,6 +339,47 @@ final class CurrencyContext {
 	}
 
 	/**
+	 * Whether explicit, session, or cookie already supplies a valid selectable currency.
+	 */
+	public function has_valid_shopper_currency_source(): bool {
+		$base       = $this->registry->get_base_code();
+		$selectable = $this->get_selectable_codes();
+
+		foreach ( array( $this->read_explicit(), $this->read_session(), $this->read_cookie() ) as $candidate ) {
+			if ( null === $candidate ) {
+				continue;
+			}
+
+			if ( $candidate === $base || in_array( $candidate, $selectable, true ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Explicit currency from the query string, if present and valid.
+	 */
+	public function get_explicit_currency_code(): ?string {
+		return $this->read_explicit();
+	}
+
+	/**
+	 * Session currency code, if present and valid.
+	 */
+	public function get_session_currency_code(): ?string {
+		return $this->read_session();
+	}
+
+	/**
+	 * Cookie currency code, if present and valid.
+	 */
+	public function get_cookie_currency_code(): ?string {
+		return $this->read_cookie();
+	}
+
+	/**
 	 * Reads the explicitly requested code from the query string, if present.
 	 */
 	private function read_explicit(): ?string {

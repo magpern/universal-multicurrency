@@ -33,6 +33,7 @@ final class SettingsPageSectionsTest extends WP_UnitTestCase {
 			array(
 				SettingsPage::SECTION_CURRENCIES,
 				SettingsPage::SECTION_EXCHANGE_RATES,
+				SettingsPage::SECTION_GEO_DETECTION,
 				SettingsPage::SECTION_DISPLAY,
 				SettingsPage::SECTION_CHECKOUT,
 				SettingsPage::SECTION_COMPATIBILITY,

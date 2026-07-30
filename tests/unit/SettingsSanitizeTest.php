@@ -28,9 +28,11 @@ final class SettingsSanitizeTest extends TestCase {
 				'currencies'           => array(),
 				'display'              => \UMC\Display\SwitcherSettings::default_array(),
 				'checkout'             => \UMC\Checkout\CheckoutSettings::default_array(),
+				'geo'                  => \UMC\Geo\GeoDetectionSettings::default_array(),
 			),
 			Settings::defaults()
 		);
+		$this->assertSame( 5, Settings::defaults()['schema_version'] );
 	}
 
 	public function test_well_formed_input_is_preserved(): void {

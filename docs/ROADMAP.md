@@ -127,25 +127,49 @@
 
     No settings schema change. Live REST/AJAX probes remain deferred.
 
-11. Checkout currency policy (**v0.10.0**) — **prepared on `feature/m11-checkout-policy`**.
+11. Checkout currency policy (**v0.10.0**) — **complete and released**.
 
-    ### Scope for v0.10.0
+    ### Shipped in v0.10.0
 
     | Work item | Status |
     |---|---|
-    | Checkout settings schema v4 (`checkout.mode`, `checkout.show_notice`) | **Prepared** |
-    | Selected-currency checkout and store-currency checkout entry mode | **Prepared** |
-    | Causality-proven gateway fallback to store currency | **Prepared** |
-    | Classic and Checkout Blocks policy parity | **Prepared** |
-    | Checkout Blocks transition notices via Store API extension + JS | **Prepared** |
-    | Order snapshot v3 checkout metadata | **Prepared** |
-    | Checkout admin settings UI and diagnostics | **Prepared** |
+    | Checkout settings schema v4 (`checkout.mode`, `checkout.show_notice`) | **Complete** |
+    | Selected-currency checkout and store-currency checkout entry mode | **Complete** |
+    | Causality-proven gateway fallback to store currency | **Complete** |
+    | Classic and Checkout Blocks policy parity | **Complete** |
+    | Checkout Blocks transition notices via Store API extension + JS | **Complete** |
+    | Order snapshot v3 checkout metadata | **Complete** |
+    | Checkout admin settings UI and diagnostics | **Complete** |
 
-    **Prepared as:** **v0.10.0** (`UMC_VERSION`, plugin header, readme Stable tag).
-    Git tag **`v0.10.0`** pending CI verification.
+    **Shipped as:** **v0.10.0**.
 
-    Settings schema v3→v4 migration adds checkout defaults (`mode: selected`,
-    `show_notice: true`). Default behaviour matches v0.9.x.
+12. Geo Detection settings (**v0.11.0**) — **prepared on `feature/m12-geo-detection`**.
+
+    ### Scope for v0.11.0
+
+    | Work item | Status |
+    |---|---|
+    | Ordered first-match country/region/Other routing | **Prepared** |
+    | Settings schema v5 (`geo` subtree, disabled by default) | **Prepared** |
+    | Optional Universal Geo Context + WooCommerce fallback | **Prepared** |
+    | Geo Detection admin section, recommended rules, simulation | **Prepared** |
+    | Checkout lock and manual-selection precedence | **Prepared** |
+
+    **Prepared as:** **v0.11.0**. See [`docs/GEO_DETECTION.md`](GEO_DETECTION.md).
+
+13. Geo Detection admin hub (**v0.12.0**) — **prepared on `feature/m13-geo-admin-hub`**.
+
+    ### Scope for v0.12.0
+
+    | Work item | Status |
+    |---|---|
+    | Geo hub sub-navigation (`geo_panel`) | **Prepared** |
+    | GeoContext document schema v1 + serializer | **Prepared** |
+    | Geo Sandbox with presets and structured output | **Prepared** |
+    | Panel-aware Detection/Settings saves | **Prepared** |
+    | Providers, Proxies, Diagnostics panel stubs | **Prepared** |
+
+    **Prepared as:** **v0.12.0**. See [`docs/adr/0017-geocontext-admin-hub.md`](adr/0017-geocontext-admin-hub.md).
 
 ## Future milestones — not started, not implemented
 
@@ -153,7 +177,7 @@ None of the following exists in the codebase today:
 
 - Additional exchange-rate providers and per-currency provider selection
 - WP-CLI command surface over the existing rate services
-- GeoIP-based currency suggestion
+- `country_change` geo detection mode and broader continent presets
 - Multicurrency reporting and analytics
 - Public APIs beyond the documented hooks in [`HOOKS.md`](HOOKS.md)
 
