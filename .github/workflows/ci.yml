@@ -32,7 +32,7 @@ jobs:
         with:
           php-version: '8.3'
           coverage: none
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: ~/.cache/composer
           key: ${{ runner.os }}-composer-${{ steps.setup-php.outputs.php-version }}-${{ hashFiles('composer.lock') }}
@@ -72,7 +72,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           coverage: none
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: ~/.cache/composer
           key: ${{ runner.os }}-composer-${{ steps.setup-php.outputs.php-version }}-${{ hashFiles('composer.lock') }}
@@ -159,7 +159,7 @@ jobs:
       # cache line with a leg that leaves it at whatever composer.lock
       # already resolves to, even when their PHP version and lockfile hash
       # otherwise match.
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: ~/.cache/composer
           key: ${{ runner.os }}-composer-${{ steps.setup-php.outputs.php-version }}-${{ hashFiles('composer.lock') }}-${{ matrix.wp_phpunit }}
@@ -173,7 +173,7 @@ jobs:
       # on WooCommerce's literal "latest", and caching a directory keyed by
       # that literal string would silently serve last run's "latest" forever,
       # defeating the leg's purpose of catching upstream drift.
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         if: matrix.wc != 'latest'
         with:
           path: tests/tmp/wordpress
@@ -220,13 +220,13 @@ jobs:
           php-version: '8.3'
           extensions: mysqli
           coverage: none
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: ~/.cache/composer
           key: ${{ runner.os }}-composer-${{ steps.setup-php.outputs.php-version }}-${{ hashFiles('composer.lock') }}-performance
           restore-keys: |
             ${{ runner.os }}-composer-${{ steps.setup-php.outputs.php-version }}-${{ hashFiles('composer.lock') }}-
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: tests/tmp/wordpress
           key: ${{ runner.os }}-wp-install--10.9.4-${{ hashFiles('tests/bin/install-wp.sh') }}
@@ -244,7 +244,7 @@ jobs:
         with:
           php-version: '8.1'
           coverage: none
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: ~/.cache/composer
           key: ${{ runner.os }}-composer-${{ steps.setup-php.outputs.php-version }}-${{ hashFiles('composer.lock') }}
@@ -252,7 +252,7 @@ jobs:
             ${{ runner.os }}-composer-${{ steps.setup-php.outputs.php-version }}-
       - run: composer install --no-dev --prefer-dist --no-progress --optimize-autoloader
       - run: bash bin/build-zip.sh
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: universal-multicurrency
           path: dist/universal-multicurrency-*.zip
@@ -272,7 +272,7 @@ jobs:
           curl -sSLo wp-cli.phar https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
           chmod +x wp-cli.phar
           sudo mv wp-cli.phar /usr/local/bin/wp
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: ~/.cache/composer
           key: ${{ runner.os }}-composer-${{ steps.setup-php.outputs.php-version }}-${{ hashFiles('composer.lock') }}-release-audit
@@ -286,7 +286,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@v4
         id: changes
         with:
           filters: |
@@ -303,7 +303,7 @@ jobs:
           php-version: '8.3'
           coverage: pcov
           ini-values: pcov.directory=src
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         if: steps.changes.outputs.diagnostics == 'true'
         with:
           path: ~/.cache/composer
