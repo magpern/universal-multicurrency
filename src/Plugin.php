@@ -11,6 +11,8 @@ namespace UMC;
 
 use UMC\Admin\AdminAssets;
 use UMC\Admin\CurrencyActionController;
+use UMC\Admin\GeoDetectionSimulationController;
+use UMC\Admin\GeoRecommendedRulesController;
 use UMC\Admin\OrderCurrencyMetaBox;
 use UMC\Admin\PluginActionLinks;
 use UMC\Admin\RateFailureNotice;
@@ -33,7 +35,12 @@ use UMC\Display\SwitcherAssets;
 use UMC\Display\SwitcherRenderer;
 use UMC\Display\SwitcherSettingsRepository;
 use UMC\Display\SwitcherShortcode;
-use UMC\Display\SwitcherViewModelFactory;
+use UMC\Geo\CountryContextResolver;
+use UMC\Geo\GeoCurrencyDecisionService;
+use UMC\Geo\GeoDetectionApplicator;
+use UMC\Geo\GeoDetectionSettingsRepository;
+use UMC\Geo\UniversalGeoContextAdapter;
+use UMC\Geo\WooCommerceFallbackProvider;
 use UMC\Integration\ClassicCheckoutPolicyAdapter;
 use UMC\Integration\CouponConversion;
 use UMC\Integration\CurrencyFormatting;
@@ -138,6 +145,8 @@ final class Plugin {
 			( new RateUpdateController( $rate_service ) )->register();
 			( new RateFailureNotice( $settings, $rate_store ) )->register();
 			( new CurrencyActionController( $settings, $base, new WooCommerceCurrencyProvider() ) )->register();
+			( new GeoRecommendedRulesController( $settings, $base ) )->register();
+			( new GeoDetectionSimulationController( $settings, $base ) )->register();
 		}
 
 		$registry = new CurrencyRegistry( $settings, $base );
@@ -166,8 +175,9 @@ final class Plugin {
 				$gateway_compat = new GatewayCompatibility( $context );
 
 				$display_settings = new SwitcherSettingsRepository( $settings );
+				$switcher         = new CurrencySwitcher( $context, $display_settings );
 
-				( new CurrencySwitcher( $context, $display_settings ) )->maybe_switch();
+				$switcher->maybe_switch();
 
 				$metadata_provider = new WooCommerceCurrencyProvider();
 				$render_registry   = new AutomaticRenderRegistry();
@@ -234,6 +244,34 @@ final class Plugin {
 				( new OrderCurrencyLock( $order_context, $gateway_compat ) )->register();
 				( new CartExtensionData( $context, $coordinator, $checkout_settings, $notice_service ) )->register();
 				( new CheckoutBlocksNoticeAssets( $context ) )->register();
+
+				$geo_settings_repo = new GeoDetectionSettingsRepository( $settings );
+				$geo_decision      = new GeoCurrencyDecisionService( $geo_settings_repo );
+				$geo_settings      = $geo_settings_repo->get();
+				$is_checkout       = function_exists( 'is_checkout' ) && is_checkout();
+				$country_resolver  = new CountryContextResolver(
+					array(
+						new UniversalGeoContextAdapter(),
+						new WooCommerceFallbackProvider(
+							$geo_settings->allow_wc_geolocation_fallback(),
+							$geo_settings->country_precedence(),
+							$is_checkout
+						),
+					)
+				);
+
+				$geo_applicator = new GeoDetectionApplicator(
+					$geo_settings_repo,
+					$geo_decision,
+					$country_resolver,
+					$context,
+					$switcher,
+					$registry,
+					$order_context,
+					$transition_repo
+				);
+				$geo_applicator->register();
+				$geo_applicator->maybe_apply();
 			}
 		);
 

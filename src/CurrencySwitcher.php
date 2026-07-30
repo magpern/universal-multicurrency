@@ -22,6 +22,8 @@ use UMC\Display\SwitcherSettingsRepository;
  */
 final class CurrencySwitcher {
 
+	public const SESSION_MANUAL_SELECTION = 'umc_manual_currency';
+
 	private const COOKIE_LIFETIME = 30 * DAY_IN_SECONDS;
 
 	/**
@@ -75,7 +77,7 @@ final class CurrencySwitcher {
 		$requested = $this->requested_code();
 
 		if ( null !== $requested ) {
-			$this->persist( $requested );
+			$this->persist( $requested, true );
 		}
 
 		if ( headers_sent() ) {
@@ -115,11 +117,16 @@ final class CurrencySwitcher {
 	/**
 	 * Persists the selected code to the session and the guest cookie.
 	 *
-	 * @param string $code Validated currency code.
+	 * @param string $code   Validated currency code.
+	 * @param bool   $manual Whether the shopper explicitly chose this currency.
 	 */
-	public function persist( string $code ): void {
+	public function persist( string $code, bool $manual = false ): void {
 		if ( function_exists( 'WC' ) && WC()->session ) {
 			WC()->session->set( CurrencyContext::SESSION_KEY, $code );
+
+			if ( $manual ) {
+				WC()->session->set( self::SESSION_MANUAL_SELECTION, '1' );
+			}
 		}
 
 		if ( $this->settings_repository->remember_selection() ) {

@@ -136,4 +136,24 @@ final class CurrencyRegistry {
 			)
 		);
 	}
+
+	/**
+	 * Currency codes that may be activated: enabled and rated, plus base.
+	 *
+	 * @return array<int, string>
+	 */
+	public function get_selectable_codes(): array {
+		$base  = $this->get_base_code();
+		$codes = array( $base );
+
+		foreach ( $this->get_enabled_currencies() as $currency ) {
+			$code = $currency->code();
+
+			if ( $code === $base || null !== $this->settings->get_rate( $code ) ) {
+				$codes[] = $code;
+			}
+		}
+
+		return array_values( array_unique( $codes ) );
+	}
 }
