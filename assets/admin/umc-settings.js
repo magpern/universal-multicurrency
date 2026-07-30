@@ -387,16 +387,21 @@
 
 		var initialSnapshot = serializeDisplayState();
 
-		function checkDirty() {
-			var $indicator = $( '[data-umc-unsaved-indicator]' );
+			function checkDirty() {
+				var $indicator = $( '[data-umc-unsaved-indicator]' );
+				var $bar = $( '[data-umc-display-actions]' );
 
-			if ( ! $indicator.length ) {
-				return;
+				if ( ! $indicator.length ) {
+					return;
+				}
+
+				var dirty = serializeDisplayState() !== initialSnapshot;
+				$indicator.prop( 'hidden', ! dirty );
+
+				if ( $bar.length ) {
+					$bar.prop( 'hidden', ! dirty );
+				}
 			}
-
-			var dirty = serializeDisplayState() !== initialSnapshot;
-			$indicator.prop( 'hidden', ! dirty );
-		}
 
 		function copyShortcode() {
 			var text = $root.find( '[data-umc-shortcode-text]' ).text();
@@ -447,6 +452,7 @@
 		} );
 
 		refreshPreview();
+		checkDirty();
 	}
 
 	$( function () {
@@ -495,5 +501,86 @@
 		}
 
 		displayPreviewModule();
+		stickySaveModule();
 	} );
+
+	function stickySaveModule() {
+		$( '[data-umc-sticky-root]' ).each( function () {
+			var $scope = $( this );
+			var scopeId = $scope.data( 'umc-sticky-root' );
+			var $bar = $( '[data-umc-sticky-save][data-umc-sticky-scope="' + scopeId + '"]' );
+
+			if ( ! $bar.length ) {
+				$bar = $scope.find( '[data-umc-sticky-save]' ).first();
+			}
+
+			if ( ! $bar.length ) {
+				return;
+			}
+
+			function serializeScope() {
+				var state = {};
+
+				$scope.find( 'input, select, textarea' ).each( function () {
+					var $el = $( this );
+					var name = $el.attr( 'name' );
+
+					if ( ! name || $el.is( '[data-umc-display-field]' ) ) {
+						return;
+					}
+
+					var type = ( $el.attr( 'type' ) || '' ).toLowerCase();
+
+					if ( 'checkbox' === type ) {
+						state[ name ] = $el.is( ':checked' ) ? '1' : '0';
+						return;
+					}
+
+					if ( 'radio' === type ) {
+						if ( $el.is( ':checked' ) ) {
+							state[ name ] = String( $el.val() );
+						} else if ( ! Object.prototype.hasOwnProperty.call( state, name ) ) {
+							state[ name ] = '';
+						}
+						return;
+					}
+
+					if ( 'hidden' === type && $scope.find( '[name="' + name.replace( /"/g, '\\"' ) + '"][type="checkbox"]' ).length ) {
+						return;
+					}
+
+					state[ name ] = String( $el.val() );
+				} );
+
+				return JSON.stringify( state, Object.keys( state ).sort() );
+			}
+
+			var initialSnapshot = serializeScope();
+
+			function setDirtyState( dirty ) {
+				$bar.prop( 'hidden', false );
+				$bar.find( '[data-umc-unsaved-indicator]' ).prop( 'hidden', ! dirty );
+				$bar.find( '[data-umc-sticky-discard]' ).prop( 'hidden', ! dirty );
+				$bar.find( '[data-umc-sticky-saved]' ).prop( 'hidden', true );
+			}
+
+			function checkDirty() {
+				setDirtyState( serializeScope() !== initialSnapshot );
+			}
+
+			setDirtyState( false );
+
+			$scope.on( 'change input', 'input, select, textarea', checkDirty );
+
+			$bar.find( '[data-umc-sticky-discard]' ).on( 'click', function ( event ) {
+				event.preventDefault();
+				window.location.reload();
+			} );
+
+			$bar.on( 'click', 'button[type="submit"]', function () {
+				window.onbeforeunload = '';
+				$bar.find( '[data-umc-sticky-saved]' ).prop( 'hidden', false );
+			} );
+		} );
+	}
 }( jQuery ) );

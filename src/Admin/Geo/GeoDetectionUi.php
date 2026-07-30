@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace UMC\Admin\Geo;
 
+use UMC\Admin\AdminComponentRenderer;
 use UMC\Currency;
 use UMC\CurrencyRegistry;
 use UMC\Geo\GeoDetectionSettings;
@@ -102,14 +103,46 @@ final class GeoDetectionUi {
 	}
 
 	/**
+	 * Returns the currency registry.
+	 */
+	public function registry(): CurrencyRegistry {
+		return $this->registry;
+	}
+
+	/**
+	 * Renders provider cards using the shared component renderer.
+	 *
+	 * @param AdminComponentRenderer $components Component renderer.
+	 */
+	public function render_provider_cards( AdminComponentRenderer $components ): void {
+		$ugc_available = function_exists( 'universal_geo_get_country_code' ) && function_exists( 'universal_geo_api_version' );
+
+		$html  = '<div class="umc-geo-provider-list">';
+		$html .= $components->provider_card(
+			__( 'Universal Geo Context', 'universal-multicurrency' ),
+			__( 'Primary detection provider for visitor country resolution.', 'universal-multicurrency' ),
+			$ugc_available ? __( 'Available', 'universal-multicurrency' ) : __( 'Missing', 'universal-multicurrency' ),
+			$ugc_available ? 'available' : 'missing'
+		);
+		$html .= $components->provider_card(
+			__( 'WooCommerce fallback', 'universal-multicurrency' ),
+			__( 'Uses WooCommerce geolocation when Universal Geo Context is unavailable.', 'universal-multicurrency' ),
+			__( 'Available', 'universal-multicurrency' ),
+			'available'
+		);
+		$html .= '</div>';
+
+		echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in AdminComponentRenderer.
+	}
+
+	/**
 	 * Renders provider availability status list.
+	 *
+	 * @deprecated 0.13.0 Use render_provider_cards().
 	 */
 	public function render_provider_status(): void {
-		$ugc = function_exists( 'universal_geo_get_country_code' ) && function_exists( 'universal_geo_api_version' );
-		echo '<ul class="umc-geo-provider-status">';
-		echo '<li>' . esc_html( $ugc ? __( 'Universal Geo Context: available', 'universal-multicurrency' ) : __( 'Universal Geo Context: not installed', 'universal-multicurrency' ) ) . '</li>';
-		echo '<li>' . esc_html__( 'WooCommerce fallback: available when enabled in Settings', 'universal-multicurrency' ) . '</li>';
-		echo '</ul>';
+		$components = new AdminComponentRenderer();
+		$this->render_provider_cards( $components );
 	}
 
 	/**

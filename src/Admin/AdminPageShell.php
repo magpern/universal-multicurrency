@@ -17,6 +17,11 @@ use UMC\Admin\ViewModel\AdminPageShellViewModel;
 final class AdminPageShell {
 
 	/**
+	 * Dashicon class for the plugin mark in the header brand.
+	 */
+	private const PLUGIN_MARK_ICON = 'dashicons-money-alt';
+
+	/**
 	 * Icon navigation renderer.
 	 *
 	 * @var SectionNavigation
@@ -41,7 +46,6 @@ final class AdminPageShell {
 		?>
 		<div class="umc-settings-shell">
 			<?php $this->render_header( $view_model ); ?>
-			<?php $this->navigation->render( $view_model ); ?>
 		</div>
 		<?php
 	}
@@ -71,39 +75,42 @@ final class AdminPageShell {
 	}
 
 	/**
-	 * Renders the top plugin header card.
+	 * Renders the unified header card with brand, navigation, and actions.
 	 *
 	 * @param AdminPageShellViewModel $view_model Shell presentation data.
 	 */
 	private function render_header( AdminPageShellViewModel $view_model ): void {
 		?>
 		<header class="umc-shell-header">
-			<div class="umc-shell-header__brand">
-				<div class="umc-shell-header__mark" aria-hidden="true">
-					<span class="umc-shell-header__mark-text">UMC</span>
-				</div>
-				<div class="umc-shell-header__titles">
-					<div class="umc-shell-header__title-row">
-						<h2 class="umc-shell-header__title"><?php echo esc_html( $view_model->plugin_title ); ?></h2>
-						<?php if ( '' !== $view_model->version ) : ?>
-							<span class="umc-shell-header__version">v<?php echo esc_html( $view_model->version ); ?></span>
-						<?php endif; ?>
+			<div class="umc-shell-header__main">
+				<div class="umc-shell-header__brand">
+					<div class="umc-shell-header__mark" aria-hidden="true">
+						<span class="umc-shell-header__mark-icon dashicons <?php echo esc_attr( self::PLUGIN_MARK_ICON ); ?>"></span>
 					</div>
-					<p class="umc-shell-header__subtitle"><?php echo esc_html( $view_model->subtitle ); ?></p>
+					<div class="umc-shell-header__titles">
+						<h2 class="umc-shell-header__title"><?php echo esc_html( $view_model->plugin_title ); ?></h2>
+						<p class="umc-shell-header__subtitle"><?php echo esc_html( $view_model->subtitle ); ?></p>
+					</div>
 				</div>
+
+				<?php $this->navigation->render( $view_model ); ?>
+
+				<?php if ( $view_model->has_header_save ) : ?>
+					<div class="umc-shell-header__actions">
+						<button type="submit" name="save" value="<?php echo esc_attr__( 'Save changes', 'universal-multicurrency' ); ?>" form="mainform" class="button button-primary umc-shell-header__save">
+							<?php esc_html_e( 'Save changes', 'universal-multicurrency' ); ?>
+						</button>
+						<p class="umc-shell-header__status" aria-live="polite">
+							<span class="umc-shell-header__status-icon dashicons dashicons-yes" aria-hidden="true"></span>
+							<?php esc_html_e( 'All changes saved', 'universal-multicurrency' ); ?>
+						</p>
+					</div>
+				<?php endif; ?>
 			</div>
 
 			<?php if ( '' !== $view_model->notice_html ) : ?>
 				<div class="umc-shell-header__notice">
 					<?php echo $view_model->notice_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped at source in ConflictNotice. ?>
-				</div>
-			<?php endif; ?>
-
-			<?php if ( $view_model->has_header_save ) : ?>
-				<div class="umc-shell-header__actions">
-					<button type="submit" name="save" value="<?php echo esc_attr__( 'Save changes', 'universal-multicurrency' ); ?>" form="mainform" class="button button-primary umc-shell-header__save">
-						<?php esc_html_e( 'Save changes', 'universal-multicurrency' ); ?>
-					</button>
 				</div>
 			<?php endif; ?>
 		</header>

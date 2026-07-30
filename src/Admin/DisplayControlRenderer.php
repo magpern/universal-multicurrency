@@ -10,9 +10,25 @@ declare(strict_types=1);
 namespace UMC\Admin;
 
 /**
- * Renders admin control primitives for the Display configurator.
+ * Backward-compatible facade over the plugin-wide admin component renderer.
  */
 final class DisplayControlRenderer {
+
+	/**
+	 * Shared admin component renderer.
+	 *
+	 * @var AdminComponentRenderer
+	 */
+	private AdminComponentRenderer $components;
+
+	/**
+	 * Creates the Display control renderer facade.
+	 *
+	 * @param AdminComponentRenderer|null $components Optional component renderer.
+	 */
+	public function __construct( ?AdminComponentRenderer $components = null ) {
+		$this->components = $components ?? new AdminComponentRenderer();
+	}
 
 	/**
 	 * Renders one visual choice card backed by a native radio input.
@@ -38,43 +54,16 @@ final class DisplayControlRenderer {
 		string $badge = '',
 		string $note = ''
 	): string {
-		$attr_html = '';
-
-		foreach ( $attrs as $key => $attr_value ) {
-			if ( null === $attr_value || '' === $attr_value ) {
-				continue;
-			}
-
-			$attr_html .= sprintf( ' %s="%s"', esc_attr( (string) $key ), esc_attr( (string) $attr_value ) );
-		}
-
-		$description_html = '' !== $description
-			? sprintf( '<span class="umc-display-choice-card__description">%s</span>', esc_html( $description ) )
-			: '';
-
-		$badge_html = '' !== $badge
-			? sprintf( '<span class="umc-display-choice-card__badge">%s</span>', esc_html( $badge ) )
-			: '';
-
-		$note_html = '' !== $note
-			? sprintf( '<span class="umc-display-choice-card__note">%s</span>', esc_html( $note ) )
-			: '';
-
-		$diagram = '' !== $diagram_html
-			? sprintf( '<span class="umc-display-choice-card__diagram">%s</span>', $diagram_html ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Static plugin-owned SVG fragments only.
-			: '';
-
-		return sprintf(
-			'<label class="umc-display-choice-card"><input type="radio" name="%1$s" value="%2$s"%3$s%4$s /><span class="umc-display-choice-card__content"><span class="umc-display-choice-card__title">%5$s</span>%6$s%7$s%8$s%9$s</span></label>',
-			esc_attr( $name ),
-			esc_attr( $value ),
-			checked( $checked, true, false ),
-			$attr_html,
-			esc_html( $title ),
-			$description_html,
-			$badge_html,
-			$note_html,
-			$diagram
+		return $this->components->choice_card(
+			$name,
+			$value,
+			$checked,
+			$title,
+			$description,
+			$diagram_html,
+			$attrs,
+			$badge,
+			$note
 		);
 	}
 
@@ -94,40 +83,7 @@ final class DisplayControlRenderer {
 		array $attrs = array(),
 		array $option_attrs = array()
 	): string {
-		$shared = '';
-
-		foreach ( $attrs as $key => $attr_value ) {
-			if ( null === $attr_value || '' === $attr_value ) {
-				continue;
-			}
-
-			$shared .= sprintf( ' %s="%s"', esc_attr( (string) $key ), esc_attr( (string) $attr_value ) );
-		}
-
-		$items = '';
-
-		foreach ( $options as $value => $label ) {
-			$extra = $shared;
-
-			foreach ( $option_attrs[ $value ] ?? array() as $key => $attr_value ) {
-				if ( null === $attr_value || '' === $attr_value ) {
-					continue;
-				}
-
-				$extra .= sprintf( ' %s="%s"', esc_attr( (string) $key ), esc_attr( (string) $attr_value ) );
-			}
-
-			$items .= sprintf(
-				'<label class="umc-display-segment"><input type="radio" name="%1$s" value="%2$s"%3$s%4$s /><span>%5$s</span></label>',
-				esc_attr( $name ),
-				esc_attr( (string) $value ),
-				checked( $selected, (string) $value, false ),
-				$extra,
-				esc_html( (string) $label )
-			);
-		}
-
-		return sprintf( '<div class="umc-display-segmented">%s</div>', $items );
+		return $this->components->segmented_control( $name, $options, $selected, $attrs, $option_attrs );
 	}
 
 	/**
@@ -146,28 +102,7 @@ final class DisplayControlRenderer {
 		string $description = '',
 		array $attrs = array()
 	): string {
-		$attr_html = '';
-
-		foreach ( $attrs as $key => $attr_value ) {
-			if ( null === $attr_value || '' === $attr_value ) {
-				continue;
-			}
-
-			$attr_html .= sprintf( ' %s="%s"', esc_attr( (string) $key ), esc_attr( (string) $attr_value ) );
-		}
-
-		$description_html = '' !== $description
-			? sprintf( '<span class="umc-display-toggle-row__description">%s</span>', esc_html( $description ) )
-			: '';
-
-		return sprintf(
-			'<label class="umc-display-toggle-row"><input type="hidden" name="%1$s" value="0" /><input type="checkbox" name="%1$s" value="1"%2$s%3$s /><span class="umc-display-toggle-row__label">%4$s</span>%5$s</label>',
-			esc_attr( $name ),
-			checked( $checked, true, false ),
-			$attr_html,
-			esc_html( $label ),
-			$description_html
-		);
+		return $this->components->toggle_row( $name, $checked, $label, $description, $attrs );
 	}
 
 	/**
@@ -177,11 +112,7 @@ final class DisplayControlRenderer {
 	 * @param string $message Message text.
 	 */
 	public function callout( string $type, string $message ): string {
-		return sprintf(
-			'<div class="umc-display-callout umc-display-callout--%1$s" role="note"><p>%2$s</p></div>',
-			esc_attr( $type ),
-			esc_html( $message )
-		);
+		return $this->components->callout( $type, $message );
 	}
 
 	/**
@@ -190,16 +121,14 @@ final class DisplayControlRenderer {
 	 * @param string $extra_class Optional extra class names.
 	 */
 	public function field_group_open( string $extra_class = '' ): string {
-		$classes = trim( 'umc-display-field-group ' . $extra_class );
-
-		return sprintf( '<div class="%s">', esc_attr( $classes ) );
+		return $this->components->field_group_open( $extra_class );
 	}
 
 	/**
 	 * Closes a field group wrapper.
 	 */
 	public function field_group_close(): string {
-		return '</div>';
+		return $this->components->field_group_close();
 	}
 
 	/**

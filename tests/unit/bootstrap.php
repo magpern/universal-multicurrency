@@ -129,6 +129,36 @@ if ( ! function_exists( 'esc_url' ) ) {
 	}
 }
 
+if ( ! function_exists( 'esc_attr__' ) ) {
+	function esc_attr__( $text, $domain = 'default' ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound, Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		return esc_attr( $text );
+	}
+}
+
+if ( ! function_exists( 'checked' ) ) {
+	function checked( $checked, $current = true, $echo = true ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound, Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed, Universal.NamingConventions.NoReservedKeywordParameterNames.echoFound
+		$result = ( (string) $checked === (string) $current ) ? ' checked="checked"' : '';
+
+		if ( $echo ) {
+			echo $result; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		}
+
+		return $result;
+	}
+}
+
+if ( ! function_exists( 'selected' ) ) {
+	function selected( $selected, $current = true, $echo = true ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound, Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed, Universal.NamingConventions.NoReservedKeywordParameterNames.echoFound
+		$result = ( (string) $selected === (string) $current ) ? ' selected="selected"' : '';
+
+		if ( $echo ) {
+			echo $result; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		}
+
+		return $result;
+	}
+}
+
 if ( ! function_exists( 'add_query_arg' ) ) {
 	function add_query_arg( $key, $value = null, $url = null ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound, Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		if ( is_array( $key ) ) {
