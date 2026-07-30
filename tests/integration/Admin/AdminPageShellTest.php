@@ -74,16 +74,17 @@ final class AdminPageShellTest extends WP_UnitTestCase {
 		return $manifest;
 	}
 
-	public function test_shell_navigation_renders_six_items_with_active_state(): void {
+	public function test_shell_navigation_renders_seven_items_with_active_state(): void {
 		global $current_section;
 
 		$current_section = SettingsPage::SECTION_DISPLAY;
 		$output          = $this->render_shell_sections();
 
-		$this->assertSame( 6, preg_match_all( '/class="umc-shell-nav__item(?:\s|")/', $output ) );
+		$this->assertSame( 7, preg_match_all( '/class="umc-shell-nav__item(?:\s|")/', $output ) );
 		$this->assertStringContainsString( 'aria-current="page"', $output );
 		$this->assertStringContainsString( 'umc-shell-nav__item--active', $output );
 		$this->assertStringContainsString( 'Exchange Rates', $output );
+		$this->assertStringContainsString( 'Geo Detection', $output );
 	}
 
 	public function test_navigation_urls_preserve_page_tab_and_section_slug(): void {
@@ -96,6 +97,7 @@ final class AdminPageShellTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'tab=umc', $output );
 		$this->assertStringContainsString( 'section=currencies', $output );
 		$this->assertStringContainsString( 'section=exchange_rates', $output );
+		$this->assertStringContainsString( 'section=geo_detection', $output );
 		$this->assertStringContainsString( 'section=display', $output );
 	}
 
