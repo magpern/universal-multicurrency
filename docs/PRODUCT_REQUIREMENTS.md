@@ -26,9 +26,15 @@ dashboard notices, the Multicurrency settings tab, and Site Health — never
 automatic deactivation. Supported PHP, WordPress, and WooCommerce versions are
 documented in `docs/COMPATIBILITY.md` and enforced in CI.
 
+## Geo Detection (v0.11.0)
+
+Optional ordered country/region routing to currencies. Disabled by default on
+upgrade. Manual shopper selection and checkout currency locks always take
+precedence. See [`docs/GEO_DETECTION.md`](GEO_DETECTION.md) and ADR-0016.
+
 ## Non-goals
 
-GeoIP, subscriptions, bundles, multi-warehouse,
+Raw IP persistence, subscriptions, bundles, multi-warehouse,
 currency-specific stock, automatic remediation of detected conflicts, and
 deactivating or modifying other plugins. Additional exchange-rate providers
 beyond Frankfurter, per-currency provider selection, and WP-CLI wrappers over

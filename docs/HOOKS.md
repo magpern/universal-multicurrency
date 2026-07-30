@@ -297,7 +297,7 @@ Links are rendered by `Admin\ExchangeRateSettingsField` (`scope=all`) and
 
 | Hook | Args | Prio | Owner | Why |
 |---|---|---|---|---|
-| `site_status_tests` | `($tests)` | 10 | `SiteHealthReport::tests()` | Adds the `umc_rate_health` direct test alongside the M6 conflict and environment tests (gated on `activate_plugins`). |
+| `site_status_tests` | `($tests)` | 10 | `SiteHealthReport::tests()` | Adds the `umc_rate_health` and `umc_geo_configuration` direct tests alongside the M6 conflict and environment tests (gated on `activate_plugins`). |
 | `debug_information` | `($info)` | 10 | `SiteHealthReport::debug()` | Adds `stale_automatic_rates` and `oldest_automatic_rate_age` to the existing debug section. Counters only — never a rate value, provider URL, or error string. |
 
 `umc_rate_health` reports **last-known operational state only**; it never issues
@@ -333,6 +333,8 @@ otherwise `good`. Covered by
 | `umc_settings_saved` (action) | `()` | 0.8.0 | Fires after `Admin\SettingsPage` persists the Multicurrency tab. `Scheduler` listens to reconcile the recurring update. |
 | `umc_exchange_rate_sources` (filter) | `(ExchangeRateSource[] $sources)` | 0.8.0 | Register additional `UMC\Rates\ExchangeRateSource` implementations. `Plugin::resolve_rate_source()` selects the one whose `id()` matches `rate_provider`, falling back to Frankfurter. |
 | `umc_rate_fetch_completed` (action) | `(RateFetchResult $result)` | 0.8.0 | Fires after every fetch attempt — success, partial failure, total failure, and `not_modified` — once the store has persisted the outcome. |
+| `umc_geo_country_resolved` (action) | `(CountryContext $context)` | 0.11.0 | Fires after country context is resolved for geo routing. |
+| `umc_geo_currency_decided` (action) | `($currency, GeoRuleEvaluationResult $result, CountryContext $country)` | 0.11.0 | Fires after geo routing selects a currency on the storefront. |
 
 Note: `umc_convert_fee` is documented for integrations but **not wired** in
 Milestone 3 — no fee conversion ships enabled.

@@ -68,7 +68,7 @@ fitting SPL type (`InvalidArgumentException` / `RuntimeException`).
 
 ### Settings schema upgrade (Milestones 7–8)
 
-`Settings::SCHEMA_VERSION` is **4** and must not be bumped unless a genuine
+`Settings::SCHEMA_VERSION` is **5** and must not be bumped unless a genuine
 settings shape change requires it. Production migrations exist because the
 stored shape actually changed; none is an artificial bump.
 
@@ -91,6 +91,10 @@ not activated by the upgrade alone.
 `SettingsUpgrader::migrate_3_to_4` adds checkout policy defaults (`checkout`)
 with `mode: selected` and `show_notice: true`, preserving v0.9.x checkout
 behaviour for upgraded stores.
+
+`SettingsUpgrader::migrate_4_to_5` adds Geo Detection defaults (`geo`) with
+`enabled: false` and empty rules, preserving v0.10.x storefront behaviour until
+an administrator enables routing.
 See [`MIGRATION.md`](MIGRATION.md) § Internal settings schema migrations.
 
 `SettingsUpgrader` responsibilities:
@@ -121,7 +125,7 @@ layers; fees are never converted.
 Request flow and collaborators:
 
 - `CurrencyResolver` — pure priority resolution (explicit → session → cookie →
-  base) against the selectable allow-list.
+  optional geo → base) against the selectable allow-list.
 - `CurrencySwitcher` — validates a `?currency=` request, persists to the WC
   session, optionally to a remembered guest cookie (Display M1 policy), and
   safe-redirects without the parameter.

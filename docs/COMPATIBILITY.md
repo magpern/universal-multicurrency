@@ -405,6 +405,16 @@ no-theme) usage are not exercised by any CI leg in this milestone — every
 integration run reports "Running as single site" — and carry no compatibility
 claim in either direction.
 
+## Geo Detection (v0.11.0)
+
+Geo Detection reuses the existing `umc_currency` session/cookie persistence.
+Full-page caching may affect first-visit currency display when Geo Detection is
+enabled — verify with the Compatibility diagnostics tab. Optional Universal Geo
+Context supplies proxy/CDN country context when installed; UMC remains functional
+without it. Another multicurrency plugin performing geo-based switching is
+reported through the existing passive conflict detection architecture when
+detectable.
+
 ## Changing this document
 
 This document is the single authoritative source for every version claim and

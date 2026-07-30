@@ -26,7 +26,7 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Produces `dist/universal-multicurrency-0.10.0.zip`. The archive includes `readme.txt`,
+Produces `dist/universal-multicurrency-0.11.0.zip`. The archive includes `readme.txt`,
 production `src/`, `vendor/`, and `languages/universal-multicurrency.pot`.
 
 Performance subset:
@@ -36,7 +36,7 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release:** **v0.10.0** on `feature/m11-checkout-policy`. Git tag and
+**Current release:** **v0.11.0** on `feature/m12-geo-detection`. Git tag and
 GitHub release follow CI verification — do not create without explicit approval.
 
 ---
@@ -993,7 +993,29 @@ unaffected.
 
 ---
 
-## v0.10.0 — Checkout currency policy (current)
+## v0.11.0 — Geo Detection (current)
+
+### Summary
+
+Ships Milestone 12 Geo Detection under version **0.11.0**. Settings schema
+**v4→v5** adds disabled Geo Detection defaults with empty rules — storefront
+behaviour is unchanged until an administrator enables routing.
+
+### Deployment sequence
+
+1. Run `composer release-audit` on the **0.11.0** tree.
+2. Build `dist/universal-multicurrency-0.11.0.zip` with `composer install --no-dev`
+   + `bin/build-zip.sh`.
+3. Deploy over **0.10.x** in place. Settings migration runs automatically on first load.
+
+### Rollback
+
+Downgrade to the **0.10.x** zip if needed. v5 geo settings are ignored safely by
+older builds; order snapshots remain readable.
+
+---
+
+## v0.10.0 — Checkout currency policy
 
 ### Summary
 

@@ -54,7 +54,7 @@ These run automatically inside UMC when it first reads `umc_settings` after an
 upgrade. They are **not** a foreign-switcher import: `SettingsUpgrader` only
 ever reads UMC's own option.
 
-`Settings::SCHEMA_VERSION` is **4**. Four production migrations exist, keyed by
+`Settings::SCHEMA_VERSION` is **5**. Five production migrations exist, keyed by
 the version they produce, and are applied in ascending order:
 
 | From → To | Migration | Change |
@@ -63,6 +63,7 @@ the version they produce, and are applied in ascending order:
 | 1 → 2 | `SettingsUpgrader::migrate_1_to_2` | Introduces the automatic-rate shape (below) |
 | 2 → 3 | `SettingsUpgrader::migrate_2_to_3` | Adds the Display switcher settings block with safe defaults |
 | 3 → 4 | `SettingsUpgrader::migrate_3_to_4` | Adds checkout policy defaults (`checkout.mode`, `checkout.show_notice`) |
+| 4 → 5 | `SettingsUpgrader::migrate_4_to_5` | Adds Geo Detection defaults (`geo` subtree disabled, empty rules) |
 
 ### What v1 → v2 changes
 

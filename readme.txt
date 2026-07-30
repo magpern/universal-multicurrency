@@ -4,7 +4,7 @@ Tags: woocommerce, currency, multicurrency, exchange rates, money
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.10.0
+Stable tag: 0.11.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,6 +49,13 @@ Not for production traffic. Two runtime converters can double-convert prices. De
 The plugin ships a POT template (`languages/universal-multicurrency.pot`) for translators. Bundled locale `.mo` files are not included in this release.
 
 == Changelog ==
+
+= 0.11.0 =
+* Geo Detection settings section with ordered first-match country/region routing
+* Settings schema v5 with safe v4→v5 migration (Geo Detection disabled by default)
+* Optional Universal Geo Context integration and WooCommerce geolocation fallback
+* Recommended European rules action, simulation tool, and Site Health geo test
+* Manual shopper selection and checkout currency lock precedence preserved
 
 = 0.10.0 =
 * Checkout currency policy settings (`selected` or store currency at checkout entry)
