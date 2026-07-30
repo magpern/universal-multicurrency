@@ -84,7 +84,7 @@ final class AdminPageShellTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'aria-current="page"', $output );
 		$this->assertStringContainsString( 'umc-shell-nav__item--active', $output );
 		$this->assertStringContainsString( 'Exchange Rates', $output );
-		$this->assertStringContainsString( 'Geo Detection', $output );
+		$this->assertStringContainsString( 'Visitor Location', $output );
 	}
 
 	public function test_navigation_urls_preserve_page_tab_and_section_slug(): void {
@@ -145,7 +145,7 @@ final class AdminPageShellTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'All changes saved', $sections );
 	}
 
-	public function test_checkout_section_exposes_header_and_in_card_save_buttons(): void {
+	public function test_checkout_section_exposes_sticky_save_without_duplicate_saves(): void {
 		global $current_section, $hide_save_button;
 
 		$current_section = SettingsPage::SECTION_CHECKOUT;
@@ -153,8 +153,9 @@ final class AdminPageShellTest extends WP_UnitTestCase {
 		$output          = $this->render_shell_output();
 
 		$this->assertTrue( ! empty( $hide_save_button ) );
-		$this->assertStringContainsString( 'umc-shell-header__save', $sections );
-		$this->assertStringContainsString( 'umc-section-card__submit', $output );
+		$this->assertStringNotContainsString( 'umc-shell-header__save', $sections );
+		$this->assertStringContainsString( 'data-umc-sticky-save', $output );
+		$this->assertStringNotContainsString( 'umc-section-card__submit', $output );
 	}
 
 	public function test_checkout_save_persists_policy_settings(): void {
