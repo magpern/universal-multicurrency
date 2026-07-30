@@ -35,25 +35,25 @@ final class CheckoutSettingsField {
 	/**
 	 * Presentation markup helper.
 	 *
-	 * @var DisplayControlRenderer
+	 * @var AdminComponentRenderer
 	 */
-	private DisplayControlRenderer $controls;
+	private AdminComponentRenderer $controls;
 
 	/**
 	 * Binds the checkout settings field to the settings store.
 	 *
 	 * @param Settings                    $settings Merchant settings store.
 	 * @param Currency                    $base     Store base currency.
-	 * @param DisplayControlRenderer|null $controls Optional presentation helper.
+	 * @param AdminComponentRenderer|null $controls Optional presentation helper.
 	 */
 	public function __construct(
 		Settings $settings,
 		Currency $base,
-		?DisplayControlRenderer $controls = null
+		?AdminComponentRenderer $controls = null
 	) {
 		$this->settings = $settings;
 		$this->base     = $base;
-		$this->controls = $controls ?? new DisplayControlRenderer();
+		$this->controls = $controls ?? new AdminComponentRenderer();
 	}
 
 	/**
@@ -68,61 +68,62 @@ final class CheckoutSettingsField {
 			__( 'Switch to store currency (%s)', 'universal-multicurrency' ),
 			$store_code
 		);
-		$mode_name     = 'umc_checkout[mode]';
-		$notice_name   = 'umc_checkout[show_notice]';
-		$selected_card = $this->controls->choice_card(
-			$mode_name,
-			CheckoutSettings::MODE_SELECTED,
-			CheckoutSettings::MODE_SELECTED === $mode,
-			__( 'Keep selected currency', 'universal-multicurrency' ),
-			__( 'Customers continue checkout in the currency they selected while browsing.', 'universal-multicurrency' ),
-			'',
-			array( 'id' => 'umc_checkout_mode_selected' ),
-			__( 'Recommended', 'universal-multicurrency' )
-		);
-		$store_card    = $this->controls->choice_card(
-			$mode_name,
-			CheckoutSettings::MODE_STORE,
-			CheckoutSettings::MODE_STORE === $mode,
-			$store_title,
-			__( 'Customers browse and use the cart in their selected currency, then checkout switches to the store currency.', 'universal-multicurrency' ),
-			'',
-			array( 'id' => 'umc_checkout_mode_store' ),
-			'',
-			__( 'This does not change the customer\'s preferred browsing currency.', 'universal-multicurrency' )
-		);
+		$mode_name   = 'umc_checkout[mode]';
+		$notice_name = 'umc_checkout[show_notice]';
 
 		?>
 		<tr valign="top">
-			<td class="forminp umc-settings umc-checkout-settings" colspan="2">
-				<div class="umc-display-card">
-					<h3 class="umc-display-card__title"><?php esc_html_e( 'Checkout currency', 'universal-multicurrency' ); ?></h3>
-					<p class="umc-checkout-settings__intro"><?php esc_html_e( 'Choose which currency customers use during checkout.', 'universal-multicurrency' ); ?></p>
-					<fieldset class="umc-display-fieldset umc-checkout-settings__modes">
-						<legend class="screen-reader-text"><?php esc_html_e( 'Checkout currency', 'universal-multicurrency' ); ?></legend>
-						<div class="umc-display-choice-cards umc-checkout-choice-cards">
-							<?php
-							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in DisplayControlRenderer.
-							echo $selected_card;
-							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in DisplayControlRenderer.
-							echo $store_card;
-							?>
-						</div>
-					</fieldset>
-					<div class="umc-checkout-notice-panel">
-						<label class="umc-display-toggle-row umc-checkout-notice-panel__toggle" for="umc_checkout_show_notice">
-							<input
-								type="checkbox"
-								name="<?php echo esc_attr( $notice_name ); ?>"
-								id="umc_checkout_show_notice"
-								value="1"
-								<?php checked( $checkout->show_notice() ); ?>
-							/>
-							<span class="umc-display-toggle-row__label"><?php esc_html_e( 'Show an informational notice when checkout currency changes.', 'universal-multicurrency' ); ?></span>
-							<span class="umc-display-toggle-row__description"><?php esc_html_e( 'Displays a customer-friendly notice whenever checkout switches to another currency.', 'universal-multicurrency' ); ?></span>
-						</label>
-					</div>
-				</div>
+			<td class="forminp umc-settings umc-checkout-settings" colspan="2" data-umc-sticky-root="checkout">
+				<?php
+				// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in AdminComponentRenderer.
+				echo $this->controls->page_intro(
+					__( 'Checkout currency', 'universal-multicurrency' ),
+					__( 'Choose which currency customers use during checkout.', 'universal-multicurrency' )
+				);
+
+				echo $this->controls->settings_card_open(
+					__( 'Checkout currency policy', 'universal-multicurrency' ),
+					__( 'Select whether checkout keeps the browsing currency or switches to the store currency.', 'universal-multicurrency' )
+				);
+				echo $this->controls->choice_cards_open();
+				echo $this->controls->choice_card(
+					$mode_name,
+					CheckoutSettings::MODE_SELECTED,
+					CheckoutSettings::MODE_SELECTED === $mode,
+					__( 'Keep selected currency', 'universal-multicurrency' ),
+					__( 'Customers continue checkout in the currency they selected while browsing.', 'universal-multicurrency' ),
+					'',
+					array( 'id' => 'umc_checkout_mode_selected' ),
+					__( 'Recommended', 'universal-multicurrency' )
+				);
+				echo $this->controls->choice_card(
+					$mode_name,
+					CheckoutSettings::MODE_STORE,
+					CheckoutSettings::MODE_STORE === $mode,
+					$store_title,
+					__( 'Customers browse and use the cart in their selected currency, then checkout switches to the store currency.', 'universal-multicurrency' ),
+					'',
+					array( 'id' => 'umc_checkout_mode_store' ),
+					'',
+					__( 'This does not change the customer\'s preferred browsing currency.', 'universal-multicurrency' )
+				);
+				echo $this->controls->choice_cards_close();
+				echo $this->controls->settings_card_close();
+
+				echo $this->controls->settings_card_open(
+					__( 'Information notice', 'universal-multicurrency' ),
+					__( 'Display an informational notice when checkout currency changes.', 'universal-multicurrency' )
+				);
+				echo $this->controls->toggle_row(
+					$notice_name,
+					$checkout->show_notice(),
+					__( 'Show an informational notice when checkout currency changes.', 'universal-multicurrency' ),
+					__( 'Displays a customer-friendly notice whenever checkout switches to another currency.', 'universal-multicurrency' ),
+					array( 'id' => 'umc_checkout_show_notice' )
+				);
+				echo $this->controls->settings_card_close();
+				// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+				?>
 			</td>
 		</tr>
 		<?php
