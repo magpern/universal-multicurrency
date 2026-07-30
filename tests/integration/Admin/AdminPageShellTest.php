@@ -105,16 +105,17 @@ final class AdminPageShellTest extends WP_UnitTestCase {
 		global $current_section;
 
 		$current_section = SettingsPage::SECTION_DISPLAY;
-		$output          = $this->render_shell_sections() . $this->render_shell_output();
+		$sections        = $this->render_shell_sections();
+		$output          = $sections . $this->render_shell_output();
 
 		$this->assertStringContainsString( 'umc-section-card__title', $output );
 		$this->assertStringContainsString( 'Display', $output );
 		$this->assertStringContainsString( 'Configure how prices and currency information are displayed across your store.', $output );
-		$this->assertStringContainsString( 'umc-shell-header__version', $output );
-
-		if ( defined( 'UMC_VERSION' ) ) {
-			$this->assertStringContainsString( 'v' . UMC_VERSION, $output );
-		}
+		$this->assertStringContainsString( 'umc-shell-header__title', $sections );
+		$this->assertStringContainsString( 'Universal Multicurrency', $sections );
+		$this->assertStringContainsString( 'for WooCommerce', $sections );
+		$this->assertStringContainsString( 'umc-shell-header__mark-icon', $sections );
+		$this->assertStringNotContainsString( 'umc-shell-header__version', $sections );
 	}
 
 	public function test_placeholder_section_hides_save_button_and_renders_info_panel(): void {
@@ -140,6 +141,8 @@ final class AdminPageShellTest extends WP_UnitTestCase {
 		$this->assertTrue( ! empty( $hide_save_button ) );
 		$this->assertStringContainsString( 'umc-shell-header__save', $sections );
 		$this->assertStringContainsString( 'form="mainform"', $sections );
+		$this->assertStringContainsString( 'umc-shell-header__status', $sections );
+		$this->assertStringContainsString( 'All changes saved', $sections );
 	}
 
 	public function test_checkout_section_exposes_header_and_in_card_save_buttons(): void {

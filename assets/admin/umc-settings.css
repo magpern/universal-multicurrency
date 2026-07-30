@@ -1,18 +1,20 @@
 .umc-settings-page .umc-settings-shell,
 .umc-settings-shell {
-	--umc-accent: #5b43ea;
+	--umc-accent: #6c3cff;
+	--umc-accent-hover: #5a2ef2;
 	--umc-accent-soft: #f3f0ff;
-	--umc-border: #dcdcde;
-	--umc-text: #1d2327;
-	--umc-muted: #646970;
+	--umc-border: #e5e7eb;
+	--umc-text: #1f2937;
+	--umc-muted: #6b7280;
 	--umc-surface: #ffffff;
-	--umc-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(29, 35, 39, 0.06);
-	--umc-radius: 12px;
+	--umc-success: #10b981;
+	--umc-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+	--umc-radius: 14px;
 	--umc-space-1: 8px;
 	--umc-space-2: 16px;
 	--umc-space-3: 24px;
 	color: var(--umc-text);
-	margin: 0 0 var(--umc-space-2);
+	margin: 0 0 var(--umc-space-3);
 }
 
 .umc-settings-page .woocommerce .subsubsub {
@@ -35,24 +37,27 @@
 }
 
 .umc-shell-header {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: var(--umc-space-2);
-	padding: var(--umc-space-2) var(--umc-space-3);
 	background: var(--umc-surface);
 	border: 1px solid var(--umc-border);
 	border-radius: var(--umc-radius);
 	box-shadow: var(--umc-shadow);
-	margin-bottom: var(--umc-space-2);
+	margin-bottom: var(--umc-space-3);
+	padding: var(--umc-space-3);
+}
+
+.umc-shell-header__main {
+	display: flex;
+	align-items: center;
+	gap: var(--umc-space-3);
+	min-height: 80px;
 }
 
 .umc-shell-header__brand {
 	display: flex;
 	align-items: center;
 	gap: var(--umc-space-2);
-	min-width: 240px;
-	flex: 1 1 240px;
+	flex: 0 0 auto;
+	min-width: auto;
 }
 
 .umc-shell-header__mark {
@@ -61,57 +66,42 @@
 	width: 48px;
 	height: 48px;
 	border-radius: 999px;
-	background: linear-gradient(135deg, #6d5df6, #4f46e5);
-	color: #fff;
+	background: var(--umc-accent-soft);
 	flex-shrink: 0;
 }
 
-.umc-shell-header__mark-text {
-	font-size: 13px;
-	font-weight: 700;
-	letter-spacing: 0.04em;
+.umc-shell-header__mark-icon {
+	color: var(--umc-accent);
+	font-size: 22px;
+	width: 22px;
+	height: 22px;
 }
 
 .umc-shell-header__titles {
-	min-width: 0;
-}
-
-.umc-shell-header__title-row {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: var(--umc-space-1);
+	flex-shrink: 0;
+	min-width: auto;
 }
 
 .umc-shell-header__title {
 	margin: 0;
-	font-size: 20px;
-	line-height: 1.3;
+	font-size: 22px;
+	line-height: 1.25;
 	font-weight: 600;
 	color: var(--umc-text);
-}
-
-.umc-shell-header__version {
-	display: inline-flex;
-	align-items: center;
-	padding: 2px 8px;
-	border-radius: 999px;
-	background: var(--umc-accent-soft);
-	color: var(--umc-accent);
-	font-size: 12px;
-	font-weight: 600;
-	line-height: 1.5;
+	white-space: nowrap;
 }
 
 .umc-shell-header__subtitle {
 	margin: 4px 0 0;
 	color: var(--umc-muted);
-	font-size: 13px;
+	font-size: 14px;
+	line-height: 1.4;
+	white-space: nowrap;
 }
 
 .umc-shell-header__notice {
-	flex: 2 1 320px;
-	min-width: 240px;
+	width: 100%;
+	margin-top: var(--umc-space-2);
 }
 
 .umc-shell-header__notice .umc-conflict-notice--settings,
@@ -133,82 +123,140 @@
 }
 
 .umc-shell-header__actions {
-	margin-left: auto;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 	flex: 0 0 auto;
+	margin-left: auto;
+	gap: 6px;
 }
 
 .umc-shell-header__save.button-primary {
 	background: var(--umc-accent);
 	border-color: var(--umc-accent);
+	border-radius: 8px;
 	box-shadow: none;
 	text-shadow: none;
-	min-height: 36px;
-	padding-inline: 16px;
+	min-height: 40px;
+	padding-inline: 20px;
+	font-weight: 600;
 }
 
 .umc-shell-header__save.button-primary:hover,
 .umc-shell-header__save.button-primary:focus {
-	background: #4f39e8;
-	border-color: #4f39e8;
+	background: var(--umc-accent-hover);
+	border-color: var(--umc-accent-hover);
+}
+
+.umc-shell-header__status {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	margin: 0;
+	color: var(--umc-success);
+	font-size: 12px;
+	line-height: 1.4;
+}
+
+.umc-shell-header__status-icon {
+	display: grid;
+	place-items: center;
+	width: 16px;
+	height: 16px;
+	border-radius: 999px;
+	background: var(--umc-success);
+	color: #fff;
+	font-size: 12px;
+}
+
+.umc-shell-header__status-icon::before {
+	font-size: 12px;
+	width: 12px;
+	height: 12px;
 }
 
 .umc-shell-nav {
-	background: var(--umc-surface);
-	border: 1px solid var(--umc-border);
-	border-radius: var(--umc-radius);
-	box-shadow: var(--umc-shadow);
-	margin-bottom: var(--umc-space-2);
-	overflow: hidden;
+	flex: 1 1 auto;
+	min-width: 0;
 }
 
 .umc-shell-nav__list {
-	display: grid;
-	grid-template-columns: repeat(6, minmax(0, 1fr));
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: stretch;
+	gap: 0;
 	list-style: none;
 	margin: 0;
 	padding: 0;
 }
 
 .umc-shell-nav__item {
-	border-right: 1px solid var(--umc-border);
-}
-
-.umc-shell-nav__item:last-child {
-	border-right: 0;
+	flex: 0 0 110px;
+	max-width: 120px;
 }
 
 .umc-shell-nav__link {
+	position: relative;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	gap: 6px;
-	min-height: 88px;
-	padding: var(--umc-space-2) var(--umc-space-1);
+	gap: var(--umc-space-1);
+	min-height: 64px;
+	padding: var(--umc-space-1) 10px;
 	text-decoration: none;
 	color: var(--umc-muted);
 	background: transparent;
-	transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+	transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.umc-shell-nav__link::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 3px;
+	background: var(--umc-accent);
+	transform: scaleX(0);
+	transform-origin: center;
+	transition: transform 0.2s ease;
 }
 
 .umc-shell-nav__link:hover,
 .umc-shell-nav__link:focus {
 	color: var(--umc-text);
-	background: #f6f7f7;
+	background: #f9fafb;
 	outline: none;
+}
+
+.umc-shell-nav__link:hover .umc-shell-nav__icon,
+.umc-shell-nav__link:focus .umc-shell-nav__icon {
+	color: var(--umc-text);
 }
 
 .umc-shell-nav__item--active .umc-shell-nav__link {
 	color: var(--umc-accent);
-	background: var(--umc-accent-soft);
-	box-shadow: inset 0 -3px 0 var(--umc-accent);
+	background: transparent;
 	font-weight: 600;
+}
+
+.umc-shell-nav__item--active .umc-shell-nav__link::after {
+	transform: scaleX(1);
+}
+
+.umc-shell-nav__item--active .umc-shell-nav__icon {
+	color: var(--umc-accent);
 }
 
 .umc-shell-nav__icon {
 	font-size: 22px;
 	width: 22px;
 	height: 22px;
+	color: inherit;
+	transition: color 0.15s ease;
 }
 
 .umc-shell-nav__label {
@@ -1171,17 +1219,18 @@
 	}
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1024px) {
+	.umc-shell-header__main {
+		flex-wrap: wrap;
+	}
+
+	.umc-shell-nav {
+		order: 3;
+		flex: 1 1 100%;
+	}
+
 	.umc-shell-nav__list {
-		grid-template-columns: repeat(3, minmax(0, 1fr));
-	}
-
-	.umc-shell-nav__item:nth-child(3n) {
-		border-right: 0;
-	}
-
-	.umc-shell-nav__item {
-		border-bottom: 1px solid var(--umc-border);
+		justify-content: center;
 	}
 }
 
@@ -1190,33 +1239,43 @@
 		padding: var(--umc-space-2);
 	}
 
+	.umc-shell-header__main {
+		flex-direction: column;
+		align-items: stretch;
+		gap: var(--umc-space-2);
+		min-height: 0;
+	}
+
+	.umc-shell-header__brand {
+		flex: 0 0 auto;
+		width: 100%;
+		order: 1;
+	}
+
+	.umc-shell-header__title {
+		font-size: 24px;
+	}
+
+	.umc-shell-nav {
+		order: 2;
+		width: 100%;
+	}
+
+	.umc-shell-nav__item {
+		flex: 1 1 calc(33.333% - 8px);
+		max-width: none;
+		min-width: 90px;
+	}
+
 	.umc-shell-header__actions {
 		width: 100%;
 		margin-left: 0;
+		order: 3;
 	}
 
 	.umc-shell-header__save.button-primary {
 		width: 100%;
 		justify-content: center;
-	}
-
-	.umc-shell-nav__list {
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-	}
-
-	.umc-shell-nav__item:nth-child(3n) {
-		border-right: 1px solid var(--umc-border);
-	}
-
-	.umc-shell-nav__item:nth-child(2n) {
-		border-right: 0;
-	}
-
-	.umc-shell-nav__link {
-		flex-direction: row;
-		justify-content: flex-start;
-		min-height: 56px;
-		padding-inline: var(--umc-space-2);
 	}
 
 	.umc-section-card {
@@ -1225,14 +1284,16 @@
 }
 
 @media (max-width: 480px) {
-	.umc-shell-nav__list {
-		grid-template-columns: 1fr;
+	.umc-shell-nav__item {
+		flex: 1 1 calc(50% - 8px);
 	}
+}
 
-	.umc-shell-nav__item,
-	.umc-shell-nav__item:nth-child(2n),
-	.umc-shell-nav__item:nth-child(3n) {
-		border-right: 0;
+@media (prefers-reduced-motion: reduce) {
+	.umc-shell-nav__link,
+	.umc-shell-nav__link::after,
+	.umc-shell-nav__icon {
+		transition: none;
 	}
 }
 
