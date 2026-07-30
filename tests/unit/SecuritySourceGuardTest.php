@@ -39,6 +39,8 @@ final class SecuritySourceGuardTest extends TestCase {
 		'GeoDetectionSettingsField.php',
 		'GeoDetectionSettingsParser.php',
 		'GeoDetectionSimulationController.php',
+		'GeoPanelRegistry.php',
+		'GeoSandboxController.php',
 		'OrderPayCurrencyLock.php',
 		'RateUpdateController.php',
 	);
@@ -163,9 +165,15 @@ final class SecuritySourceGuardTest extends TestCase {
 
 	public function test_get_user_meta_is_confined_to_notice_dismissal(): void {
 		$this->assert_pattern_absent_from(
-			$this->files_except( array( 'NoticeDismissal.php' ) ),
+			$this->files_except(
+				array(
+					'NoticeDismissal.php',
+					'GeoSandboxController.php',
+					'GeoSandboxRecentStore.php',
+				)
+			),
 			'/\bget_user_meta\s*\(/',
-			'User meta reads are confined to NoticeDismissal.'
+			'User meta reads are confined to approved stores.'
 		);
 	}
 

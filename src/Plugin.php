@@ -13,6 +13,7 @@ use UMC\Admin\AdminAssets;
 use UMC\Admin\CurrencyActionController;
 use UMC\Admin\GeoDetectionSimulationController;
 use UMC\Admin\GeoRecommendedRulesController;
+use UMC\Admin\GeoSandboxController;
 use UMC\Admin\OrderCurrencyMetaBox;
 use UMC\Admin\PluginActionLinks;
 use UMC\Admin\RateFailureNotice;
@@ -148,6 +149,7 @@ final class Plugin {
 			( new CurrencyActionController( $settings, $base, new WooCommerceCurrencyProvider() ) )->register();
 			( new GeoRecommendedRulesController( $settings, $base ) )->register();
 			( new GeoDetectionSimulationController( $settings, $base ) )->register();
+			( new GeoSandboxController( $settings, $base ) )->register();
 		}
 
 		$registry = new CurrencyRegistry( $settings, $base );

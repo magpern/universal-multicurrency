@@ -1,14 +1,14 @@
-# Release audit — v0.11.0 Geo Detection
+# Release audit — v0.12.0 Geo admin hub
 
-Executable release-blocking gate for Universal Multicurrency **v0.11.0**. This
+Executable release-blocking gate for Universal Multicurrency **v0.12.0**. This
 document records scope, criteria, commands, audit results, and the current
 release-preparation state.
 
 **Governing question:** If we published this release tomorrow, is there anything
 left in the repository that clearly should not ship?
 
-**Repository status:** **prepared for v0.11.0** on `feature/m12-geo-detection`.
-Milestone 12 (Geo Detection) awaits CI verification. Git tag **`v0.11.0`** and
+**Repository status:** **prepared for v0.12.0** on `feature/m13-geo-admin-hub`.
+Milestone 13 (Geo admin hub) awaits CI verification. Git tag **`v0.12.0`** and
 GitHub release publication follow full CI matrix pass.
 
 ---
@@ -17,8 +17,8 @@ GitHub release publication follow full CI matrix pass.
 
 | Item | Value |
 |---|---|
-| Version | **0.11.0** |
-| Settings schema | **5** (Geo Detection subtree; v4→v5 migration) |
+| Version | **0.12.0** |
+| Settings schema | **5** (unchanged; Geo Detection subtree) |
 | Order snapshot schema | **3** (unchanged) |
 | Persisted-data inventory version | **5** |
 | Production migrations | **v0 → v1**, **v1 → v2**, **v2 → v3**, **v3 → v4**, **v4 → v5** |
@@ -33,15 +33,36 @@ GitHub release publication follow full CI matrix pass.
 | Git tag `v0.10.0` | **Created** (superseded) |
 | GitHub release `v0.10.0` | **Published** (superseded) |
 | Git tag `v0.8.0` | **Created** (superseded) |
-| Git tag `v0.11.0` | **Not yet created** |
-| GitHub release `v0.11.0` | **Not yet created** |
+| Git tag `v0.11.0` | **Not yet created** (superseded by M13 prep) |
+| GitHub release `v0.11.0` | **Not yet created** (superseded by M13 prep) |
+| Git tag `v0.12.0` | **Not yet created** |
+| GitHub release `v0.12.0` | **Not yet created** |
 | Milestone 8 | **Complete** — released and review-closed at v0.8.0 |
 | Milestone 11 | **Complete** — Checkout currency policy at v0.10.0 |
-| Milestone 12 | **Prepared** — Geo Detection on feature branch |
+| Milestone 12 | **Prepared** — Geo Detection engine at v0.11.0 |
+| Milestone 13 | **Prepared** — Geo admin hub on feature branch |
 
 ---
 
-## v0.11.0 Geo Detection scope
+## v0.12.0 Geo admin hub scope
+
+Minor release shipping Milestone 13. Admin-only refactor: Geo Detection settings
+become a panel-based hub with GeoContext sandbox simulation. No settings schema
+change; storefront geo routing is unchanged.
+
+### Shipped capabilities
+
+| Area | Summary |
+|---|---|
+| Geo hub navigation | Overview, Detection, Geo Sandbox, Providers, Proxies, Diagnostics, Settings |
+| GeoContext v1 | Versioned document for sandbox input/output (ADR-0017) |
+| Geo Sandbox | Presets, recent countries, structured JSON trace via admin-post |
+| Panel-aware saves | Detection panel saves rules only; Settings panel saves operational options |
+| Legacy simulation | `umc_geo_simulate` redirects to Geo Sandbox |
+
+---
+
+## v0.11.0 Geo Detection scope (superseded)
 
 Minor release shipping Milestone 12. Settings schema v4→v5 adds Geo Detection
 defaults with the feature disabled and no rules. Storefront behaviour is

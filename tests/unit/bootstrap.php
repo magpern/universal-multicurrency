@@ -130,14 +130,54 @@ if ( ! function_exists( 'esc_url' ) ) {
 }
 
 if ( ! function_exists( 'add_query_arg' ) ) {
-	function add_query_arg( $key, $value, $url = false ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound, Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-		if ( false === $url ) {
-			$url = '/';
+	function add_query_arg( $key, $value = null, $url = null ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound, Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		if ( is_array( $key ) ) {
+			$args = $key;
+			$url  = $value ?? '/';
+		} else {
+			$args = array( (string) $key => (string) $value );
+			$url  = $url ?? '/';
+		}
+
+		$parts = array();
+
+		foreach ( $args as $arg_key => $arg_value ) {
+			$parts[] = rawurlencode( (string) $arg_key ) . '=' . rawurlencode( (string) $arg_value );
 		}
 
 		$separator = str_contains( (string) $url, '?' ) ? '&' : '?';
 
-		return (string) $url . $separator . rawurlencode( (string) $key ) . '=' . rawurlencode( (string) $value );
+		return (string) $url . $separator . implode( '&', $parts );
+	}
+}
+
+if ( ! function_exists( 'wp_json_encode' ) ) {
+	function wp_json_encode( $data, $options = 0, $depth = 512 ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound, Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		return json_encode( $data, $options, $depth ); // phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+	}
+}
+
+if ( ! function_exists( 'sanitize_text_field' ) ) {
+	function sanitize_text_field( $str ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound
+		return trim( (string) $str );
+	}
+}
+
+if ( ! function_exists( 'sanitize_key' ) ) {
+	function sanitize_key( $key ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound
+		return strtolower( preg_replace( '/[^a-z0-9_\-]/', '', (string) $key ) );
+	}
+}
+
+if ( ! function_exists( 'wp_unslash' ) ) {
+	function wp_unslash( $value ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound
+		return is_string( $value ) ? stripslashes( $value ) : $value;
+	}
+}
+
+if ( ! function_exists( 'admin_url' ) ) {
+	function admin_url( $path = '' ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound, Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		return 'https://example.test/wp-admin/' . ltrim( (string) $path, '/' );
 	}
 }
 

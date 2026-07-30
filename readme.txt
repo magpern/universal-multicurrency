@@ -4,7 +4,7 @@ Tags: woocommerce, currency, multicurrency, exchange rates, money
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.11.0
+Stable tag: 0.12.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,6 +49,13 @@ Not for production traffic. Two runtime converters can double-convert prices. De
 The plugin ships a POT template (`languages/universal-multicurrency.pot`) for translators. Bundled locale `.mo` files are not included in this release.
 
 == Changelog ==
+
+= 0.12.0 =
+* Geo Detection admin hub with Overview, Detection, Geo Sandbox, Providers, Trusted Proxies, Diagnostics, and Settings panels
+* GeoContext document (schema v1) for structured sandbox simulation and future provider-chain work
+* Geo Sandbox with quick-pick presets, recent countries, and JSON trace output via admin-post
+* Panel-aware saves: Detection updates rules only; Settings updates operational options only
+* Legacy simulation action redirects to Geo Sandbox
 
 = 0.11.0 =
 * Geo Detection settings section with ordered first-match country/region routing
