@@ -136,7 +136,7 @@ if ( ! function_exists( 'esc_attr__' ) ) {
 }
 
 if ( ! function_exists( 'checked' ) ) {
-	function checked( $checked, $current = true, $echo = true ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound, Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+	function checked( $checked, $current = true, $echo = true ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound, Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed, Universal.NamingConventions.NoReservedKeywordParameterNames.echoFound
 		$result = ( (string) $checked === (string) $current ) ? ' checked="checked"' : '';
 
 		if ( $echo ) {
@@ -148,7 +148,7 @@ if ( ! function_exists( 'checked' ) ) {
 }
 
 if ( ! function_exists( 'selected' ) ) {
-	function selected( $selected, $current = true, $echo = true ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound, Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+	function selected( $selected, $current = true, $echo = true ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound, Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed, Universal.NamingConventions.NoReservedKeywordParameterNames.echoFound
 		$result = ( (string) $selected === (string) $current ) ? ' selected="selected"' : '';
 
 		if ( $echo ) {

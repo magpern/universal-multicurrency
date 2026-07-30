@@ -475,7 +475,7 @@ msgid "Remove this currency from the store configuration?"
 msgstr ""
 
 #: src/Admin/CurrencyOverviewField.php:175
-#: src/Admin/Geo/GeoDetectionUi.php:177
+#: src/Admin/Geo/GeoDetectionUi.php:180
 msgid "Remove"
 msgstr ""
 
@@ -921,44 +921,44 @@ msgstr ""
 msgid "Uses WooCommerce geolocation when Universal Geo Context is unavailable."
 msgstr ""
 
-#: src/Admin/Geo/GeoDetectionUi.php:175
+#: src/Admin/Geo/GeoDetectionUi.php:178
 msgid "Move up"
 msgstr ""
 
-#: src/Admin/Geo/GeoDetectionUi.php:176
+#: src/Admin/Geo/GeoDetectionUi.php:179
 msgid "Move down"
 msgstr ""
 
-#: src/Admin/Geo/GeoDetectionUi.php:217
+#: src/Admin/Geo/GeoDetectionUi.php:220
 msgid "Other countries"
 msgstr ""
 
-#: src/Admin/Geo/GeoDetectionUi.php:245
+#: src/Admin/Geo/GeoDetectionUi.php:248
 msgid "European Union"
 msgstr ""
 
-#: src/Admin/Geo/GeoDetectionUi.php:246
+#: src/Admin/Geo/GeoDetectionUi.php:249
 msgid "Eurozone"
 msgstr ""
 
-#: src/Admin/Geo/GeoDetectionUi.php:247
+#: src/Admin/Geo/GeoDetectionUi.php:250
 msgid "European Economic Area"
 msgstr ""
 
-#: src/Admin/Geo/GeoDetectionUi.php:258
+#: src/Admin/Geo/GeoDetectionUi.php:261
 msgid "Region"
 msgstr ""
 
-#: src/Admin/Geo/GeoDetectionUi.php:262
+#: src/Admin/Geo/GeoDetectionUi.php:265
 msgid "Other"
 msgstr ""
 
-#: src/Admin/Geo/GeoDetectionUi.php:265
+#: src/Admin/Geo/GeoDetectionUi.php:268
 msgid "Country"
 msgstr ""
 
 #. translators: 1: country code, 2: region id
-#: src/Admin/Geo/GeoDetectionUi.php:291
+#: src/Admin/Geo/GeoDetectionUi.php:294
 #: src/Geo/GeoRoutingRuleValidator.php:163
 #, php-format
 msgid "The %1$s rule will never be reached because an earlier %2$s rule already matches %1$s."
