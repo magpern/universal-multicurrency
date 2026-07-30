@@ -26,7 +26,7 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Produces `dist/universal-multicurrency-0.12.0.zip`. The archive includes `readme.txt`,
+Produces `dist/universal-multicurrency-0.12.1.zip`. The archive includes `readme.txt`,
 production `src/`, `vendor/`, and `languages/universal-multicurrency.pot`.
 
 Performance subset:
@@ -36,7 +36,7 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release:** **v0.12.0** on `feature/m13-geo-admin-hub`. Git tag and
+**Current release:** **v0.12.1** on `main`. Git tag and
 GitHub release follow CI verification — do not create without explicit approval.
 
 ---

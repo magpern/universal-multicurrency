@@ -484,6 +484,7 @@
 				return;
 			}
 
+			window.onbeforeunload = '';
 			window.location.href =
 				addUrl + ( addUrl.indexOf( '?' ) === -1 ? '?' : '&' ) + 'code=' + encodeURIComponent( code );
 		} );

@@ -4,7 +4,7 @@ Tags: woocommerce, currency, multicurrency, exchange rates, money
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.12.0
+Stable tag: 0.12.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,6 +49,9 @@ Not for production traffic. Two runtime converters can double-convert prices. De
 The plugin ships a POT template (`languages/universal-multicurrency.pot`) for translators. Bundled locale `.mo` files are not included in this release.
 
 == Changelog ==
+
+= 0.12.1 =
+* Fix Add currency redirect blocked by WooCommerce settings unsaved-changes guard on the Multicurrency overview
 
 = 0.12.0 =
 * Geo Detection admin hub with Overview, Detection, Geo Sandbox, Providers, Trusted Proxies, Diagnostics, and Settings panels

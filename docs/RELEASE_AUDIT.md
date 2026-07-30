@@ -17,7 +17,7 @@ GitHub release publication follow full CI matrix pass.
 
 | Item | Value |
 |---|---|
-| Version | **0.12.0** |
+| Version | **0.12.1** |
 | Settings schema | **5** (unchanged; Geo Detection subtree) |
 | Order snapshot schema | **3** (unchanged) |
 | Persisted-data inventory version | **5** |
@@ -35,8 +35,10 @@ GitHub release publication follow full CI matrix pass.
 | Git tag `v0.8.0` | **Created** (superseded) |
 | Git tag `v0.11.0` | **Not yet created** (superseded by M13 prep) |
 | GitHub release `v0.11.0` | **Not yet created** (superseded by M13 prep) |
-| Git tag `v0.12.0` | **Not yet created** |
-| GitHub release `v0.12.0` | **Not yet created** |
+| Git tag `v0.12.0` | **Created** |
+| GitHub release `v0.12.0` | **Published** |
+| Git tag `v0.12.1` | **Not yet created** |
+| GitHub release `v0.12.1` | **Not yet created** |
 | Milestone 8 | **Complete** — released and review-closed at v0.8.0 |
 | Milestone 11 | **Complete** — Checkout currency policy at v0.10.0 |
 | Milestone 12 | **Prepared** — Geo Detection engine at v0.11.0 |

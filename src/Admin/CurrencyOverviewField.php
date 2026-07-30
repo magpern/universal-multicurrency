@@ -86,7 +86,7 @@ final class CurrencyOverviewField {
 			'umc_currency_add'
 		);
 		?>
-		<div class="umc-add-currency">
+		<div class="umc-add-currency wc-settings-prevent-change-event">
 			<label for="umc-add-currency-code" class="screen-reader-text">
 				<?php esc_html_e( 'Add currency', 'universal-multicurrency' ); ?>
 			</label>
