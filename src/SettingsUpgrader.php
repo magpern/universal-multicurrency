@@ -11,6 +11,7 @@ namespace UMC;
 
 use UMC\Checkout\CheckoutSettings;
 use UMC\Display\SwitcherSettings;
+use UMC\Geo\GeoDetectionSettings;
 
 /**
  * Applies versioned migrations to persisted `umc_settings` before sanitization.
@@ -63,6 +64,7 @@ final class SettingsUpgrader {
 			2 => self::MIGRATE_1_TO_2,
 			3 => self::MIGRATE_2_TO_3,
 			4 => self::MIGRATE_3_TO_4,
+			5 => self::MIGRATE_4_TO_5,
 		);
 	}
 
@@ -267,6 +269,36 @@ final class SettingsUpgrader {
 	 * @var callable(array<string, mixed>): array<string, mixed>
 	 */
 	public const MIGRATE_3_TO_4 = array( self::class, 'migrate_3_to_4' );
+
+	/**
+	 * Real v4 → v5 migration.
+	 *
+	 * Adds Geo Detection defaults. Existing configuration is preserved;
+	 * geo remains disabled with no routing rules.
+	 *
+	 * @param array<string, mixed> $data Raw settings at schema version 4.
+	 * @return array<string, mixed>
+	 */
+	public static function migrate_4_to_5( array $data ): array {
+		return array(
+			'schema_version'       => 5,
+			'rate_mode'            => $data['rate_mode'] ?? Settings::RATE_MODE_MANUAL,
+			'rate_provider'        => $data['rate_provider'] ?? Settings::DEFAULT_RATE_PROVIDER,
+			'rate_update_interval' => $data['rate_update_interval'] ?? Settings::DEFAULT_RATE_INTERVAL,
+			'rate_max_age_hours'   => $data['rate_max_age_hours'] ?? Settings::DEFAULT_RATE_MAX_AGE_HOURS,
+			'currencies'           => is_array( $data['currencies'] ?? null ) ? $data['currencies'] : array(),
+			'display'              => is_array( $data['display'] ?? null ) ? $data['display'] : SwitcherSettings::default_array(),
+			'checkout'             => is_array( $data['checkout'] ?? null ) ? $data['checkout'] : CheckoutSettings::default_array(),
+			'geo'                  => GeoDetectionSettings::default_array(),
+		);
+	}
+
+	/**
+	 * Migration callable for v4 → v5.
+	 *
+	 * @var callable(array<string, mixed>): array<string, mixed>
+	 */
+	public const MIGRATE_4_TO_5 = array( self::class, 'migrate_4_to_5' );
 
 	/**
 	 * Applies migrations from the stored version up to the target version.
