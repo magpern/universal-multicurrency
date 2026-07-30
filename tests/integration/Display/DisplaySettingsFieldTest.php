@@ -134,7 +134,7 @@ final class DisplaySettingsFieldTest extends WP_UnitTestCase {
 		$html = $this->capture_render();
 
 		$this->assertStringContainsString( 'umc-display-enable-row', $html );
-		$this->assertSame( 5, substr_count( $html, '<label class="umc-display-choice-card">' ) );
+		$this->assertSame( 5, substr_count( $html, 'class="umc-ui-choice-card umc-display-choice-card"' ) );
 		$this->assertSame( 3, substr_count( $html, 'name="umc_display[placement]"' ) );
 		$this->assertSame( 2, substr_count( $html, 'name="umc_display[style]"' ) );
 		$this->assertStringContainsString( 'data-umc-position-panel="floating_side"', $html );

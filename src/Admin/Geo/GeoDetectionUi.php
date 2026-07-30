@@ -117,24 +117,27 @@ final class GeoDetectionUi {
 	public function render_provider_cards( AdminComponentRenderer $components ): void {
 		$ugc_available = function_exists( 'universal_geo_get_country_code' ) && function_exists( 'universal_geo_api_version' );
 
-		echo '<div class="umc-geo-provider-list">';
-		echo $components->provider_card(
+		$html  = '<div class="umc-geo-provider-list">';
+		$html .= $components->provider_card(
 			__( 'Universal Geo Context', 'universal-multicurrency' ),
 			__( 'Primary detection provider for visitor country resolution.', 'universal-multicurrency' ),
 			$ugc_available ? __( 'Available', 'universal-multicurrency' ) : __( 'Missing', 'universal-multicurrency' ),
 			$ugc_available ? 'available' : 'missing'
 		);
-		echo $components->provider_card(
+		$html .= $components->provider_card(
 			__( 'WooCommerce fallback', 'universal-multicurrency' ),
 			__( 'Uses WooCommerce geolocation when Universal Geo Context is unavailable.', 'universal-multicurrency' ),
 			__( 'Available', 'universal-multicurrency' ),
 			'available'
 		);
-		echo '</div>';
+		$html .= '</div>';
+
+		echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in AdminComponentRenderer.
 	}
 
 	/**
 	 * Renders provider availability status list.
+	 *
 	 * @deprecated 0.13.0 Use render_provider_cards().
 	 */
 	public function render_provider_status(): void {

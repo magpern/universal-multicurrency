@@ -112,18 +112,13 @@ final class GeoDetectionSettingsField {
 					<?php $this->navigation->render( $active ); ?>
 					<div class="umc-geo-panel umc-geo-panel-stack <?php echo esc_attr( GeoPanelRegistry::PANEL_OVERVIEW === $active ? 'umc-ui-layout--wide' : 'umc-ui-layout--readable' ); ?>" data-umc-geo-panel="<?php echo esc_attr( $active ); ?>">
 						<?php
-						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in AdminComponentRenderer.
-						echo $this->components->page_intro(
-							GeoPanelRegistry::intro_title( $active ),
-							GeoPanelRegistry::intro_description( $active )
-						);
+						echo $this->components->page_intro( GeoPanelRegistry::intro_title( $active ), GeoPanelRegistry::intro_description( $active ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in AdminComponentRenderer.
 						$this->render_panel( $active );
 						?>
 					</div>
 					<?php if ( GeoPanelRegistry::is_saveable_panel( $active ) ) : ?>
 						<?php
-						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in renderer.
-						echo $this->components->sticky_save_bar( 'visitor-location' );
+						echo $this->components->sticky_save_bar( 'visitor-location' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in AdminComponentRenderer.
 						?>
 					<?php endif; ?>
 				</div>
