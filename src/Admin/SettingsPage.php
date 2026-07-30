@@ -35,6 +35,7 @@ final class SettingsPage extends WC_Settings_Page {
 
 	public const SECTION_CURRENCIES     = 'currencies';
 	public const SECTION_EXCHANGE_RATES = 'exchange_rates';
+	public const SECTION_GEO_DETECTION  = 'geo_detection';
 	public const SECTION_DISPLAY        = 'display';
 	public const SECTION_CHECKOUT       = 'checkout';
 	public const SECTION_COMPATIBILITY  = 'compatibility';
@@ -90,6 +91,13 @@ final class SettingsPage extends WC_Settings_Page {
 	private CompatibilitySettingsField $compatibility_field;
 
 	/**
+	 * Geo Detection settings field renderer.
+	 *
+	 * @var GeoDetectionSettingsField
+	 */
+	private GeoDetectionSettingsField $geo_field;
+
+	/**
 	 * Placeholder section renderer callback target.
 	 *
 	 * @var AdminPageShellViewModelFactory
@@ -134,6 +142,7 @@ final class SettingsPage extends WC_Settings_Page {
 			$display_repository
 		);
 		$this->checkout_field      = new CheckoutSettingsField( $settings, $base );
+		$this->geo_field           = new GeoDetectionSettingsField( $settings, $base, $registry );
 		$conflict_detector         = new ConflictDetector(
 			new DetectorRegistry(),
 			new WordPressEnvironmentProbe(),
@@ -160,6 +169,7 @@ final class SettingsPage extends WC_Settings_Page {
 		add_action( 'woocommerce_admin_field_umc_exchange_rates', array( $this->exchange_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_display', array( $this->display_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_checkout', array( $this->checkout_field, 'render' ) );
+		add_action( 'woocommerce_admin_field_umc_geo_detection', array( $this->geo_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_compatibility', array( $this->compatibility_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_currencies', array( $this->overview_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_placeholder', array( $this, 'render_placeholder_field' ) );
@@ -175,6 +185,7 @@ final class SettingsPage extends WC_Settings_Page {
 		return array(
 			self::SECTION_CURRENCIES     => __( 'Currencies', 'universal-multicurrency' ),
 			self::SECTION_EXCHANGE_RATES => __( 'Exchange Rates', 'universal-multicurrency' ),
+			self::SECTION_GEO_DETECTION  => __( 'Geo Detection', 'universal-multicurrency' ),
 			self::SECTION_DISPLAY        => __( 'Display', 'universal-multicurrency' ),
 			self::SECTION_CHECKOUT       => __( 'Checkout', 'universal-multicurrency' ),
 			self::SECTION_COMPATIBILITY  => __( 'Compatibility', 'universal-multicurrency' ),
@@ -243,7 +254,7 @@ final class SettingsPage extends WC_Settings_Page {
 	 * @param string $section Section slug.
 	 */
 	public function section_has_saveable_settings( string $section ): bool {
-		return in_array( $section, array( self::SECTION_CURRENCIES, self::SECTION_EXCHANGE_RATES, self::SECTION_DISPLAY, self::SECTION_CHECKOUT ), true );
+		return in_array( $section, array( self::SECTION_CURRENCIES, self::SECTION_EXCHANGE_RATES, self::SECTION_GEO_DETECTION, self::SECTION_DISPLAY, self::SECTION_CHECKOUT ), true );
 	}
 
 	/**
@@ -254,7 +265,7 @@ final class SettingsPage extends WC_Settings_Page {
 	public function section_has_header_save( string $section ): bool {
 		return in_array(
 			$section,
-			array( self::SECTION_CURRENCIES, self::SECTION_EXCHANGE_RATES, self::SECTION_CHECKOUT ),
+			array( self::SECTION_CURRENCIES, self::SECTION_EXCHANGE_RATES, self::SECTION_GEO_DETECTION, self::SECTION_CHECKOUT ),
 			true
 		);
 	}
@@ -307,6 +318,15 @@ final class SettingsPage extends WC_Settings_Page {
 	 */
 	protected function get_settings_for_exchange_rates_section() {
 		return $this->exchange_rate_settings();
+	}
+
+	/**
+	 * Returns field definitions for the Geo Detection section.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	protected function get_settings_for_geo_detection_section() {
+		return $this->geo_detection_settings();
 	}
 
 	/**
@@ -382,6 +402,24 @@ final class SettingsPage extends WC_Settings_Page {
 					__( 'Horizontal list is only available with manual placement. Style was saved as Dropdown.', 'universal-multicurrency' ),
 					'warning'
 				);
+			}
+
+			return;
+		}
+
+		if ( self::SECTION_GEO_DETECTION === $section ) {
+			$parsed = $this->geo_field->parse_post();
+
+			if ( null === $parsed ) {
+				return;
+			}
+
+			$merged = array_merge( $this->settings->get(), array( 'geo' => $parsed['geo'] ) );
+			$this->settings->save( $merged );
+			$this->fire_saved_hook();
+
+			foreach ( $parsed['warnings'] as $warning ) {
+				\WC_Admin_Settings::add_message( $warning );
 			}
 
 			return;
@@ -496,6 +534,33 @@ final class SettingsPage extends WC_Settings_Page {
 			array(
 				'type' => 'sectionend',
 				'id'   => 'umc_display_end',
+			),
+		);
+	}
+
+	/**
+	 * Returns field definitions for the Geo Detection section.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function geo_detection_settings(): array {
+		return array(
+			array(
+				'type' => 'umc_conflict',
+				'id'   => 'umc_conflict_notice',
+			),
+			array(
+				'type' => 'title',
+				'name' => __( 'Geo Detection', 'universal-multicurrency' ),
+				'id'   => 'umc_geo_title',
+			),
+			array(
+				'type' => 'umc_geo_detection',
+				'id'   => 'umc_geo_detection',
+			),
+			array(
+				'type' => 'sectionend',
+				'id'   => 'umc_geo_end',
 			),
 		);
 	}

@@ -61,6 +61,27 @@ final class AdminAssets {
 			true
 		);
 
+		if ( $this->is_geo_detection_section() ) {
+			wp_enqueue_script(
+				'umc-admin-geo-rules',
+				$base . 'umc-geo-rules.js',
+				array( 'jquery', 'umc-admin-settings' ),
+				(string) filemtime( $path . 'umc-geo-rules.js' ),
+				true
+			);
+
+			wp_localize_script(
+				'umc-admin-geo-rules',
+				'umcGeoRules',
+				array(
+					/* translators: 1: rule type label, 2: new position */
+					'movedTemplate'   => __( '%1$s rule moved to position %2$d', 'universal-multicurrency' ),
+					/* translators: %s: rule type label */
+					'removedTemplate' => __( '%1$s rule removed', 'universal-multicurrency' ),
+				)
+			);
+		}
+
 		if ( $this->is_display_section() ) {
 			$switcher_base = plugin_dir_url( UMC_PLUGIN_FILE ) . 'assets/css/switcher.css';
 			$switcher_path = plugin_dir_path( UMC_PLUGIN_FILE ) . 'assets/css/switcher.css';
@@ -169,5 +190,15 @@ final class AdminAssets {
 		$section = isset( $_GET['section'] ) ? sanitize_key( wp_unslash( (string) $_GET['section'] ) ) : '';
 
 		return SettingsPage::SECTION_COMPATIBILITY === $section;
+	}
+
+	/**
+	 * Whether the active Multicurrency tab section is Geo Detection.
+	 */
+	private function is_geo_detection_section(): bool {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Display-only query args.
+		$section = isset( $_GET['section'] ) ? sanitize_key( wp_unslash( (string) $_GET['section'] ) ) : '';
+
+		return SettingsPage::SECTION_GEO_DETECTION === $section;
 	}
 }
