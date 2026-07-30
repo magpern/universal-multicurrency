@@ -33,6 +33,21 @@ final class GeoPanelRegistry {
 	public const QUERY_VAR = 'geo_panel';
 
 	/**
+	 * Panel icon classes keyed by panel id.
+	 *
+	 * @var array<string, string>
+	 */
+	private const PANEL_ICONS = array(
+		self::PANEL_OVERVIEW    => 'dashicons-dashboard',
+		self::PANEL_DETECTION   => 'dashicons-location-alt',
+		self::PANEL_SANDBOX     => 'dashicons-search',
+		self::PANEL_PROVIDERS   => 'dashicons-admin-plugins',
+		self::PANEL_PROXIES     => 'dashicons-shield',
+		self::PANEL_DIAGNOSTICS => 'dashicons-heart',
+		self::PANEL_SETTINGS    => 'dashicons-admin-generic',
+	);
+
+	/**
 	 * All valid panel ids in display order.
 	 *
 	 * @return list<string>
@@ -87,6 +102,51 @@ final class GeoPanelRegistry {
 			self::PANEL_DIAGNOSTICS => __( 'Diagnostics', 'universal-multicurrency' ),
 			self::PANEL_SETTINGS    => __( 'Settings', 'universal-multicurrency' ),
 			default                 => __( 'Overview', 'universal-multicurrency' ),
+		};
+	}
+
+	/**
+	 * Dashicon class for a panel pill.
+	 *
+	 * @param string $panel Panel id.
+	 */
+	public static function icon( string $panel ): string {
+		return self::PANEL_ICONS[ $panel ] ?? 'dashicons-admin-generic';
+	}
+
+	/**
+	 * Intro title for a panel page introduction block.
+	 *
+	 * @param string $panel Panel id.
+	 */
+	public static function intro_title( string $panel ): string {
+		return match ( $panel ) {
+			self::PANEL_OVERVIEW    => __( 'Visitor Location overview', 'universal-multicurrency' ),
+			self::PANEL_DETECTION   => __( 'Detection rules', 'universal-multicurrency' ),
+			self::PANEL_SANDBOX     => __( 'Geo Sandbox', 'universal-multicurrency' ),
+			self::PANEL_PROVIDERS   => __( 'Detection providers', 'universal-multicurrency' ),
+			self::PANEL_PROXIES     => __( 'Trusted proxies', 'universal-multicurrency' ),
+			self::PANEL_DIAGNOSTICS => __( 'Visitor Location diagnostics', 'universal-multicurrency' ),
+			self::PANEL_SETTINGS    => __( 'Visitor Location settings', 'universal-multicurrency' ),
+			default                 => __( 'Visitor Location', 'universal-multicurrency' ),
+		};
+	}
+
+	/**
+	 * Intro description for a panel page introduction block.
+	 *
+	 * @param string $panel Panel id.
+	 */
+	public static function intro_description( string $panel ): string {
+		return match ( $panel ) {
+			self::PANEL_OVERVIEW    => __( 'Review current visitor location status and jump to common tasks.', 'universal-multicurrency' ),
+			self::PANEL_DETECTION   => __( 'Configure how visitor location is detected before selecting an automatic currency.', 'universal-multicurrency' ),
+			self::PANEL_SANDBOX     => __( 'Reproduce geographic context and inspect routing without changing storefront session, cookies, or active currency.', 'universal-multicurrency' ),
+			self::PANEL_PROVIDERS   => __( 'Review which location providers are available to Universal Multicurrency.', 'universal-multicurrency' ),
+			self::PANEL_PROXIES     => __( 'Trusted proxy configuration is managed by Universal Geo Context when installed.', 'universal-multicurrency' ),
+			self::PANEL_DIAGNOSTICS => __( 'Inspect Geo Detection health signals and open related diagnostics tools.', 'universal-multicurrency' ),
+			self::PANEL_SETTINGS    => __( 'Configure automatic currency selection, providers, fallback behavior, and checkout interactions.', 'universal-multicurrency' ),
+			default                 => __( 'Determine a visitor\'s country and automatically suggest the appropriate currency.', 'universal-multicurrency' ),
 		};
 	}
 

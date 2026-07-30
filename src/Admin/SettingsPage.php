@@ -186,7 +186,7 @@ final class SettingsPage extends WC_Settings_Page {
 		return array(
 			self::SECTION_CURRENCIES     => __( 'Currencies', 'universal-multicurrency' ),
 			self::SECTION_EXCHANGE_RATES => __( 'Exchange Rates', 'universal-multicurrency' ),
-			self::SECTION_GEO_DETECTION  => __( 'Geo Detection', 'universal-multicurrency' ),
+			self::SECTION_GEO_DETECTION  => __( 'Visitor Location', 'universal-multicurrency' ),
 			self::SECTION_DISPLAY        => __( 'Display', 'universal-multicurrency' ),
 			self::SECTION_CHECKOUT       => __( 'Checkout', 'universal-multicurrency' ),
 			self::SECTION_COMPATIBILITY  => __( 'Compatibility', 'universal-multicurrency' ),
@@ -245,8 +245,12 @@ final class SettingsPage extends WC_Settings_Page {
 		\WC_Admin_Settings::output_fields( $this->content_settings( $settings ) );
 		echo '</table>';
 
-		if ( $this->section_has_saveable_settings( $active ) && self::SECTION_DISPLAY !== $active ) {
+		if ( $this->section_has_saveable_settings( $active ) && ! $this->section_uses_sticky_save( $active ) && self::SECTION_DISPLAY !== $active ) {
 			$this->render_section_save_actions();
+		}
+
+		if ( $this->section_uses_sticky_save( $active ) && self::SECTION_GEO_DETECTION !== $active ) {
+			$this->render_sticky_save_actions( $active );
 		}
 
 		if ( self::SECTION_DISPLAY === $active ) {
@@ -275,13 +279,13 @@ final class SettingsPage extends WC_Settings_Page {
 	 * @param string $section Section slug.
 	 */
 	public function section_has_header_save( string $section ): bool {
-		if ( self::SECTION_GEO_DETECTION === $section ) {
-			return GeoPanelRegistry::is_saveable_panel( GeoPanelRegistry::active_panel() );
+		if ( self::SECTION_GEO_DETECTION === $section || self::SECTION_CHECKOUT === $section ) {
+			return false;
 		}
 
 		return in_array(
 			$section,
-			array( self::SECTION_CURRENCIES, self::SECTION_EXCHANGE_RATES, self::SECTION_CHECKOUT ),
+			array( self::SECTION_CURRENCIES, self::SECTION_EXCHANGE_RATES ),
 			true
 		);
 	}
@@ -567,7 +571,7 @@ final class SettingsPage extends WC_Settings_Page {
 			),
 			array(
 				'type' => 'title',
-				'name' => __( 'Geo Detection', 'universal-multicurrency' ),
+				'name' => __( 'Visitor Location', 'universal-multicurrency' ),
 				'id'   => 'umc_geo_title',
 			),
 			array(
@@ -784,13 +788,40 @@ final class SettingsPage extends WC_Settings_Page {
 	 */
 	private function render_display_sticky_actions(): void {
 		?>
-		<div class="umc-display-actions submit" data-umc-display-actions>
+		<div class="umc-display-actions submit" data-umc-display-actions data-umc-sticky-save data-umc-sticky-scope="display">
 			<span class="umc-display-actions__status" data-umc-unsaved-indicator hidden><?php esc_html_e( 'Unsaved changes', 'universal-multicurrency' ); ?></span>
 			<button type="submit" name="save" value="<?php echo esc_attr__( 'Save changes', 'universal-multicurrency' ); ?>" class="button button-primary umc-display-actions__save">
 				<?php esc_html_e( 'Save changes', 'universal-multicurrency' ); ?>
 			</button>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Renders the shared sticky save bar for saveable sections.
+	 *
+	 * @param string $section Active section slug.
+	 */
+	private function render_sticky_save_actions( string $section ): void {
+		$renderer = new AdminComponentRenderer();
+		echo $renderer->sticky_save_bar( $section ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in renderer.
+	}
+
+	/**
+	 * Returns whether a section uses the shared sticky save bar outside geo hub markup.
+	 *
+	 * @param string $section Section slug.
+	 */
+	private function section_uses_sticky_save( string $section ): bool {
+		if ( self::SECTION_CHECKOUT === $section ) {
+			return true;
+		}
+
+		if ( self::SECTION_GEO_DETECTION === $section ) {
+			return GeoPanelRegistry::is_saveable_panel( GeoPanelRegistry::active_panel() );
+		}
+
+		return false;
 	}
 
 	/**

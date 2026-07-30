@@ -84,7 +84,7 @@ final class AdminPageShellViewModelFactory {
 			case SettingsPage::SECTION_EXCHANGE_RATES:
 				return __( 'Configure providers, update schedules, and effective rates.', 'universal-multicurrency' );
 			case SettingsPage::SECTION_GEO_DETECTION:
-				return __( 'Suggest a currency based on the visitor\'s country while respecting manual selection.', 'universal-multicurrency' );
+				return __( 'Determine a visitor\'s country and automatically suggest the appropriate currency.', 'universal-multicurrency' );
 			case SettingsPage::SECTION_DISPLAY:
 				return __( 'Configure how prices and currency information are displayed across your store.', 'universal-multicurrency' );
 			case SettingsPage::SECTION_CHECKOUT:
