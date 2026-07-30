@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace UMC\Diagnostics;
 
+use UMC\Geo\GeoDetectionSettings;
 use UMC\Rates\ExchangeRateStore;
 use UMC\Rates\RateStatusEvaluator;
 use UMC\Rates\RateUpdateState;
@@ -29,6 +30,8 @@ final class SiteHealthReport {
 	public const TEST_ENVIRONMENT = 'umc_environment';
 
 	public const TEST_RATE_HEALTH = 'umc_rate_health';
+
+	public const TEST_GEO_CONFIGURATION = 'umc_geo_configuration';
 
 	/**
 	 * Tested-up-to ceilings for PHP and WordPress, mirroring
@@ -115,17 +118,21 @@ final class SiteHealthReport {
 			return $tests;
 		}
 
-		$tests['direct'][ self::TEST_CONFLICTS ]   = array(
+		$tests['direct'][ self::TEST_CONFLICTS ]         = array(
 			'label' => \__( 'Currency switcher conflicts', 'universal-multicurrency' ),
 			'test'  => array( $this, 'run_conflict_test' ),
 		);
-		$tests['direct'][ self::TEST_ENVIRONMENT ] = array(
+		$tests['direct'][ self::TEST_ENVIRONMENT ]       = array(
 			'label' => \__( 'Universal Multicurrency environment', 'universal-multicurrency' ),
 			'test'  => array( $this, 'run_environment_test' ),
 		);
-		$tests['direct'][ self::TEST_RATE_HEALTH ] = array(
+		$tests['direct'][ self::TEST_RATE_HEALTH ]       = array(
 			'label' => \__( 'Exchange rate provider health', 'universal-multicurrency' ),
 			'test'  => array( $this, 'run_rate_health_test' ),
+		);
+		$tests['direct'][ self::TEST_GEO_CONFIGURATION ] = array(
+			'label' => \__( 'Geo Detection configuration', 'universal-multicurrency' ),
+			'test'  => array( $this, 'run_geo_configuration_test' ),
 		);
 
 		return $tests;
@@ -268,6 +275,58 @@ final class SiteHealthReport {
 			\__( 'Exchange rate provider health looks good', 'universal-multicurrency' ),
 			'good',
 			'<p>' . \esc_html__( 'No stale or failed automatic rates were recorded in the last-known operational state.', 'universal-multicurrency' ) . '</p>'
+		);
+	}
+
+	/**
+	 * Executes the Geo Detection configuration Site Health test.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function run_geo_configuration_test(): array {
+		if ( null === $this->settings ) {
+			return self::format_test_result(
+				self::TEST_GEO_CONFIGURATION,
+				\__( 'Geo Detection status unavailable', 'universal-multicurrency' ),
+				'good',
+				'<p>' . \esc_html__( 'Geo diagnostics were not initialized.', 'universal-multicurrency' ) . '</p>'
+			);
+		}
+
+		$geo = GeoDetectionSettings::from_array( $this->settings->get()['geo'] ?? array() );
+
+		if ( ! $geo->is_enabled() ) {
+			return self::format_test_result(
+				self::TEST_GEO_CONFIGURATION,
+				\__( 'Geo Detection is disabled', 'universal-multicurrency' ),
+				'good',
+				'<p>' . \esc_html__( 'Automatic country-based currency routing is not active.', 'universal-multicurrency' ) . '</p>'
+			);
+		}
+
+		if ( array() === $geo->rules() ) {
+			return self::format_test_result(
+				self::TEST_GEO_CONFIGURATION,
+				\__( 'Geo Detection is enabled without routing rules', 'universal-multicurrency' ),
+				'recommended',
+				'<p>' . \esc_html__( 'Add geographic routing rules or disable Geo Detection.', 'universal-multicurrency' ) . '</p>'
+			);
+		}
+
+		if ( ! $geo->allow_wc_geolocation_fallback() && ! function_exists( 'universal_geo_get_country_code' ) ) {
+			return self::format_test_result(
+				self::TEST_GEO_CONFIGURATION,
+				\__( 'Geo Detection has no country provider', 'universal-multicurrency' ),
+				'critical',
+				'<p>' . \esc_html__( 'Universal Geo Context is unavailable and WooCommerce geolocation fallback is disabled.', 'universal-multicurrency' ) . '</p>'
+			);
+		}
+
+		return self::format_test_result(
+			self::TEST_GEO_CONFIGURATION,
+			\__( 'Geo Detection configuration looks good', 'universal-multicurrency' ),
+			'good',
+			'<p>' . \esc_html__( 'Geo Detection is enabled with routing rules configured.', 'universal-multicurrency' ) . '</p>'
 		);
 	}
 
