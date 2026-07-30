@@ -35,6 +35,7 @@ use UMC\Display\SwitcherAssets;
 use UMC\Display\SwitcherRenderer;
 use UMC\Display\SwitcherSettingsRepository;
 use UMC\Display\SwitcherShortcode;
+use UMC\Display\SwitcherViewModelFactory;
 use UMC\Geo\CountryContextResolver;
 use UMC\Geo\GeoCurrencyDecisionService;
 use UMC\Geo\GeoDetectionApplicator;
