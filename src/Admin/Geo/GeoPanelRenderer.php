@@ -50,6 +50,11 @@ final class GeoPanelRenderer {
 		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in AdminComponentRenderer.
 		$geo = $this->ui->geo_settings();
 
+		echo $this->components->feature_section_open(
+			__( 'At a glance', 'universal-multicurrency' ),
+			__( 'Key metrics from your current Visitor Location configuration.', 'universal-multicurrency' )
+		);
+
 		echo $this->components->statistics_grid_open(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo $this->components->statistics_card(
 			__( 'Detection status', 'universal-multicurrency' ),
@@ -93,6 +98,13 @@ final class GeoPanelRenderer {
 		);
 		echo $this->components->settings_card_close(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
+		echo $this->components->feature_section_close();
+
+		echo $this->components->feature_section_open(
+			__( 'Quick actions', 'universal-multicurrency' ),
+			''
+		);
+
 		echo $this->components->quick_actions_panel(
 			__( 'Quick actions', 'universal-multicurrency' ),
 			array(
@@ -119,10 +131,19 @@ final class GeoPanelRenderer {
 			)
 		); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
+		echo $this->components->feature_section_close();
+
+		echo $this->components->feature_section_open(
+			__( 'Guidance', 'universal-multicurrency' ),
+			''
+		);
+
 		echo $this->components->info_panel(
 			'',
 			__( 'Manual currency selection always takes precedence over automatic detection.', 'universal-multicurrency' )
 		); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
+		echo $this->components->feature_section_close();
 	}
 
 	/**
@@ -136,6 +157,12 @@ final class GeoPanelRenderer {
 			admin_url( 'admin-post.php?action=umc_geo_add_recommended_rules' ),
 			'umc_geo_add_recommended_rules'
 		);
+
+		echo $this->components->feature_section_open(
+			__( 'Routing rules', 'universal-multicurrency' ),
+			__( 'Define how visitor country maps to currency. First match wins.', 'universal-multicurrency' )
+		);
+
 		echo $this->components->settings_card_open(
 			__( 'Geographic routing', 'universal-multicurrency' ),
 			__( 'Rules are evaluated from top to bottom. The first matching rule determines the visitor\'s currency.', 'universal-multicurrency' )
@@ -166,6 +193,8 @@ final class GeoPanelRenderer {
 				esc_html__( 'Add recommended European rules', 'universal-multicurrency' )
 			)
 		);
+
+		echo $this->components->feature_section_close();
 	}
 
 	/**
@@ -176,6 +205,12 @@ final class GeoPanelRenderer {
 		$selectable  = $this->ui->selectable_codes();
 		$display_url = admin_url( 'admin.php?page=wc-settings&tab=umc&section=display' );
 		$compat_url  = admin_url( 'admin.php?page=wc-settings&tab=umc&section=compatibility' );
+
+		echo $this->components->feature_section_open(
+			__( 'Currency selection', 'universal-multicurrency' ),
+			__( 'Control when automatic currency detection runs for each visitor.', 'universal-multicurrency' )
+		);
+
 		echo $this->components->settings_card_open(
 			__( 'Automatic currency selection', 'universal-multicurrency' ),
 			__( 'Enable automatic currency detection and choose when it should apply.', 'universal-multicurrency' )
@@ -220,6 +255,13 @@ final class GeoPanelRenderer {
 			)
 		);
 
+		echo $this->components->feature_section_close();
+
+		echo $this->components->feature_section_open(
+			__( 'Provider configuration', 'universal-multicurrency' ),
+			__( 'Review detection providers and fallback behaviour.', 'universal-multicurrency' )
+		);
+
 		echo $this->components->settings_card_open(
 			__( 'Detection provider', 'universal-multicurrency' ),
 			__( 'Review available location providers and configure fallback behavior.', 'universal-multicurrency' )
@@ -233,6 +275,8 @@ final class GeoPanelRenderer {
 			array( 'id' => 'umc_geo_wc_fallback' )
 		);
 		echo $this->components->settings_card_close();
+
+		echo $this->components->feature_section_close();
 
 		$fallback_select = sprintf(
 			'<select name="umc_geo[fallback_currency]" id="umc_geo_fallback_currency"><option value="">%s</option>',
@@ -254,8 +298,12 @@ final class GeoPanelRenderer {
 		}
 		$fallback_select .= '</select>';
 
+		echo $this->components->feature_section_open(
+			__( 'Applies when country context is missing or does not match earlier rules.', 'universal-multicurrency' )
+		);
+
 		echo $this->components->settings_card_open(
-			__( 'Technical fallback', 'universal-multicurrency' ),
+			__( 'Fallback currency', 'universal-multicurrency' ),
 			__( 'Other countries handles valid countries unmatched by earlier rules. The technical fallback handles missing or invalid country context.', 'universal-multicurrency' )
 		);
 		echo $this->components->select_row(
@@ -267,8 +315,15 @@ final class GeoPanelRenderer {
 		);
 		echo $this->components->settings_card_close();
 
-		echo $this->components->settings_card_open(
+		echo $this->components->feature_section_close();
+
+		echo $this->components->feature_section_open(
 			__( 'Checkout behaviour', 'universal-multicurrency' ),
+			__( 'How Visitor Location interacts with checkout once a session begins.', 'universal-multicurrency' )
+		);
+
+		echo $this->components->settings_card_open(
+			__( 'Checkout locking', 'universal-multicurrency' ),
 			__( 'Once checkout has started, currency is locked to keep totals consistent throughout the order.', 'universal-multicurrency' )
 		);
 		echo $this->components->toggle_row( 'umc_geo[checkout][lock_on_entry]', $geo->lock_on_entry(), __( 'Lock currency when checkout begins', 'universal-multicurrency' ) );
@@ -290,6 +345,13 @@ final class GeoPanelRenderer {
 		);
 		echo $this->components->settings_card_close();
 
+		echo $this->components->feature_section_close();
+
+		echo $this->components->feature_section_open(
+			__( 'Compatibility', 'universal-multicurrency' ),
+			__( 'How Visitor Location interacts with caching and proxy setups.', 'universal-multicurrency' )
+		);
+
 		echo $this->components->info_panel(
 			__( 'Cache and proxy compatibility', 'universal-multicurrency' ),
 			__( 'Geo Detection reuses the existing currency cookie and WooCommerce session. Full-page caching may affect first-page currency display until the session is established.', 'universal-multicurrency' ),
@@ -299,6 +361,8 @@ final class GeoPanelRenderer {
 				esc_html__( 'Review Compatibility diagnostics', 'universal-multicurrency' )
 			)
 		);
+
+		echo $this->components->feature_section_close();
 	}
 
 	/**
@@ -311,6 +375,11 @@ final class GeoPanelRenderer {
 		$result    = GeoSandboxController::last_result_for_current_user();
 		$selected  = is_array( $result ) ? (string) ( $result['geo']['country'] ?? 'DE' ) : 'DE';
 		$form_id   = 'umc-geo-sandbox-form';
+
+		echo $this->components->feature_section_open(
+			__( 'Simulation', 'universal-multicurrency' ),
+			__( 'Test routing safely without affecting live shoppers.', 'universal-multicurrency' )
+		);
 
 		echo $this->components->settings_card_open(
 			__( 'Simulation', 'universal-multicurrency' ),
@@ -367,7 +436,14 @@ final class GeoPanelRenderer {
 		<?php
 		echo $this->components->settings_card_close();
 
+		echo $this->components->feature_section_close();
+
 		if ( is_array( $result ) ) {
+			echo $this->components->feature_section_open(
+				__( 'Results', 'universal-multicurrency' ),
+				__( 'Output from your most recent sandbox run.', 'universal-multicurrency' )
+			);
+
 			echo $this->components->settings_card_open(
 				__( 'Last sandbox result', 'universal-multicurrency' ),
 				__( 'Most recent simulation output for your account.', 'universal-multicurrency' )
@@ -376,6 +452,8 @@ final class GeoPanelRenderer {
 			<pre class="umc-geo-sandbox-output"><?php echo esc_html( wp_json_encode( $result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE ) ); ?></pre>
 			<?php
 			echo $this->components->settings_card_close();
+
+			echo $this->components->feature_section_close();
 		}
 	}
 
@@ -383,6 +461,11 @@ final class GeoPanelRenderer {
 	 * Renders the Providers panel (read-only v0.12).
 	 */
 	public function render_providers(): void {
+		echo $this->components->feature_section_open(
+			__( 'Provider chain', 'universal-multicurrency' ),
+			__( 'Location providers used to resolve visitor country.', 'universal-multicurrency' )
+		);
+
 		echo $this->components->settings_card_open(
 			__( 'Provider chain', 'universal-multicurrency' ),
 			__( 'Provider chain configuration is read-only in this release. Universal Geo Context is preferred when available; WooCommerce billing/shipping and geolocation provide fallback signals.', 'universal-multicurrency' )
@@ -390,22 +473,38 @@ final class GeoPanelRenderer {
 		$this->ui->render_provider_cards( $this->components );
 		echo $this->components->settings_card_close();
 
+		echo $this->components->feature_section_close();
+
+		echo $this->components->feature_section_open(
+			__( 'Roadmap', 'universal-multicurrency' ),
+			''
+		);
+
 		echo $this->components->empty_state(
 			'dashicons-admin-plugins',
 			__( 'Advanced provider controls coming soon', 'universal-multicurrency' ),
 			__( 'Editable provider priorities, enable/disable controls, and health metrics are planned for a future release.', 'universal-multicurrency' )
 		);
+
+		echo $this->components->feature_section_close();
 	}
 
 	/**
 	 * Renders the Trusted Proxies panel (UGC boundary).
 	 */
 	public function render_proxies(): void {
+		echo $this->components->feature_section_open(
+			__( 'Trusted proxies', 'universal-multicurrency' ),
+			__( 'Proxy and CDN configuration for accurate country detection.', 'universal-multicurrency' )
+		);
+
 		echo $this->components->empty_state(
 			'dashicons-shield',
 			__( 'Managed by Universal Geo Context', 'universal-multicurrency' ),
 			__( 'Universal Multicurrency does not manage trusted proxy configuration. When Universal Geo Context is installed, it handles proxy and CDN country signals.', 'universal-multicurrency' )
 		);
+
+		echo $this->components->feature_section_close();
 	}
 
 	/**
@@ -413,6 +512,11 @@ final class GeoPanelRenderer {
 	 */
 	public function render_diagnostics(): void {
 		$geo = $this->ui->geo_settings();
+
+		echo $this->components->feature_section_open(
+			__( 'Health signals', 'universal-multicurrency' ),
+			__( 'Quick health overview for Visitor Location configuration.', 'universal-multicurrency' )
+		);
 
 		echo $this->components->settings_card_open(
 			__( 'Health overview', 'universal-multicurrency' ),
@@ -437,6 +541,13 @@ final class GeoPanelRenderer {
 		);
 		echo $this->components->settings_card_close();
 
+		echo $this->components->feature_section_close();
+
+		echo $this->components->feature_section_open(
+			__( 'Tools', 'universal-multicurrency' ),
+			__( 'Related diagnostics for deeper inspection.', 'universal-multicurrency' )
+		);
+
 		echo $this->components->info_panel(
 			__( 'Diagnostics tools', 'universal-multicurrency' ),
 			__( 'Open related diagnostics to inspect Geo Detection configuration alongside other store health checks.', 'universal-multicurrency' ),
@@ -448,7 +559,8 @@ final class GeoPanelRenderer {
 				esc_html__( 'Open Compatibility diagnostics', 'universal-multicurrency' )
 			)
 		);
-		// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+
+		echo $this->components->feature_section_close();
 	}
 
 	/**

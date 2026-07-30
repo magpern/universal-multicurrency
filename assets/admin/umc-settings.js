@@ -557,17 +557,18 @@
 
 			var initialSnapshot = serializeScope();
 
-			function setBarVisible( visible ) {
-				$bar.prop( 'hidden', ! visible );
-				$bar.find( '[data-umc-unsaved-indicator]' ).prop( 'hidden', ! visible );
+			function setDirtyState( dirty ) {
+				$bar.prop( 'hidden', false );
+				$bar.find( '[data-umc-unsaved-indicator]' ).prop( 'hidden', ! dirty );
+				$bar.find( '[data-umc-sticky-discard]' ).prop( 'hidden', ! dirty );
+				$bar.find( '[data-umc-sticky-saved]' ).prop( 'hidden', true );
 			}
 
 			function checkDirty() {
-				var dirty = serializeScope() !== initialSnapshot;
-				setBarVisible( dirty );
+				setDirtyState( serializeScope() !== initialSnapshot );
 			}
 
-			setBarVisible( false );
+			setDirtyState( false );
 
 			$scope.on( 'change input', 'input, select, textarea', checkDirty );
 

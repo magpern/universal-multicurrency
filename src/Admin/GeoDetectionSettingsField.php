@@ -13,7 +13,7 @@ use UMC\Admin\Geo\GeoDetectionUi;
 use UMC\Admin\Geo\GeoPanelNavigation;
 use UMC\Admin\Geo\GeoPanelRegistry;
 use UMC\Admin\Geo\GeoPanelRenderer;
-use UMC\Admin\Geo\GeoSandboxController;
+use UMC\Admin\GeoSandboxController;
 use UMC\Currency;
 use UMC\CurrencyRegistry;
 use UMC\Geo\GeoRegionRegistry;
@@ -110,7 +110,7 @@ final class GeoDetectionSettingsField {
 				<div class="umc-geo-hub" data-umc-geo-root data-umc-sticky-root="visitor-location">
 					<div aria-live="polite" class="screen-reader-text" data-umc-geo-live></div>
 					<?php $this->navigation->render( $active ); ?>
-					<div class="umc-geo-panel umc-geo-panel-stack" data-umc-geo-panel="<?php echo esc_attr( $active ); ?>">
+					<div class="umc-geo-panel umc-geo-panel-stack <?php echo esc_attr( GeoPanelRegistry::PANEL_OVERVIEW === $active ? 'umc-ui-layout--wide' : 'umc-ui-layout--readable' ); ?>" data-umc-geo-panel="<?php echo esc_attr( $active ); ?>">
 						<?php
 						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in AdminComponentRenderer.
 						echo $this->components->page_intro(

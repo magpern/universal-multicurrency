@@ -29,6 +29,18 @@ final class AdminComponentRendererTest extends TestCase {
 		$this->ui = new AdminComponentRenderer();
 	}
 
+	public function test_feature_section_renders_landmark_structure(): void {
+		$html = $this->ui->feature_section_open( 'Currency selection', 'Section description' )
+			. '<div>card</div>'
+			. $this->ui->feature_section_close();
+
+		$this->assertStringContainsString( 'umc-ui-feature-section', $html );
+		$this->assertStringContainsString( 'umc-ui-feature-section__title', $html );
+		$this->assertStringContainsString( 'umc-ui-feature-section__content', $html );
+		$this->assertStringContainsString( 'Currency selection', $html );
+		$this->assertStringContainsString( 'Section description', $html );
+	}
+
 	public function test_settings_card_anatomy_includes_title_divider_and_body(): void {
 		$html = $this->ui->settings_card_open( 'Card title', 'Card description' ) . 'controls' . $this->ui->settings_card_close();
 

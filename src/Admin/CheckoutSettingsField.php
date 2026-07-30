@@ -73,12 +73,17 @@ final class CheckoutSettingsField {
 
 		?>
 		<tr valign="top">
-			<td class="forminp umc-settings umc-checkout-settings" colspan="2" data-umc-sticky-root="checkout">
+			<td class="forminp umc-settings umc-checkout-settings umc-ui-layout--readable" colspan="2" data-umc-sticky-root="checkout">
 				<?php
 				// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in AdminComponentRenderer.
 				echo $this->controls->page_intro(
 					__( 'Checkout currency', 'universal-multicurrency' ),
 					__( 'Choose which currency customers use during checkout.', 'universal-multicurrency' )
+				);
+
+				echo $this->controls->feature_section_open(
+					__( 'Checkout configuration', 'universal-multicurrency' ),
+					__( 'Define checkout currency behaviour and optional customer messaging.', 'universal-multicurrency' )
 				);
 
 				echo $this->controls->settings_card_open(
@@ -122,6 +127,7 @@ final class CheckoutSettingsField {
 					array( 'id' => 'umc_checkout_show_notice' )
 				);
 				echo $this->controls->settings_card_close();
+				echo $this->controls->feature_section_close();
 				// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 				?>
 			</td>

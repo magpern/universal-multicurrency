@@ -49,6 +49,31 @@ final class AdminComponentRenderer {
 	}
 
 	/**
+	 * Opens a feature section landmark for grouping related cards.
+	 *
+	 * @param string $title       Section landmark title.
+	 * @param string $description Optional supporting description.
+	 */
+	public function feature_section_open( string $title, string $description = '' ): string {
+		$description_html = '' !== $description
+			? sprintf( '<p class="umc-ui-feature-section__description">%s</p>', esc_html( $description ) )
+			: '';
+
+		return sprintf(
+			'<section class="umc-ui-feature-section"><header class="umc-ui-feature-section__header"><h4 class="umc-ui-feature-section__title">%1$s</h4>%2$s</header><div class="umc-ui-feature-section__content">',
+			esc_html( $title ),
+			$description_html
+		);
+	}
+
+	/**
+	 * Closes a feature section landmark.
+	 */
+	public function feature_section_close(): string {
+		return '</div></section>';
+	}
+
+	/**
 	 * Opens a statistics card grid.
 	 */
 	public function statistics_grid_open(): string {
@@ -463,7 +488,7 @@ final class AdminComponentRenderer {
 	 */
 	public function sticky_save_bar( string $scope = 'default' ): string {
 		return sprintf(
-			'<div class="umc-ui-sticky-save umc-display-actions submit" data-umc-sticky-save data-umc-sticky-scope="%1$s" hidden><span class="umc-ui-sticky-save__status" data-umc-unsaved-indicator hidden>%2$s</span><button type="button" class="button button-link umc-ui-sticky-save__discard" data-umc-sticky-discard>%3$s</button><button type="submit" name="save" value="%4$s" class="button button-primary umc-ui-sticky-save__save umc-display-actions__save">%4$s</button><span class="umc-ui-sticky-save__saved" data-umc-sticky-saved hidden>%5$s</span></div>',
+			'<div class="umc-ui-sticky-save umc-display-actions submit" data-umc-sticky-save data-umc-sticky-scope="%1$s"><span class="umc-ui-sticky-save__status" data-umc-unsaved-indicator hidden>%2$s</span><button type="button" class="button button-link umc-ui-sticky-save__discard" data-umc-sticky-discard hidden>%3$s</button><button type="submit" name="save" value="%4$s" class="button button-primary umc-ui-sticky-save__save umc-display-actions__save">%4$s</button><span class="umc-ui-sticky-save__saved" data-umc-sticky-saved hidden>%5$s</span></div>',
 			esc_attr( $scope ),
 			esc_html__( 'Unsaved changes', 'universal-multicurrency' ),
 			esc_html__( 'Discard', 'universal-multicurrency' ),
