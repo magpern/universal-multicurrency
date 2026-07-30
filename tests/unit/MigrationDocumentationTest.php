@@ -100,7 +100,8 @@ final class MigrationDocumentationTest extends TestCase {
 	public function test_readme_txt_exists_and_documents_manual_migration(): void {
 		$readme = $this->read( 'readme.txt' );
 
-		$this->assertStringContainsString( 'Stable tag: 0.11.0', $readme );
+		$this->assertStringContainsString( 'Stable tag: 0.12.0', $readme );
+		$this->assertStringContainsString( '= 0.12.0 =', $readme );
 		$this->assertStringContainsString( '= 0.11.0 =', $readme );
 		$this->assertStringContainsString( '= 0.9.1 =', $readme );
 		$this->assertStringContainsString( '= 0.9.0 =', $readme );

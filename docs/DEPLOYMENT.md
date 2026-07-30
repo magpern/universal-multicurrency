@@ -26,7 +26,7 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Produces `dist/universal-multicurrency-0.11.0.zip`. The archive includes `readme.txt`,
+Produces `dist/universal-multicurrency-0.12.0.zip`. The archive includes `readme.txt`,
 production `src/`, `vendor/`, and `languages/universal-multicurrency.pot`.
 
 Performance subset:
@@ -36,7 +36,7 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release:** **v0.11.0** on `feature/m12-geo-detection`. Git tag and
+**Current release:** **v0.12.0** on `feature/m13-geo-admin-hub`. Git tag and
 GitHub release follow CI verification — do not create without explicit approval.
 
 ---
@@ -993,7 +993,31 @@ unaffected.
 
 ---
 
-## v0.11.0 — Geo Detection (current)
+---
+
+## v0.12.0 — Geo Detection admin hub (current)
+
+### Summary
+
+Ships Milestone 13 Geo admin hub under version **0.12.0**. Settings schema
+remains **v5** — no migration. The monolithic Geo Detection page becomes a
+panel-based hub with GeoContext sandbox simulation.
+
+### Deployment sequence
+
+1. Run `composer release-audit` on the **0.12.0** tree.
+2. Build `dist/universal-multicurrency-0.12.0.zip` with `composer install --no-dev`
+   + `bin/build-zip.sh`.
+3. Deploy over **0.11.x** in place. No settings migration step.
+
+### Rollback
+
+Downgrade to the **0.11.x** zip if needed. Geo hub UI changes are admin-only;
+storefront geo routing behaviour is unchanged.
+
+---
+
+## v0.11.0 — Geo Detection
 
 ### Summary
 

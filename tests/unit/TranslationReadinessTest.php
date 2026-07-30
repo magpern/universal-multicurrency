@@ -32,6 +32,7 @@ final class TranslationReadinessTest extends TestCase {
 		'assets/admin/umc-settings.js',
 		'assets/admin/umc-compatibility.js',
 		'assets/admin/umc-geo-rules.js',
+		'assets/admin/umc-geo-sandbox.js',
 		'assets/js/switcher.js',
 		'assets/js/checkout-notice.js',
 	);

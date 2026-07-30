@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace UMC\Admin;
 
+use UMC\Admin\Geo\GeoPanelRegistry;
 use UMC\Admin\ViewModel\CurrencyViewModelFactory;
 use UMC\Compatibility\CompatibilityServices;
 use UMC\Currency;
@@ -233,6 +234,13 @@ final class SettingsPage extends WC_Settings_Page {
 			esc_attr( $active )
 		);
 
+		if ( self::SECTION_GEO_DETECTION === $active ) {
+			printf(
+				'<input type="hidden" name="umc_geo_panel" value="%s" />',
+				esc_attr( GeoPanelRegistry::active_panel() )
+			);
+		}
+
 		echo '<table class="form-table umc-form-table">';
 		\WC_Admin_Settings::output_fields( $this->content_settings( $settings ) );
 		echo '</table>';
@@ -254,7 +262,11 @@ final class SettingsPage extends WC_Settings_Page {
 	 * @param string $section Section slug.
 	 */
 	public function section_has_saveable_settings( string $section ): bool {
-		return in_array( $section, array( self::SECTION_CURRENCIES, self::SECTION_EXCHANGE_RATES, self::SECTION_GEO_DETECTION, self::SECTION_DISPLAY, self::SECTION_CHECKOUT ), true );
+		if ( self::SECTION_GEO_DETECTION === $section ) {
+			return GeoPanelRegistry::is_saveable_panel( GeoPanelRegistry::active_panel() );
+		}
+
+		return in_array( $section, array( self::SECTION_CURRENCIES, self::SECTION_EXCHANGE_RATES, self::SECTION_DISPLAY, self::SECTION_CHECKOUT ), true );
 	}
 
 	/**
@@ -263,9 +275,13 @@ final class SettingsPage extends WC_Settings_Page {
 	 * @param string $section Section slug.
 	 */
 	public function section_has_header_save( string $section ): bool {
+		if ( self::SECTION_GEO_DETECTION === $section ) {
+			return GeoPanelRegistry::is_saveable_panel( GeoPanelRegistry::active_panel() );
+		}
+
 		return in_array(
 			$section,
-			array( self::SECTION_CURRENCIES, self::SECTION_EXCHANGE_RATES, self::SECTION_GEO_DETECTION, self::SECTION_CHECKOUT ),
+			array( self::SECTION_CURRENCIES, self::SECTION_EXCHANGE_RATES, self::SECTION_CHECKOUT ),
 			true
 		);
 	}

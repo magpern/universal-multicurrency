@@ -25,7 +25,7 @@ use ZipArchive;
  */
 final class DocumentationSyncTest extends TestCase {
 
-	private const CURRENT_VERSION = '0.11.0';
+	private const CURRENT_VERSION = '0.12.0';
 
 	/**
 	 * Tracked documentation sources that must exist and stay internally consistent.
@@ -55,6 +55,7 @@ final class DocumentationSyncTest extends TestCase {
 		'docs/adr/0012-operational-rate-state-separation.md',
 		'docs/adr/0013-conditional-http-rate-caching.md',
 		'docs/adr/0016-geo-detection-ordered-routing.md',
+		'docs/adr/0017-geocontext-admin-hub.md',
 		'docs/GEO_DETECTION.md',
 	);
 

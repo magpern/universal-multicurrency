@@ -157,6 +157,20 @@
 
     **Prepared as:** **v0.11.0**. See [`docs/GEO_DETECTION.md`](GEO_DETECTION.md).
 
+13. Geo Detection admin hub (**v0.12.0**) — **prepared on `feature/m13-geo-admin-hub`**.
+
+    ### Scope for v0.12.0
+
+    | Work item | Status |
+    |---|---|
+    | Geo hub sub-navigation (`geo_panel`) | **Prepared** |
+    | GeoContext document schema v1 + serializer | **Prepared** |
+    | Geo Sandbox with presets and structured output | **Prepared** |
+    | Panel-aware Detection/Settings saves | **Prepared** |
+    | Providers, Proxies, Diagnostics panel stubs | **Prepared** |
+
+    **Prepared as:** **v0.12.0**. See [`docs/adr/0017-geocontext-admin-hub.md`](adr/0017-geocontext-admin-hub.md).
+
 ## Future milestones — not started, not implemented
 
 None of the following exists in the codebase today:

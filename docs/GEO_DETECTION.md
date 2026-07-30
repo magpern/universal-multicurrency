@@ -72,9 +72,31 @@ currencies only. Currencies are never enabled automatically.
 
 ## Simulation
 
-The **Test detection** panel runs a read-only simulation via
-`admin_post_umc_geo_simulate`. It does not alter session, cookies, cart, or
-active currency.
+The **Geo Sandbox** panel runs a read-only simulation via
+`admin_post_umc_geo_sandbox_run`. It builds a **GeoContext** document, evaluates
+routing, and displays structured JSON output. It does not alter session, cookies,
+cart, or active currency.
+
+Quick-pick presets (SE, NO, DK, FI, DE, GB, US) and recently used countries
+speed up repeated tests. The legacy **Test detection** action redirects to Geo
+Sandbox.
+
+## Admin hub panels
+
+Geo Detection uses secondary navigation (`geo_panel` query argument):
+
+| Panel | Purpose |
+|---|---|
+| Overview | Status, provider summary, quick links |
+| Detection | Geographic routing rules |
+| Geo Sandbox | GeoContext simulation |
+| Providers | Read-only provider status (editable in a future release) |
+| Trusted Proxies | Universal Geo Context boundary |
+| Diagnostics | Geo counts and diagnostic links |
+| Settings | Enable/mode, fallback, checkout behaviour |
+
+Saving from **Detection** updates rules only. Saving from **Settings** updates
+operational options only.
 
 ## Related documentation
 
