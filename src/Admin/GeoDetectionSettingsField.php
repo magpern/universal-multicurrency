@@ -1,6 +1,6 @@
 <?php
 /**
- * Geo Detection settings admin field (hub router).
+ * Visitor Location settings admin field (hub router).
  *
  * @package UniversalMulticurrency
  */
@@ -13,13 +13,14 @@ use UMC\Admin\Geo\GeoDetectionUi;
 use UMC\Admin\Geo\GeoPanelNavigation;
 use UMC\Admin\Geo\GeoPanelRegistry;
 use UMC\Admin\Geo\GeoPanelRenderer;
+use UMC\Admin\Geo\GeoSandboxController;
 use UMC\Currency;
 use UMC\CurrencyRegistry;
 use UMC\Geo\GeoRegionRegistry;
 use UMC\Settings;
 
 /**
- * Renders the Geo Detection hub with secondary panel navigation.
+ * Renders the Visitor Location hub with secondary panel navigation.
  */
 final class GeoDetectionSettingsField {
 
@@ -31,14 +32,7 @@ final class GeoDetectionSettingsField {
 	private Settings $settings;
 
 	/**
-	 * Currency registry.
-	 *
-	 * @var CurrencyRegistry
-	 */
-	private CurrencyRegistry $registry;
-
-	/**
-	 * Shared geo UI helper.
+	 * Shared visitor location UI helper.
 	 *
 	 * @var GeoDetectionUi
 	 */
@@ -59,14 +53,29 @@ final class GeoDetectionSettingsField {
 	private GeoPanelNavigation $navigation;
 
 	/**
-	 * Constructs the geo settings field renderer.
+	 * Shared admin component renderer.
 	 *
-	 * @param Settings                $settings Settings store.
-	 * @param Currency                $base     Base currency.
-	 * @param CurrencyRegistry        $registry Currency registry.
-	 * @param GeoDetectionUi|null     $ui      Shared UI helper.
-	 * @param GeoPanelRenderer|null   $panels Panel renderer.
-	 * @param GeoPanelNavigation|null $navigation Navigation renderer.
+	 * @var AdminComponentRenderer
+	 */
+	private AdminComponentRenderer $components;
+
+	/**
+	 * Currency registry for POST parsing.
+	 *
+	 * @var CurrencyRegistry
+	 */
+	private CurrencyRegistry $registry;
+
+	/**
+	 * Constructs the visitor location settings field renderer.
+	 *
+	 * @param Settings                    $settings   Settings store.
+	 * @param Currency                    $base       Base currency.
+	 * @param CurrencyRegistry            $registry   Currency registry.
+	 * @param GeoDetectionUi|null         $ui         Shared UI helper.
+	 * @param GeoPanelRenderer|null       $panels     Panel renderer.
+	 * @param GeoPanelNavigation|null     $navigation Navigation renderer.
+	 * @param AdminComponentRenderer|null $components Component renderer.
 	 */
 	public function __construct(
 		Settings $settings,
@@ -74,33 +83,64 @@ final class GeoDetectionSettingsField {
 		CurrencyRegistry $registry,
 		?GeoDetectionUi $ui = null,
 		?GeoPanelRenderer $panels = null,
-		?GeoPanelNavigation $navigation = null
+		?GeoPanelNavigation $navigation = null,
+		?AdminComponentRenderer $components = null
 	) {
 		$this->settings   = $settings;
 		$this->registry   = $registry;
+		$this->components = $components ?? new AdminComponentRenderer();
 		$this->ui         = $ui ?? new GeoDetectionUi( $settings, $base, $registry, new GeoRegionRegistry() );
-		$this->panels     = $panels ?? new GeoPanelRenderer( $this->ui );
-		$this->navigation = $navigation ?? new GeoPanelNavigation();
+		$this->panels     = $panels ?? new GeoPanelRenderer( $this->ui, $this->components );
+		$this->navigation = $navigation ?? new GeoPanelNavigation( $this->components );
 	}
 
 	/**
-	 * Renders the Geo Detection hub field.
+	 * Renders the Visitor Location hub field.
 	 */
 	public function render(): void {
 		$active = GeoPanelRegistry::active_panel();
 
+		if ( GeoPanelRegistry::PANEL_SANDBOX === $active ) {
+			add_action( 'admin_footer', array( $this, 'render_sandbox_form_anchor' ), 20 );
+		}
+
 		?>
 		<tr valign="top">
 			<td class="forminp umc-settings umc-geo-settings" colspan="2">
-				<div class="umc-display-card umc-geo-card" data-umc-geo-root>
+				<div class="umc-geo-hub" data-umc-geo-root data-umc-sticky-root="visitor-location">
 					<div aria-live="polite" class="screen-reader-text" data-umc-geo-live></div>
 					<?php $this->navigation->render( $active ); ?>
-					<div class="umc-geo-panel" data-umc-geo-panel="<?php echo esc_attr( $active ); ?>">
-						<?php $this->render_panel( $active ); ?>
+					<div class="umc-geo-panel umc-geo-panel-stack" data-umc-geo-panel="<?php echo esc_attr( $active ); ?>">
+						<?php
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in AdminComponentRenderer.
+						echo $this->components->page_intro(
+							GeoPanelRegistry::intro_title( $active ),
+							GeoPanelRegistry::intro_description( $active )
+						);
+						$this->render_panel( $active );
+						?>
 					</div>
+					<?php if ( GeoPanelRegistry::is_saveable_panel( $active ) ) : ?>
+						<?php
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in renderer.
+						echo $this->components->sticky_save_bar( 'visitor-location' );
+						?>
+					<?php endif; ?>
 				</div>
 			</td>
 		</tr>
+		<?php
+	}
+
+	/**
+	 * Renders the sandbox POST form anchor outside the WooCommerce settings form.
+	 */
+	public function render_sandbox_form_anchor(): void {
+		?>
+		<form id="umc-geo-sandbox-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="umc-geo-sandbox-form-anchor">
+			<input type="hidden" name="action" value="<?php echo esc_attr( GeoSandboxController::ACTION ); ?>" />
+			<?php wp_nonce_field( GeoSandboxController::ACTION ); ?>
+		</form>
 		<?php
 	}
 
