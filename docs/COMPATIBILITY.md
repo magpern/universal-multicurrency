@@ -405,14 +405,27 @@ no-theme) usage are not exercised by any CI leg in this milestone — every
 integration run reports "Running as single site" — and carry no compatibility
 claim in either direction.
 
-## Geo Detection (v0.11.0)
+## Visitor Location (v0.11.0; boundary aligned in M14/v0.13.0)
 
-Geo Detection reuses the existing `umc_currency` session/cookie persistence.
-Full-page caching may affect first-visit currency display when Geo Detection is
-enabled — verify with the Compatibility diagnostics tab. Optional Universal Geo
-Context supplies proxy/CDN country context when installed; UMC remains functional
-without it. Another multicurrency plugin performing geo-based switching is
-reported through the existing passive conflict detection architecture when
+Visitor Location (Currency Routing + Currency Simulation) reuses the existing
+`umc_currency` session/cookie persistence. Full-page caching may affect
+first-visit currency display when automatic detection is enabled — verify
+with the Compatibility diagnostics tab.
+
+**Universal Geo Context integration:** optional, feature-detected. This
+plugin consumes only Universal Geo Context's public API — the six global
+functions in its `src/api.php` — gated by `function_exists()` and
+`universal_geo_api_version() >= 1`. There is no minimum Universal Geo
+Context *version*: any release exposing public API v1 is compatible. When
+Universal Geo Context is absent, outdated, or reports an incompatible API
+version, this plugin falls back to WooCommerce checkout country /
+geolocation and remains fully functional — see ADR-0018. Provider
+configuration, trusted proxies, and detection diagnostics are managed
+entirely in Universal Geo Context; this plugin's Visitor Location hub
+(Overview, Currency Routing, Currency Simulation) never duplicates them.
+
+Another multicurrency plugin performing geo-based switching is reported
+through the existing passive conflict detection architecture when
 detectable.
 
 ## Changing this document

@@ -294,7 +294,7 @@ final class GeoDetectionUi {
 			),
 			GeoRoutingRule::TYPE_REGION  => sprintf(
 				/* translators: %s: region name */
-				__( 'the visitor is in %s', 'universal-multicurrency' ),
+				__( 'the visitor is in the %s region', 'universal-multicurrency' ),
 				$this->region_options()[ $rule->value() ] ?? $rule->value()
 			),
 			default                      => __( 'no earlier rule matched', 'universal-multicurrency' ),
