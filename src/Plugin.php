@@ -11,6 +11,7 @@ namespace UMC;
 
 use UMC\Admin\AdminAssets;
 use UMC\Admin\CurrencyActionController;
+use UMC\Admin\Geo\GeoLegacyPanelRedirect;
 use UMC\Admin\GeoDetectionSimulationController;
 use UMC\Admin\GeoRecommendedRulesController;
 use UMC\Admin\GeoSandboxController;
@@ -150,6 +151,7 @@ final class Plugin {
 			( new GeoRecommendedRulesController( $settings, $base ) )->register();
 			( new GeoDetectionSimulationController( $settings, $base ) )->register();
 			( new GeoSandboxController( $settings, $base ) )->register();
+			( new GeoLegacyPanelRedirect() )->register();
 		}
 
 		$registry = new CurrencyRegistry( $settings, $base );

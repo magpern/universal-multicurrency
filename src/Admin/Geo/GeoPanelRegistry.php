@@ -33,18 +33,37 @@ final class GeoPanelRegistry {
 	public const QUERY_VAR = 'geo_panel';
 
 	/**
+	 * One-time redirect notice query var (legacy panel id that was requested).
+	 */
+	public const MOVED_QUERY_VAR = 'umc_geo_moved';
+
+	/**
 	 * Panel icon classes keyed by panel id.
 	 *
 	 * @var array<string, string>
 	 */
 	private const PANEL_ICONS = array(
-		self::PANEL_OVERVIEW    => 'dashicons-dashboard',
-		self::PANEL_DETECTION   => 'dashicons-location-alt',
-		self::PANEL_SANDBOX     => 'dashicons-search',
-		self::PANEL_PROVIDERS   => 'dashicons-admin-plugins',
-		self::PANEL_PROXIES     => 'dashicons-shield',
-		self::PANEL_DIAGNOSTICS => 'dashicons-heart',
-		self::PANEL_SETTINGS    => 'dashicons-admin-generic',
+		self::PANEL_OVERVIEW  => 'dashicons-dashboard',
+		self::PANEL_DETECTION => 'dashicons-randomize',
+		self::PANEL_SANDBOX   => 'dashicons-search',
+	);
+
+	/**
+	 * Retired panel ids mapped to the panel that now covers their content.
+	 *
+	 * Universal Geo Context now owns provider configuration, trusted proxies,
+	 * and geo diagnostics; Currency Routing absorbed the standalone Settings
+	 * panel. Kept so bookmarked and previously-shared admin URLs redirect
+	 * instead of silently landing on the Overview with no explanation — see
+	 * {@see \UMC\Admin\Geo\GeoLegacyPanelRedirect} and ADR-0018.
+	 *
+	 * @var array<string, string>
+	 */
+	private const LEGACY_PANELS = array(
+		self::PANEL_SETTINGS    => self::PANEL_DETECTION,
+		self::PANEL_PROVIDERS   => self::PANEL_OVERVIEW,
+		self::PANEL_PROXIES     => self::PANEL_OVERVIEW,
+		self::PANEL_DIAGNOSTICS => self::PANEL_OVERVIEW,
 	);
 
 	/**
@@ -57,19 +76,51 @@ final class GeoPanelRegistry {
 			self::PANEL_OVERVIEW,
 			self::PANEL_DETECTION,
 			self::PANEL_SANDBOX,
-			self::PANEL_PROVIDERS,
-			self::PANEL_PROXIES,
-			self::PANEL_DIAGNOSTICS,
-			self::PANEL_SETTINGS,
 		);
+	}
+
+	/**
+	 * Retired panel ids that now redirect elsewhere.
+	 *
+	 * @return list<string>
+	 */
+	public static function legacy_panel_ids(): array {
+		return array_keys( self::LEGACY_PANELS );
+	}
+
+	/**
+	 * Whether a panel id is retired.
+	 *
+	 * @param string $panel Panel id.
+	 */
+	public static function is_legacy_panel( string $panel ): bool {
+		return array_key_exists( $panel, self::LEGACY_PANELS );
+	}
+
+	/**
+	 * The panel a retired panel id now redirects to.
+	 *
+	 * @param string $panel Legacy panel id.
+	 */
+	public static function legacy_redirect_target( string $panel ): string {
+		return self::LEGACY_PANELS[ $panel ] ?? self::PANEL_OVERVIEW;
+	}
+
+	/**
+	 * Returns the raw, sanitized `geo_panel` request value, unconstrained by
+	 * the current panel list — used to detect legacy panel ids before they
+	 * are normalized away by {@see active_panel()}.
+	 */
+	public static function raw_requested_panel(): string {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Display-only routing.
+		return isset( $_GET[ self::QUERY_VAR ] ) ? sanitize_key( wp_unslash( (string) $_GET[ self::QUERY_VAR ] ) ) : '';
 	}
 
 	/**
 	 * Returns the active panel from the current request.
 	 */
 	public static function active_panel(): string {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Display-only routing.
-		$panel = isset( $_GET[ self::QUERY_VAR ] ) ? sanitize_key( wp_unslash( (string) $_GET[ self::QUERY_VAR ] ) ) : '';
+		$panel = self::raw_requested_panel();
 
 		if ( in_array( $panel, self::panel_ids(), true ) ) {
 			return $panel;
@@ -84,7 +135,7 @@ final class GeoPanelRegistry {
 	 * @param string $panel Panel id.
 	 */
 	public static function is_saveable_panel( string $panel ): bool {
-		return in_array( $panel, array( self::PANEL_DETECTION, self::PANEL_SETTINGS ), true );
+		return self::PANEL_DETECTION === $panel;
 	}
 
 	/**
@@ -94,14 +145,9 @@ final class GeoPanelRegistry {
 	 */
 	public static function label( string $panel ): string {
 		return match ( $panel ) {
-			self::PANEL_OVERVIEW    => __( 'Overview', 'universal-multicurrency' ),
-			self::PANEL_DETECTION   => __( 'Detection', 'universal-multicurrency' ),
-			self::PANEL_SANDBOX     => __( 'Geo Sandbox', 'universal-multicurrency' ),
-			self::PANEL_PROVIDERS   => __( 'Providers', 'universal-multicurrency' ),
-			self::PANEL_PROXIES     => __( 'Trusted Proxies', 'universal-multicurrency' ),
-			self::PANEL_DIAGNOSTICS => __( 'Diagnostics', 'universal-multicurrency' ),
-			self::PANEL_SETTINGS    => __( 'Settings', 'universal-multicurrency' ),
-			default                 => __( 'Overview', 'universal-multicurrency' ),
+			self::PANEL_DETECTION => __( 'Currency Routing', 'universal-multicurrency' ),
+			self::PANEL_SANDBOX   => __( 'Currency Simulation', 'universal-multicurrency' ),
+			default               => __( 'Overview', 'universal-multicurrency' ),
 		};
 	}
 
@@ -121,14 +167,10 @@ final class GeoPanelRegistry {
 	 */
 	public static function intro_title( string $panel ): string {
 		return match ( $panel ) {
-			self::PANEL_OVERVIEW    => __( 'Visitor Location overview', 'universal-multicurrency' ),
-			self::PANEL_DETECTION   => __( 'Detection rules', 'universal-multicurrency' ),
-			self::PANEL_SANDBOX     => __( 'Geo Sandbox', 'universal-multicurrency' ),
-			self::PANEL_PROVIDERS   => __( 'Detection providers', 'universal-multicurrency' ),
-			self::PANEL_PROXIES     => __( 'Trusted proxies', 'universal-multicurrency' ),
-			self::PANEL_DIAGNOSTICS => __( 'Visitor Location diagnostics', 'universal-multicurrency' ),
-			self::PANEL_SETTINGS    => __( 'Visitor Location settings', 'universal-multicurrency' ),
-			default                 => __( 'Visitor Location', 'universal-multicurrency' ),
+			self::PANEL_OVERVIEW  => __( 'Visitor Location overview', 'universal-multicurrency' ),
+			self::PANEL_DETECTION => __( 'Currency Routing', 'universal-multicurrency' ),
+			self::PANEL_SANDBOX   => __( 'Currency Simulation', 'universal-multicurrency' ),
+			default               => __( 'Visitor Location', 'universal-multicurrency' ),
 		};
 	}
 
@@ -139,14 +181,10 @@ final class GeoPanelRegistry {
 	 */
 	public static function intro_description( string $panel ): string {
 		return match ( $panel ) {
-			self::PANEL_OVERVIEW    => __( 'Review current visitor location status and jump to common tasks.', 'universal-multicurrency' ),
-			self::PANEL_DETECTION   => __( 'Configure how visitor location is detected before selecting an automatic currency.', 'universal-multicurrency' ),
-			self::PANEL_SANDBOX     => __( 'Reproduce geographic context and inspect routing without changing storefront session, cookies, or active currency.', 'universal-multicurrency' ),
-			self::PANEL_PROVIDERS   => __( 'Review which location providers are available to Universal Multicurrency.', 'universal-multicurrency' ),
-			self::PANEL_PROXIES     => __( 'Trusted proxy configuration is managed by Universal Geo Context when installed.', 'universal-multicurrency' ),
-			self::PANEL_DIAGNOSTICS => __( 'Inspect Geo Detection health signals and open related diagnostics tools.', 'universal-multicurrency' ),
-			self::PANEL_SETTINGS    => __( 'Configure automatic currency selection, providers, fallback behavior, and checkout interactions.', 'universal-multicurrency' ),
-			default                 => __( 'Determine a visitor\'s country and automatically suggest the appropriate currency.', 'universal-multicurrency' ),
+			self::PANEL_OVERVIEW  => __( 'Check whether Universal Geo Context is connected, which country and currency it produces right now, and whether anything needs attention.', 'universal-multicurrency' ),
+			self::PANEL_DETECTION => __( 'Define the ordered policy that turns a detected country into a currency, and how detection behaves at checkout.', 'universal-multicurrency' ),
+			self::PANEL_SANDBOX   => __( 'Simulate the currency decision for a given country and shopper state without affecting live shoppers, your session, or storefront data.', 'universal-multicurrency' ),
+			default               => __( 'Determine a visitor\'s country and automatically suggest the appropriate currency.', 'universal-multicurrency' ),
 		};
 	}
 

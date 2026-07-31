@@ -9,12 +9,14 @@ declare( strict_types=1 );
 
 namespace UMC\Tests\Integration\Admin;
 
+use UMC\Admin\Geo\GeoLegacyPanelRedirect;
 use UMC\Admin\Geo\GeoPanelRegistry;
 use UMC\Admin\SettingsPage;
 use UMC\Currency;
 use UMC\Rates\ExchangeRateStore;
 use UMC\Rates\RateUpdateState;
 use UMC\Settings;
+use UMC\Tests\Support\RedirectCapturedException;
 use WP_UnitTestCase;
 
 /**
@@ -39,10 +41,19 @@ final class VisitorLocationPanelUiTest extends WP_UnitTestCase {
 		remove_all_actions( 'woocommerce_admin_field_umc_compatibility' );
 		remove_all_actions( 'woocommerce_admin_field_umc_currencies' );
 		remove_all_actions( 'woocommerce_admin_field_umc_placeholder' );
+
+		add_filter(
+			'wp_redirect',
+			static function ( $location ): string {
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Test control flow.
+				throw new RedirectCapturedException( (string) $location );
+			}
+		);
 	}
 
 	protected function tearDown(): void {
-		unset( $_GET['section'], $_GET['page'], $_GET['tab'], $_GET[ GeoPanelRegistry::QUERY_VAR ] );
+		remove_all_filters( 'wp_redirect' );
+		unset( $_GET['section'], $_GET['page'], $_GET['tab'], $_GET[ GeoPanelRegistry::QUERY_VAR ], $_GET[ GeoPanelRegistry::MOVED_QUERY_VAR ] );
 		unset( $GLOBALS['hide_save_button'] );
 		$this->page = null;
 
@@ -60,26 +71,28 @@ final class VisitorLocationPanelUiTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'section=geo_detection', $output );
 	}
 
-	public function test_pill_navigation_renders_seven_items_with_icons_and_active_state(): void {
+	public function test_pill_navigation_renders_exactly_three_items_with_icons_and_active_state(): void {
 		global $current_section;
 
 		$current_section = SettingsPage::SECTION_GEO_DETECTION;
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Harness sets display-only query args.
-		$_GET[ GeoPanelRegistry::QUERY_VAR ] = GeoPanelRegistry::PANEL_SETTINGS;
+		$_GET[ GeoPanelRegistry::QUERY_VAR ] = GeoPanelRegistry::PANEL_DETECTION;
 
 		$output = $this->render_geo_field();
 
-		$this->assertSame( 7, preg_match_all( '/class="umc-ui-pill-nav__item(?:\s|")/', $output ) );
+		$this->assertSame( 3, preg_match_all( '/class="umc-ui-pill-nav__item(?:\s|")/', $output ) );
 		$this->assertStringContainsString( 'umc-ui-pill-nav__icon', $output );
 		$this->assertStringContainsString( 'aria-current="page"', $output );
+		$this->assertStringContainsString( 'Currency Routing', $output );
+		$this->assertStringContainsString( 'Currency Simulation', $output );
 	}
 
-	public function test_settings_panel_preserves_field_names_and_hidden_zero_values(): void {
+	public function test_currency_routing_panel_preserves_field_names_and_hidden_zero_values(): void {
 		global $current_section;
 
 		$current_section = SettingsPage::SECTION_GEO_DETECTION;
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Harness sets display-only query args.
-		$_GET[ GeoPanelRegistry::QUERY_VAR ] = GeoPanelRegistry::PANEL_SETTINGS;
+		$_GET[ GeoPanelRegistry::QUERY_VAR ] = GeoPanelRegistry::PANEL_DETECTION;
 
 		$output = $this->render_geo_field();
 
@@ -92,7 +105,7 @@ final class VisitorLocationPanelUiTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'umc-ui-settings-card__divider', $output );
 	}
 
-	public function test_detection_panel_preserves_rules_hooks(): void {
+	public function test_currency_routing_panel_preserves_rules_hooks(): void {
 		global $current_section;
 
 		$current_section = SettingsPage::SECTION_GEO_DETECTION;
@@ -106,12 +119,12 @@ final class VisitorLocationPanelUiTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'id="umc-geo-rule-template"', $output );
 	}
 
-	public function test_saveable_panel_renders_sticky_save_and_not_header_save(): void {
+	public function test_currency_routing_is_the_only_saveable_panel(): void {
 		global $current_section;
 
 		$current_section = SettingsPage::SECTION_GEO_DETECTION;
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Harness sets display-only query args.
-		$_GET[ GeoPanelRegistry::QUERY_VAR ] = GeoPanelRegistry::PANEL_SETTINGS;
+		$_GET[ GeoPanelRegistry::QUERY_VAR ] = GeoPanelRegistry::PANEL_DETECTION;
 
 		$sections = $this->render_shell_sections();
 		$output   = $this->render_geo_field();
@@ -131,8 +144,6 @@ final class VisitorLocationPanelUiTest extends WP_UnitTestCase {
 		$output = $this->render_geo_field();
 
 		$this->assertStringNotContainsString( 'data-umc-sticky-save', $output );
-		$this->assertStringContainsString( 'umc-ui-statistics-grid', $output );
-		$this->assertStringContainsString( 'umc-ui-quick-actions', $output );
 	}
 
 	public function test_sandbox_panel_does_not_nest_form_inside_mainform(): void {
@@ -148,16 +159,60 @@ final class VisitorLocationPanelUiTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'form="umc-geo-sandbox-form"', $output );
 	}
 
-	public function test_stub_panel_renders_empty_state(): void {
+	/**
+	 * @dataProvider legacy_panel_cases
+	 */
+	public function test_legacy_panel_urls_redirect_to_their_new_home( string $legacy_panel, string $expected_target ): void {
+		$_GET['page']                        = 'wc-settings';
+		$_GET['tab']                         = 'umc';
+		$_GET['section']                     = GeoPanelRegistry::SECTION;
+		$_GET[ GeoPanelRegistry::QUERY_VAR ] = $legacy_panel;
+
+		try {
+			( new GeoLegacyPanelRedirect() )->maybe_redirect();
+			$this->fail( 'Expected a redirect for a legacy panel id.' );
+		} catch ( RedirectCapturedException $redirect ) {
+			$this->assertStringContainsString( GeoPanelRegistry::QUERY_VAR . '=' . $expected_target, $redirect->location() );
+			$this->assertSame( $legacy_panel, $redirect->query_arg( GeoPanelRegistry::MOVED_QUERY_VAR ) );
+		}
+	}
+
+	public function test_current_panel_urls_are_never_redirected(): void {
+		$_GET['page']                        = 'wc-settings';
+		$_GET['tab']                         = 'umc';
+		$_GET['section']                     = GeoPanelRegistry::SECTION;
+		$_GET[ GeoPanelRegistry::QUERY_VAR ] = GeoPanelRegistry::PANEL_SANDBOX;
+
+		// No RedirectCapturedException means no redirect occurred.
+		( new GeoLegacyPanelRedirect() )->maybe_redirect();
+
+		$this->assertTrue( true );
+	}
+
+	/**
+	 * @return array<string, array{0: string, 1: string}>
+	 */
+	public static function legacy_panel_cases(): array {
+		return array(
+			'settings'    => array( GeoPanelRegistry::PANEL_SETTINGS, GeoPanelRegistry::PANEL_DETECTION ),
+			'providers'   => array( GeoPanelRegistry::PANEL_PROVIDERS, GeoPanelRegistry::PANEL_OVERVIEW ),
+			'proxies'     => array( GeoPanelRegistry::PANEL_PROXIES, GeoPanelRegistry::PANEL_OVERVIEW ),
+			'diagnostics' => array( GeoPanelRegistry::PANEL_DIAGNOSTICS, GeoPanelRegistry::PANEL_OVERVIEW ),
+		);
+	}
+
+	public function test_moved_notice_renders_after_a_legacy_redirect(): void {
 		global $current_section;
 
 		$current_section = SettingsPage::SECTION_GEO_DETECTION;
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Harness sets display-only query args.
-		$_GET[ GeoPanelRegistry::QUERY_VAR ] = GeoPanelRegistry::PANEL_PROXIES;
+		$_GET[ GeoPanelRegistry::QUERY_VAR ] = GeoPanelRegistry::PANEL_OVERVIEW;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Harness sets display-only query args.
+		$_GET[ GeoPanelRegistry::MOVED_QUERY_VAR ] = GeoPanelRegistry::PANEL_PROVIDERS;
 
 		$output = $this->render_geo_field();
 
-		$this->assertStringContainsString( 'umc-ui-empty-state', $output );
+		$this->assertStringContainsString( 'Provider configuration is managed in Universal Geo Context.', $output );
 	}
 
 	public function test_checkout_section_uses_sticky_save_and_preserves_field_names(): void {

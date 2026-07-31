@@ -148,67 +148,23 @@ final class GeoPanelRenderer {
 	}
 
 	/**
-	 * Renders the Detection (routing rules) panel.
+	 * Renders the Currency Routing panel: automatic detection, the ordered
+	 * routing policy, location sources, fallback currency, and checkout
+	 * behaviour — the single saveable panel in the Visitor Location hub.
 	 */
 	public function render_detection(): void {
 		$geo         = $this->ui->geo_settings();
 		$selectable  = $this->ui->selectable_codes();
 		$countries   = $this->ui->countries();
+		$display_url = admin_url( 'admin.php?page=wc-settings&tab=umc&section=display' );
+		$compat_url  = admin_url( 'admin.php?page=wc-settings&tab=umc&section=compatibility' );
 		$recommended = wp_nonce_url(
 			admin_url( 'admin-post.php?action=umc_geo_add_recommended_rules' ),
 			'umc_geo_add_recommended_rules'
 		);
 
 		echo $this->components->feature_section_open(
-			__( 'Routing rules', 'universal-multicurrency' ),
-			__( 'Define how visitor country maps to currency. First match wins.', 'universal-multicurrency' )
-		);
-
-		echo $this->components->settings_card_open(
-			__( 'Geographic routing', 'universal-multicurrency' ),
-			__( 'Rules are evaluated from top to bottom. The first matching rule determines the visitor\'s currency.', 'universal-multicurrency' )
-		);
-		?>
-		<ol class="umc-geo-rules" data-umc-geo-rules>
-			<?php
-			$index = 0;
-			foreach ( $geo->rules() as $rule ) {
-				++$index;
-				$this->ui->render_rule_row( $rule, $index, count( $geo->rules() ), $countries, $selectable, $geo->rules() );
-			}
-			?>
-		</ol>
-		<p class="umc-geo-rule-actions">
-			<button type="button" class="button" data-umc-geo-add="country"><?php esc_html_e( 'Add country rule', 'universal-multicurrency' ); ?></button>
-			<button type="button" class="button" data-umc-geo-add="region"><?php esc_html_e( 'Add region rule', 'universal-multicurrency' ); ?></button>
-			<button type="button" class="button" data-umc-geo-add="other"><?php esc_html_e( 'Add catch-all rule', 'universal-multicurrency' ); ?></button>
-		</p>
-		<template id="umc-geo-rule-template">
-			<?php $this->ui->render_rule_row_template( $countries, $selectable ); ?>
-		</template>
-		<?php
-		echo $this->components->settings_card_footer(
-			sprintf(
-				'<a class="button button-secondary" href="%s">%s</a>',
-				esc_url( $recommended ),
-				esc_html__( 'Add recommended European rules', 'universal-multicurrency' )
-			)
-		);
-
-		echo $this->components->feature_section_close();
-	}
-
-	/**
-	 * Renders the Settings panel.
-	 */
-	public function render_settings(): void {
-		$geo         = $this->ui->geo_settings();
-		$selectable  = $this->ui->selectable_codes();
-		$display_url = admin_url( 'admin.php?page=wc-settings&tab=umc&section=display' );
-		$compat_url  = admin_url( 'admin.php?page=wc-settings&tab=umc&section=compatibility' );
-
-		echo $this->components->feature_section_open(
-			__( 'Currency selection', 'universal-multicurrency' ),
+			__( 'Automatic currency selection', 'universal-multicurrency' ),
 			__( 'Control when automatic currency detection runs for each visitor.', 'universal-multicurrency' )
 		);
 
@@ -259,23 +215,40 @@ final class GeoPanelRenderer {
 		echo $this->components->feature_section_close();
 
 		echo $this->components->feature_section_open(
-			__( 'Provider configuration', 'universal-multicurrency' ),
-			__( 'Review detection providers and fallback behaviour.', 'universal-multicurrency' )
+			__( 'Routing policy', 'universal-multicurrency' ),
+			__( 'Rules are evaluated in order, top to bottom. The first matching rule decides the currency.', 'universal-multicurrency' )
 		);
 
 		echo $this->components->settings_card_open(
-			__( 'Detection provider', 'universal-multicurrency' ),
-			__( 'Review available location providers and configure fallback behavior.', 'universal-multicurrency' )
+			__( 'Country and region rules', 'universal-multicurrency' ),
+			__( 'Each rule matches a country or region and assigns a currency. Add an "Other countries" rule last to catch every remaining valid country.', 'universal-multicurrency' )
 		);
-		$this->ui->render_provider_cards( $this->components );
-		echo $this->components->toggle_row(
-			'umc_geo[allow_wc_geolocation_fallback]',
-			$geo->allow_wc_geolocation_fallback(),
-			__( 'WooCommerce fallback', 'universal-multicurrency' ),
-			__( 'Use WooCommerce geolocation whenever Universal Geo Context cannot resolve the visitor.', 'universal-multicurrency' ),
-			array( 'id' => 'umc_geo_wc_fallback' )
+		?>
+		<ol class="umc-geo-rules" data-umc-geo-rules>
+			<?php
+			$index = 0;
+			foreach ( $geo->rules() as $rule ) {
+				++$index;
+				$this->ui->render_rule_row( $rule, $index, count( $geo->rules() ), $countries, $selectable, $geo->rules() );
+			}
+			?>
+		</ol>
+		<p class="umc-geo-rule-actions">
+			<button type="button" class="button" data-umc-geo-add="country"><?php esc_html_e( 'Add country rule', 'universal-multicurrency' ); ?></button>
+			<button type="button" class="button" data-umc-geo-add="region"><?php esc_html_e( 'Add region rule', 'universal-multicurrency' ); ?></button>
+			<button type="button" class="button" data-umc-geo-add="other"><?php esc_html_e( 'Add catch-all rule', 'universal-multicurrency' ); ?></button>
+		</p>
+		<template id="umc-geo-rule-template">
+			<?php $this->ui->render_rule_row_template( $countries, $selectable ); ?>
+		</template>
+		<?php
+		echo $this->components->settings_card_footer(
+			sprintf(
+				'<a class="button button-secondary" href="%s">%s</a>',
+				esc_url( $recommended ),
+				esc_html__( 'Add recommended European rules', 'universal-multicurrency' )
+			)
 		);
-		echo $this->components->settings_card_close();
 
 		echo $this->components->feature_section_close();
 
@@ -300,12 +273,13 @@ final class GeoPanelRenderer {
 		$fallback_select .= '</select>';
 
 		echo $this->components->feature_section_open(
-			__( 'Applies when country context is missing or does not match earlier rules.', 'universal-multicurrency' )
+			__( 'Technical fallback', 'universal-multicurrency' ),
+			__( 'Applies when the visitor\'s country is missing or invalid — not when a valid country simply has no matching rule.', 'universal-multicurrency' )
 		);
 
 		echo $this->components->settings_card_open(
 			__( 'Fallback currency', 'universal-multicurrency' ),
-			__( 'Other countries handles valid countries unmatched by earlier rules. The technical fallback handles missing or invalid country context.', 'universal-multicurrency' )
+			__( 'An "Other countries" rule handles valid countries unmatched by earlier rules. The technical fallback below only handles missing or invalid country context.', 'universal-multicurrency' )
 		);
 		echo $this->components->select_row(
 			'umc_geo[fallback_currency]',
@@ -313,6 +287,27 @@ final class GeoPanelRenderer {
 			'',
 			$fallback_select,
 			array( 'id' => 'umc_geo_fallback_currency' )
+		);
+		echo $this->components->settings_card_close();
+
+		echo $this->components->feature_section_close();
+
+		echo $this->components->feature_section_open(
+			__( 'Location sources', 'universal-multicurrency' ),
+			__( 'Universal Geo Context supplies country facts when available. Provider configuration, trusted proxies, and detection diagnostics live there — not in this plugin.', 'universal-multicurrency' )
+		);
+
+		echo $this->components->settings_card_open(
+			__( 'Detection provider', 'universal-multicurrency' ),
+			__( 'Universal Multicurrency never duplicates location detection — it consumes Universal Geo Context and falls back to WooCommerce when it is unavailable.', 'universal-multicurrency' )
+		);
+		$this->ui->render_provider_cards( $this->components );
+		echo $this->components->toggle_row(
+			'umc_geo[allow_wc_geolocation_fallback]',
+			$geo->allow_wc_geolocation_fallback(),
+			__( 'WooCommerce fallback', 'universal-multicurrency' ),
+			__( 'Use WooCommerce geolocation whenever Universal Geo Context cannot resolve the visitor.', 'universal-multicurrency' ),
+			array( 'id' => 'umc_geo_wc_fallback' )
 		);
 		echo $this->components->settings_card_close();
 
@@ -456,112 +451,6 @@ final class GeoPanelRenderer {
 
 			echo $this->components->feature_section_close();
 		}
-	}
-
-	/**
-	 * Renders the Providers panel (read-only v0.12).
-	 */
-	public function render_providers(): void {
-		echo $this->components->feature_section_open(
-			__( 'Provider chain', 'universal-multicurrency' ),
-			__( 'Location providers used to resolve visitor country.', 'universal-multicurrency' )
-		);
-
-		echo $this->components->settings_card_open(
-			__( 'Provider chain', 'universal-multicurrency' ),
-			__( 'Provider chain configuration is read-only in this release. Universal Geo Context is preferred when available; WooCommerce billing/shipping and geolocation provide fallback signals.', 'universal-multicurrency' )
-		);
-		$this->ui->render_provider_cards( $this->components );
-		echo $this->components->settings_card_close();
-
-		echo $this->components->feature_section_close();
-
-		echo $this->components->feature_section_open(
-			__( 'Roadmap', 'universal-multicurrency' ),
-			''
-		);
-
-		echo $this->components->empty_state(
-			'dashicons-admin-plugins',
-			__( 'Advanced provider controls coming soon', 'universal-multicurrency' ),
-			__( 'Editable provider priorities, enable/disable controls, and health metrics are planned for a future release.', 'universal-multicurrency' )
-		);
-
-		echo $this->components->feature_section_close();
-	}
-
-	/**
-	 * Renders the Trusted Proxies panel (UGC boundary).
-	 */
-	public function render_proxies(): void {
-		echo $this->components->feature_section_open(
-			__( 'Trusted proxies', 'universal-multicurrency' ),
-			__( 'Proxy and CDN configuration for accurate country detection.', 'universal-multicurrency' )
-		);
-
-		echo $this->components->empty_state(
-			'dashicons-shield',
-			__( 'Managed by Universal Geo Context', 'universal-multicurrency' ),
-			__( 'Universal Multicurrency does not manage trusted proxy configuration. When Universal Geo Context is installed, it handles proxy and CDN country signals.', 'universal-multicurrency' )
-		);
-
-		echo $this->components->feature_section_close();
-	}
-
-	/**
-	 * Renders the Diagnostics panel (stub v0.12).
-	 */
-	public function render_diagnostics(): void {
-		$geo = $this->ui->geo_settings();
-
-		echo $this->components->feature_section_open(
-			__( 'Health signals', 'universal-multicurrency' ),
-			__( 'Quick health overview for Visitor Location configuration.', 'universal-multicurrency' )
-		);
-
-		echo $this->components->settings_card_open(
-			__( 'Health overview', 'universal-multicurrency' ),
-			__( 'Geo Detection health signals for this store.', 'universal-multicurrency' )
-		);
-		echo $this->components->status_badge(
-			sprintf(
-				/* translators: %d: number of routing rules */
-				__( 'Routing rules: %d', 'universal-multicurrency' ),
-				count( $geo->rules() )
-			),
-			count( $geo->rules() ) > 0 ? 'active' : 'warning'
-		);
-		echo ' ';
-		echo $this->components->status_badge(
-			sprintf(
-				/* translators: %d: region registry version */
-				__( 'Region registry version: %d', 'universal-multicurrency' ),
-				\UMC\Geo\GeoRegionRegistry::VERSION
-			),
-			'available'
-		);
-		echo $this->components->settings_card_close();
-
-		echo $this->components->feature_section_close();
-
-		echo $this->components->feature_section_open(
-			__( 'Tools', 'universal-multicurrency' ),
-			__( 'Related diagnostics for deeper inspection.', 'universal-multicurrency' )
-		);
-
-		echo $this->components->info_panel(
-			__( 'Diagnostics tools', 'universal-multicurrency' ),
-			__( 'Open related diagnostics to inspect Geo Detection configuration alongside other store health checks.', 'universal-multicurrency' ),
-			sprintf(
-				'<a href="%1$s">%2$s</a> · <a href="%3$s">%4$s</a>',
-				esc_url( admin_url( 'site-health.php' ) ),
-				esc_html__( 'Open Site Health', 'universal-multicurrency' ),
-				esc_url( admin_url( 'admin.php?page=wc-settings&tab=umc&section=compatibility' ) ),
-				esc_html__( 'Open Compatibility diagnostics', 'universal-multicurrency' )
-			)
-		);
-
-		echo $this->components->feature_section_close();
 	}
 
 	/**
