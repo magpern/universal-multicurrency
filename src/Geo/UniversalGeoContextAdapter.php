@@ -23,11 +23,12 @@ final class UniversalGeoContextAdapter implements CountryContextProviderInterfac
 
 	/**
 	 * Whether Universal Geo Context API is available.
+	 *
+	 * Delegates to {@see UgcIntegrationStatus}, the single source of truth for
+	 * availability shared with admin and diagnostics surfaces.
 	 */
 	public function is_available(): bool {
-		return function_exists( 'universal_geo_get_country_code' )
-			&& function_exists( 'universal_geo_api_version' )
-			&& universal_geo_api_version() >= 1;
+		return ( new UgcIntegrationStatus() )->is_available();
 	}
 
 	/**

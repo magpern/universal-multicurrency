@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace UMC\Diagnostics;
 
 use UMC\Geo\GeoDetectionSettings;
+use UMC\Geo\UgcIntegrationStatus;
 use UMC\Rates\ExchangeRateStore;
 use UMC\Rates\RateStatusEvaluator;
 use UMC\Rates\RateUpdateState;
@@ -313,12 +314,23 @@ final class SiteHealthReport {
 			);
 		}
 
-		if ( ! $geo->allow_wc_geolocation_fallback() && ! function_exists( 'universal_geo_get_country_code' ) ) {
+		$ugc = new UgcIntegrationStatus();
+
+		if ( ! $geo->allow_wc_geolocation_fallback() && ! $ugc->is_available() ) {
 			return self::format_test_result(
 				self::TEST_GEO_CONFIGURATION,
 				\__( 'Geo Detection has no country provider', 'universal-multicurrency' ),
 				'critical',
 				'<p>' . \esc_html__( 'Universal Geo Context is unavailable and WooCommerce geolocation fallback is disabled.', 'universal-multicurrency' ) . '</p>'
+			);
+		}
+
+		if ( ! $ugc->is_available() ) {
+			return self::format_test_result(
+				self::TEST_GEO_CONFIGURATION,
+				\__( 'Geo Detection is using the WooCommerce fallback provider', 'universal-multicurrency' ),
+				'recommended',
+				'<p>' . \esc_html__( 'Install Universal Geo Context for higher-accuracy country detection. WooCommerce geolocation fallback is currently handling detection.', 'universal-multicurrency' ) . '</p>'
 			);
 		}
 

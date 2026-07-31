@@ -15,6 +15,7 @@ use UMC\CurrencyRegistry;
 use UMC\Geo\GeoDetectionSettings;
 use UMC\Geo\GeoRegionRegistry;
 use UMC\Geo\GeoRoutingRule;
+use UMC\Geo\UgcIntegrationStatus;
 use UMC\Settings;
 
 /**
@@ -115,14 +116,14 @@ final class GeoDetectionUi {
 	 * @param AdminComponentRenderer $components Component renderer.
 	 */
 	public function render_provider_cards( AdminComponentRenderer $components ): void {
-		$ugc_available = function_exists( 'universal_geo_get_country_code' ) && function_exists( 'universal_geo_api_version' );
+		$status = new UgcIntegrationStatus();
 
 		$html  = '<div class="umc-geo-provider-list">';
 		$html .= $components->provider_card(
 			__( 'Universal Geo Context', 'universal-multicurrency' ),
 			__( 'Primary detection provider for visitor country resolution.', 'universal-multicurrency' ),
-			$ugc_available ? __( 'Available', 'universal-multicurrency' ) : __( 'Missing', 'universal-multicurrency' ),
-			$ugc_available ? 'available' : 'missing'
+			$this->ugc_badge_label( $status ),
+			$status->state()
 		);
 		$html .= $components->provider_card(
 			__( 'WooCommerce fallback', 'universal-multicurrency' ),
@@ -143,6 +144,19 @@ final class GeoDetectionUi {
 	public function render_provider_status(): void {
 		$components = new AdminComponentRenderer();
 		$this->render_provider_cards( $components );
+	}
+
+	/**
+	 * Localized provider-card badge label for a Universal Geo Context status.
+	 *
+	 * @param UgcIntegrationStatus $status Integration status.
+	 */
+	public function ugc_badge_label( UgcIntegrationStatus $status ): string {
+		return match ( $status->state() ) {
+			UgcIntegrationStatus::STATE_AVAILABLE     => __( 'Available', 'universal-multicurrency' ),
+			UgcIntegrationStatus::STATE_MISCONFIGURED => __( 'Needs attention', 'universal-multicurrency' ),
+			default                                   => __( 'Missing', 'universal-multicurrency' ),
+		};
 	}
 
 	/**

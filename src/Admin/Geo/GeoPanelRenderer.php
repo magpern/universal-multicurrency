@@ -12,6 +12,7 @@ namespace UMC\Admin\Geo;
 use UMC\Admin\AdminComponentRenderer;
 use UMC\Admin\GeoSandboxController;
 use UMC\Geo\GeoDetectionSettings;
+use UMC\Geo\UgcIntegrationStatus;
 
 /**
  * Renders individual Visitor Location hub panels.
@@ -567,7 +568,7 @@ final class GeoPanelRenderer {
 	 * Returns the active provider label for overview statistics.
 	 */
 	private function active_provider_label(): string {
-		if ( function_exists( 'universal_geo_get_country_code' ) && function_exists( 'universal_geo_api_version' ) ) {
+		if ( ( new UgcIntegrationStatus() )->is_available() ) {
 			return __( 'Universal Geo Context', 'universal-multicurrency' );
 		}
 
