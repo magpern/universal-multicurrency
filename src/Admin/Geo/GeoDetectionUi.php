@@ -137,16 +137,6 @@ final class GeoDetectionUi {
 	}
 
 	/**
-	 * Renders provider availability status list.
-	 *
-	 * @deprecated 0.13.0 Use render_provider_cards().
-	 */
-	public function render_provider_status(): void {
-		$components = new AdminComponentRenderer();
-		$this->render_provider_cards( $components );
-	}
-
-	/**
 	 * Localized provider-card badge label for a Universal Geo Context status.
 	 *
 	 * @param UgcIntegrationStatus $status Integration status.
