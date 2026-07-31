@@ -358,15 +358,20 @@ final class GeoPanelRenderer {
 		$result    = GeoSandboxController::last_result_for_current_user();
 		$selected  = is_array( $result ) ? (string) ( $result['geo']['country'] ?? 'DE' ) : 'DE';
 		$form_id   = 'umc-geo-sandbox-form';
+		$status    = new UgcIntegrationStatus();
 
 		echo $this->components->feature_section_open(
-			__( 'Simulation', 'universal-multicurrency' ),
-			__( 'Test routing safely without affecting live shoppers.', 'universal-multicurrency' )
+			__( 'Currency Simulation', 'universal-multicurrency' ),
+			__( 'This is a read-only what-if: it never changes the storefront, your session, or any other user — unlike simulating a location in Universal Geo Context, which changes your own live browsing context.', 'universal-multicurrency' )
 		);
 
+		if ( $status->is_simulating() ) {
+			echo $this->ugc_simulation_banner( $status, $countries );
+		}
+
 		echo $this->components->settings_card_open(
-			__( 'Simulation', 'universal-multicurrency' ),
-			__( 'Choose a country context and run a sandbox simulation.', 'universal-multicurrency' )
+			__( 'Choose a scenario', 'universal-multicurrency' ),
+			__( 'Choose a country and shopper state, then run the simulation.', 'universal-multicurrency' )
 		);
 		?>
 		<div class="umc-geo-sandbox-presets">
@@ -423,21 +428,172 @@ final class GeoPanelRenderer {
 
 		if ( is_array( $result ) ) {
 			echo $this->components->feature_section_open(
-				__( 'Results', 'universal-multicurrency' ),
-				__( 'Output from your most recent sandbox run.', 'universal-multicurrency' )
+				__( 'Result', 'universal-multicurrency' ),
+				__( 'Output from your most recent simulation. Only you can see this.', 'universal-multicurrency' )
 			);
 
 			echo $this->components->settings_card_open(
-				__( 'Last sandbox result', 'universal-multicurrency' ),
-				__( 'Most recent simulation output for your account.', 'universal-multicurrency' )
+				__( 'Simulated outcome', 'universal-multicurrency' ),
+				''
 			);
-			?>
-			<pre class="umc-geo-sandbox-output"><?php echo esc_html( wp_json_encode( $result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE ) ); ?></pre>
-			<?php
+			echo $this->sandbox_result_markup( $result );
 			echo $this->components->settings_card_close();
 
 			echo $this->components->feature_section_close();
 		}
+	}
+
+	/**
+	 * Renders a banner when Universal Geo Context is simulating a country
+	 * for the admin's own live browsing context, with a one-click way to
+	 * load that same country into this read-only currency simulation.
+	 *
+	 * @param UgcIntegrationStatus $status    Integration status.
+	 * @param array<string,string> $countries WC countries.
+	 */
+	private function ugc_simulation_banner( UgcIntegrationStatus $status, array $countries ): string {
+		$country = $this->live_country( $status );
+		$action  = null !== $country
+			? sprintf(
+				'<button type="button" class="button umc-geo-sandbox-preset" data-umc-geo-preset-country="%1$s">%2$s</button> <a href="%3$s">%4$s</a>',
+				esc_attr( $country ),
+				esc_html(
+					sprintf(
+						/* translators: %s: country label */
+						__( 'Use %s here', 'universal-multicurrency' ),
+						$this->country_label( $country, $countries )
+					)
+				),
+				esc_url( $status->simulation_url() ),
+				esc_html__( 'Manage Universal Geo Context simulation', 'universal-multicurrency' )
+			)
+			: sprintf( '<a href="%s">%s</a>', esc_url( $status->simulation_url() ), esc_html__( 'Manage Universal Geo Context simulation', 'universal-multicurrency' ) );
+
+		return $this->components->info_panel(
+			__( 'Universal Geo Context is simulating a location', 'universal-multicurrency' ),
+			__( 'Your own admin browsing session currently sees a simulated country. That is separate from this currency simulation below, which never affects your session.', 'universal-multicurrency' ),
+			$action
+		);
+	}
+
+	/**
+	 * Renders the design-system presentation of a sandbox result, clearly
+	 * separating the simulated input from the matched rule, the suggested
+	 * currency, and precedence effects — with the raw document retained in
+	 * a collapsed details block for support purposes.
+	 *
+	 * @param array<string, mixed> $result Decoded GeoContext document.
+	 */
+	private function sandbox_result_markup( array $result ): string {
+		$final_currency = (string) ( $result['routing']['final_currency'] ?? $this->ui->base_code() );
+		$skipped        = ! empty( $result['routing']['geo_skipped'] );
+		$skip_reason    = (string) ( $result['routing']['geo_skip_reason'] ?? '' );
+		$evaluation     = is_array( $result['routing']['evaluation'] ?? null ) ? $result['routing']['evaluation'] : null;
+
+		$html = $this->components->status_badge(
+			sprintf(
+				/* translators: %s: resulting currency code */
+				__( 'Effective currency: %s', 'universal-multicurrency' ),
+				$final_currency
+			),
+			'active'
+		);
+
+		if ( $skipped ) {
+			$html .= $this->components->info_panel(
+				__( 'Currency routing was skipped', 'universal-multicurrency' ),
+				$this->skip_reason_label( $skip_reason )
+			);
+
+			return $html;
+		}
+
+		if ( is_array( $evaluation ) ) {
+			$html .= $this->components->status_badge(
+				! empty( $evaluation['technical_fallback_used'] )
+					? __( 'Technical fallback used', 'universal-multicurrency' )
+					: sprintf(
+						/* translators: %s: matched rule identifier or currency */
+						__( 'Matched rule: %s', 'universal-multicurrency' ),
+						(string) ( $evaluation['matched_rule_id'] ?? __( 'none', 'universal-multicurrency' ) )
+					),
+				'recommended'
+			);
+			$html .= $this->sandbox_trace_markup( is_array( $evaluation['trace'] ?? null ) ? $evaluation['trace'] : array() );
+		}
+
+		$html .= sprintf(
+			'<details class="umc-geo-sandbox-raw"><summary>%s</summary><pre class="umc-geo-sandbox-output">%s</pre></details>',
+			esc_html__( 'Technical details (raw output)', 'universal-multicurrency' ),
+			esc_html( (string) wp_json_encode( $result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE ) )
+		);
+
+		return $html;
+	}
+
+	/**
+	 * Renders the ordered rule-evaluation trace as a readable list.
+	 *
+	 * @param array<int, array<string, mixed>> $trace Evaluation trace steps.
+	 */
+	private function sandbox_trace_markup( array $trace ): string {
+		if ( array() === $trace ) {
+			return '';
+		}
+
+		$items = '';
+
+		foreach ( $trace as $step ) {
+			$label   = (string) ( $step['label'] ?? '' );
+			$matched = ! empty( $step['matched'] );
+			$reason  = (string) ( $step['reason'] ?? '' );
+
+			$text = $matched
+				? sprintf(
+					/* translators: %s: rule label */
+					__( '%s — matched', 'universal-multicurrency' ),
+					$label
+				)
+				: sprintf(
+					/* translators: 1: rule label, 2: reason the rule did not apply */
+					__( '%1$s — %2$s', 'universal-multicurrency' ),
+					$label,
+					$this->trace_reason_label( $reason )
+				);
+
+			$items .= sprintf( '<li%s>%s</li>', $matched ? ' class="umc-geo-sandbox-trace__step--matched"' : '', esc_html( $text ) );
+		}
+
+		return sprintf( '<ol class="umc-geo-sandbox-trace">%s</ol>', $items );
+	}
+
+	/**
+	 * Human-readable label for a rule-trace skip reason.
+	 *
+	 * @param string $reason Trace step reason code.
+	 */
+	private function trace_reason_label( string $reason ): string {
+		return match ( $reason ) {
+			'currency_unavailable' => __( 'currency not currently selectable', 'universal-multicurrency' ),
+			default                => __( 'no match', 'universal-multicurrency' ),
+		};
+	}
+
+	/**
+	 * Human-readable label for why geo routing was skipped in a simulation.
+	 *
+	 * @param string $reason Skip reason code from GeoCurrencyDecisionService::simulate().
+	 */
+	private function skip_reason_label( string $reason ): string {
+		return match ( $reason ) {
+			'explicit_currency' => __( 'An explicit currency (?currency=) already takes precedence.', 'universal-multicurrency' ),
+			'session_currency'  => __( 'A session currency already takes precedence.', 'universal-multicurrency' ),
+			'cookie_currency'   => __( 'A cookie currency already takes precedence.', 'universal-multicurrency' ),
+			'shopper_currency'  => __( 'A shopper currency already takes precedence.', 'universal-multicurrency' ),
+			'checkout_locked'   => __( 'Checkout has locked the currency for this session.', 'universal-multicurrency' ),
+			'geo_disabled'      => __( 'Automatic currency detection is disabled.', 'universal-multicurrency' ),
+			default             => __( 'Automatic currency detection did not run for this scenario.', 'universal-multicurrency' ),
+		};
 	}
 
 	/**

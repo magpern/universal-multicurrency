@@ -77,8 +77,16 @@ Writer: `Order\RefundSnapshot`.
 | Key | Owner | Contents | Uninstall |
 |---|---|---|---|
 | `umc_dismissed_notices` | `Diagnostics\NoticeDismissal` | Per-user map of dismissed conflict-notice fingerprints (cap 20, 180-day expiry) | **Preserved** (ADR-0009) |
+| `umc_geo_sandbox_last_result` | `Admin\GeoSandboxController` | Last Currency Simulation result for this admin (encoded `GeoContext` document, schema-versioned; stale-version entries are discarded on read) | **Preserved** (ADR-0009) |
+| `umc_geo_sandbox_recent` | `Admin\Geo\GeoSandboxRecentStore` | Per-user recently-used Currency Simulation country codes (cap 8) | **Preserved** (ADR-0009) |
 
 This is the first non-order data persisted outside `umc_settings` (ADR-0007).
+
+The two sandbox keys were added to this inventory in M14 (previously an
+undocumented gap) and classified as preserved, matching `uninstall.php`'s
+existing "configuration options only" contract — they are admin-only display
+cache, harmless if orphaned, and were never deleted by `uninstall.php` in the
+first place.
 
 ---
 
@@ -147,6 +155,7 @@ that cache per currency. That value is not a standalone persisted key.
 | `_umc_*` order meta | **Preserved forever** |
 | `_umc_parent_*` refund meta | **Preserved forever** |
 | `umc_dismissed_notices` user meta | **Preserved** |
+| Currency Simulation user meta (`umc_geo_sandbox_*`) | **Preserved** |
 | WC session keys | Not targeted (WC session lifecycle) |
 | Cookies | Not targeted (browser lifecycle) |
 | Store API `umc` extension | Not persisted |
@@ -164,7 +173,7 @@ with `PersistedKeys::inventory()` — never edit one without the other.
 
 ```umc:persisted-inventory
 {
-  "inventory_version": 5,
+  "inventory_version": 6,
   "options": [
     "umc_settings",
     "umc_rate_state"
@@ -188,7 +197,9 @@ with `PersistedKeys::inventory()` — never edit one without the other.
     "_umc_parent_rate_identity"
   ],
   "user_meta": [
-    "umc_dismissed_notices"
+    "umc_dismissed_notices",
+    "umc_geo_sandbox_last_result",
+    "umc_geo_sandbox_recent"
   ],
   "session_keys": [
     "umc_currency",
@@ -233,7 +244,9 @@ with `PersistedKeys::inventory()` — never edit one without the other.
       "_umc_parent_rate_identity"
     ],
     "preserve_user_meta": [
-      "umc_dismissed_notices"
+      "umc_dismissed_notices",
+      "umc_geo_sandbox_last_result",
+      "umc_geo_sandbox_recent"
     ]
   }
 }

@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace UMC;
 
+use UMC\Admin\Geo\GeoSandboxRecentStore;
+use UMC\Admin\GeoSandboxController;
 use UMC\Cart\CartRecalculation;
 use UMC\Checkout\CheckoutTransitionStateRepository;
 use UMC\CurrencySwitcher;
@@ -29,7 +31,7 @@ final class PersistedKeys {
 	/**
 	 * Bump when the inventory shape or membership changes.
 	 */
-	public const INVENTORY_VERSION = 5;
+	public const INVENTORY_VERSION = 6;
 
 	/**
 	 * WordPress options written by the plugin.
@@ -85,6 +87,8 @@ final class PersistedKeys {
 	public static function user_meta_keys(): array {
 		return array(
 			'umc_dismissed_notices',
+			GeoSandboxController::RESULT_META,
+			GeoSandboxRecentStore::META_KEY,
 		);
 	}
 

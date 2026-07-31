@@ -65,4 +65,35 @@ final class GeoContextTest extends TestCase {
 		$this->assertSame( 'NOK', $shopper['explicit_currency'] );
 		$this->assertTrue( $shopper['checkout_locked'] );
 	}
+
+	public function test_default_document_no_longer_carries_the_removed_network_and_providers_subtrees(): void {
+		$document = GeoContext::default_document( false );
+
+		$this->assertArrayNotHasKey( 'network', $document );
+		$this->assertArrayNotHasKey( 'providers', $document );
+		$this->assertSame( 2, GeoContext::SCHEMA_VERSION );
+	}
+
+	public function test_decode_discards_a_document_from_a_prior_schema_version(): void {
+		$stale = wp_json_encode(
+			array(
+				'schema_version' => 1,
+				'simulation'     => true,
+				'shopper'        => array(),
+				'geo'            => array( 'country' => 'DE' ),
+				'network'        => array( 'ip_address' => null ),
+				'providers'      => array( 'chain_override' => null ),
+				'resolution'     => array(),
+				'routing'        => array(),
+			)
+		);
+
+		$this->assertNull( GeoContextSerializer::decode( (string) $stale ) );
+	}
+
+	public function test_decode_accepts_a_current_schema_version_document(): void {
+		$current = GeoContextSerializer::encode( GeoContext::for_sandbox( array( 'geo' => array( 'country' => 'DE' ) ) )->to_array() );
+
+		$this->assertInstanceOf( GeoContext::class, GeoContextSerializer::decode( $current ) );
+	}
 }
