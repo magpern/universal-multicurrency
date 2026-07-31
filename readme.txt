@@ -4,7 +4,7 @@ Tags: woocommerce, currency, multicurrency, exchange rates, money
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.12.1
+Stable tag: 0.13.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,6 +49,16 @@ Not for production traffic. Two runtime converters can double-convert prices. De
 The plugin ships a POT template (`languages/universal-multicurrency.pot`) for translators. Bundled locale `.mo` files are not included in this release.
 
 == Changelog ==
+
+= 0.13.0 =
+* Visitor Location hub reduced from seven panels to three: Overview, Currency Routing, Currency Simulation
+* Overview redesigned as a merchant dashboard: integration health, detected country and resulting currency, and a needs-attention area, replacing the previous version-number display
+* Currency Routing (formerly Detection + Settings) presents each rule as a condition/result/priority policy statement with inline validation
+* Currency Simulation (formerly Geo Sandbox) replaces raw JSON output with a status-badge and trace presentation, and is aware of an active Universal Geo Context location simulation
+* Retired Providers, Trusted Proxies, and Diagnostics panels now redirect to their replacement with a one-time notice; deep-link into Universal Geo Context instead of duplicating its screens
+* Universal Geo Context availability centralized behind one check (`UgcIntegrationStatus`), correcting three call sites that previously skipped the API-compatibility check
+* GeoContext (sandbox document) schema v2 removes unused reserved fields; older cached results are discarded safely
+* No settings schema change; safe in-place upgrade from 0.12.x
 
 = 0.12.1 =
 * Fix Add currency redirect blocked by WooCommerce settings unsaved-changes guard on the Multicurrency overview
@@ -119,6 +129,9 @@ The plugin ships a POT template (`languages/universal-multicurrency.pot`) for tr
 * Storefront conversion, classic cart/checkout, order snapshots, historical order display, refunds, and Store API / blocks parity (milestones 2–5)
 
 == Upgrade Notice ==
+
+= 0.13.0 =
+Visitor Location admin redesign (Overview, Currency Routing, Currency Simulation). No settings schema change — safe upgrade from 0.12.x. Requires WooCommerce 8.2+, PHP 8.1+, and HPOS.
 
 = 0.10.0 =
 Checkout currency policy release. Settings schema v3→v4 adds checkout defaults that preserve selected-currency checkout behaviour. Requires WooCommerce 8.2+, PHP 8.1+, and HPOS.

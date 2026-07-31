@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Universal Multicurrency for WooCommerce 0.12.1\n"
+"Project-Id-Version: Universal Multicurrency for WooCommerce 0.13.0\n"
 "Report-Msgid-Bugs-To: https://github.com/magpern/universal-multicurrency/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -83,7 +83,7 @@ msgid "Hide technical evidence"
 msgstr ""
 
 #: src/Admin/AdminComponentRenderer.php:493
-#: src/Admin/SettingsPage.php:792
+#: src/Admin/SettingsPage.php:785
 msgid "Unsaved changes"
 msgstr ""
 
@@ -94,10 +94,10 @@ msgstr ""
 #: src/Admin/AdminComponentRenderer.php:495
 #: src/Admin/AdminPageShell.php:100
 #: src/Admin/AdminPageShell.php:101
-#: src/Admin/SettingsPage.php:779
-#: src/Admin/SettingsPage.php:780
-#: src/Admin/SettingsPage.php:793
-#: src/Admin/SettingsPage.php:794
+#: src/Admin/SettingsPage.php:772
+#: src/Admin/SettingsPage.php:773
+#: src/Admin/SettingsPage.php:786
+#: src/Admin/SettingsPage.php:787
 msgid "Save changes"
 msgstr ""
 
@@ -108,8 +108,8 @@ msgstr ""
 
 #: src/Admin/AdminPageShellViewModelFactory.php:62
 #: src/Compatibility/Checks/EnvironmentCheck.php:37
-#: src/Diagnostics/SiteHealthReport.php:666
-#: src/Diagnostics/SiteHealthReport.php:910
+#: src/Diagnostics/SiteHealthReport.php:678
+#: src/Diagnostics/SiteHealthReport.php:922
 msgid "Universal Multicurrency"
 msgstr ""
 
@@ -119,7 +119,7 @@ msgstr ""
 
 #: src/Admin/AdminPageShellViewModelFactory.php:66
 #: src/Admin/SettingsPage.php:131
-#: src/Admin/SettingsPage.php:835
+#: src/Admin/SettingsPage.php:828
 msgid "Multicurrency"
 msgstr ""
 
@@ -132,7 +132,7 @@ msgid "Configure providers, update schedules, and effective rates."
 msgstr ""
 
 #: src/Admin/AdminPageShellViewModelFactory.php:87
-#: src/Admin/Geo/GeoPanelRegistry.php:149
+#: src/Admin/Geo/GeoPanelRegistry.php:187
 msgid "Determine a visitor's country and automatically suggest the appropriate currency."
 msgstr ""
 
@@ -391,7 +391,6 @@ msgstr ""
 #: src/Admin/CurrencyOverviewField.php:51
 #: src/Admin/CurrencyOverviewField.php:209
 #: src/Admin/CurrencyTableField.php:100
-#: src/Admin/Geo/GeoPanelRenderer.php:61
 msgid "Enabled"
 msgstr ""
 
@@ -441,12 +440,12 @@ msgid "Always"
 msgstr ""
 
 #: src/Admin/CurrencyOverviewField.php:128
-#: src/Diagnostics/SiteHealthReport.php:687
+#: src/Diagnostics/SiteHealthReport.php:699
 msgid "Yes"
 msgstr ""
 
 #: src/Admin/CurrencyOverviewField.php:128
-#: src/Diagnostics/SiteHealthReport.php:687
+#: src/Diagnostics/SiteHealthReport.php:699
 msgid "No"
 msgstr ""
 
@@ -454,7 +453,7 @@ msgstr ""
 #: src/Admin/ViewModel/CurrencyViewModelFactory.php:85
 #: src/Admin/ViewModel/CurrencyViewModelFactory.php:89
 #: src/Compatibility/Checks/EnvironmentCheck.php:51
-#: src/Diagnostics/SiteHealthReport.php:674
+#: src/Diagnostics/SiteHealthReport.php:686
 msgid "Base currency"
 msgstr ""
 
@@ -475,7 +474,7 @@ msgid "Remove this currency from the store configuration?"
 msgstr ""
 
 #: src/Admin/CurrencyOverviewField.php:175
-#: src/Admin/Geo/GeoDetectionUi.php:180
+#: src/Admin/Geo/GeoDetectionUi.php:186
 msgid "Remove"
 msgstr ""
 
@@ -568,7 +567,7 @@ msgstr ""
 
 #: src/Admin/CurrencyTableField.php:95
 #: src/Admin/SettingsPage.php:187
-#: src/Admin/SettingsPage.php:520
+#: src/Admin/SettingsPage.php:513
 msgid "Currencies"
 msgstr ""
 
@@ -595,7 +594,6 @@ msgid "Provider date"
 msgstr ""
 
 #: src/Admin/CurrencyTableField.php:111
-#: src/Admin/Geo/GeoPanelRenderer.php:80
 msgid "Last updated"
 msgstr ""
 
@@ -893,72 +891,118 @@ msgstr ""
 msgid "Update all automatic rates"
 msgstr ""
 
-#: src/Admin/Geo/GeoDetectionUi.php:122
-#: src/Admin/Geo/GeoPanelRenderer.php:571
+#: src/Admin/Geo/GeoDetectionUi.php:123
 msgid "Universal Geo Context"
 msgstr ""
 
-#: src/Admin/Geo/GeoDetectionUi.php:123
+#: src/Admin/Geo/GeoDetectionUi.php:124
 msgid "Primary detection provider for visitor country resolution."
 msgstr ""
 
-#: src/Admin/Geo/GeoDetectionUi.php:124
-#: src/Admin/Geo/GeoDetectionUi.php:130
-msgid "Available"
-msgstr ""
-
-#: src/Admin/Geo/GeoDetectionUi.php:124
-msgid "Missing"
-msgstr ""
-
-#: src/Admin/Geo/GeoDetectionUi.php:128
-#: src/Admin/Geo/GeoPanelRenderer.php:273
-#: src/Admin/Geo/GeoPanelRenderer.php:574
+#: src/Admin/Geo/GeoDetectionUi.php:129
+#: src/Admin/Geo/GeoPanelRenderer.php:295
 msgid "WooCommerce fallback"
 msgstr ""
 
-#: src/Admin/Geo/GeoDetectionUi.php:129
+#: src/Admin/Geo/GeoDetectionUi.php:130
 msgid "Uses WooCommerce geolocation when Universal Geo Context is unavailable."
 msgstr ""
 
-#: src/Admin/Geo/GeoDetectionUi.php:178
+#: src/Admin/Geo/GeoDetectionUi.php:131
+#: src/Admin/Geo/GeoDetectionUi.php:146
+msgid "Available"
+msgstr ""
+
+#: src/Admin/Geo/GeoDetectionUi.php:147
+#: src/Admin/Geo/GeoPanelRenderer.php:85
+#: src/Admin/Geo/GeoPanelRenderer.php:684
+msgid "Needs attention"
+msgstr ""
+
+#: src/Admin/Geo/GeoDetectionUi.php:148
+msgid "Missing"
+msgstr ""
+
+#. translators: %d: rule priority position
+#: src/Admin/Geo/GeoDetectionUi.php:169
+#, php-format
+msgid "Priority %d"
+msgstr ""
+
+#: src/Admin/Geo/GeoDetectionUi.php:172
+msgid "Condition"
+msgstr ""
+
+#: src/Admin/Geo/GeoDetectionUi.php:176
+msgid "Result currency"
+msgstr ""
+
+#: src/Admin/Geo/GeoDetectionUi.php:184
 msgid "Move up"
 msgstr ""
 
-#: src/Admin/Geo/GeoDetectionUi.php:179
+#: src/Admin/Geo/GeoDetectionUi.php:185
 msgid "Move down"
 msgstr ""
 
-#: src/Admin/Geo/GeoDetectionUi.php:220
+#: src/Admin/Geo/GeoDetectionUi.php:227
 msgid "Other countries"
 msgstr ""
 
-#: src/Admin/Geo/GeoDetectionUi.php:248
+#: src/Admin/Geo/GeoDetectionUi.php:255
 msgid "European Union"
 msgstr ""
 
-#: src/Admin/Geo/GeoDetectionUi.php:249
+#: src/Admin/Geo/GeoDetectionUi.php:256
 msgid "Eurozone"
 msgstr ""
 
-#: src/Admin/Geo/GeoDetectionUi.php:250
+#: src/Admin/Geo/GeoDetectionUi.php:257
 msgid "European Economic Area"
 msgstr ""
 
-#: src/Admin/Geo/GeoDetectionUi.php:261
+#: src/Admin/Geo/GeoDetectionUi.php:268
 msgid "Region"
 msgstr ""
 
-#: src/Admin/Geo/GeoDetectionUi.php:265
+#: src/Admin/Geo/GeoDetectionUi.php:272
 msgid "Other"
 msgstr ""
 
-#: src/Admin/Geo/GeoDetectionUi.php:268
+#: src/Admin/Geo/GeoDetectionUi.php:275
 msgid "Country"
 msgstr ""
 
+#. translators: %s: country name
+#: src/Admin/Geo/GeoDetectionUi.php:292
+#, php-format
+msgid "the visitor is in %s"
+msgstr ""
+
+#. translators: %s: region name
+#: src/Admin/Geo/GeoDetectionUi.php:297
+#, php-format
+msgid "the visitor is in the %s region"
+msgstr ""
+
+#: src/Admin/Geo/GeoDetectionUi.php:300
+msgid "no earlier rule matched"
+msgstr ""
+
+#. translators: 1: condition description, 2: result currency code
+#: src/Admin/Geo/GeoDetectionUi.php:305
+#, php-format
+msgid "When %1$s, use %2$s."
+msgstr ""
+
+#. translators: %s: currency code
+#: src/Admin/Geo/GeoDetectionUi.php:318
+#, php-format
+msgid "%s is not currently enabled or has no exchange rate. This rule cannot take effect until it does."
+msgstr ""
+
 #. translators: 1: country code, 2: region id
-#: src/Admin/Geo/GeoDetectionUi.php:294
+#: src/Admin/Geo/GeoDetectionUi.php:350
 #: src/Geo/GeoRoutingRuleValidator.php:163
 #, php-format
 msgid "The %1$s rule will never be reached because an earlier %2$s rule already matches %1$s."
@@ -968,545 +1012,639 @@ msgstr ""
 msgid "Visitor Location panels"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRegistry.php:97
-#: src/Admin/Geo/GeoPanelRegistry.php:104
+#: src/Admin/Geo/GeoPanelRegistry.php:148
+#: src/Admin/Geo/GeoPanelRegistry.php:171
+msgid "Currency Routing"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRegistry.php:149
+#: src/Admin/Geo/GeoPanelRegistry.php:172
+#: src/Admin/Geo/GeoPanelRenderer.php:364
+msgid "Currency Simulation"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRegistry.php:150
 msgid "Overview"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRegistry.php:98
-msgid "Detection"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRegistry.php:99
-#: src/Admin/Geo/GeoPanelRegistry.php:126
-msgid "Geo Sandbox"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRegistry.php:100
-msgid "Providers"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRegistry.php:101
-msgid "Trusted Proxies"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRegistry.php:102
-msgid "Diagnostics"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRegistry.php:103
-#: src/Admin/PluginActionLinks.php:58
-msgid "Settings"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRegistry.php:124
+#: src/Admin/Geo/GeoPanelRegistry.php:170
 msgid "Visitor Location overview"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRegistry.php:125
-msgid "Detection rules"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRegistry.php:127
-msgid "Detection providers"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRegistry.php:128
-#: src/Admin/Geo/GeoPanelRenderer.php:497
-msgid "Trusted proxies"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRegistry.php:129
-msgid "Visitor Location diagnostics"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRegistry.php:130
-msgid "Visitor Location settings"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRegistry.php:131
+#: src/Admin/Geo/GeoPanelRegistry.php:173
 #: src/Admin/SettingsPage.php:189
-#: src/Admin/SettingsPage.php:574
+#: src/Admin/SettingsPage.php:567
 msgid "Visitor Location"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRegistry.php:142
-msgid "Review current visitor location status and jump to common tasks."
+#: src/Admin/Geo/GeoPanelRegistry.php:184
+msgid "Check whether Universal Geo Context is connected, which country and currency it produces right now, and whether anything needs attention."
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRegistry.php:143
-msgid "Configure how visitor location is detected before selecting an automatic currency."
+#: src/Admin/Geo/GeoPanelRegistry.php:185
+msgid "Define the ordered policy that turns a detected country into a currency, and how detection behaves at checkout."
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRegistry.php:144
-msgid "Reproduce geographic context and inspect routing without changing storefront session, cookies, or active currency."
+#: src/Admin/Geo/GeoPanelRegistry.php:186
+msgid "Simulate the currency decision for a given country and shopper state without affecting live shoppers, your session, or storefront data."
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRegistry.php:145
-msgid "Review which location providers are available to Universal Multicurrency."
+#: src/Admin/Geo/GeoPanelRenderer.php:66
+#: src/Admin/Geo/GeoPanelRenderer.php:689
+msgid "Visitor Location Provider"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRegistry.php:146
-msgid "Trusted proxy configuration is managed by Universal Geo Context when installed."
+#: src/Admin/Geo/GeoPanelRenderer.php:73
+msgid "Detected country and resulting currency"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRegistry.php:147
-msgid "Inspect Geo Detection health signals and open related diagnostics tools."
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRegistry.php:148
-msgid "Configure automatic currency selection, providers, fallback behavior, and checkout interactions."
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:54
+#: src/Admin/Geo/GeoPanelRenderer.php:95
 msgid "At a glance"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:55
-msgid "Key metrics from your current Visitor Location configuration."
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:60
+#: src/Admin/Geo/GeoPanelRenderer.php:100
 msgid "Detection status"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:61
-#: src/Admin/Geo/GeoPanelRenderer.php:87
+#. translators: %s: detection mode
+#: src/Admin/Geo/GeoPanelRenderer.php:104
+#, php-format
+msgid "Enabled (%s)"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:107
 #: src/Admin/ViewModel/CurrencyViewModelFactory.php:311
 msgid "Disabled"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:64
-msgid "Active provider"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:68
-msgid "Current visitor country"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:69
-msgid "Not available"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:72
-msgid "Suggested currency"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:73
-msgid "Not detected"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:76
-msgid "Active rules"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:81
-msgid "Not configured"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:85
-msgid "Status summary"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:85
-msgid "Overall Visitor Location configuration at a glance."
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:87
-#: src/Diagnostics/SiteHealthReport.php:723
-msgid "Active"
-msgstr ""
-
-#. translators: %s: detection mode
-#: src/Admin/Geo/GeoPanelRenderer.php:94
-#, php-format
-msgid "Mode: %s"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:104
-#: src/Admin/Geo/GeoPanelRenderer.php:109
-msgid "Quick actions"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:112
-msgid "Open Geo Sandbox"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:114
-msgid "Test visitor location routing safely."
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:117
-msgid "View detection rules"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:119
-msgid "Edit geographic routing rules."
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:122
-msgid "View providers"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:124
-msgid "Review available location providers."
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:127
-msgid "View diagnostics"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:129
-msgid "Open Geo Detection diagnostics tools."
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:137
-msgid "Guidance"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:143
-msgid "Manual currency selection always takes precedence over automatic detection."
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:162
+#: src/Admin/Geo/GeoPanelRenderer.php:110
 msgid "Routing rules"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:163
-msgid "Define how visitor country maps to currency. First match wins."
+#: src/Admin/Geo/GeoPanelRenderer.php:114
+#: src/Admin/Geo/GeoPanelRenderer.php:268
+#: src/Admin/Geo/GeoPanelRenderer.php:273
+msgid "Fallback currency"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:167
-msgid "Geographic routing"
+#: src/Admin/Geo/GeoPanelRenderer.php:120
+msgid "Manual currency selection always takes precedence over automatic detection."
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:168
-msgid "Rules are evaluated from top to bottom. The first matching rule determines the visitor's currency."
+#: src/Admin/Geo/GeoPanelRenderer.php:125
+#: src/Admin/Geo/GeoPanelRenderer.php:129
+msgid "Quick actions"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:181
-msgid "Add country rule"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:182
-msgid "Add region rule"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:183
-msgid "Add catch-all rule"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:193
-msgid "Add recommended European rules"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:210
-msgid "Currency selection"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:211
-msgid "Control when automatic currency detection runs for each visitor."
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:215
+#: src/Admin/Geo/GeoPanelRenderer.php:154
+#: src/Admin/Geo/GeoPanelRenderer.php:159
 msgid "Automatic currency selection"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:216
+#: src/Admin/Geo/GeoPanelRenderer.php:155
+msgid "Control when automatic currency detection runs for each visitor."
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:160
 msgid "Enable automatic currency detection and choose when it should apply."
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:221
+#: src/Admin/Geo/GeoPanelRenderer.php:165
 msgid "Enable automatic currency detection"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:228
+#: src/Admin/Geo/GeoPanelRenderer.php:172
 msgid "First eligible visit"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:229
+#: src/Admin/Geo/GeoPanelRenderer.php:173
 msgid "Detect only when no currency has previously been selected."
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:232
+#: src/Admin/Geo/GeoPanelRenderer.php:176
 msgid "Once per session"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:233
+#: src/Admin/Geo/GeoPanelRenderer.php:177
 msgid "Re-evaluate on every new browsing session."
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:236
+#: src/Admin/Geo/GeoPanelRenderer.php:180
 msgid "Until manually selected"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:237
+#: src/Admin/Geo/GeoPanelRenderer.php:181
 msgid "Continue detecting until the customer explicitly selects a currency."
 msgstr ""
 
 #. translators: %s: link to Display settings
-#: src/Admin/Geo/GeoPanelRenderer.php:253
+#: src/Admin/Geo/GeoPanelRenderer.php:197
 #, php-format
 msgid "Remembered customer selection is controlled in <a href=\"%s\">Display settings</a>."
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:261
-msgid "Provider configuration"
+#: src/Admin/Geo/GeoPanelRenderer.php:205
+msgid "Routing policy"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:262
-msgid "Review detection providers and fallback behaviour."
+#: src/Admin/Geo/GeoPanelRenderer.php:206
+msgid "Rules are evaluated in order, top to bottom. The first matching rule decides the currency."
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:266
-msgid "Detection provider"
+#: src/Admin/Geo/GeoPanelRenderer.php:210
+msgid "Country and region rules"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:267
-msgid "Review available location providers and configure fallback behavior."
+#: src/Admin/Geo/GeoPanelRenderer.php:211
+msgid "Each rule matches a country or region and assigns a currency. Add an \"Other countries\" rule last to catch every remaining valid country."
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:274
-msgid "Use WooCommerce geolocation whenever Universal Geo Context cannot resolve the visitor."
+#: src/Admin/Geo/GeoPanelRenderer.php:224
+msgid "Add country rule"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:225
+msgid "Add region rule"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:226
+msgid "Add catch-all rule"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:236
+msgid "Add recommended European rules"
 msgstr ""
 
 #. translators: %s: store base currency code
-#: src/Admin/Geo/GeoPanelRenderer.php:286
+#: src/Admin/Geo/GeoPanelRenderer.php:247
 #, php-format
 msgid "Store default (%s)"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:302
-msgid "Applies when country context is missing or does not match earlier rules."
+#: src/Admin/Geo/GeoPanelRenderer.php:263
+#: src/Admin/Geo/GeoPanelRenderer.php:718
+msgid "Technical fallback"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:306
-#: src/Admin/Geo/GeoPanelRenderer.php:311
-msgid "Fallback currency"
+#: src/Admin/Geo/GeoPanelRenderer.php:264
+msgid "Applies when the visitor's country is missing or invalid — not when a valid country simply has no matching rule."
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:307
-msgid "Other countries handles valid countries unmatched by earlier rules. The technical fallback handles missing or invalid country context."
+#: src/Admin/Geo/GeoPanelRenderer.php:269
+msgid "An \"Other countries\" rule handles valid countries unmatched by earlier rules. The technical fallback below only handles missing or invalid country context."
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:321
+#: src/Admin/Geo/GeoPanelRenderer.php:283
+msgid "Location sources"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:284
+msgid "Universal Geo Context supplies country facts when available. Provider configuration, trusted proxies, and detection diagnostics live there — not in this plugin."
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:288
+msgid "Detection provider"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:289
+msgid "Universal Multicurrency never duplicates location detection — it consumes Universal Geo Context and falls back to WooCommerce when it is unavailable."
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:296
+msgid "Use WooCommerce geolocation whenever Universal Geo Context cannot resolve the visitor."
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:304
 msgid "Checkout behaviour"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:322
+#: src/Admin/Geo/GeoPanelRenderer.php:305
 msgid "How Visitor Location interacts with checkout once a session begins."
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:326
+#: src/Admin/Geo/GeoPanelRenderer.php:309
 msgid "Checkout locking"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:327
+#: src/Admin/Geo/GeoPanelRenderer.php:310
 msgid "Once checkout has started, currency is locked to keep totals consistent throughout the order."
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:329
+#: src/Admin/Geo/GeoPanelRenderer.php:312
 msgid "Lock currency when checkout begins"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:330
+#: src/Admin/Geo/GeoPanelRenderer.php:313
 msgid "Re-evaluate when billing country changes (before lock)"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:331
+#: src/Admin/Geo/GeoPanelRenderer.php:314
 msgid "Re-evaluate when shipping country changes (before lock)"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:335
+#: src/Admin/Geo/GeoPanelRenderer.php:318
 msgid "Billing country"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:337
+#: src/Admin/Geo/GeoPanelRenderer.php:320
 msgid "Shipping country"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:341
+#: src/Admin/Geo/GeoPanelRenderer.php:324
 msgid "Checkout country precedence"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:351
+#: src/Admin/Geo/GeoPanelRenderer.php:334
 #: src/Admin/SettingsPage.php:192
-#: src/Admin/SettingsPage.php:651
+#: src/Admin/SettingsPage.php:644
 msgid "Compatibility"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:352
+#: src/Admin/Geo/GeoPanelRenderer.php:335
 msgid "How Visitor Location interacts with caching and proxy setups."
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:356
+#: src/Admin/Geo/GeoPanelRenderer.php:339
 msgid "Cache and proxy compatibility"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:357
+#: src/Admin/Geo/GeoPanelRenderer.php:340
 msgid "Geo Detection reuses the existing currency cookie and WooCommerce session. Full-page caching may affect first-page currency display until the session is established."
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:361
+#: src/Admin/Geo/GeoPanelRenderer.php:344
 msgid "Review Compatibility diagnostics"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:380
-#: src/Admin/Geo/GeoPanelRenderer.php:385
-msgid "Simulation"
+#: src/Admin/Geo/GeoPanelRenderer.php:365
+msgid "This is a read-only what-if: it never changes the storefront, your session, or any other user — unlike simulating a location in Universal Geo Context, which changes your own live browsing context."
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:381
-msgid "Test routing safely without affecting live shoppers."
+#: src/Admin/Geo/GeoPanelRenderer.php:373
+msgid "Choose a scenario"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:386
-msgid "Choose a country context and run a sandbox simulation."
+#: src/Admin/Geo/GeoPanelRenderer.php:374
+msgid "Choose a country and shopper state, then run the simulation."
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:391
+#: src/Admin/Geo/GeoPanelRenderer.php:379
 msgid "Recently used"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:401
+#: src/Admin/Geo/GeoPanelRenderer.php:389
 msgid "Quick picks"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:412
+#: src/Admin/Geo/GeoPanelRenderer.php:400
 msgid "Browse all countries…"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:415
+#: src/Admin/Geo/GeoPanelRenderer.php:403
 msgid "All countries"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:426
+#: src/Admin/Geo/GeoPanelRenderer.php:414
 msgid "Shopper precedence simulation"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:428
+#: src/Admin/Geo/GeoPanelRenderer.php:416
 msgid "Explicit currency exists"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:429
+#: src/Admin/Geo/GeoPanelRenderer.php:417
 msgid "Session currency exists"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:430
+#: src/Admin/Geo/GeoPanelRenderer.php:418
 msgid "Cookie currency exists"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:431
+#: src/Admin/Geo/GeoPanelRenderer.php:419
 msgid "Checkout locked"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:435
+#: src/Admin/Geo/GeoPanelRenderer.php:423
 msgid "Run sandbox"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:443
-msgid "Results"
+#: src/Admin/Geo/GeoPanelRenderer.php:431
+msgid "Result"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:444
-msgid "Output from your most recent sandbox run."
+#: src/Admin/Geo/GeoPanelRenderer.php:432
+msgid "Output from your most recent simulation. Only you can see this."
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:448
-msgid "Last sandbox result"
+#: src/Admin/Geo/GeoPanelRenderer.php:436
+msgid "Simulated outcome"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:449
-msgid "Most recent simulation output for your account."
+#. translators: %s: country label
+#: src/Admin/Geo/GeoPanelRenderer.php:463
+#, php-format
+msgid "Use %s here"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:465
+#: src/Admin/Geo/GeoPanelRenderer.php:468
 #: src/Admin/Geo/GeoPanelRenderer.php:470
-msgid "Provider chain"
+msgid "Manage Universal Geo Context simulation"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:466
-msgid "Location providers used to resolve visitor country."
+#: src/Admin/Geo/GeoPanelRenderer.php:473
+msgid "Universal Geo Context is simulating a location"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:471
-msgid "Provider chain configuration is read-only in this release. Universal Geo Context is preferred when available; WooCommerce billing/shipping and geolocation provide fallback signals."
+#: src/Admin/Geo/GeoPanelRenderer.php:474
+msgid "Your own admin browsing session currently sees a simulated country. That is separate from this currency simulation below, which never affects your session."
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:479
-msgid "Roadmap"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:485
-msgid "Advanced provider controls coming soon"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:486
-msgid "Editable provider priorities, enable/disable controls, and health metrics are planned for a future release."
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:498
-msgid "Proxy and CDN configuration for accurate country detection."
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:503
-msgid "Managed by Universal Geo Context"
+#. translators: %s: resulting currency code
+#: src/Admin/Geo/GeoPanelRenderer.php:496
+#, php-format
+msgid "Effective currency: %s"
 msgstr ""
 
 #: src/Admin/Geo/GeoPanelRenderer.php:504
-msgid "Universal Multicurrency does not manage trusted proxy configuration. When Universal Geo Context is installed, it handles proxy and CDN country signals."
+msgid "Currency routing was skipped"
 msgstr ""
 
+#: src/Admin/Geo/GeoPanelRenderer.php:514
+msgid "Technical fallback used"
+msgstr ""
+
+#. translators: %s: matched rule identifier or currency
 #: src/Admin/Geo/GeoPanelRenderer.php:517
-msgid "Health signals"
+#, php-format
+msgid "Matched rule: %s"
 msgstr ""
 
 #: src/Admin/Geo/GeoPanelRenderer.php:518
-msgid "Quick health overview for Visitor Location configuration."
+#: src/Admin/Geo/GeoPanelRenderer.php:848
+#: src/Admin/Geo/GeoPanelRenderer.php:855
+msgid "none"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:522
-msgid "Health overview"
+#: src/Admin/Geo/GeoPanelRenderer.php:527
+msgid "Technical details (raw output)"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRenderer.php:523
-msgid "Geo Detection health signals for this store."
-msgstr ""
-
-#. translators: %d: number of routing rules
-#: src/Admin/Geo/GeoPanelRenderer.php:528
+#. translators: %s: rule label
+#: src/Admin/Geo/GeoPanelRenderer.php:554
 #, php-format
-msgid "Routing rules: %d"
+msgid "%s — matched"
 msgstr ""
 
-#. translators: %d: region registry version
-#: src/Admin/Geo/GeoPanelRenderer.php:537
-#, php-format
-msgid "Region registry version: %d"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:547
-msgid "Tools"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:548
-msgid "Related diagnostics for deeper inspection."
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:552
-msgid "Diagnostics tools"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:553
-msgid "Open related diagnostics to inspect Geo Detection configuration alongside other store health checks."
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:557
-msgid "Open Site Health"
-msgstr ""
-
+#. translators: 1: rule label, 2: reason the rule did not apply
 #: src/Admin/Geo/GeoPanelRenderer.php:559
-msgid "Open Compatibility diagnostics"
+#, php-format
+msgid "%1$s — %2$s"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:577
+msgid "currency not currently selectable"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:578
+msgid "no match"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:589
+msgid "An explicit currency (?currency=) already takes precedence."
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:590
+msgid "A session currency already takes precedence."
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:591
+msgid "A cookie currency already takes precedence."
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:592
+msgid "A shopper currency already takes precedence."
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:593
+msgid "Checkout has locked the currency for this session."
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:594
+msgid "Automatic currency detection is disabled."
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:595
+msgid "Automatic currency detection did not run for this scenario."
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:667
+msgid "Simulation active"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:668
+msgid "Simulation inactive"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:669
+msgid "Status healthy"
+msgstr ""
+
+#. translators: %s: installed Universal Geo Context version
+#: src/Admin/Geo/GeoPanelRenderer.php:673
+#, php-format
+msgid "Installed version %s does not expose a compatible detection API"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:674
+msgid "unknown"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:677
+msgid "Not installed — using the WooCommerce fallback"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:679
+msgid "Not installed — no automatic detection is active"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:683
+msgid "Universal Geo Context connected"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:685
+msgid "Not connected"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:693
+#: src/Admin/GeoDetectionSettingsField.php:224
+msgid "Open Universal Geo Context"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:709
+msgid "No detection provider available"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:710
+msgid "Install Universal Geo Context for automatic country detection, or enable the WooCommerce fallback on Currency Routing."
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:715
+msgid "Not determined"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:718
+msgid "No match"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:720
+msgid "Detected for your admin session — storefront visitors are resolved individually."
+msgstr ""
+
+#. translators: %s: detected country label
+#: src/Admin/Geo/GeoPanelRenderer.php:724
+#, php-format
+msgid "Country: %s"
+msgstr ""
+
+#. translators: %s: matched routing rule
+#: src/Admin/Geo/GeoPanelRenderer.php:733
+#, php-format
+msgid "Rule: %s"
+msgstr ""
+
+#. translators: %s: resulting currency code
+#: src/Admin/Geo/GeoPanelRenderer.php:742
+#, php-format
+msgid "Currency: %s"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:751
+msgid "This is a preview of your routing policy. Automatic currency detection itself is currently disabled — see Currency Routing."
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:771
+msgid "Automatic detection is enabled but no routing rules are configured. Visitors will always receive the fallback currency."
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:775
+msgid "No detection provider is available: Universal Geo Context is not installed and the WooCommerce fallback is disabled."
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:783
+msgid "Universal Geo Context is simulating a country for your admin session. Turn off simulation there when you are done testing."
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:800
+msgid "Manage currency routing rules"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:802
+msgid "Edit the ordered country and region rules."
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:805
+msgid "Simulate a currency decision"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:807
+msgid "Test routing safely without affecting live shoppers."
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:815
+msgid "Simulate a country"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:817
+msgid "Test detection in Universal Geo Context."
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:820
+msgid "Inspect current detection"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:822
+msgid "Open the Universal Geo Context Detection Inspector."
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:825
+msgid "Manage providers"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:827
+msgid "Configure detection providers in Universal Geo Context."
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:830
+msgid "View geo diagnostics"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:832
+msgid "Open detailed detection diagnostics."
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:852
+msgid "Provider order"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:852
+msgid "Universal Geo Context, then WooCommerce fallback"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:853
+msgid "Detection source"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:854
+msgid "Confidence"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:855
+msgid "Detected country"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:856
+msgid "Matched rule index"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:856
+#: src/Admin/Geo/GeoPanelRenderer.php:858
+msgid "n/a"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:857
+msgid "Universal Geo Context version"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:857
+msgid "not installed"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:858
+msgid "Universal Geo Context API version"
+msgstr ""
+
+#: src/Admin/Geo/GeoPanelRenderer.php:868
+msgid "Technical details"
+msgstr ""
+
+#: src/Admin/GeoDetectionSettingsField.php:189
+msgid "Visitor Location settings now live on the Currency Routing panel."
+msgstr ""
+
+#: src/Admin/GeoDetectionSettingsField.php:190
+msgid "Provider configuration is managed in Universal Geo Context."
+msgstr ""
+
+#: src/Admin/GeoDetectionSettingsField.php:191
+msgid "Trusted proxies are managed in Universal Geo Context."
+msgstr ""
+
+#: src/Admin/GeoDetectionSettingsField.php:192
+msgid "Geo diagnostics are managed in Universal Geo Context. Currency-routing status is shown here."
+msgstr ""
+
+#: src/Admin/GeoDetectionSettingsField.php:193
+msgid "This page has moved."
 msgstr ""
 
 #: src/Admin/GeoDetectionSimulationController.php:43
@@ -1532,7 +1670,7 @@ msgid "%s were skipped because those currencies are not enabled."
 msgstr ""
 
 #: src/Admin/GeoSandboxController.php:86
-msgid "You do not have permission to run the Geo Sandbox."
+msgid "You do not have permission to run Currency Simulation."
 msgstr ""
 
 #: src/Admin/OrderCurrencyMetaBox.php:80
@@ -1586,6 +1724,10 @@ msgstr ""
 msgid "This section will be implemented in a future milestone."
 msgstr ""
 
+#: src/Admin/PluginActionLinks.php:58
+msgid "Settings"
+msgstr ""
+
 #. translators: %s: comma-separated currency codes
 #: src/Admin/RateFailureNotice.php:89
 #, php-format
@@ -1621,17 +1763,17 @@ msgid "Multicurrency settings sections"
 msgstr ""
 
 #: src/Admin/SettingsPage.php:188
-#: src/Admin/SettingsPage.php:628
+#: src/Admin/SettingsPage.php:621
 msgid "Exchange Rates"
 msgstr ""
 
 #: src/Admin/SettingsPage.php:190
-#: src/Admin/SettingsPage.php:547
+#: src/Admin/SettingsPage.php:540
 msgid "Display"
 msgstr ""
 
 #: src/Admin/SettingsPage.php:191
-#: src/Admin/SettingsPage.php:601
+#: src/Admin/SettingsPage.php:594
 msgid "Checkout"
 msgstr ""
 
@@ -1639,11 +1781,11 @@ msgstr ""
 msgid "Advanced"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:405
+#: src/Admin/SettingsPage.php:398
 msgid "When the switcher is enabled, at least one device visibility option must be selected."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:422
+#: src/Admin/SettingsPage.php:415
 msgid "Horizontal list is only available with manual placement. Style was saved as Dropdown."
 msgstr ""
 
@@ -1966,13 +2108,13 @@ msgid "Stored schema version %1$d is older than the current schema %2$d."
 msgstr ""
 
 #: src/Compatibility/Validation/SettingsConfigurationValidator.php:186
-#: src/Diagnostics/SiteHealthReport.php:229
+#: src/Diagnostics/SiteHealthReport.php:230
 msgid "Recent exchange-rate fetch failures detected"
 msgstr ""
 
 #. translators: %d: number of currencies with failed fetches
 #: src/Compatibility/Validation/SettingsConfigurationValidator.php:189
-#: src/Diagnostics/SiteHealthReport.php:234
+#: src/Diagnostics/SiteHealthReport.php:235
 #, php-format
 msgid "%d automatic currency has a failed fetch on record."
 msgid_plural "%d automatic currencies have failed fetches on record."
@@ -1992,12 +2134,12 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: src/Compatibility/Validation/SettingsConfigurationValidator.php:226
-#: src/Diagnostics/SiteHealthReport.php:220
+#: src/Diagnostics/SiteHealthReport.php:221
 msgid "Automatic rate updates are not scheduled"
 msgstr ""
 
 #: src/Compatibility/Validation/SettingsConfigurationValidator.php:227
-#: src/Diagnostics/SiteHealthReport.php:222
+#: src/Diagnostics/SiteHealthReport.php:223
 msgid "Automatic mode is enabled but no recurring update is scheduled."
 msgstr ""
 
@@ -2078,8 +2220,8 @@ msgstr ""
 #: src/Diagnostics/ConflictNotice.php:444
 #: src/Diagnostics/ConflictNotice.php:733
 #: src/Diagnostics/ConflictNotice.php:738
-#: src/Diagnostics/SiteHealthReport.php:837
-#: src/Diagnostics/SiteHealthReport.php:842
+#: src/Diagnostics/SiteHealthReport.php:849
+#: src/Diagnostics/SiteHealthReport.php:854
 msgid "and"
 msgstr ""
 
@@ -2137,253 +2279,265 @@ msgstr ""
 msgid "Detected because:"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:122
+#: src/Diagnostics/SiteHealthReport.php:123
 msgid "Currency switcher conflicts"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:126
+#: src/Diagnostics/SiteHealthReport.php:127
 msgid "Universal Multicurrency environment"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:130
+#: src/Diagnostics/SiteHealthReport.php:131
 msgid "Exchange rate provider health"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:134
+#: src/Diagnostics/SiteHealthReport.php:135
 msgid "Geo Detection configuration"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:192
+#: src/Diagnostics/SiteHealthReport.php:193
 msgid "Exchange rate health unavailable"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:194
+#: src/Diagnostics/SiteHealthReport.php:195
 msgid "Rate health diagnostics were not initialized."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:249
+#: src/Diagnostics/SiteHealthReport.php:250
 msgid "Multiple automatic exchange rates are stale"
 msgstr ""
 
 #. translators: %d: stale currency count
-#: src/Diagnostics/SiteHealthReport.php:254
+#: src/Diagnostics/SiteHealthReport.php:255
 #, php-format
 msgid "%d automatic currencies exceed the configured maximum age."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:264
+#: src/Diagnostics/SiteHealthReport.php:265
 msgid "Some automatic exchange rates are stale"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:266
+#: src/Diagnostics/SiteHealthReport.php:267
 msgid "One or more automatic currencies exceed the configured maximum age. Conversion still uses the last known rate."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:275
+#: src/Diagnostics/SiteHealthReport.php:276
 msgid "Exchange rate provider health looks good"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:277
+#: src/Diagnostics/SiteHealthReport.php:278
 msgid "No stale or failed automatic rates were recorded in the last-known operational state."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:290
+#: src/Diagnostics/SiteHealthReport.php:291
 msgid "Geo Detection status unavailable"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:292
+#: src/Diagnostics/SiteHealthReport.php:293
 msgid "Geo diagnostics were not initialized."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:301
+#: src/Diagnostics/SiteHealthReport.php:302
 msgid "Geo Detection is disabled"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:303
+#: src/Diagnostics/SiteHealthReport.php:304
 msgid "Automatic country-based currency routing is not active."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:310
+#: src/Diagnostics/SiteHealthReport.php:311
 msgid "Geo Detection is enabled without routing rules"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:312
+#: src/Diagnostics/SiteHealthReport.php:313
 msgid "Add geographic routing rules or disable Geo Detection."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:319
+#: src/Diagnostics/SiteHealthReport.php:322
 msgid "Geo Detection has no country provider"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:321
+#: src/Diagnostics/SiteHealthReport.php:324
 msgid "Universal Geo Context is unavailable and WooCommerce geolocation fallback is disabled."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:327
+#: src/Diagnostics/SiteHealthReport.php:331
+msgid "Geo Detection is using the WooCommerce fallback provider"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:333
+msgid "Install Universal Geo Context for higher-accuracy country detection. WooCommerce geolocation fallback is currently handling detection."
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:339
 msgid "Geo Detection configuration looks good"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:329
+#: src/Diagnostics/SiteHealthReport.php:341
 msgid "Geo Detection is enabled with routing rules configured."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:361
+#: src/Diagnostics/SiteHealthReport.php:373
 msgid "No conflicting currency switchers detected"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:363
+#: src/Diagnostics/SiteHealthReport.php:375
 msgid "Universal Multicurrency did not detect another currency switcher on this site."
 msgstr ""
 
 #. translators: %s: comma-separated list of detected switcher labels
-#: src/Diagnostics/SiteHealthReport.php:381
+#: src/Diagnostics/SiteHealthReport.php:393
 #, php-format
 msgid "Universal Multicurrency detected a conflicting currency switcher: %s."
 msgid_plural "Universal Multicurrency detected conflicting currency switchers: %s."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Diagnostics/SiteHealthReport.php:391
+#: src/Diagnostics/SiteHealthReport.php:403
 msgid "The evidence is weak and may be a false positive. Review the Multicurrency settings tab if prices look wrong."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:396
+#: src/Diagnostics/SiteHealthReport.php:408
 msgid "Deactivate the other switcher to avoid multiplied exchange rates. Universal Multicurrency will not deactivate it for you."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:401
+#: src/Diagnostics/SiteHealthReport.php:413
 msgid "Running two currency switchers can multiply exchange rates and corrupt cart and order totals. Deactivate the other switcher immediately."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:408
+#: src/Diagnostics/SiteHealthReport.php:420
 msgid "Conflicting currency switcher detected"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:410
+#: src/Diagnostics/SiteHealthReport.php:422
 msgid "Possible currency switcher conflict"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:411
+#: src/Diagnostics/SiteHealthReport.php:423
 msgid "Weak currency switcher signal detected"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:480
+#: src/Diagnostics/SiteHealthReport.php:492
 msgid "Environment meets Universal Multicurrency requirements"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:482
+#: src/Diagnostics/SiteHealthReport.php:494
 msgid "PHP, WordPress, WooCommerce, and High-Performance Order Storage meet the supported range for this plugin."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:497
+#: src/Diagnostics/SiteHealthReport.php:509
 msgid "Environment is below the supported minimum"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:498
+#: src/Diagnostics/SiteHealthReport.php:510
 msgid "Environment should be reviewed"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:667
+#: src/Diagnostics/SiteHealthReport.php:679
 msgid "Passive compatibility and environment diagnostics for support requests."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:670
+#: src/Diagnostics/SiteHealthReport.php:682
 msgid "Plugin version"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:678
+#: src/Diagnostics/SiteHealthReport.php:690
 msgid "Currencies configured"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:682
+#: src/Diagnostics/SiteHealthReport.php:694
 msgid "Currencies enabled with a rate"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:686
+#: src/Diagnostics/SiteHealthReport.php:698
 msgid "HPOS enabled"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:690
+#: src/Diagnostics/SiteHealthReport.php:702
 msgid "Settings schema version"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:694
+#: src/Diagnostics/SiteHealthReport.php:706
 msgid "Declared minimum PHP"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:698
+#: src/Diagnostics/SiteHealthReport.php:710
 msgid "Declared minimum WordPress"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:702
+#: src/Diagnostics/SiteHealthReport.php:714
 msgid "Declared minimum WooCommerce"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:706
+#: src/Diagnostics/SiteHealthReport.php:718
 msgid "Running PHP"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:710
+#: src/Diagnostics/SiteHealthReport.php:722
 msgid "Running WordPress"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:714
+#: src/Diagnostics/SiteHealthReport.php:726
 msgid "Running WooCommerce"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:718
+#: src/Diagnostics/SiteHealthReport.php:730
 msgid "Conflicts detected"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:722
+#: src/Diagnostics/SiteHealthReport.php:734
 msgid "Store API conversion"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:726
+#: src/Diagnostics/SiteHealthReport.php:735
+msgid "Active"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:738
 msgid "Stale automatic rates"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:730
+#: src/Diagnostics/SiteHealthReport.php:742
 msgid "Oldest automatic rate age (hours)"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:744
+#: src/Diagnostics/SiteHealthReport.php:756
 msgid "None"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:779
+#: src/Diagnostics/SiteHealthReport.php:791
 msgid "PHP is below the minimum version required by Universal Multicurrency."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:783
+#: src/Diagnostics/SiteHealthReport.php:795
 msgid "WordPress is below the minimum version required by Universal Multicurrency."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:787
+#: src/Diagnostics/SiteHealthReport.php:799
 msgid "WooCommerce is below the minimum version required by Universal Multicurrency."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:791
+#: src/Diagnostics/SiteHealthReport.php:803
 msgid "PHP is newer than the version Universal Multicurrency has tested up to."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:795
+#: src/Diagnostics/SiteHealthReport.php:807
 msgid "WordPress is newer than the version Universal Multicurrency has tested up to."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:799
+#: src/Diagnostics/SiteHealthReport.php:811
 msgid "WooCommerce is newer than the version Universal Multicurrency has tested up to."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:805
+#: src/Diagnostics/SiteHealthReport.php:817
 msgid "One or more environment version strings could not be parsed."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:809
+#: src/Diagnostics/SiteHealthReport.php:821
 msgid "This store is below a future minimum version announced in the compatibility documentation."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:813
+#: src/Diagnostics/SiteHealthReport.php:825
 msgid "High-Performance Order Storage (HPOS) is not enabled. Universal Multicurrency supports legacy order storage, but HPOS is recommended."
 msgstr ""
 
