@@ -87,9 +87,11 @@ During spec audit, four genuine, narrow engineering gaps were identified:
 3. **Dead `$geo` parameter on `CurrencyResolver::resolve()`:** The 6th optional
    parameter `?string $geo = null` is never populated by any production caller
    (confirmed via repo-wide grep) and represents an abandoned candidate-list
-   integration pattern. Remediation: remove the parameter and dead branch;
-   document the reason (architecture uses `GeoDetectionApplicator` →
-   `CurrencySwitcher` side-channel write, not parameter passing).
+   integration pattern. The architecture uses `GeoDetectionApplicator` →
+   `CurrencySwitcher::persist()` (side-channel write) instead. The parameter's
+   test case (`test_geo_candidate_is_used_between_cookie_and_base`) documents
+   the design intent but is dead code. Remediation: remove the parameter,
+   its branch, and the test; document the reason (architecture rationale).
 
 4. **Caching guidance for first-visit geo detection:** Documentation lacks
    explicit guidance on the cache-behavior risk: a full-page cache served
