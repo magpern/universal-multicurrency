@@ -196,6 +196,21 @@
     [`docs/adr/0018-visitor-location-boundary-alignment.md`](adr/0018-visitor-location-boundary-alignment.md)
     and [`docs/GEO_DETECTION.md`](GEO_DETECTION.md).
 
+    ### Post-v0.13.0 hardening
+
+    Conformance-validation and gap-closure work completed after the main M14
+    scope (see [`docs/adr/0019-visitor-location-spec-conformance.md`](adr/0019-visitor-location-spec-conformance.md)):
+
+    | Item | Status |
+    |---|---|
+    | `GeoDetectionApplicator` integration test coverage (storefront gating guards and detection mode semantics) | **Complete** — WP2 |
+    | Malformed JSON (`GeoContextSerializer::decode()`) unit test coverage | **Complete** — WP2 |
+    | Remove dead `$geo` parameter from `CurrencyResolver::resolve()` | **Complete** — WP3 |
+    | First-visit geo detection caching guidance (`CacheCheck` advisory, docs, test) | **Complete** — WP4 |
+
+    No settings schema change, storefront behavior change, or version bump.
+    Safe in-place upgrade from **0.13.0**.
+
 ## Future milestones — not started, not implemented
 
 None of the following exists in the codebase today:
