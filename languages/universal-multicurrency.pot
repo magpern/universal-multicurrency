@@ -1863,20 +1863,24 @@ msgstr ""
 #. translators: %s: cache plugin name
 #: src/Compatibility/Checks/CacheCheck.php:120
 #, php-format
-msgid "%s is active. Full-page caching may serve the wrong currency unless cache varies by selection state."
+msgid "%s is active. Full-page caching may serve the wrong currency to first-time visitors or when currency selection changes unless cache is configured appropriately."
 msgstr ""
 
 #. translators: %s: cookie name used by Universal Multicurrency
 #: src/Compatibility/Checks/CacheCheck.php:139
 #, php-format
-msgid "Vary or bypass page cache when the selected currency changes (%1$s cookie, WooCommerce session key %2$s, or explicit currency query requests)."
+msgid "Vary or bypass page cache when currency selection changes via the switcher (%1$s cookie, WooCommerce session key %2$s, or explicit currency query requests)."
 msgstr ""
 
 #: src/Compatibility/Checks/CacheCheck.php:143
-msgid "Exclude cart, checkout, and account pages from full-page cache when prices must reflect the selected currency."
+msgid "If Visitor Location (first-visit country-based detection) is enabled, exclude landing and category pages from full-page cache or configure cache to vary on the currency cookie, so new visitors do not see a cached page from a different country."
 msgstr ""
 
 #: src/Compatibility/Checks/CacheCheck.php:144
+msgid "Exclude cart, checkout, and account pages from full-page cache when prices must reflect the selected currency."
+msgstr ""
+
+#: src/Compatibility/Checks/CacheCheck.php:145
 msgid "Confirm AJAX or fragment behavior for the currency switcher under cache."
 msgstr ""
 
