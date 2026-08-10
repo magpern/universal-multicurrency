@@ -26,7 +26,7 @@ jobs:
   phpcs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         id: setup-php
         with:
@@ -44,7 +44,7 @@ jobs:
   pot:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
@@ -66,7 +66,7 @@ jobs:
         # tests/unit/bootstrap.php), so this is the PHP axis in isolation.
         php: ['8.1', '8.3', '8.4']
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         id: setup-php
         with:
@@ -147,7 +147,7 @@ jobs:
       WP_DB_USER: root
       WP_DB_PASS: root
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         id: setup-php
         with:
@@ -213,7 +213,7 @@ jobs:
       WP_DB_USER: root
       WP_DB_PASS: root
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         id: setup-php
         with:
@@ -238,7 +238,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         id: setup-php
         with:
@@ -252,7 +252,7 @@ jobs:
             ${{ runner.os }}-composer-${{ steps.setup-php.outputs.php-version }}-
       - run: composer install --no-dev --prefer-dist --no-progress --optimize-autoloader
       - run: bash bin/build-zip.sh
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: universal-multicurrency
           path: dist/universal-multicurrency-*.zip
@@ -260,7 +260,7 @@ jobs:
   release-audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         id: setup-php
         with:
@@ -285,7 +285,7 @@ jobs:
   mutation:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: dorny/paths-filter@v4
         id: changes
         with:
