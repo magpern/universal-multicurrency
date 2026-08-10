@@ -207,6 +207,7 @@
     | Malformed JSON (`GeoContextSerializer::decode()`) unit test coverage | **Complete** — `155d692` |
     | Remove dead `$geo` parameter from `CurrencyResolver::resolve()` | **Complete** — `6b076bf` |
     | First-visit geo detection caching guidance (`CacheCheck` advisory, docs) | **Complete** — `42123f4` |
+    | `GeoDetectionApplicator` storefront gating integration test coverage | **Complete** — `9adba08` |
 
     No settings schema change, storefront behavior change, or version bump.
     Safe in-place upgrade from **0.13.0**.
