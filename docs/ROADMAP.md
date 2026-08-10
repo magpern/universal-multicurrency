@@ -203,10 +203,10 @@
 
     | Item | Status |
     |---|---|
-    | `GeoDetectionApplicator` integration test coverage (storefront gating guards and detection mode semantics) | **Complete** — WP2 |
-    | Malformed JSON (`GeoContextSerializer::decode()`) unit test coverage | **Complete** — WP2 |
-    | Remove dead `$geo` parameter from `CurrencyResolver::resolve()` | **Complete** — WP3 |
-    | First-visit geo detection caching guidance (`CacheCheck` advisory, docs, test) | **Complete** — WP4 |
+    | ADR-0019 spec conformance + ROADMAP hardening documentation | **Complete** — `3ba9a74` |
+    | Malformed JSON (`GeoContextSerializer::decode()`) unit test coverage | **Complete** — `155d692` |
+    | Remove dead `$geo` parameter from `CurrencyResolver::resolve()` | **Complete** — `6b076bf` |
+    | First-visit geo detection caching guidance (`CacheCheck` advisory, docs) | **Complete** — `42123f4` |
 
     No settings schema change, storefront behavior change, or version bump.
     Safe in-place upgrade from **0.13.0**.
