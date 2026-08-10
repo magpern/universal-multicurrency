@@ -117,7 +117,7 @@ final class CacheCheck implements CompatibilityCheckInterface {
 
 		return sprintf(
 			/* translators: %s: cache plugin name */
-			__( '%s is active. Full-page caching may serve the wrong currency unless cache varies by selection state.', 'universal-multicurrency' ),
+			__( '%s is active. Full-page caching may serve the wrong currency to first-time visitors or when currency selection changes unless cache is configured appropriately.', 'universal-multicurrency' ),
 			$label
 		);
 	}
@@ -136,10 +136,11 @@ final class CacheCheck implements CompatibilityCheckInterface {
 		return array(
 			sprintf(
 				/* translators: %s: cookie name used by Universal Multicurrency */
-				__( 'Vary or bypass page cache when the selected currency changes (%1$s cookie, WooCommerce session key %2$s, or explicit currency query requests).', 'universal-multicurrency' ),
+				__( 'Vary or bypass page cache when currency selection changes via the switcher (%1$s cookie, WooCommerce session key %2$s, or explicit currency query requests).', 'universal-multicurrency' ),
 				CurrencyContext::COOKIE_NAME,
 				CurrencyContext::SESSION_KEY
 			),
+			__( 'If Visitor Location (first-visit country-based detection) is enabled, exclude landing and category pages from full-page cache or configure cache to vary on the currency cookie, so new visitors do not see a cached page from a different country.', 'universal-multicurrency' ),
 			__( 'Exclude cart, checkout, and account pages from full-page cache when prices must reflect the selected currency.', 'universal-multicurrency' ),
 			__( 'Confirm AJAX or fragment behavior for the currency switcher under cache.', 'universal-multicurrency' ),
 		);

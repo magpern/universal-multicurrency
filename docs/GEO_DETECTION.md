@@ -143,6 +143,43 @@ with a one-time notice, and will keep doing so for at least two minor
 releases. See [ADR-0018](adr/0018-visitor-location-boundary-alignment.md)
 for the full rationale.
 
+## Caching and first-visit detection
+
+Visitor Location determines a visitor's country only when WordPress and PHP
+execute. If your store uses **full-page caching** (via a caching plugin, CDN,
+edge cache, or reverse proxy), a cached page served to a first-time visitor
+*before* the detection code runs will show a currency computed for a *different*
+geography.
+
+### Merchant configuration
+
+If you enable first-visit Visitor Location detection, you should ensure your
+cache does not serve the same page to visitors from different countries without
+re-evaluating:
+
+- **Exclude landing pages from full-page cache** — mark your home page, category
+  archives, and product listing pages as non-cacheable, or set a very short TTL
+  (cache lifetime). First-visit detection runs earliest on these pages.
+- **Configure cache to vary on the currency cookie** — if your caching plugin
+  (e.g. WP Super Cache, LiteSpeed Cache, WP Rocket) supports cache-key variation,
+  add the `umc_currency` cookie as a vary dimension. After Visitor Location
+  applies a currency once, the cookie persists it for 30 days, and your cache
+  respects the cookie automatically.
+- **Use session-aware cache** — some CDNs and reverse proxies (Cloudflare,
+  Varnish, Nginx) can be configured to check WooCommerce session cookies and
+  bypass cache for new sessions, serving fresh HTML instead of a cached page.
+
+If you do not configure cache behavior and a first-time visitor from Sweden
+lands on a cached page that was built for a Brazil visitor, they will see
+prices in BRL until they manually select a currency or reload the page.
+
+### For developers
+
+The `umc_geo_currency_decided` action fires **after** a geo currency is selected
+and **before** it is persisted. This is the appropriate hook to add cache-busting
+logic (send `Cache-Control: no-cache`, `Vary` headers, or clear relevant cache
+keys) if you need Visitor Location to bypass your cache entirely.
+
 ## Related documentation
 
 - [ADR-0018](adr/0018-visitor-location-boundary-alignment.md) — the
