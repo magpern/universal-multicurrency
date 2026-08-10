@@ -83,7 +83,7 @@ final class GeoSandboxController {
 	 */
 	public function handle(): void {
 		if ( ! current_user_can( 'manage_woocommerce' ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown
-			wp_die( esc_html__( 'You do not have permission to run the Geo Sandbox.', 'universal-multicurrency' ) );
+			wp_die( esc_html__( 'You do not have permission to run Currency Simulation.', 'universal-multicurrency' ) );
 		}
 
 		check_admin_referer( self::ACTION );

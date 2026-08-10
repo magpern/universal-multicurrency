@@ -12,6 +12,8 @@ namespace UMC\Tests\Unit;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use RuntimeException;
+use UMC\Admin\Geo\GeoSandboxRecentStore;
+use UMC\Admin\GeoSandboxController;
 use UMC\Cart\CartRecalculation;
 use UMC\Checkout\CheckoutTransitionStateRepository;
 use UMC\CurrencyContext;
@@ -127,7 +129,11 @@ final class PersistedKeysInventoryTest extends TestCase {
 
 	public function test_user_meta_keys_match_notice_dismissal_constant(): void {
 		$this->assertSame(
-			array( NoticeDismissal::META_KEY ),
+			array(
+				NoticeDismissal::META_KEY,
+				GeoSandboxController::RESULT_META,
+				GeoSandboxRecentStore::META_KEY,
+			),
 			PersistedKeys::user_meta_keys()
 		);
 	}

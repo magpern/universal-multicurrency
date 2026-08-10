@@ -2356,6 +2356,13 @@
 	line-height: 1.5;
 }
 
+.umc-geo-rule__explanation {
+	grid-column: 1 / -1;
+	margin: 0;
+	color: var(--umc-muted);
+	font-size: 0.85rem;
+}
+
 .umc-geo-shadow-warning {
 	grid-column: 1 / -1;
 	margin: 0;

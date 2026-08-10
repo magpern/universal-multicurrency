@@ -100,7 +100,11 @@ final class UninstallPolicyGuardTest extends TestCase {
 
 	public function test_uninstall_policy_preserves_dismissal_user_meta(): void {
 		$this->assertSame(
-			array( 'umc_dismissed_notices' ),
+			array(
+				'umc_dismissed_notices',
+				\UMC\Admin\GeoSandboxController::RESULT_META,
+				\UMC\Admin\Geo\GeoSandboxRecentStore::META_KEY,
+			),
 			PersistedKeys::uninstall_preserved_user_meta_keys()
 		);
 	}

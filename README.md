@@ -5,9 +5,10 @@ rates from an exchange-rate provider. Products and inventory stay in the store's
 base currency; conversion happens at runtime on storefront, cart, checkout, and
 Store API surfaces. Orders carry a permanent exchange-rate snapshot.
 
-**Current release:** **v0.9.1** (plugin header and `UMC_VERSION`) — Compatibility
-diagnostics center plus validation and rate-update fixes. Tag and GitHub release
-follow release verification; see [`docs/RELEASE_AUDIT.md`](docs/RELEASE_AUDIT.md).
+**Current release:** **v0.13.0** (plugin header and `UMC_VERSION`) — Visitor
+Location boundary alignment with Universal Geo Context (ADR-0018). Tag and
+GitHub release follow release verification; see
+[`docs/RELEASE_AUDIT.md`](docs/RELEASE_AUDIT.md).
 
 ## Invariants
 
@@ -34,7 +35,7 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Produces `dist/universal-multicurrency-0.9.1.zip`. Upload and activate through
+Produces `dist/universal-multicurrency-0.13.0.zip`. Upload and activate through
 WordPress, or symlink the plugin directory into `wp-content/plugins/`.
 WooCommerce must be active first. The release zip includes `readme.txt`,
 production `src/`, `vendor/`, and `languages/universal-multicurrency.pot`.
@@ -70,6 +71,36 @@ CI legs, and passive conflict detectors.
   and `umc_dismissed_notices` user meta are preserved (ADR-0009).
 
 ## Changelog
+
+Highlights only — see [`readme.txt`](readme.txt) for the complete
+release-by-release changelog.
+
+### 0.13.0 — Visitor Location boundary alignment
+
+Visitor Location hub reduced from seven panels to three (Overview, Currency
+Routing, Currency Simulation); Overview redesigned as a merchant dashboard;
+Currency Routing absorbs the former Settings panel and presents rules as
+policy statements; Currency Simulation replaces raw JSON with design-system
+output and is aware of an active Universal Geo Context location simulation.
+Universal Geo Context availability centralized behind one check. No
+settings schema change — see [ADR-0018](docs/adr/0018-visitor-location-boundary-alignment.md).
+
+### 0.12.x — Geo Detection admin hub
+
+Panel-based Visitor Location hub with GeoContext sandbox simulation
+(v0.12.0); Add-currency redirect fix (v0.12.1).
+
+### 0.11.0 — Geo Detection
+
+Ordered first-match country/region currency routing, settings schema v5,
+optional Universal Geo Context integration with WooCommerce geolocation
+fallback. See [`docs/GEO_DETECTION.md`](docs/GEO_DETECTION.md).
+
+### 0.10.0 — Checkout currency policy
+
+Checkout currency policy (`selected` or store currency at checkout entry),
+causality-proven payment-gateway fallback, Classic and Checkout Blocks
+parity, settings schema v4.
 
 ### 0.9.1 — Compatibility diagnostics
 
@@ -116,7 +147,7 @@ five-leg CI matrix, and `docs/COMPATIBILITY.md`.
 
 | Document | Contents |
 |---|---|
-| [`readme.txt`](readme.txt) | WordPress.org–oriented plugin readme (Stable tag 0.9.1) |
+| [`readme.txt`](readme.txt) | WordPress.org–oriented plugin readme (Stable tag 0.13.0) |
 | [`docs/PRODUCT_REQUIREMENTS.md`](docs/PRODUCT_REQUIREMENTS.md) | Goals and non-goals |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Layers, invariants, collaborators, exchange-rate layer |
 | [`docs/HOOKS.md`](docs/HOOKS.md) | Every hook registered, and every extension point provided |
@@ -129,7 +160,8 @@ five-leg CI matrix, and `docs/COMPATIBILITY.md`.
 | [`docs/SECURITY_REVIEW.md`](docs/SECURITY_REVIEW.md) | Security audit record and accepted residual risks |
 | [`docs/PERFORMANCE_BASELINES.md`](docs/PERFORMANCE_BASELINES.md) | Deterministic performance ceilings |
 | [`docs/RELEASE_AUDIT.md`](docs/RELEASE_AUDIT.md) | Executable release-blocking audit record |
-| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Milestone status (Compatibility diagnostics at v0.9.1) |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Milestone status (Visitor Location boundary alignment at v0.13.0) |
+| [`docs/GEO_DETECTION.md`](docs/GEO_DETECTION.md) | Visitor Location administrator guide |
 | [`docs/adr/`](docs/adr/) | Architecture decision records |
 
 ## License

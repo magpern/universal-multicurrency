@@ -331,7 +331,7 @@ changing monetary behaviour. Authoritative records:
 | Persisted-key inventory | [`PERSISTED_DATA.md`](PERSISTED_DATA.md), `PersistedKeys`, `PersistedKeysInventoryTest` |
 | Uninstall retention | ADR-0009, `uninstall.php`, `UninstallPolicyGuardTest` |
 | Manual merchant migration only | [`MIGRATION.md`](MIGRATION.md) — no foreign import, no RC CSV parser |
-| Settings schema | `Settings::SCHEMA_VERSION === 4`; production migrations v0→v1, v1→v2, v2→v3, and v3→v4 via `SettingsUpgrader` |
+| Settings schema | `Settings::SCHEMA_VERSION === 5`; production migrations v0→v1, v1→v2, v2→v3, v3→v4, and v4→v5 via `SettingsUpgrader` |
 | Translation readiness | [`TRANSLATION.md`](TRANSLATION.md), `languages/universal-multicurrency.pot`, `composer make-pot:check` |
 | Security audit | [`SECURITY_REVIEW.md`](SECURITY_REVIEW.md) — zero open Critical/High; accepted M/L risks documented |
 | Performance baselines | [`PERFORMANCE_BASELINES.md`](PERFORMANCE_BASELINES.md) — deterministic query/write ceilings only |
@@ -431,6 +431,8 @@ conditional headers simply never returns 304; there is no new failure mode
 6. **The storefront money path is unaware of providers.** Conversion reads
    `Settings`; no storefront request fetches, schedules, or writes rates.
 
-Plugin version is **0.9.1**. Milestone 10 (Compatibility diagnostics) shipped at
-v0.9.1. Milestone 9 shipped at v0.9.0; v0.8.1 was a maintenance release. See [`RELEASE_AUDIT.md`](RELEASE_AUDIT.md) and
+Plugin version is **0.13.0**. Milestone 14 (Visitor Location boundary
+alignment, ADR-0018) is prepared at v0.13.0. Milestone 10 (Compatibility
+diagnostics) shipped at v0.9.1; Milestone 9 shipped at v0.9.0; v0.8.1 was a
+maintenance release. See [`RELEASE_AUDIT.md`](RELEASE_AUDIT.md) and
 [`ROADMAP.md`](ROADMAP.md).

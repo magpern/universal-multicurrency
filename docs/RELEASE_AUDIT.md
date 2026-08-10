@@ -1,15 +1,17 @@
-# Release audit — v0.12.0 Geo admin hub
+# Release audit — v0.13.0 Visitor Location boundary alignment
 
-Executable release-blocking gate for Universal Multicurrency **v0.12.0**. This
+Executable release-blocking gate for Universal Multicurrency **v0.13.0**. This
 document records scope, criteria, commands, audit results, and the current
 release-preparation state.
 
 **Governing question:** If we published this release tomorrow, is there anything
 left in the repository that clearly should not ship?
 
-**Repository status:** **prepared for v0.12.0** on `feature/m13-geo-admin-hub`.
-Milestone 13 (Geo admin hub) awaits CI verification. Git tag **`v0.12.0`** and
-GitHub release publication follow full CI matrix pass.
+**Repository status:** **prepared for v0.13.0** on
+`feature/m14-visitor-location-boundary`. Milestone 14 (Visitor Location
+boundary alignment with Universal Geo Context; ADR-0018) awaits CI
+verification. Git tag **`v0.13.0`** and GitHub release publication follow
+full CI matrix pass and explicit approval to tag and push.
 
 ---
 
@@ -17,36 +19,64 @@ GitHub release publication follow full CI matrix pass.
 
 | Item | Value |
 |---|---|
-| Version | **0.12.1** |
-| Settings schema | **5** (unchanged; Geo Detection subtree) |
+| Version | **0.13.0** |
+| Settings schema | **5** (unchanged; no keys added, renamed, or removed) |
 | Order snapshot schema | **3** (unchanged) |
-| Persisted-data inventory version | **5** |
-| Production migrations | **v0 → v1**, **v1 → v2**, **v2 → v3**, **v3 → v4**, **v4 → v5** |
+| GeoContext (sandbox document) schema | **2** (was 1; removed unused `network`/`providers` reserved subtrees, ADR-0018) |
+| Persisted-data inventory version | **6** (was 5; two previously-undocumented sandbox user-meta keys added) |
+| Production migrations | **v0 → v1**, **v1 → v2**, **v2 → v3**, **v3 → v4**, **v4 → v5** (unchanged; no new migration in this release) |
 | Unresolved Critical security findings | **0** |
 | Unresolved High security findings | **0** |
-| Unresolved release blockers | **0** (pending CI) |
+| Unresolved release blockers | **0** |
 | Open Milestone 8 review findings | **0** |
-| Deterministic performance gates | **Pending CI** |
-| POT drift | **Pending CI / make-pot** |
-| Dependency audit (`composer audit`) | **Pending CI** |
-| Package inspection | **Pending CI** |
+| Deterministic performance gates | See § Performance gate |
+| POT drift | See § Translation audit |
+| Dependency audit (`composer audit`) | See § Security gate |
+| Package inspection | See § Release ZIP audit |
 | Git tag `v0.10.0` | **Created** (superseded) |
 | GitHub release `v0.10.0` | **Published** (superseded) |
 | Git tag `v0.8.0` | **Created** (superseded) |
-| Git tag `v0.11.0` | **Not yet created** (superseded by M13 prep) |
-| GitHub release `v0.11.0` | **Not yet created** (superseded by M13 prep) |
-| Git tag `v0.12.0` | **Created** |
-| GitHub release `v0.12.0` | **Published** |
-| Git tag `v0.12.1` | **Not yet created** |
-| GitHub release `v0.12.1` | **Not yet created** |
+| Git tag `v0.11.0` | **Not yet created** (superseded by M13/M14 prep) |
+| GitHub release `v0.11.0` | **Not yet created** (superseded by M13/M14 prep) |
+| Git tag `v0.12.0` | **Created** (superseded) |
+| GitHub release `v0.12.0` | **Published** (superseded) |
+| Git tag `v0.12.1` | **Created** |
+| GitHub release `v0.12.1` | **Published** |
+| Git tag `v0.13.0` | **Not yet created** |
+| GitHub release `v0.13.0` | **Not yet created** |
 | Milestone 8 | **Complete** — released and review-closed at v0.8.0 |
 | Milestone 11 | **Complete** — Checkout currency policy at v0.10.0 |
-| Milestone 12 | **Prepared** — Geo Detection engine at v0.11.0 |
-| Milestone 13 | **Prepared** — Geo admin hub on feature branch |
+| Milestone 12 | **Prepared** — Geo Detection engine (see v0.12.0 tag note above) |
+| Milestone 13 | **Complete** — Geo admin hub at v0.12.0 |
+| Milestone 14 | **Prepared** — Visitor Location boundary alignment on feature branch |
 
 ---
 
-## v0.12.0 Geo admin hub scope
+## v0.13.0 Visitor Location boundary alignment scope
+
+Minor release shipping Milestone 14 (ADR-0018). Admin-only realignment with
+Universal Geo Context: the Visitor Location hub shrinks from seven panels to
+three, Overview becomes a merchant dashboard, Currency Routing absorbs the
+former Settings panel and presents rules as policy statements, and Currency
+Simulation (formerly Geo Sandbox) replaces raw JSON with design-system
+output. No settings schema change; storefront currency-decision behaviour
+is unchanged — verified by new characterization tests over the provider
+chain and applicator gate order predating any refactor in this milestone.
+
+### Shipped capabilities
+
+| Area | Summary |
+|---|---|
+| `UgcIntegrationStatus` | Single source of truth for Universal Geo Context availability; fixes three call sites that previously skipped the API-version compatibility check |
+| Visitor Location IA | Overview, Currency Routing, Currency Simulation (was seven panels); retired panel URLs 302-redirect with a one-time notice |
+| Overview redesign | Integration-health card, detected-country/matched-rule/resulting-currency preview, needs-attention area, collapsed technical details |
+| Currency Routing | Folded Settings panel; ordered routing policy presented as condition/result/priority statements with inline validation |
+| Currency Simulation | Design-system result presentation; Universal Geo Context simulation awareness; GeoContext schema v2 |
+| Persisted-data inventory | Two previously-undocumented sandbox user-meta keys added (inventory v5 → v6); classified preserved, no uninstall.php change |
+
+---
+
+## v0.12.0 Geo admin hub scope (superseded)
 
 Minor release shipping Milestone 13. Admin-only refactor: Geo Detection settings
 become a panel-based hub with GeoContext sandbox simulation. No settings schema
@@ -352,10 +382,10 @@ needles remain confined to `Diagnostics/DetectorManifest.php` only.
 
 ## Metadata and compatibility
 
-| Field | Value (v0.9.0) |
+| Field | Value (v0.13.0) |
 |---|---|
-| Plugin version (header + `UMC_VERSION`) | **0.9.1** |
-| readme.txt Stable tag | **0.9.1** |
+| Plugin version (header + `UMC_VERSION`) | **0.13.0** |
+| readme.txt Stable tag | **0.13.0** |
 | Text domain | `universal-multicurrency` |
 | Requires PHP | 8.1 |
 | Requires Plugins | woocommerce |
@@ -437,11 +467,11 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Expected artifact: **`dist/universal-multicurrency-0.9.1.zip`**
+Expected artifact: **`dist/universal-multicurrency-0.13.0.zip`**
 
 ### Included
 
-- `universal-multicurrency.php` (header Version **0.9.1**), `uninstall.php`, `readme.txt` (Stable tag **0.9.1**)
+- `universal-multicurrency.php` (header Version **0.13.0**), `uninstall.php`, `readme.txt` (Stable tag **0.13.0**)
 - `src/` production PHP including `src/Admin/DisplayControlRenderer.php`, `src/Admin/DisplaySettingsField.php`, `src/Display/`
 - `assets/admin/umc-settings.css`, `assets/admin/umc-settings.js`, `assets/css/switcher.css`, `assets/js/switcher.js`
 - `src/` production PHP

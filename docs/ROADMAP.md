@@ -171,6 +171,47 @@
 
     **Prepared as:** **v0.12.0**. See [`docs/adr/0017-geocontext-admin-hub.md`](adr/0017-geocontext-admin-hub.md).
 
+14. Visitor Location boundary alignment (**v0.13.0**) — **prepared on
+    `feature/m14-visitor-location-boundary`**. Supersedes the M14/M15 plans
+    recorded in ADR-0017's Consequences section (editable provider UI,
+    diagnostics from resolution traces) — see ADR-0018.
+
+    ### Scope for v0.13.0
+
+    | Work item | Status |
+    |---|---|
+    | `UgcIntegrationStatus` — single availability source of truth | **Prepared** |
+    | Visitor Location hub: 7 panels → 3 (Overview, Currency Routing, Currency Simulation) | **Prepared** |
+    | Retired-panel redirects with one-time notice (`GeoLegacyPanelRedirect`) | **Prepared** |
+    | Overview merchant dashboard (integration health, detected outcome, needs-attention) | **Prepared** |
+    | Currency Routing: folded Settings panel, condition/result/priority rule presentation | **Prepared** |
+    | Currency Simulation: design-system output, Universal Geo Context simulation awareness | **Prepared** |
+    | GeoContext schema v2 (removed `network`/`providers` reserved subtrees) | **Prepared** |
+    | Persisted-data inventory v6 (documented two previously-undocumented sandbox user-meta keys) | **Prepared** |
+
+    No settings schema change; storefront currency-decision behaviour is
+    unchanged (locked by new characterization tests predating the refactor).
+
+    **Prepared as:** **v0.13.0**. See
+    [`docs/adr/0018-visitor-location-boundary-alignment.md`](adr/0018-visitor-location-boundary-alignment.md)
+    and [`docs/GEO_DETECTION.md`](GEO_DETECTION.md).
+
+    ### Post-v0.13.0 hardening
+
+    Conformance-validation and gap-closure work completed after the main M14
+    scope (see [`docs/adr/0019-visitor-location-spec-conformance.md`](adr/0019-visitor-location-spec-conformance.md)):
+
+    | Item | Status |
+    |---|---|
+    | ADR-0019 spec conformance + ROADMAP hardening documentation | **Complete** — `3ba9a74` |
+    | Malformed JSON (`GeoContextSerializer::decode()`) unit test coverage | **Complete** — `155d692` |
+    | Remove dead `$geo` parameter from `CurrencyResolver::resolve()` | **Complete** — `6b076bf` |
+    | First-visit geo detection caching guidance (`CacheCheck` advisory, docs) | **Complete** — `42123f4` |
+    | `GeoDetectionApplicator` storefront gating integration test coverage | **Complete** — `9adba08` |
+
+    No settings schema change, storefront behavior change, or version bump.
+    Safe in-place upgrade from **0.13.0**.
+
 ## Future milestones — not started, not implemented
 
 None of the following exists in the codebase today:

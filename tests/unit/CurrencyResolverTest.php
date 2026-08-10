@@ -20,8 +20,8 @@ final class CurrencyResolverTest extends TestCase {
 	private const BASE       = 'EUR';
 	private const SELECTABLE = array( 'SEK', 'JPY' );
 
-	private function resolve( ?string $explicit, ?string $session, ?string $cookie, ?string $geo = null ): string {
-		return ( new CurrencyResolver() )->resolve( $explicit, $session, $cookie, self::BASE, self::SELECTABLE, $geo );
+	private function resolve( ?string $explicit, ?string $session, ?string $cookie ): string {
+		return ( new CurrencyResolver() )->resolve( $explicit, $session, $cookie, self::BASE, self::SELECTABLE );
 	}
 
 	public function test_explicit_wins_over_session_and_cookie(): void {
@@ -64,11 +64,5 @@ final class CurrencyResolverTest extends TestCase {
 	public function test_selectable_list_is_matched_case_insensitively(): void {
 		$resolved = ( new CurrencyResolver() )->resolve( 'sek', null, null, 'eur', array( 'sek' ) );
 		$this->assertSame( 'SEK', $resolved );
-	}
-
-	public function test_geo_candidate_is_used_between_cookie_and_base(): void {
-		$this->assertSame( 'SEK', $this->resolve( null, null, null, 'SEK' ) );
-		$this->assertSame( 'JPY', $this->resolve( null, null, 'JPY', 'SEK' ) );
-		$this->assertSame( 'EUR', $this->resolve( null, null, null, 'GBP' ) );
 	}
 }

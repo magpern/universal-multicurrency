@@ -234,13 +234,6 @@ final class SettingsPage extends WC_Settings_Page {
 			esc_attr( $active )
 		);
 
-		if ( self::SECTION_GEO_DETECTION === $active ) {
-			printf(
-				'<input type="hidden" name="umc_geo_panel" value="%s" />',
-				esc_attr( GeoPanelRegistry::active_panel() )
-			);
-		}
-
 		echo '<table class="form-table umc-form-table">';
 		\WC_Admin_Settings::output_fields( $this->content_settings( $settings ) );
 		echo '</table>';

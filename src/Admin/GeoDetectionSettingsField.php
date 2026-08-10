@@ -17,6 +17,7 @@ use UMC\Admin\GeoSandboxController;
 use UMC\Currency;
 use UMC\CurrencyRegistry;
 use UMC\Geo\GeoRegionRegistry;
+use UMC\Geo\UgcIntegrationStatus;
 use UMC\Settings;
 
 /**
@@ -110,6 +111,7 @@ final class GeoDetectionSettingsField {
 				<div class="umc-geo-hub" data-umc-geo-root data-umc-sticky-root="visitor-location">
 					<div aria-live="polite" class="screen-reader-text" data-umc-geo-live></div>
 					<?php $this->navigation->render( $active ); ?>
+					<?php $this->maybe_render_moved_notice(); ?>
 					<div class="umc-geo-panel umc-geo-panel-stack <?php echo esc_attr( GeoPanelRegistry::PANEL_OVERVIEW === $active ? 'umc-ui-layout--wide' : 'umc-ui-layout--readable' ); ?>" data-umc-geo-panel="<?php echo esc_attr( $active ); ?>">
 						<?php
 						echo $this->components->page_intro( GeoPanelRegistry::intro_title( $active ), GeoPanelRegistry::intro_description( $active ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in AdminComponentRenderer.
@@ -157,13 +159,68 @@ final class GeoDetectionSettingsField {
 	 */
 	private function render_panel( string $panel ): void {
 		match ( $panel ) {
-			GeoPanelRegistry::PANEL_DETECTION   => $this->panels->render_detection(),
-			GeoPanelRegistry::PANEL_SETTINGS    => $this->panels->render_settings(),
-			GeoPanelRegistry::PANEL_SANDBOX     => $this->panels->render_sandbox(),
-			GeoPanelRegistry::PANEL_PROVIDERS     => $this->panels->render_providers(),
-			GeoPanelRegistry::PANEL_PROXIES      => $this->panels->render_proxies(),
-			GeoPanelRegistry::PANEL_DIAGNOSTICS  => $this->panels->render_diagnostics(),
-			default                              => $this->panels->render_overview(),
+			GeoPanelRegistry::PANEL_DETECTION => $this->panels->render_detection(),
+			GeoPanelRegistry::PANEL_SANDBOX   => $this->panels->render_sandbox(),
+			default                           => $this->panels->render_overview(),
 		};
+	}
+
+	/**
+	 * Renders a one-time notice when a retired panel URL was requested.
+	 */
+	private function maybe_render_moved_notice(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Display-only, one-time notice after a redirect.
+		$legacy = isset( $_GET[ GeoPanelRegistry::MOVED_QUERY_VAR ] ) ? sanitize_key( wp_unslash( (string) $_GET[ GeoPanelRegistry::MOVED_QUERY_VAR ] ) ) : '';
+
+		if ( ! GeoPanelRegistry::is_legacy_panel( $legacy ) ) {
+			return;
+		}
+
+		echo $this->components->info_panel( '', $this->moved_notice_message( $legacy ), $this->moved_notice_action( $legacy ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in AdminComponentRenderer.
+	}
+
+	/**
+	 * Notice copy for a retired panel id.
+	 *
+	 * @param string $legacy Legacy panel id.
+	 */
+	private function moved_notice_message( string $legacy ): string {
+		return match ( $legacy ) {
+			GeoPanelRegistry::PANEL_SETTINGS    => __( 'Visitor Location settings now live on the Currency Routing panel.', 'universal-multicurrency' ),
+			GeoPanelRegistry::PANEL_PROVIDERS   => __( 'Provider configuration is managed in Universal Geo Context.', 'universal-multicurrency' ),
+			GeoPanelRegistry::PANEL_PROXIES     => __( 'Trusted proxies are managed in Universal Geo Context.', 'universal-multicurrency' ),
+			GeoPanelRegistry::PANEL_DIAGNOSTICS => __( 'Geo diagnostics are managed in Universal Geo Context. Currency-routing status is shown here.', 'universal-multicurrency' ),
+			default                             => __( 'This page has moved.', 'universal-multicurrency' ),
+		};
+	}
+
+	/**
+	 * Optional deep-link action markup for a retired panel notice.
+	 *
+	 * @param string $legacy Legacy panel id.
+	 */
+	private function moved_notice_action( string $legacy ): string {
+		if ( GeoPanelRegistry::PANEL_SETTINGS === $legacy || ! current_user_can( 'manage_options' ) ) {
+			return '';
+		}
+
+		$status = new UgcIntegrationStatus();
+
+		if ( ! $status->is_available() ) {
+			return '';
+		}
+
+		$url = match ( $legacy ) {
+			GeoPanelRegistry::PANEL_PROVIDERS   => $status->providers_url(),
+			GeoPanelRegistry::PANEL_PROXIES     => $status->trusted_proxies_url(),
+			GeoPanelRegistry::PANEL_DIAGNOSTICS => $status->diagnostics_url(),
+			default                             => '',
+		};
+
+		if ( '' === $url ) {
+			return '';
+		}
+
+		return sprintf( '<a href="%s">%s</a>', esc_url( $url ), esc_html__( 'Open Universal Geo Context', 'universal-multicurrency' ) );
 	}
 }

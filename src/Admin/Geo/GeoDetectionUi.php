@@ -15,6 +15,7 @@ use UMC\CurrencyRegistry;
 use UMC\Geo\GeoDetectionSettings;
 use UMC\Geo\GeoRegionRegistry;
 use UMC\Geo\GeoRoutingRule;
+use UMC\Geo\UgcIntegrationStatus;
 use UMC\Settings;
 
 /**
@@ -115,14 +116,14 @@ final class GeoDetectionUi {
 	 * @param AdminComponentRenderer $components Component renderer.
 	 */
 	public function render_provider_cards( AdminComponentRenderer $components ): void {
-		$ugc_available = function_exists( 'universal_geo_get_country_code' ) && function_exists( 'universal_geo_api_version' );
+		$status = new UgcIntegrationStatus();
 
 		$html  = '<div class="umc-geo-provider-list">';
 		$html .= $components->provider_card(
 			__( 'Universal Geo Context', 'universal-multicurrency' ),
 			__( 'Primary detection provider for visitor country resolution.', 'universal-multicurrency' ),
-			$ugc_available ? __( 'Available', 'universal-multicurrency' ) : __( 'Missing', 'universal-multicurrency' ),
-			$ugc_available ? 'available' : 'missing'
+			$this->ugc_badge_label( $status ),
+			$status->state()
 		);
 		$html .= $components->provider_card(
 			__( 'WooCommerce fallback', 'universal-multicurrency' ),
@@ -136,13 +137,16 @@ final class GeoDetectionUi {
 	}
 
 	/**
-	 * Renders provider availability status list.
+	 * Localized provider-card badge label for a Universal Geo Context status.
 	 *
-	 * @deprecated 0.13.0 Use render_provider_cards().
+	 * @param UgcIntegrationStatus $status Integration status.
 	 */
-	public function render_provider_status(): void {
-		$components = new AdminComponentRenderer();
-		$this->render_provider_cards( $components );
+	public function ugc_badge_label( UgcIntegrationStatus $status ): string {
+		return match ( $status->state() ) {
+			UgcIntegrationStatus::STATE_AVAILABLE     => __( 'Available', 'universal-multicurrency' ),
+			UgcIntegrationStatus::STATE_MISCONFIGURED => __( 'Needs attention', 'universal-multicurrency' ),
+			default                                   => __( 'Missing', 'universal-multicurrency' ),
+		};
 	}
 
 	/**
@@ -162,12 +166,14 @@ final class GeoDetectionUi {
 			<input type="hidden" name="umc_geo_rules_order[]" value="<?php echo esc_attr( $rule->id() ); ?>" />
 			<input type="hidden" name="<?php echo esc_attr( $prefix ); ?>[id]" value="<?php echo esc_attr( $rule->id() ); ?>" />
 			<input type="hidden" name="<?php echo esc_attr( $prefix ); ?>[type]" value="<?php echo esc_attr( $rule->type() ); ?>" data-umc-geo-type />
-			<span class="umc-geo-rule__position"><?php echo esc_html( (string) $position ); ?></span>
+			<span class="umc-geo-rule__position" aria-label="<?php echo esc_attr( sprintf( /* translators: %d: rule priority position */ __( 'Priority %d', 'universal-multicurrency' ), $position ) ); ?>"><?php echo esc_html( (string) $position ); ?></span>
 			<span class="umc-geo-rule__badge"><?php echo esc_html( $this->type_label( $rule->type() ) ); ?></span>
 			<span class="umc-geo-rule__match">
+				<span class="screen-reader-text"><?php esc_html_e( 'Condition', 'universal-multicurrency' ); ?></span>
 				<?php $this->render_match_control( $rule, $prefix, $countries ); ?>
 			</span>
 			<span class="umc-geo-rule__currency">
+				<span class="screen-reader-text"><?php esc_html_e( 'Result currency', 'universal-multicurrency' ); ?></span>
 				<select name="<?php echo esc_attr( $prefix ); ?>[currency]">
 					<?php foreach ( $selectable as $code ) : ?>
 						<option value="<?php echo esc_attr( $code ); ?>" <?php selected( $rule->currency(), $code ); ?>><?php echo esc_html( $code ); ?></option>
@@ -179,6 +185,7 @@ final class GeoDetectionUi {
 				<button type="button" class="button button-small" data-umc-geo-move="down" <?php disabled( $position === $total ); ?>><?php esc_html_e( 'Move down', 'universal-multicurrency' ); ?></button>
 				<button type="button" class="button button-small" data-umc-geo-remove><?php esc_html_e( 'Remove', 'universal-multicurrency' ); ?></button>
 			</span>
+			<?php echo $this->rule_explanation_markup( $rule, $countries, $selectable ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			<?php echo $this->shadow_warning_markup( $rule, $position - 1, $all_rules ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 		</li>
 		<?php
@@ -266,6 +273,55 @@ final class GeoDetectionUi {
 		}
 
 		return __( 'Country', 'universal-multicurrency' );
+	}
+
+	/**
+	 * Builds the plain-language "condition → result" sentence for one rule,
+	 * plus an inline warning when its assigned currency is not currently
+	 * selectable — so a misconfigured rule is legible where it occurs
+	 * instead of only in a save-time summary.
+	 *
+	 * @param GeoRoutingRule       $rule       Rule.
+	 * @param array<string,string> $countries  WC countries.
+	 * @param array<int,string>    $selectable Selectable currencies.
+	 */
+	private function rule_explanation_markup( GeoRoutingRule $rule, array $countries, array $selectable ): string {
+		$condition = match ( $rule->type() ) {
+			GeoRoutingRule::TYPE_COUNTRY => sprintf(
+				/* translators: %s: country name */
+				__( 'the visitor is in %s', 'universal-multicurrency' ),
+				$countries[ $rule->value() ] ?? $rule->value()
+			),
+			GeoRoutingRule::TYPE_REGION  => sprintf(
+				/* translators: %s: region name */
+				__( 'the visitor is in the %s region', 'universal-multicurrency' ),
+				$this->region_options()[ $rule->value() ] ?? $rule->value()
+			),
+			default                      => __( 'no earlier rule matched', 'universal-multicurrency' ),
+		};
+
+		$sentence = sprintf(
+			/* translators: 1: condition description, 2: result currency code */
+			__( 'When %1$s, use %2$s.', 'universal-multicurrency' ),
+			$condition,
+			$rule->currency()
+		);
+
+		$currency_available = in_array( strtoupper( $rule->currency() ), array_map( 'strtoupper', $selectable ), true );
+
+		$markup = '<p class="umc-geo-rule__explanation">' . esc_html( $sentence ) . '</p>';
+
+		if ( ! $currency_available ) {
+			$markup .= '<p class="umc-geo-shadow-warning">' . esc_html(
+				sprintf(
+					/* translators: %s: currency code */
+					__( '%s is not currently enabled or has no exchange rate. This rule cannot take effect until it does.', 'universal-multicurrency' ),
+					$rule->currency()
+				)
+			) . '</p>';
+		}
+
+		return $markup;
 	}
 
 	/**

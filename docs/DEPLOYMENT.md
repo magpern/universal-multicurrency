@@ -26,7 +26,7 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Produces `dist/universal-multicurrency-0.12.1.zip`. The archive includes `readme.txt`,
+Produces `dist/universal-multicurrency-0.13.0.zip`. The archive includes `readme.txt`,
 production `src/`, `vendor/`, and `languages/universal-multicurrency.pot`.
 
 Performance subset:
@@ -36,8 +36,9 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release:** **v0.12.1** on `main`. Git tag and
-GitHub release follow CI verification — do not create without explicit approval.
+**Current release:** **v0.13.0** on `feature/m14-visitor-location-boundary`.
+Git tag and GitHub release follow CI verification — do not create without
+explicit approval.
 
 ---
 
@@ -995,7 +996,36 @@ unaffected.
 
 ---
 
-## v0.12.0 — Geo Detection admin hub (current)
+## v0.13.0 — Visitor Location boundary alignment (current)
+
+### Summary
+
+Ships Milestone 14 under version **0.13.0** (ADR-0018). Settings schema
+remains **v5** — no migration. The Visitor Location hub shrinks from seven
+panels to three (Overview, Currency Routing, Currency Simulation); provider,
+trusted-proxy, and diagnostics content is removed in favor of Universal Geo
+Context deep links. GeoContext (sandbox document) schema bumps 1→2, removing
+unused reserved fields — the sandbox result cache is ephemeral and discards
+stale-schema entries safely on read. No storefront behaviour change.
+
+### Deployment sequence
+
+1. Run `composer release-audit` on the **0.13.0** tree.
+2. Build `dist/universal-multicurrency-0.13.0.zip` with `composer install --no-dev`
+   + `bin/build-zip.sh`.
+3. Deploy over **0.12.x** in place. No settings migration step. Bookmarked
+   URLs for the retired Providers/Trusted Proxies/Diagnostics/Settings
+   panels redirect automatically.
+
+### Rollback
+
+Downgrade to the **0.12.x** zip if needed. All admin-only changes; the geo
+provider chain, currency precedence ladder, and settings schema are
+unchanged, so a downgrade is safe at any point.
+
+---
+
+## v0.12.0 — Geo Detection admin hub
 
 ### Summary
 

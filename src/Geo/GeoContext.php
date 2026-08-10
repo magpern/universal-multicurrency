@@ -1,6 +1,7 @@
 <?php
 /**
- * Versioned geographic context document for sandbox and future runtime resolution.
+ * Versioned geographic context document for Currency Simulation only —
+ * never a runtime resolution format (see ADR-0018).
  *
  * @package UniversalMulticurrency
  */
@@ -10,11 +11,17 @@ declare(strict_types=1);
 namespace UMC\Geo;
 
 /**
- * Extensible GeoContext document (schema v1).
+ * Extensible GeoContext document (schema v2).
  */
 final class GeoContext {
 
-	public const SCHEMA_VERSION = 1;
+	/**
+	 * Bumped 1 → 2 in M14: the reserved `network` and `providers` subtrees
+	 * (scaffolding for a second-geo-platform direction ADR-0018 supersedes)
+	 * were removed. See {@see GeoContextSerializer::decode()} for the
+	 * corresponding stale-document discard on read.
+	 */
+	public const SCHEMA_VERSION = 2;
 
 	/**
 	 * Normalized GeoContext document payload.
@@ -144,15 +151,6 @@ final class GeoContext {
 				'postal_code'  => null,
 				'timezone'     => null,
 				'coordinates'  => null,
-			),
-			'network'        => array(
-				'ip_version' => null,
-				'ip_address' => null,
-				'headers'    => array(),
-			),
-			'providers'      => array(
-				'chain_override' => null,
-				'skip_providers' => array(),
 			),
 			'resolution'     => array(
 				'source'     => null,

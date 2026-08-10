@@ -26,12 +26,21 @@ final class GeoContextSerializer {
 	/**
 	 * Decodes JSON into a GeoContext instance.
 	 *
+	 * Documents from a prior schema version are discarded rather than
+	 * upgraded — this is an ephemeral per-user cache (last sandbox result),
+	 * not persisted merchant configuration, so silently dropping a stale
+	 * entry is safe and avoids reviving fields a schema bump removed.
+	 *
 	 * @param string $json Encoded document.
 	 */
 	public static function decode( string $json ): ?GeoContext {
 		$data = json_decode( $json, true );
 
 		if ( ! is_array( $data ) ) {
+			return null;
+		}
+
+		if ( ( $data['schema_version'] ?? null ) !== GeoContext::SCHEMA_VERSION ) {
 			return null;
 		}
 
