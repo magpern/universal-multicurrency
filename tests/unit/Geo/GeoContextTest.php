@@ -96,4 +96,22 @@ final class GeoContextTest extends TestCase {
 
 		$this->assertInstanceOf( GeoContext::class, GeoContextSerializer::decode( $current ) );
 	}
+
+	public function test_decode_returns_null_on_genuinely_malformed_json(): void {
+		$malformed_json = '{"incomplete": "json"';
+
+		$this->assertNull( GeoContextSerializer::decode( $malformed_json ) );
+	}
+
+	public function test_decode_returns_null_when_json_decodes_to_non_array(): void {
+		$json_string = wp_json_encode( 'just a string, not an array' );
+
+		$this->assertNull( GeoContextSerializer::decode( (string) $json_string ) );
+	}
+
+	public function test_decode_returns_null_when_json_decodes_to_null(): void {
+		$json_null = wp_json_encode( null );
+
+		$this->assertNull( GeoContextSerializer::decode( (string) $json_null ) );
+	}
 }
