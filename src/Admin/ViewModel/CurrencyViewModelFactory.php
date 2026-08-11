@@ -265,16 +265,24 @@ final class CurrencyViewModelFactory {
 			return __( 'Manual', 'universal-multicurrency' );
 		}
 
+		$provider = (string) ( $this->settings->get()['rate_provider'] ?? Settings::DEFAULT_RATE_PROVIDER );
+		$label    = '' !== $provider ? ucfirst( $provider ) : 'Frankfurter';
+
 		if ( '0' === $adjustment || '0.00' === $adjustment ) {
-			return __( 'Automatic', 'universal-multicurrency' );
+			return sprintf(
+				/* translators: %s: provider label, e.g. Frankfurter */
+				__( 'Automatic — %s', 'universal-multicurrency' ),
+				$label
+			);
 		}
 
 		$numeric = (float) $adjustment;
 		$sign    = $numeric > 0 ? '+' : '';
 
 		return sprintf(
-			/* translators: %s: signed adjustment percentage, e.g. +2% */
-			__( 'Automatic (%s%%)', 'universal-multicurrency' ),
+			/* translators: 1: provider label, 2: signed adjustment percentage, e.g. +2 */
+			__( 'Automatic — %1$s (%2$s%%)', 'universal-multicurrency' ),
+			$label,
 			$sign . rtrim( rtrim( number_format( $numeric, 2, '.', '' ), '0' ), '.' )
 		);
 	}

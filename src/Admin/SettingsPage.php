@@ -26,6 +26,7 @@ use UMC\Display\SwitcherSettingsRepository;
 use UMC\Display\SwitcherViewModelFactory;
 use UMC\Rates\ExchangeRateStore;
 use UMC\Rates\ManualRateProvider;
+use UMC\Rates\RateHealthService;
 use UMC\Settings;
 use WC_Settings_Page;
 
@@ -130,16 +131,17 @@ final class SettingsPage extends WC_Settings_Page {
 	/**
 	 * Builds the settings tab and its custom field renderers.
 	 *
-	 * @param Settings          $settings Merchant settings store.
-	 * @param Currency          $base     Store base currency.
-	 * @param ExchangeRateStore $store    Rate persistence boundary.
+	 * @param Settings               $settings Merchant settings store.
+	 * @param Currency               $base     Store base currency.
+	 * @param ExchangeRateStore      $store    Rate persistence boundary.
+	 * @param RateHealthService|null $health   Optional shared rate health service.
 	 */
-	public function __construct( Settings $settings, Currency $base, ExchangeRateStore $store ) {
+	public function __construct( Settings $settings, Currency $base, ExchangeRateStore $store, ?RateHealthService $health = null ) {
 		$this->id                       = 'umc';
 		$this->label                    = __( 'Multicurrency', 'universal-multicurrency' );
 		$this->settings                 = $settings;
 		$this->parser                   = new CurrencySettingsParser( $settings, $base );
-		$this->exchange_field           = new ExchangeRateSettingsField( $settings, $store );
+		$this->exchange_field           = new ExchangeRateSettingsField( $settings, $store, $health );
 		$registry                       = new CurrencyRegistry( $settings, $base );
 		$rates                          = new ManualRateProvider( $settings, $base->code() );
 		$context                        = new CurrencyContext( $registry, $rates, new CurrencyResolver() );
