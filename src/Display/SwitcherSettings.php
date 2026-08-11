@@ -737,6 +737,14 @@ final class SwitcherSettings {
 		$classes[] = 'umc-switcher--size-' . $this->design['size'];
 		$classes[] = 'umc-switcher--shape-' . $this->design['shape'];
 
+		if ( $this->responsive['hide_name_on_mobile'] ) {
+			$classes[] = 'umc-switcher--hide-name-on-mobile';
+		}
+
+		if ( $this->responsive['compact_on_mobile'] ) {
+			$classes[] = 'umc-switcher--compact-on-mobile';
+		}
+
 		if ( ! $this->visibility['desktop'] ) {
 			$classes[] = 'umc-switcher--hide-desktop';
 		}

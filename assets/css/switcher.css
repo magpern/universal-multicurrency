@@ -331,6 +331,13 @@
 	.umc-switcher--hide-name-on-mobile .umc-switcher__name {
 		display: none;
 	}
+
+	.umc-switcher--compact-on-mobile {
+		--umc-switcher-control-height: 32px;
+		--umc-switcher-font-size: 0.875em;
+		--umc-switcher-gap: 0.25em;
+		--umc-switcher-spacing: 6px;
+	}
 }
 
 @media (min-width: 768px) {

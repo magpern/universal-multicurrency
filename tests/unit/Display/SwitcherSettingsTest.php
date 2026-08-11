@@ -409,6 +409,27 @@ final class SwitcherSettingsTest extends TestCase {
 		$this->assertContains( 'umc-switcher--theme-automatic', $classes );
 	}
 
+	public function test_modifier_classes_include_responsive_adjustments(): void {
+		$classes = SwitcherSettings::from_array(
+			array(
+				'responsive' => array(
+					'hide_name_on_mobile' => true,
+					'compact_on_mobile'   => true,
+				),
+			)
+		)->modifier_classes();
+
+		$this->assertContains( 'umc-switcher--hide-name-on-mobile', $classes );
+		$this->assertContains( 'umc-switcher--compact-on-mobile', $classes );
+	}
+
+	public function test_modifier_classes_omit_responsive_adjustments_when_disabled(): void {
+		$classes = SwitcherSettings::from_array( array() )->modifier_classes();
+
+		$this->assertNotContains( 'umc-switcher--hide-name-on-mobile', $classes );
+		$this->assertNotContains( 'umc-switcher--compact-on-mobile', $classes );
+	}
+
 	public function test_manual_placement_modifier_class_is_not_duplicated(): void {
 		$settings = SwitcherSettings::from_array(
 			array(
