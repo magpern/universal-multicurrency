@@ -24,6 +24,16 @@ final class CurrencySwitcher {
 
 	public const SESSION_MANUAL_SELECTION = 'umc_manual_currency';
 
+	/**
+	 * Explanatory origin of the currently persisted shopper currency.
+	 *
+	 * Never read by {@see CurrencyResolver}. Values are metadata only.
+	 */
+	public const SESSION_CURRENCY_ORIGIN = 'umc_currency_origin';
+
+	public const ORIGIN_CUSTOMER          = 'customer';
+	public const ORIGIN_VISITOR_LOCATION  = 'visitor_location';
+
 	private const COOKIE_LIFETIME = 30 * DAY_IN_SECONDS;
 
 	/**
@@ -123,6 +133,10 @@ final class CurrencySwitcher {
 	public function persist( string $code, bool $manual = false ): void {
 		if ( function_exists( 'WC' ) && WC()->session ) {
 			WC()->session->set( CurrencyContext::SESSION_KEY, $code );
+			WC()->session->set(
+				self::SESSION_CURRENCY_ORIGIN,
+				$manual ? self::ORIGIN_CUSTOMER : self::ORIGIN_VISITOR_LOCATION
+			);
 
 			if ( $manual ) {
 				WC()->session->set( self::SESSION_MANUAL_SELECTION, '1' );
@@ -135,6 +149,40 @@ final class CurrencySwitcher {
 		}
 
 		$this->delete_remembered_cookie();
+	}
+
+	/**
+	 * Clears explanatory currency origin metadata from the WooCommerce session.
+	 *
+	 * Does not clear or change the persisted currency code.
+	 */
+	public function clear_currency_origin(): void {
+		if ( ! function_exists( 'WC' ) || ! WC()->session ) {
+			return;
+		}
+
+		WC()->session->set( self::SESSION_CURRENCY_ORIGIN, null );
+	}
+
+	/**
+	 * Reads explanatory origin of the persisted shopper currency, if present.
+	 */
+	public static function read_currency_origin(): ?string {
+		if ( ! function_exists( 'WC' ) || ! WC()->session ) {
+			return null;
+		}
+
+		$value = WC()->session->get( self::SESSION_CURRENCY_ORIGIN );
+
+		if ( ! is_string( $value ) || '' === $value ) {
+			return null;
+		}
+
+		if ( self::ORIGIN_CUSTOMER !== $value && self::ORIGIN_VISITOR_LOCATION !== $value ) {
+			return null;
+		}
+
+		return $value;
 	}
 
 	/**
