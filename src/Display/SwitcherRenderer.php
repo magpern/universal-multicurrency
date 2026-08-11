@@ -145,24 +145,9 @@ final class SwitcherRenderer {
 		return sprintf(
 			'class="%1$s" style="%2$s" data-umc-placement="%3$s" data-umc-style="%4$s"',
 			esc_attr( implode( ' ', array_merge( $view_model->root_classes(), $extra_classes ) ) ),
-			esc_attr( $this->style_attr( $view_model->css_variables() ) ),
+			esc_attr( SwitcherPresentationCss::style_attribute( $view_model->css_variables() ) ),
 			esc_attr( $view_model->placement_attribute() ),
 			esc_attr( $view_model->style_attribute() )
 		);
-	}
-
-	/**
-	 * Serializes CSS custom properties for an inline style attribute.
-	 *
-	 * @param array<string, string> $variables CSS custom properties.
-	 */
-	private function style_attr( array $variables ): string {
-		$parts = array();
-
-		foreach ( $variables as $name => $value ) {
-			$parts[] = $name . ':' . $value;
-		}
-
-		return implode( ';', $parts );
 	}
 }
