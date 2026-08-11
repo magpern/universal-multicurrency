@@ -212,21 +212,21 @@
     No settings schema change, storefront behavior change, or version bump.
     Safe in-place upgrade from **0.13.0**.
 
-15. Currency Resolution & Explainability (**v0.14.0**) — **in progress on
-    `feature/m15-currency-explainability`**. This is a **new** Milestone 15
-    (currency decision explainability). It does **not** revive the M15 plan
-    retired by ADR-0018 (“diagnostics from GeoContext resolution traces”).
+15. Currency Resolution & Explainability (**v0.14.0**) — **complete and
+    released**. This is a **new** Milestone 15 (currency decision
+    explainability). It does **not** revive the M15 plan retired by ADR-0018
+    (“diagnostics from GeoContext resolution traces”).
 
-    ### Scope for v0.14.0
+    ### Shipped in v0.14.0
 
     | Work item | Status |
     |---|---|
-    | Structured `CurrencyResolutionResult` + `CurrencyResolver::evaluate()` | **Prepared** |
-    | Shopper currency provenance metadata (explanatory only; no precedence) | **Prepared** |
-    | `CurrencyDecisionExplanation` / explainer composition layer | **Prepared** |
-    | Stateless Decision Inspector admin section | **Prepared** |
-    | Visitor Location + checkout explanation stages | **Prepared** |
-    | ADR-0020 + architecture specification | **Prepared** |
+    | Structured `CurrencyResolutionResult` + `CurrencyResolver::evaluate()` | **Complete** |
+    | Shopper currency provenance metadata (explanatory only; no precedence) | **Complete** |
+    | `CurrencyDecisionExplanation` / explainer composition layer | **Complete** |
+    | Stateless Decision Inspector admin section | **Complete** |
+    | Visitor Location + checkout explanation stages | **Complete** |
+    | ADR-0020 + architecture specification | **Complete** |
 
     No settings schema change. No DB migration. No storefront currency-outcome
     change. Inspector simulation is side-effect-free and does not persist
@@ -236,14 +236,45 @@
     and
     [`docs/architecture/currency-decision-explainability.md`](architecture/currency-decision-explainability.md).
 
-    **Prepared as:** **v0.14.0**.
+    **Released as:** **v0.14.0**.
+
+16. Exchange Rate Operations & Reliability (**v0.15.0**) — **in progress on
+    `feature/m16-exchange-rate-operations`**. Hardens the Milestone 8 rate
+    stack into an operationally trustworthy subsystem (health model, aging
+    presentation, scheduler correctness for per-currency automatic targets,
+    refresh/lock reliability, admin ops UX, order rate provenance schema 4,
+    thin WP-CLI). Does **not** redesign providers, add failover, or change
+    stale storefront conversion semantics.
+
+    ### Scope for v0.15.0
+
+    | Work item | Status |
+    |---|---|
+    | Authoritative architecture spec + ADR-0021 | **Prepared** |
+    | Characterization of current rate/refresh/scheduler/order behavior | Planned |
+    | `RateHealthService` / `RateHealthReport` (no HTTP, no mutations) | Planned |
+    | Aging status (presentation-only; 50% of `rate_max_age_hours`) | Planned |
+    | Scheduler `has_automatic_targets` (effective per-currency mode) | Planned |
+    | Lock characterization (+ minimal harden only if race proven) | Planned |
+    | Structured failure taxonomy + unified refresh result contract | Planned |
+    | Exchange Rates admin ops UX (Admin Design System) | Planned |
+    | Order snapshot schema 4 (provider + adjustment) | Planned |
+    | Diagnostics / Site Health alignment | Planned |
+    | Thin `wp umc rates` CLI | Planned |
+
+    No `Settings::SCHEMA_VERSION` bump expected. No DB migration. Stale rates
+    remain usable. Action Scheduler remains schedule truth. See
+    [`docs/adr/0021-exchange-rate-operations.md`](adr/0021-exchange-rate-operations.md)
+    and
+    [`docs/architecture/exchange-rate-operations.md`](architecture/exchange-rate-operations.md).
+
+    **Prepared as:** **v0.15.0**.
 
 ## Future milestones — not started, not implemented
 
 None of the following exists in the codebase today:
 
 - Additional exchange-rate providers and per-currency provider selection
-- WP-CLI command surface over the existing rate services
 - `country_change` geo detection mode and broader continent presets
 - Multicurrency reporting and analytics
 - Public APIs beyond the documented hooks in [`HOOKS.md`](HOOKS.md)
