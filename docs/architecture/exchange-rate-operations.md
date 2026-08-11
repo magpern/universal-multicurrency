@@ -435,11 +435,11 @@ it. No interactive UI. No history / provider-management commands.
 
 ## 19. Acceptance checklist
 
-- [ ] Scheduler schedules when any effective automatic target exists
-- [ ] Stale conversion semantics unchanged (characterization + regression)
-- [ ] Storefront free of live provider HTTP
-- [ ] Health model shared by admin / SH / Compatibility / CLI
-- [ ] Order schema 4 additive; schemas 1–3 still read
-- [ ] Full unit + integration suites green
+- [x] Scheduler schedules when any effective automatic target exists
+- [x] Stale conversion semantics unchanged (characterization + regression)
+- [x] Storefront free of live provider HTTP
+- [x] Health model shared by admin / SH / Compatibility / CLI
+- [x] Order schema 4 additive; schemas 1–3 still read
+- [x] Full unit + integration suites green
 - [ ] Canonical `composer release-audit` green
 - [ ] Version prepared as **0.15.0** (no tag/push required by this spec alone)

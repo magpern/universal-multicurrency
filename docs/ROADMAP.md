@@ -238,37 +238,38 @@
 
     **Released as:** **v0.14.0**.
 
-16. Exchange Rate Operations & Reliability (**v0.15.0**) — **in progress on
-    `feature/m16-exchange-rate-operations`**. Hardens the Milestone 8 rate
-    stack into an operationally trustworthy subsystem (health model, aging
-    presentation, scheduler correctness for per-currency automatic targets,
-    refresh/lock reliability, admin ops UX, order rate provenance schema 4,
-    thin WP-CLI). Does **not** redesign providers, add failover, or change
-    stale storefront conversion semantics.
+16. Exchange Rate Operations & Reliability (**v0.15.0**) — **implementation
+    complete** on `feature/m16-exchange-rate-operations`; **prepared** as
+    **v0.15.0**. Hardens the Milestone 8 rate stack into an operationally
+    trustworthy subsystem (health model, aging presentation, scheduler
+    correctness for per-currency automatic targets, refresh/lock reliability,
+    admin ops UX, order rate provenance schema 4, thin WP-CLI). Does **not**
+    redesign providers, add failover, or change stale storefront conversion
+    semantics.
 
     ### Scope for v0.15.0
 
     | Work item | Status |
     |---|---|
-    | Authoritative architecture spec + ADR-0021 | **Prepared** |
-    | Characterization of current rate/refresh/scheduler/order behavior | Planned |
-    | `RateHealthService` / `RateHealthReport` (no HTTP, no mutations) | Planned |
-    | Aging status (presentation-only; 50% of `rate_max_age_hours`) | Planned |
-    | Scheduler `has_automatic_targets` (effective per-currency mode) | Planned |
-    | Lock characterization (+ minimal harden only if race proven) | Planned |
-    | Structured failure taxonomy + unified refresh result contract | Planned |
-    | Exchange Rates admin ops UX (Admin Design System) | Planned |
-    | Order snapshot schema 4 (provider + adjustment) | Planned |
-    | Diagnostics / Site Health alignment | Planned |
-    | Thin `wp umc rates` CLI | Planned |
+    | Authoritative architecture spec + ADR-0021 | **Complete** |
+    | Characterization of current rate/refresh/scheduler/order behavior | **Complete** |
+    | `RateHealthService` / `RateHealthReport` (no HTTP, no mutations) | **Complete** |
+    | Aging status (presentation-only; 50% of `rate_max_age_hours`) | **Complete** |
+    | Scheduler `has_automatic_targets` (effective per-currency mode) | **Complete** |
+    | Lock characterization (+ minimal harden only if race proven) | **Complete** |
+    | Structured failure taxonomy + unified refresh result contract | **Complete** |
+    | Exchange Rates admin ops UX (Admin Design System) | **Complete** |
+    | Order snapshot schema 4 (provider + adjustment) | **Complete** |
+    | Diagnostics / Site Health alignment | **Complete** |
+    | Thin `wp umc rates` CLI | **Complete** |
 
-    No `Settings::SCHEMA_VERSION` bump expected. No DB migration. Stale rates
-    remain usable. Action Scheduler remains schedule truth. See
+    No `Settings::SCHEMA_VERSION` bump. No DB migration. Stale rates remain
+    usable. Action Scheduler remains schedule truth. See
     [`docs/adr/0021-exchange-rate-operations.md`](adr/0021-exchange-rate-operations.md)
     and
     [`docs/architecture/exchange-rate-operations.md`](architecture/exchange-rate-operations.md).
 
-    **Prepared as:** **v0.15.0**.
+    **Prepared as:** **v0.15.0** (tag and GitHub release not yet created).
 
 ## Future milestones — not started, not implemented
 
