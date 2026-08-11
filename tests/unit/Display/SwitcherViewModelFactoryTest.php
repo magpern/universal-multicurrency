@@ -135,6 +135,118 @@ final class SwitcherViewModelFactoryTest extends TestCase {
 		$this->assertSame( '#', $model->options()[0]->url() );
 	}
 
+	public function test_options_carry_structured_markup_and_plain_labels(): void {
+		$model = $this->two_currency_factory()->create( null, true );
+
+		$this->assertNotNull( $model );
+
+		$option = $model->options()[0];
+
+		$this->assertSame(
+			'<span class="umc-switcher__code">EUR</span><span class="umc-switcher__symbol">€</span>',
+			$option->menu_html()
+		);
+		$this->assertSame( $option->menu_html(), $option->trigger_content_html() );
+		$this->assertSame( 'EUR €', $option->label() );
+		$this->assertSame( 'EUR €', $option->compact_label() );
+	}
+
+	public function test_trigger_and_menu_content_are_configured_independently(): void {
+		$model = $this->two_currency_factory()->create(
+			SwitcherSettings::from_array(
+				array(
+					'enabled' => true,
+					'content' => array(
+						'trigger' => array(
+							'show_code'   => true,
+							'show_symbol' => false,
+							'show_name'   => false,
+						),
+						'menu'    => array(
+							'show_code'   => false,
+							'show_symbol' => false,
+							'show_name'   => true,
+						),
+					),
+				)
+			),
+			true
+		);
+
+		$this->assertNotNull( $model );
+
+		$option = $model->options()[0];
+
+		$this->assertSame( '<span class="umc-switcher__code">EUR</span>', $option->trigger_content_html() );
+		$this->assertSame( '<span class="umc-switcher__name">EUR name</span>', $option->menu_html() );
+	}
+
+	public function test_duplicate_symbols_force_code_into_option_markup(): void {
+		$factory = $this->factory(
+			new Settings(
+				array(
+					'display'    => array( 'enabled' => true ),
+					'currencies' => array(
+						'SEK' => array(
+							'enabled' => true,
+							'rate'    => '11.5',
+						),
+						'USD' => array(
+							'enabled' => true,
+							'rate'    => '1.1',
+						),
+					),
+				)
+			)
+		);
+
+		$model = $factory->create(
+			SwitcherSettings::from_array(
+				array(
+					'enabled' => true,
+					'content' => array(
+						'menu' => array(
+							'show_code'   => false,
+							'show_symbol' => true,
+							'show_name'   => false,
+						),
+					),
+				)
+			),
+			true
+		);
+
+		$this->assertNotNull( $model );
+
+		$markup = array();
+
+		foreach ( $model->options() as $option ) {
+			$markup[ $option->code() ] = $option->menu_html();
+		}
+
+		$this->assertSame(
+			'<span class="umc-switcher__code">SEK</span><span class="umc-switcher__symbol">$</span>',
+			$markup['SEK']
+		);
+		$this->assertSame( '<span class="umc-switcher__symbol">€</span>', $markup['EUR'] );
+	}
+
+	public function test_admin_preview_samples_carry_structured_markup(): void {
+		$model = $this->factory(
+			new Settings(
+				array(
+					'display'    => array( 'enabled' => true ),
+					'currencies' => array(),
+				)
+			)
+		)->create_for_admin_preview();
+
+		$this->assertSame(
+			'<span class="umc-switcher__code">EUR</span><span class="umc-switcher__symbol">€</span>',
+			$model->options()[0]->menu_html()
+		);
+	}
+
 	private function two_currency_factory(): SwitcherViewModelFactory {
 		return $this->factory(
 			new Settings(

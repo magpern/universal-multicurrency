@@ -96,9 +96,9 @@ final class SwitcherViewModelFactory {
 			$symbols[] = $this->resolve_symbol( $currency );
 		}
 
-		$formatter = new SwitcherLabelFormatter(
-			$settings->content(),
-			SwitcherLabelFormatter::duplicate_symbol_map( $symbols )
+		$option_factory = new SwitcherOptionFactory(
+			$settings,
+			SwitcherElementComposer::duplicate_symbol_map( $symbols )
 		);
 
 		$options      = array();
@@ -108,10 +108,10 @@ final class SwitcherViewModelFactory {
 			$code   = $currency->code();
 			$symbol = $this->resolve_symbol( $currency );
 			$name   = $this->resolve_name( $code );
-			$option = new SwitcherOptionViewModel(
+			$option = $option_factory->create(
 				$code,
-				$formatter->format( $code, $symbol, $name ),
-				$formatter->format_compact( $code, $symbol, $name ),
+				$symbol,
+				$name,
 				$this->switch_url( $code, $preview ),
 				$active_code === $code
 			);
@@ -151,21 +151,21 @@ final class SwitcherViewModelFactory {
 			return $model;
 		}
 
-		$formatter = new SwitcherLabelFormatter( $settings->content(), array() );
-		$options   = array();
-		$samples   = array(
+		$option_factory = new SwitcherOptionFactory( $settings );
+		$options        = array();
+		$samples        = array(
 			array( 'EUR', '€', 'Euro' ),
 			array( 'SEK', 'kr', 'Swedish krona' ),
 			array( 'USD', '$', 'US Dollar' ),
 		);
 
-		foreach ( $samples as $index => $sample ) {
-			$options[] = new SwitcherOptionViewModel(
+		foreach ( $samples as $sample_index => $sample ) {
+			$options[] = $option_factory->create(
 				$sample[0],
-				$formatter->format( $sample[0], $sample[1], $sample[2] ),
-				$formatter->format_compact( $sample[0], $sample[1], $sample[2] ),
+				$sample[1],
+				$sample[2],
 				'#',
-				0 === $index
+				0 === $sample_index
 			);
 		}
 

@@ -1,27 +1,62 @@
 /**
  * Universal Multicurrency storefront switcher styles.
  *
+ * Cascade order in this file is part of the public contract:
+ * base tokens -> elements -> layout -> preset -> theme/size/shape -> responsive.
+ * Presets are declared before theme/size/shape so first-class theme, size, and
+ * shape settings always win over a named preset.
+ *
  * @package UniversalMulticurrency
  */
 
 .umc-switcher {
-	--umc-surface: #ffffff;
-	--umc-text: #1f2937;
-	--umc-text-muted: #6b7280;
-	--umc-border: #d1d5db;
-	--umc-hover: #f3f4f6;
-	--umc-selected-bg: #eef2ff;
-	--umc-focus-ring: #6366f1;
-	--umc-radius: 8px;
-	--umc-control-height: 40px;
-	--umc-spacing: 8px;
-	--umc-edge-offset: 16px;
-	--umc-vertical-offset: 0px;
-	--umc-bottom-offset: 16px;
+	/* Public tokens. */
+	--umc-switcher-font-family: inherit;
+	--umc-switcher-font-size: inherit;
+	--umc-switcher-font-weight: inherit;
+	--umc-switcher-surface: #ffffff;
+	--umc-switcher-text: #1f2937;
+	--umc-switcher-text-muted: #6b7280;
+	--umc-switcher-border: #d1d5db;
+	--umc-switcher-border-width: 1px;
+	--umc-switcher-hover: #f3f4f6;
+	--umc-switcher-selected-bg: #eef2ff;
+	--umc-switcher-selected-weight: 600;
+	--umc-switcher-focus-ring: #6366f1;
+	--umc-switcher-radius: 8px;
+	--umc-switcher-control-height: 40px;
+	--umc-switcher-spacing: 8px;
+	--umc-switcher-gap: 0.35em;
+	--umc-switcher-transition-duration: 150ms;
+	--umc-switcher-transition-timing: ease;
+	--umc-switcher-trigger-shadow: none;
+	--umc-switcher-menu-shadow: 0 8px 24px rgb(15 23 42 / 12%);
+	--umc-switcher-chevron-size: 0.3em;
+	--umc-switcher-edge-offset: 16px;
+	--umc-switcher-vertical-offset: 0px;
+	--umc-switcher-bottom-offset: 16px;
 	--umc-switcher-z-index: 9990;
+
+	/* Legacy v0.15 aliases; overriding either name keeps working. */
+	--umc-surface: var(--umc-switcher-surface);
+	--umc-text: var(--umc-switcher-text);
+	--umc-text-muted: var(--umc-switcher-text-muted);
+	--umc-border: var(--umc-switcher-border);
+	--umc-hover: var(--umc-switcher-hover);
+	--umc-selected-bg: var(--umc-switcher-selected-bg);
+	--umc-focus-ring: var(--umc-switcher-focus-ring);
+	--umc-radius: var(--umc-switcher-radius);
+	--umc-control-height: var(--umc-switcher-control-height);
+	--umc-spacing: var(--umc-switcher-spacing);
+	--umc-edge-offset: var(--umc-switcher-edge-offset);
+	--umc-vertical-offset: var(--umc-switcher-vertical-offset);
+	--umc-bottom-offset: var(--umc-switcher-bottom-offset);
 	box-sizing: border-box;
 	color: var(--umc-text);
 	font: inherit;
+	font-family: var(--umc-switcher-font-family);
+	font-size: var(--umc-switcher-font-size);
+	font-weight: var(--umc-switcher-font-weight);
 	position: relative;
 	z-index: var(--umc-switcher-z-index);
 }
@@ -35,13 +70,17 @@
 .umc-switcher__trigger {
 	align-items: center;
 	background: var(--umc-surface);
-	border: 1px solid var(--umc-border);
+	border: var(--umc-switcher-border-width) solid var(--umc-border);
 	border-radius: var(--umc-radius);
+	box-shadow: var(--umc-switcher-trigger-shadow);
 	color: inherit;
 	cursor: pointer;
 	display: inline-flex;
 	font: inherit;
-	gap: 0.35em;
+	font-family: var(--umc-switcher-font-family);
+	font-size: var(--umc-switcher-font-size);
+	font-weight: var(--umc-switcher-font-weight);
+	gap: var(--umc-switcher-gap);
 	height: var(--umc-control-height);
 	line-height: 1.2;
 	min-width: 0;
@@ -55,12 +94,45 @@
 	outline-offset: 2px;
 }
 
+.umc-switcher__trigger-content {
+	align-items: center;
+	display: inline-flex;
+	gap: var(--umc-switcher-gap);
+	min-width: 0;
+}
+
+.umc-switcher__code,
+.umc-switcher__symbol,
+.umc-switcher__name {
+	display: inline-block;
+}
+
+.umc-switcher__name {
+	color: var(--umc-text-muted);
+}
+
+.umc-switcher__chevron {
+	border-block-end: 0;
+	border-block-start: var(--umc-switcher-chevron-size) solid currentColor;
+	border-inline-end: var(--umc-switcher-chevron-size) solid transparent;
+	border-inline-start: var(--umc-switcher-chevron-size) solid transparent;
+	display: inline-block;
+	flex: none;
+	height: 0;
+	transition: transform var(--umc-switcher-transition-duration) var(--umc-switcher-transition-timing);
+	width: 0;
+}
+
+.umc-switcher--open .umc-switcher__chevron {
+	transform: rotate(180deg);
+}
+
 .umc-switcher__menu,
 .umc-switcher__list {
 	background: var(--umc-surface);
-	border: 1px solid var(--umc-border);
+	border: var(--umc-switcher-border-width) solid var(--umc-border);
 	border-radius: var(--umc-radius);
-	box-shadow: 0 8px 24px rgb(15 23 42 / 12%);
+	box-shadow: var(--umc-switcher-menu-shadow);
 	list-style: none;
 	margin: calc(var(--umc-spacing) * 0.5) 0 0;
 	min-width: 100%;
@@ -95,9 +167,11 @@
 }
 
 .umc-switcher__link {
+	align-items: center;
 	border-radius: calc(var(--umc-radius) - 2px);
 	color: inherit;
-	display: block;
+	display: flex;
+	gap: var(--umc-switcher-gap);
 	padding: calc(var(--umc-spacing) * 0.75) calc(var(--umc-spacing) * 1.25);
 	text-decoration: none;
 	white-space: nowrap;
@@ -111,7 +185,7 @@
 .umc-switcher__item.is-active .umc-switcher__link,
 .umc-switcher__link[aria-current="true"] {
 	background: var(--umc-selected-bg);
-	font-weight: 600;
+	font-weight: var(--umc-switcher-selected-weight);
 }
 
 .umc-switcher--horizontal-list .umc-switcher__list {
@@ -125,7 +199,7 @@
 }
 
 .umc-switcher--horizontal-list .umc-switcher__link {
-	border: 1px solid var(--umc-border);
+	border: var(--umc-switcher-border-width) solid var(--umc-border);
 }
 
 .umc-switcher--floating-side {
@@ -171,22 +245,55 @@
 	bottom: calc(var(--umc-bottom-offset) + env(safe-area-inset-bottom, 0px));
 }
 
+.umc-switcher--preset-default {
+	/* Deliberately empty: the default preset changes no tokens. */
+}
+
+.umc-switcher--preset-minimal {
+	--umc-switcher-border: transparent;
+	--umc-switcher-menu-shadow: 0 4px 12px rgb(15 23 42 / 10%);
+	--umc-switcher-spacing: 6px;
+	--umc-switcher-surface: transparent;
+}
+
+.umc-switcher--preset-pill {
+	--umc-switcher-radius: 999px;
+	--umc-switcher-spacing: 10px;
+}
+
+.umc-switcher--preset-compact {
+	--umc-switcher-control-height: 32px;
+	--umc-switcher-font-size: 0.875em;
+	--umc-switcher-gap: 0.25em;
+	--umc-switcher-spacing: 6px;
+}
+
+.umc-switcher--preset-borderless {
+	--umc-switcher-border-width: 0;
+	--umc-switcher-menu-shadow: 0 6px 18px rgb(15 23 42 / 14%);
+}
+
+.umc-switcher--preset-floating {
+	--umc-switcher-menu-shadow: 0 12px 32px rgb(15 23 42 / 18%);
+	--umc-switcher-trigger-shadow: 0 2px 8px rgb(15 23 42 / 12%);
+}
+
 .umc-switcher--size-compact {
-	--umc-control-height: 32px;
-	--umc-radius: 6px;
+	--umc-switcher-control-height: 32px;
+	--umc-switcher-radius: 6px;
 }
 
 .umc-switcher--size-large {
-	--umc-control-height: 48px;
-	--umc-radius: 10px;
+	--umc-switcher-control-height: 48px;
+	--umc-switcher-radius: 10px;
 }
 
 .umc-switcher--shape-slight {
-	--umc-radius: 6px;
+	--umc-switcher-radius: 6px;
 }
 
 .umc-switcher--shape-pill {
-	--umc-radius: 999px;
+	--umc-switcher-radius: 999px;
 }
 
 .umc-switcher--theme-light {
@@ -194,23 +301,23 @@
 }
 
 .umc-switcher--theme-dark {
-	--umc-surface: #111827;
-	--umc-text: #f9fafb;
-	--umc-text-muted: #d1d5db;
-	--umc-border: #374151;
-	--umc-hover: #1f2937;
-	--umc-selected-bg: #312e81;
+	--umc-switcher-border: #374151;
+	--umc-switcher-hover: #1f2937;
+	--umc-switcher-selected-bg: #312e81;
+	--umc-switcher-surface: #111827;
+	--umc-switcher-text: #f9fafb;
+	--umc-switcher-text-muted: #d1d5db;
 	color-scheme: dark;
 }
 
 @media (prefers-color-scheme: dark) {
 	.umc-switcher--theme-automatic {
-		--umc-surface: #111827;
-		--umc-text: #f9fafb;
-		--umc-text-muted: #d1d5db;
-		--umc-border: #374151;
-		--umc-hover: #1f2937;
-		--umc-selected-bg: #312e81;
+		--umc-switcher-border: #374151;
+		--umc-switcher-hover: #1f2937;
+		--umc-switcher-selected-bg: #312e81;
+		--umc-switcher-surface: #111827;
+		--umc-switcher-text: #f9fafb;
+		--umc-switcher-text-muted: #d1d5db;
 		color-scheme: dark;
 	}
 }
@@ -218,6 +325,11 @@
 @media (max-width: 767px) {
 	.umc-switcher--hide-mobile {
 		display: none !important;
+	}
+
+	/* Responsive bag: only the name may be dropped, so a trigger is never empty. */
+	.umc-switcher--hide-name-on-mobile .umc-switcher__name {
+		display: none;
 	}
 }
 

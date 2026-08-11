@@ -95,6 +95,31 @@ final class SwitcherViewModel {
 	}
 
 	/**
+	 * Whether the disclosure chevron is enabled.
+	 */
+	public function show_chevron(): bool {
+		return $this->settings->show_chevron();
+	}
+
+	/**
+	 * Placement value for the public `data-umc-placement` styling hook.
+	 */
+	public function placement_attribute(): string {
+		if ( SwitcherSettings::PLACEMENT_STICKY_FOOTER === $this->settings->placement() ) {
+			return 'floating-bottom';
+		}
+
+		return str_replace( '_', '-', $this->settings->placement() );
+	}
+
+	/**
+	 * Style value for the public `data-umc-style` styling hook.
+	 */
+	public function style_attribute(): string {
+		return str_replace( '_', '-', $this->settings->style() );
+	}
+
+	/**
 	 * Menu element id for aria-controls.
 	 */
 	public function menu_id(): string {
