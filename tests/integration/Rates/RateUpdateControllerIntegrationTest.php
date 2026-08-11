@@ -135,7 +135,10 @@ final class RateUpdateControllerIntegrationTest extends WP_UnitTestCase {
 		$store    = $this->boot_controller();
 		$redirect = $this->dispatch();
 
-		$this->assertSame( 'Rate update failed. Last known rates were preserved.', $redirect->query_arg( 'umc_msg' ) );
+		$this->assertSame(
+			'Rate update failed for all targeted currencies. Last known rates were preserved.',
+			$redirect->query_arg( 'umc_msg' )
+		);
 
 		$persisted = get_option( Settings::OPTION );
 		$this->assertSame( '10.00', $persisted['currencies']['SEK']['provider_rate'] );

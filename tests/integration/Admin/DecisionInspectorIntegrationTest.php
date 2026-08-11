@@ -275,7 +275,7 @@ final class DecisionInspectorIntegrationTest extends WP_UnitTestCase {
 			CurrencySwitcher::SESSION_CURRENCY_ORIGIN,
 			PersistedKeys::session_keys()
 		);
-		$this->assertSame( 7, PersistedKeys::INVENTORY_VERSION );
+		$this->assertSame( 8, PersistedKeys::INVENTORY_VERSION );
 		$this->assertNotContains(
 			'umc_decision_inspector',
 			PersistedKeys::user_meta_keys()

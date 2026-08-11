@@ -117,7 +117,7 @@ final class SiteHealthRateIntegrationTest extends WP_UnitTestCase {
 
 		$this->assertSame( 'critical', $result['status'] );
 		$this->assertSame( 'red', $result['badge']['color'] );
-		$this->assertStringContainsString( 'scheduled', strtolower( (string) $result['description'] ) );
+		$this->assertStringContainsString( 'schedule', strtolower( (string) $result['description'] ) );
 	}
 
 	public function test_one_stale_currency_is_recommended(): void {
