@@ -323,6 +323,10 @@ final class CurrencyViewModelFactory {
 		$label = $evaluator->label_for_currency( $code );
 
 		return match ( $label ) {
+			RateStatusEvaluator::LABEL_AGING  => array(
+				'label' => __( 'Aging', 'universal-multicurrency' ),
+				'class' => 'aging',
+			),
 			RateStatusEvaluator::LABEL_STALE  => array(
 				'label' => __( 'Stale', 'universal-multicurrency' ),
 				'class' => 'stale',

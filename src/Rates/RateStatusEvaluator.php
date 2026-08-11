@@ -18,6 +18,8 @@ final class RateStatusEvaluator {
 
 	public const LABEL_OK = 'ok';
 
+	public const LABEL_AGING = 'aging';
+
 	public const LABEL_STALE = 'stale';
 
 	public const LABEL_FAILED = 'failed';
@@ -68,11 +70,15 @@ final class RateStatusEvaluator {
 
 		$age_hours = ( time() - $updated_at ) / 3600;
 
-		if ( $age_hours > $max_age ) {
-			return self::LABEL_STALE;
+		if ( $age_hours <= ( 0.5 * $max_age ) ) {
+			return self::LABEL_OK;
 		}
 
-		return self::LABEL_OK;
+		if ( $age_hours <= $max_age ) {
+			return self::LABEL_AGING;
+		}
+
+		return self::LABEL_STALE;
 	}
 
 	/**
@@ -82,6 +88,7 @@ final class RateStatusEvaluator {
 	 */
 	public function display_label( string $label ): string {
 		return match ( $label ) {
+			self::LABEL_AGING  => __( 'Aging', 'universal-multicurrency' ),
 			self::LABEL_STALE  => __( 'Stale', 'universal-multicurrency' ),
 			self::LABEL_FAILED => __( 'Failed', 'universal-multicurrency' ),
 			self::LABEL_NEVER  => __( 'Never', 'universal-multicurrency' ),
