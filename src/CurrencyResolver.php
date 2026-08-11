@@ -60,12 +60,12 @@ final class CurrencyResolver {
 			CurrencyResolutionResult::SOURCE_COOKIE   => $cookie,
 		);
 
-		$candidates    = array();
+		$candidates     = array();
 		$winning_source = null;
 		$winning_code   = null;
 
 		foreach ( $sources as $source => $candidate ) {
-			$evaluated = $this->evaluate_candidate( $source, $candidate, $base, $selectable );
+			$evaluated    = $this->evaluate_candidate( $source, $candidate, $base, $selectable );
 			$candidates[] = $evaluated;
 
 			if ( null === $winning_source && CurrencyResolutionCandidate::STATUS_ACCEPTED === $evaluated->status() ) {

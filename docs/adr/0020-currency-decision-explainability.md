@@ -70,18 +70,22 @@ using provenance metadata (below). That origin is explanatory only.
 
 ### Provenance is explanatory metadata only
 
-A session key records how the current persisted shopper currency was written
-(for example customer/manual selection vs Visitor Location). Contract:
+Session key `umc_currency_origin` (`CurrencySwitcher::SESSION_CURRENCY_ORIGIN`)
+records how the current persisted shopper currency was written:
+
+| Value | Constant | Writer |
+|---|---|---|
+| `customer` | `ORIGIN_CUSTOMER` | `CurrencySwitcher::persist( $code, true )` |
+| `visitor_location` | `ORIGIN_VISITOR_LOCATION` | `CurrencySwitcher::persist( $code, false )` (geo applicator) |
+
+Contract:
 
 - Provenance **MUST NOT** participate in currency precedence.
 - Provenance **MUST NOT** alter which currency wins.
 - Provenance **MUST NOT** become a second resolver input.
 - Provenance **MUST NOT** be trusted over actual runtime currency state.
-- Provenance is cleared/updated whenever the persisted shopper currency is
-  written or cleared through production write paths.
-
-Exact key name and value set are defined in the architecture specification and
-`PersistedKeys` / `docs/PERSISTED_DATA.md` after write-path inventory.
+- Provenance is updated on every `persist()` write and may be cleared via
+  `clear_currency_origin()` without changing the currency code.
 
 ### On-demand explainability
 
@@ -125,13 +129,20 @@ Routing / UGC; it must not duplicate diagnostic content.
 logic that resembles `CurrencyResolver`. Consolidation is allowed **only**
 after characterization proves behavioral equivalence for shared inputs.
 
+**M15 outcome:** characterization found shared **final currency** agreement for
+representative shopper inputs, but **skip-reason labeling** differs when the
+explicit currency equals the store base and base is absent from the selectable
+list (`shopper_currency` vs an `explicit`-style label). Runtime
+`GeoCurrencyDecisionService` was therefore **left intact**. The explainer
+composes `CurrencyResolver::evaluate()` and `GeoCurrencyDecisionService::simulate()`
+side by side. Explainability is not a justification for changing runtime
+behavior.
+
 If exact parity cannot be shown cleanly:
 
 - leave the runtime path intact;
 - share a lower-level pure evaluator only if behavior remains identical; or
 - let the explainer compose both existing results.
-
-Explainability is not a justification for changing runtime behavior.
 
 ### Settings / schema
 

@@ -26,7 +26,7 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Produces `dist/universal-multicurrency-0.13.0.zip`. The archive includes `readme.txt`,
+Produces `dist/universal-multicurrency-0.14.0.zip`. The archive includes `readme.txt`,
 production `src/`, `vendor/`, and `languages/universal-multicurrency.pot`.
 
 Performance subset:
@@ -36,7 +36,7 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release:** **v0.13.0** on `feature/m14-visitor-location-boundary`.
+**Current release:** **v0.14.0** on `feature/m15-currency-explainability`.
 Git tag and GitHub release follow CI verification — do not create without
 explicit approval.
 
@@ -996,7 +996,31 @@ unaffected.
 
 ---
 
-## v0.13.0 — Visitor Location boundary alignment (current)
+## v0.14.0 — Currency Resolution & Explainability (current)
+
+### Summary
+
+Ships Milestone 15 under version **0.14.0** (ADR-0020). Settings schema
+remains **v5** — no migration. Adds structured currency resolution results,
+explanatory `umc_currency_origin` session provenance, an on-demand decision
+explainer, and a stateless Decision Inspector admin section. Persisted-data
+inventory bumps 6→7. No storefront currency-outcome change.
+
+### Deployment sequence
+
+1. Run `composer release-audit` on the **0.14.0** tree.
+2. Build `dist/universal-multicurrency-0.14.0.zip` with `composer install --no-dev`
+   + `bin/build-zip.sh`.
+3. Deploy over **0.13.x** in place. No settings migration step.
+
+### Rollback
+
+Downgrade to the **0.13.x** zip if needed. Admin Decision Inspector and
+provenance metadata are additive; storefront precedence is unchanged.
+
+---
+
+## v0.13.0 — Visitor Location boundary alignment
 
 ### Summary
 

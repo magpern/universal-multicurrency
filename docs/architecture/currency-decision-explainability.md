@@ -179,25 +179,16 @@ cookie) known at planning time:
 Checkout effective override does **not** rewrite shopper preference persistence
 and is **not** a provenance writer for `umc_currency`.
 
-### Value set
+### Value set (final)
 
-Finalize a **small exact enum** from the inventory during implementation.
-Do not invent overlapping categories. Likely:
+| Session value | Constant | Production writer |
+|---|---|---|
+| `customer` | `CurrencySwitcher::ORIGIN_CUSTOMER` | `persist( $code, true )` (`?currency=` / manual) |
+| `visitor_location` | `CurrencySwitcher::ORIGIN_VISITOR_LOCATION` | `persist( $code, false )` (geo applicator) |
 
-- customer / manual selection
-- visitor location / geo
+Key: `umc_currency_origin` (`CurrencySwitcher::SESSION_CURRENCY_ORIGIN`).
 
-Use repository naming conventions for the session key (conceptually
-`umc_currency_origin`; exact constant on `CurrencySwitcher` or adjacent owner,
-registered in `PersistedKeys`).
-
-Document in:
-
-- `PersistedKeys` inventory (bump inventory version)
-- `docs/PERSISTED_DATA.md`
-- ADR-0020 (if final names differ from draft)
-
-No settings schema bump. No DB migration.
+No other production writers of `umc_currency` exist outside `CurrencySwitcher::persist()`.
 
 ### Truthful explanation example
 

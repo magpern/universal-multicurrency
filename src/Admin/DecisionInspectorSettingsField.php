@@ -65,7 +65,9 @@ final class DecisionInspectorSettingsField {
 		$service     = new DecisionInspectorService( $this->settings, $this->base );
 		$explanation = null;
 
-		if ( isset( $_GET['umc_inspected'] ) && '1' === (string) $_GET['umc_inspected'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Read-only flag.
+		$inspected = isset( $_GET['umc_inspected'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['umc_inspected'] ) ) : '';
+		if ( '1' === $inspected ) {
 			$explanation = $service->explain_from_array( $values );
 		}
 
@@ -73,16 +75,15 @@ final class DecisionInspectorSettingsField {
 		$geo      = ( new GeoDetectionSettingsRepository( $this->settings ) )->get();
 		$checkout = $this->settings->get()['checkout'] ?? CheckoutSettings::default_array();
 		$ugc      = new UgcIntegrationStatus();
+		$origin   = (string) ( $values['currency_origin'] ?? '' );
+		$mode     = (string) ( $values['checkout_mode'] ?? ( is_array( $checkout ) ? ( $checkout['mode'] ?? 'selected' ) : 'selected' ) );
 
-		echo '<div class="umc-decision-inspector">';
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Design-system renderer escapes.
-		echo $this->ui->page_intro(
+		$html  = '<div class="umc-decision-inspector">';
+		$html .= $this->ui->page_intro(
 			__( 'Decision Inspector', 'universal-multicurrency' ),
 			__( 'Explain why a shopper would use a given currency, including Visitor Location and checkout policy when relevant. Simulation is side-effect-free and is not saved.', 'universal-multicurrency' )
 		);
-
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Design-system renderer escapes.
-		echo $this->ui->quick_actions_panel(
+		$html .= $this->ui->quick_actions_panel(
 			__( 'Related tools', 'universal-multicurrency' ),
 			array(
 				array(
@@ -104,18 +105,14 @@ final class DecisionInspectorSettingsField {
 			)
 		);
 
-		echo '<form method="post" action="' . esc_url( $action ) . '" class="umc-decision-inspector__form">';
-		echo '<input type="hidden" name="action" value="' . esc_attr( DecisionInspectorController::ACTION ) . '" />';
-		wp_nonce_field( DecisionInspectorController::ACTION );
-
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Design-system renderer escapes.
-		echo $this->ui->settings_card_open(
+		$html .= '<form method="post" action="' . esc_url( $action ) . '" class="umc-decision-inspector__form">';
+		$html .= '<input type="hidden" name="action" value="' . esc_attr( DecisionInspectorController::ACTION ) . '" />';
+		$html .= wp_nonce_field( DecisionInspectorController::ACTION, '_wpnonce', true, false );
+		$html .= $this->ui->settings_card_open(
 			__( 'Simulation inputs', 'universal-multicurrency' ),
 			__( 'Provide deterministic context. No shopper cookies or sessions are modified.', 'universal-multicurrency' )
 		);
-
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo $this->ui->input_row(
+		$html .= $this->ui->input_row(
 			'umc_decision_inspector[country_code]',
 			__( 'Country', 'universal-multicurrency' ),
 			(string) ( $values['country_code'] ?? '' ),
@@ -125,83 +122,63 @@ final class DecisionInspectorSettingsField {
 				'placeholder' => 'SE',
 			)
 		);
-
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo $this->ui->input_row(
+		$html .= $this->ui->input_row(
 			'umc_decision_inspector[explicit_currency]',
 			__( 'Customer selection (explicit)', 'universal-multicurrency' ),
 			(string) ( $values['explicit_currency'] ?? '' ),
 			'',
 			array( 'maxlength' => '3' )
 		);
-
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo $this->ui->input_row(
+		$html .= $this->ui->input_row(
 			'umc_decision_inspector[session_currency]',
 			__( 'Saved customer currency (session)', 'universal-multicurrency' ),
 			(string) ( $values['session_currency'] ?? '' ),
 			'',
 			array( 'maxlength' => '3' )
 		);
-
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo $this->ui->input_row(
+		$html .= $this->ui->input_row(
 			'umc_decision_inspector[cookie_currency]',
 			__( 'Remembered currency (cookie)', 'universal-multicurrency' ),
 			(string) ( $values['cookie_currency'] ?? '' ),
 			'',
 			array( 'maxlength' => '3' )
 		);
-
-		$origin = (string) ( $values['currency_origin'] ?? '' );
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo $this->ui->select_row(
+		$html .= $this->ui->select_row(
 			'umc_decision_inspector[currency_origin]',
 			__( 'Session currency origin', 'universal-multicurrency' ),
 			__( 'Explanatory metadata only. Never changes which currency wins.', 'universal-multicurrency' ),
 			$this->select_html(
 				'umc_decision_inspector[currency_origin]',
 				array(
-					''                                        => __( 'Unknown / not set', 'universal-multicurrency' ),
-					CurrencySwitcher::ORIGIN_CUSTOMER         => __( 'Customer selection', 'universal-multicurrency' ),
+					''                                => __( 'Unknown / not set', 'universal-multicurrency' ),
+					CurrencySwitcher::ORIGIN_CUSTOMER => __( 'Customer selection', 'universal-multicurrency' ),
 					CurrencySwitcher::ORIGIN_VISITOR_LOCATION => __( 'Visitor Location', 'universal-multicurrency' ),
 				),
 				$origin
 			)
 		);
-
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo $this->ui->toggle_row(
+		$html .= $this->ui->toggle_row(
 			'umc_decision_inspector[manual_selection]',
 			! empty( $values['manual_selection'] ),
 			__( 'Manual selection flag', 'universal-multicurrency' ),
 			__( 'Simulates the until_manual Visitor Location suppression flag.', 'universal-multicurrency' )
 		);
-
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo $this->ui->toggle_row(
+		$html .= $this->ui->toggle_row(
 			'umc_decision_inspector[geo_enabled]',
 			array_key_exists( 'geo_enabled', $values ) ? ! empty( $values['geo_enabled'] ) : $geo->is_enabled(),
 			__( 'Visitor Location enabled', 'universal-multicurrency' )
 		);
-
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo $this->ui->toggle_row(
+		$html .= $this->ui->toggle_row(
 			'umc_decision_inspector[checkout_locked]',
 			! empty( $values['checkout_locked'] ),
 			__( 'Checkout locked for Visitor Location', 'universal-multicurrency' )
 		);
-
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo $this->ui->toggle_row(
+		$html .= $this->ui->toggle_row(
 			'umc_decision_inspector[include_checkout]',
 			! empty( $values['include_checkout'] ),
 			__( 'Include checkout policy', 'universal-multicurrency' )
 		);
-
-		$mode = (string) ( $values['checkout_mode'] ?? ( is_array( $checkout ) ? ( $checkout['mode'] ?? 'selected' ) : 'selected' ) );
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo $this->ui->select_row(
+		$html .= $this->ui->select_row(
 			'umc_decision_inspector[checkout_mode]',
 			__( 'Checkout mode', 'universal-multicurrency' ),
 			'',
@@ -214,42 +191,35 @@ final class DecisionInspectorSettingsField {
 				$mode
 			)
 		);
-
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo $this->ui->toggle_row(
+		$html .= $this->ui->toggle_row(
 			'umc_decision_inspector[gateway_supports_display]',
 			! array_key_exists( 'gateway_supports_display', $values ) || ! empty( $values['gateway_supports_display'] ),
 			__( 'Payment gateway supports display currency', 'universal-multicurrency' )
 		);
-
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo $this->ui->toggle_row(
+		$html .= $this->ui->toggle_row(
 			'umc_decision_inspector[show_notice]',
 			! array_key_exists( 'show_notice', $values ) || ! empty( $values['show_notice'] ),
 			__( 'Customer notice enabled', 'universal-multicurrency' )
 		);
-
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo $this->ui->settings_card_footer(
+		$html .= $this->ui->settings_card_footer(
 			'<button type="submit" class="button button-primary">' . esc_html__( 'Explain decision', 'universal-multicurrency' ) . '</button>'
 		);
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo $this->ui->settings_card_close();
-		echo '</form>';
+		$html .= $this->ui->settings_card_close();
+		$html .= '</form>';
 
 		if ( $explanation instanceof CurrencyDecisionExplanation ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			echo $this->render_explanation( $explanation );
+			$html .= $this->render_explanation( $explanation );
 		} else {
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			echo $this->ui->empty_state(
+			$html .= $this->ui->empty_state(
 				'dashicons-search',
 				__( 'No explanation yet', 'universal-multicurrency' ),
 				__( 'Enter simulation inputs and choose Explain decision.', 'universal-multicurrency' )
 			);
 		}
 
-		echo '</div>';
+		$html .= '</div>';
+
+		echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped via AdminComponentRenderer and esc_* helpers.
 	}
 
 	/**
@@ -258,12 +228,12 @@ final class DecisionInspectorSettingsField {
 	 * @param CurrencyDecisionExplanation $explanation Explanation.
 	 */
 	public function render_explanation( CurrencyDecisionExplanation $explanation ): string {
-		$html  = $this->ui->settings_card_open(
+		$html     = $this->ui->settings_card_open(
 			__( 'Explanation', 'universal-multicurrency' ),
 			__( 'Structured stages from the same decision services used at runtime.', 'universal-multicurrency' )
 		);
-		$html .= $this->ui->statistics_grid_open();
-		$html .= $this->ui->statistics_card(
+		$html    .= $this->ui->statistics_grid_open();
+		$html    .= $this->ui->statistics_card(
 			__( 'Display currency', 'universal-multicurrency' ),
 			$explanation->display_currency()
 		);
@@ -307,7 +277,7 @@ final class DecisionInspectorSettingsField {
 	 * @param string                $current Current value.
 	 */
 	private function select_html( string $name, array $options, string $current ): string {
-		$id      = sanitize_key( str_replace( array( '[', ']' ), array( '-', '' ), $name ) );
+		$id           = sanitize_key( str_replace( array( '[', ']' ), array( '-', '' ), $name ) );
 		$options_html = '';
 
 		foreach ( $options as $value => $label ) {

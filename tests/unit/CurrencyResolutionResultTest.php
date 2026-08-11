@@ -39,7 +39,7 @@ final class CurrencyResolutionResultTest extends TestCase {
 		);
 
 		foreach ( $cases as $case ) {
-			$resolved = $resolver->resolve( $case[0], $case[1], $case[2], self::BASE, self::SELECTABLE );
+			$resolved  = $resolver->resolve( $case[0], $case[1], $case[2], self::BASE, self::SELECTABLE );
 			$evaluated = $resolver->evaluate( $case[0], $case[1], $case[2], self::BASE, self::SELECTABLE );
 
 			$this->assertSame( $resolved, $evaluated->currency() );

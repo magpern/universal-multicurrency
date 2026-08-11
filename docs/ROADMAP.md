@@ -221,16 +221,17 @@
 
     | Work item | Status |
     |---|---|
-    | Structured `CurrencyResolutionResult` + `CurrencyResolver::evaluate()` | Planned |
-    | Shopper currency provenance metadata (explanatory only; no precedence) | Planned |
-    | `CurrencyDecisionExplanation` / explainer composition layer | Planned |
-    | Stateless Decision Inspector admin section | Planned |
-    | Visitor Location + checkout explanation stages | Planned |
-    | ADR-0020 + architecture specification | Prepared |
+    | Structured `CurrencyResolutionResult` + `CurrencyResolver::evaluate()` | **Prepared** |
+    | Shopper currency provenance metadata (explanatory only; no precedence) | **Prepared** |
+    | `CurrencyDecisionExplanation` / explainer composition layer | **Prepared** |
+    | Stateless Decision Inspector admin section | **Prepared** |
+    | Visitor Location + checkout explanation stages | **Prepared** |
+    | ADR-0020 + architecture specification | **Prepared** |
 
     No settings schema change. No DB migration. No storefront currency-outcome
     change. Inspector simulation is side-effect-free and does not persist
-    results. See
+    results. `GeoCurrencyDecisionService` left unconsolidated after
+    characterization (skip-reason labeling differs for base-as-explicit). See
     [`docs/adr/0020-currency-decision-explainability.md`](adr/0020-currency-decision-explainability.md)
     and
     [`docs/architecture/currency-decision-explainability.md`](architecture/currency-decision-explainability.md).

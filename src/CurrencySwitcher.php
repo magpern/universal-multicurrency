@@ -31,8 +31,8 @@ final class CurrencySwitcher {
 	 */
 	public const SESSION_CURRENCY_ORIGIN = 'umc_currency_origin';
 
-	public const ORIGIN_CUSTOMER          = 'customer';
-	public const ORIGIN_VISITOR_LOCATION  = 'visitor_location';
+	public const ORIGIN_CUSTOMER         = 'customer';
+	public const ORIGIN_VISITOR_LOCATION = 'visitor_location';
 
 	private const COOKIE_LIFETIME = 30 * DAY_IN_SECONDS;
 

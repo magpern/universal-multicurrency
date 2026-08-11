@@ -55,10 +55,10 @@ final class CurrencyDecisionExplainer {
 	/**
 	 * Constructs the explainer.
 	 *
-	 * @param CurrencyResolver                $resolver         Resolver.
-	 * @param GeoCurrencyDecisionService      $geo_decisions    Geo decisions.
-	 * @param CheckoutCurrencyPolicy|null     $checkout_policy  Checkout policy.
-	 * @param CheckoutNoticeService|null      $notice_service   Notice service.
+	 * @param CurrencyResolver            $resolver         Resolver.
+	 * @param GeoCurrencyDecisionService  $geo_decisions    Geo decisions.
+	 * @param CheckoutCurrencyPolicy|null $checkout_policy  Checkout policy.
+	 * @param CheckoutNoticeService|null  $notice_service   Notice service.
 	 */
 	public function __construct(
 		CurrencyResolver $resolver,
@@ -197,7 +197,7 @@ final class CurrencyDecisionExplainer {
 	/**
 	 * Shopper selection stage.
 	 *
-	 * @param DecisionExplanationInput   $input      Inputs.
+	 * @param DecisionExplanationInput      $input      Inputs.
 	 * @param \UMC\CurrencyResolutionResult $resolution Resolution.
 	 */
 	private function shopper_stage( DecisionExplanationInput $input, \UMC\CurrencyResolutionResult $resolution ): ExplanationStage {
@@ -220,15 +220,15 @@ final class CurrencyDecisionExplainer {
 	/**
 	 * Visitor Location stage distinguishing candidate vs won.
 	 *
-	 * @param DecisionExplanationInput     $input      Inputs.
+	 * @param DecisionExplanationInput      $input      Inputs.
 	 * @param \UMC\CurrencyResolutionResult $resolution Shopper resolution.
-	 * @param array<string, mixed>         $geo        simulate() output.
+	 * @param array<string, mixed>          $geo        simulate() output.
 	 */
 	private function visitor_location_stage( DecisionExplanationInput $input, \UMC\CurrencyResolutionResult $resolution, array $geo ): ExplanationStage {
-		$skipped = ! empty( $geo['geo_skipped'] );
-		$reason  = is_string( $geo['geo_skip_reason'] ?? null ) ? (string) $geo['geo_skip_reason'] : '';
-		/** @var GeoRuleEvaluationResult|null $evaluation */
+		$skipped    = ! empty( $geo['geo_skipped'] );
+		$reason     = is_string( $geo['geo_skip_reason'] ?? null ) ? (string) $geo['geo_skip_reason'] : '';
 		$evaluation = $geo['evaluation'] ?? null;
+		$evaluation = $evaluation instanceof GeoRuleEvaluationResult ? $evaluation : null;
 		$candidate  = is_string( $geo['final_currency'] ?? null ) ? strtoupper( (string) $geo['final_currency'] ) : null;
 
 		if ( $input->manual_selection() && $skipped ) {
@@ -251,12 +251,12 @@ final class CurrencyDecisionExplainer {
 				$status,
 				$reason,
 				array(
-					'participated'   => false,
-					'won'            => false,
-					'candidate'      => $candidate,
-					'country_code'   => $input->country_code(),
-					'ugc_available'  => $input->ugc_available(),
-					'evaluation'     => null,
+					'participated'  => false,
+					'won'           => false,
+					'candidate'     => $candidate,
+					'country_code'  => $input->country_code(),
+					'ugc_available' => $input->ugc_available(),
+					'evaluation'    => null,
 				)
 			);
 		}
@@ -315,7 +315,7 @@ final class CurrencyDecisionExplainer {
 			$decision = $this->checkout_policy->decide_pass_two( $display, $input->base_currency() );
 		}
 
-		$effective = $decision->effective_currency();
+		$effective           = $decision->effective_currency();
 		$transition_required = $display !== $effective || '' !== $decision->transition_reason();
 
 		$stages   = array();
@@ -339,14 +339,14 @@ final class CurrencyDecisionExplainer {
 			$input->gateway_supports_display() ? ExplanationStage::STATUS_INFO : ExplanationStage::STATUS_BLOCKED,
 			$input->gateway_supports_display() ? 'supported' : 'unsupported',
 			array(
-				'supports_display'   => $input->gateway_supports_display(),
-				'before_umc_count'   => $evaluation->before_umc_count(),
-				'after_umc_count'    => $evaluation->after_umc_count(),
-				'umc_caused_empty'   => $evaluation->umc_caused_empty(),
+				'supports_display' => $input->gateway_supports_display(),
+				'before_umc_count' => $evaluation->before_umc_count(),
+				'after_umc_count'  => $evaluation->after_umc_count(),
+				'umc_caused_empty' => $evaluation->umc_caused_empty(),
 			)
 		);
 
-		$state = new CheckoutTransitionState(
+		$state  = new CheckoutTransitionState(
 			$settings->mode(),
 			$display,
 			$effective,

@@ -25,10 +25,10 @@ final class CurrencyResolutionResult {
 	/**
 	 * Creates a resolution result.
 	 *
-	 * @param string                             $currency              Resolved currency code.
-	 * @param string                             $winning_source        explicit|session|cookie|base.
+	 * @param string                                  $currency              Resolved currency code.
+	 * @param string                                  $winning_source        explicit|session|cookie|base.
 	 * @param array<int, CurrencyResolutionCandidate> $candidates       Ordered candidate evaluations.
-	 * @param bool                               $was_fallback_to_base  Whether base was used as fallback.
+	 * @param bool                                    $was_fallback_to_base  Whether base was used as fallback.
 	 */
 	public function __construct(
 		private string $currency,

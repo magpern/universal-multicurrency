@@ -64,33 +64,31 @@ final class DecisionInspectorController {
 
 		check_admin_referer( self::ACTION );
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$post = isset( $_POST['umc_decision_inspector'] ) && is_array( $_POST['umc_decision_inspector'] )
-			? wp_unslash( $_POST['umc_decision_inspector'] )
-			: array();
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verified above; sanitized in DecisionInspectorService::input_from_array().
+		$post = isset( $_POST['umc_decision_inspector'] ) && is_array( $_POST['umc_decision_inspector'] ) ? wp_unslash( $_POST['umc_decision_inspector'] ) : array();
 
 		$service = new DecisionInspectorService( $this->settings, $this->base );
 		$input   = $service->input_from_array( is_array( $post ) ? $post : array() );
 
 		$args = array(
-			'page'                      => 'wc-settings',
-			'tab'                       => 'umc',
-			'section'                   => SettingsPage::SECTION_DECISION_INSPECTOR,
-			'umc_inspected'             => '1',
-			'umc_di_country'            => $input->country_code(),
-			'umc_di_explicit'           => (string) ( $input->explicit_currency() ?? '' ),
-			'umc_di_session'            => (string) ( $input->session_currency() ?? '' ),
-			'umc_di_cookie'             => (string) ( $input->cookie_currency() ?? '' ),
-			'umc_di_manual'             => $input->manual_selection() ? '1' : '0',
-			'umc_di_origin'             => (string) ( $input->currency_origin() ?? '' ),
-			'umc_di_geo_enabled'        => $input->geo_enabled() ? '1' : '0',
-			'umc_di_checkout_locked'    => $input->checkout_locked() ? '1' : '0',
-			'umc_di_include_checkout'   => $input->include_checkout() ? '1' : '0',
-			'umc_di_checkout_mode'      => $input->checkout_mode(),
-			'umc_di_show_notice'        => $input->show_notice() ? '1' : '0',
-			'umc_di_payment_required'   => $input->payment_required() ? '1' : '0',
-			'umc_di_gateway_supports'   => $input->gateway_supports_display() ? '1' : '0',
-			'umc_di_order_context'      => $input->order_context_active() ? '1' : '0',
+			'page'                    => 'wc-settings',
+			'tab'                     => 'umc',
+			'section'                 => SettingsPage::SECTION_DECISION_INSPECTOR,
+			'umc_inspected'           => '1',
+			'umc_di_country'          => $input->country_code(),
+			'umc_di_explicit'         => (string) ( $input->explicit_currency() ?? '' ),
+			'umc_di_session'          => (string) ( $input->session_currency() ?? '' ),
+			'umc_di_cookie'           => (string) ( $input->cookie_currency() ?? '' ),
+			'umc_di_manual'           => $input->manual_selection() ? '1' : '0',
+			'umc_di_origin'           => (string) ( $input->currency_origin() ?? '' ),
+			'umc_di_geo_enabled'      => $input->geo_enabled() ? '1' : '0',
+			'umc_di_checkout_locked'  => $input->checkout_locked() ? '1' : '0',
+			'umc_di_include_checkout' => $input->include_checkout() ? '1' : '0',
+			'umc_di_checkout_mode'    => $input->checkout_mode(),
+			'umc_di_show_notice'      => $input->show_notice() ? '1' : '0',
+			'umc_di_payment_required' => $input->payment_required() ? '1' : '0',
+			'umc_di_gateway_supports' => $input->gateway_supports_display() ? '1' : '0',
+			'umc_di_order_context'    => $input->order_context_active() ? '1' : '0',
 		);
 
 		wp_safe_redirect( add_query_arg( $args, admin_url( 'admin.php' ) ) );

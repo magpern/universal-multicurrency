@@ -19,11 +19,11 @@ final class CurrencyDecisionExplanation {
 	/**
 	 * Creates an explanation.
 	 *
-	 * @param string                        $display_currency   Browse/display currency.
-	 * @param string|null                   $checkout_currency  Effective checkout currency, if evaluated.
-	 * @param CurrencyResolutionResult      $shopper_resolution Shopper ladder result.
-	 * @param string|null                   $currency_origin    Provenance metadata, if any.
-	 * @param array<int, ExplanationStage>  $stages             Ordered stages.
+	 * @param string                       $display_currency   Browse/display currency.
+	 * @param string|null                  $checkout_currency  Effective checkout currency, if evaluated.
+	 * @param CurrencyResolutionResult     $shopper_resolution Shopper ladder result.
+	 * @param string|null                  $currency_origin    Provenance metadata, if any.
+	 * @param array<int, ExplanationStage> $stages             Ordered stages.
 	 */
 	public function __construct(
 		private string $display_currency,

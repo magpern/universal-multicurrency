@@ -98,7 +98,7 @@ final class CurrencySwitcherTest extends TestCase {
 		$this->assertSame( 'USD', $resolved );
 
 		$this->session[ CurrencySwitcher::SESSION_CURRENCY_ORIGIN ] = CurrencySwitcher::ORIGIN_VISITOR_LOCATION;
-		$resolved_with_stale_origin = $resolver->resolve( null, $this->session[ CurrencyContext::SESSION_KEY ], null, 'EUR', array( 'SEK', 'USD' ) );
+		$resolved_with_stale_origin                                 = $resolver->resolve( null, $this->session[ CurrencyContext::SESSION_KEY ], null, 'EUR', array( 'SEK', 'USD' ) );
 		$this->assertSame( 'USD', $resolved_with_stale_origin );
 	}
 

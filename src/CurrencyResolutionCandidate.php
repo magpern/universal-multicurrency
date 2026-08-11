@@ -18,8 +18,8 @@ final class CurrencyResolutionCandidate {
 	public const STATUS_ACCEPTED = 'accepted';
 	public const STATUS_REJECTED = 'rejected';
 
-	public const REJECT_MALFORMED       = 'malformed';
-	public const REJECT_NOT_SELECTABLE  = 'not_selectable';
+	public const REJECT_MALFORMED      = 'malformed';
+	public const REJECT_NOT_SELECTABLE = 'not_selectable';
 
 	/**
 	 * Creates a candidate evaluation.

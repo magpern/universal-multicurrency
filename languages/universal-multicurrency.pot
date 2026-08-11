@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Universal Multicurrency for WooCommerce 0.13.0\n"
+"Project-Id-Version: Universal Multicurrency for WooCommerce 0.14.0\n"
 "Report-Msgid-Bugs-To: https://github.com/magpern/universal-multicurrency/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -83,7 +83,7 @@ msgid "Hide technical evidence"
 msgstr ""
 
 #: src/Admin/AdminComponentRenderer.php:493
-#: src/Admin/SettingsPage.php:785
+#: src/Admin/SettingsPage.php:832
 msgid "Unsaved changes"
 msgstr ""
 
@@ -94,10 +94,10 @@ msgstr ""
 #: src/Admin/AdminComponentRenderer.php:495
 #: src/Admin/AdminPageShell.php:100
 #: src/Admin/AdminPageShell.php:101
-#: src/Admin/SettingsPage.php:772
-#: src/Admin/SettingsPage.php:773
-#: src/Admin/SettingsPage.php:786
-#: src/Admin/SettingsPage.php:787
+#: src/Admin/SettingsPage.php:819
+#: src/Admin/SettingsPage.php:820
+#: src/Admin/SettingsPage.php:833
+#: src/Admin/SettingsPage.php:834
 msgid "Save changes"
 msgstr ""
 
@@ -106,70 +106,74 @@ msgstr ""
 msgid "All changes saved"
 msgstr ""
 
-#: src/Admin/AdminPageShellViewModelFactory.php:62
+#: src/Admin/AdminPageShellViewModelFactory.php:63
 #: src/Compatibility/Checks/EnvironmentCheck.php:37
 #: src/Diagnostics/SiteHealthReport.php:678
 #: src/Diagnostics/SiteHealthReport.php:922
 msgid "Universal Multicurrency"
 msgstr ""
 
-#: src/Admin/AdminPageShellViewModelFactory.php:64
+#: src/Admin/AdminPageShellViewModelFactory.php:65
 msgid "for WooCommerce"
 msgstr ""
 
-#: src/Admin/AdminPageShellViewModelFactory.php:66
-#: src/Admin/SettingsPage.php:131
-#: src/Admin/SettingsPage.php:828
+#: src/Admin/AdminPageShellViewModelFactory.php:67
+#: src/Admin/SettingsPage.php:139
+#: src/Admin/SettingsPage.php:875
 msgid "Multicurrency"
 msgstr ""
 
-#: src/Admin/AdminPageShellViewModelFactory.php:83
+#: src/Admin/AdminPageShellViewModelFactory.php:84
 msgid "Manage the currencies available across your store."
 msgstr ""
 
-#: src/Admin/AdminPageShellViewModelFactory.php:85
+#: src/Admin/AdminPageShellViewModelFactory.php:86
 msgid "Configure providers, update schedules, and effective rates."
 msgstr ""
 
-#: src/Admin/AdminPageShellViewModelFactory.php:87
+#: src/Admin/AdminPageShellViewModelFactory.php:88
 #: src/Admin/Geo/GeoPanelRegistry.php:187
 msgid "Determine a visitor's country and automatically suggest the appropriate currency."
 msgstr ""
 
-#: src/Admin/AdminPageShellViewModelFactory.php:89
+#: src/Admin/AdminPageShellViewModelFactory.php:90
 msgid "Configure how prices and currency information are displayed across your store."
 msgstr ""
 
-#: src/Admin/AdminPageShellViewModelFactory.php:91
+#: src/Admin/AdminPageShellViewModelFactory.php:92
 #: src/Admin/CheckoutSettingsField.php:81
 msgid "Choose which currency customers use during checkout."
 msgstr ""
 
-#: src/Admin/AdminPageShellViewModelFactory.php:93
+#: src/Admin/AdminPageShellViewModelFactory.php:94
+msgid "Explain why a shopper would use a given currency, including Visitor Location and checkout policy."
+msgstr ""
+
+#: src/Admin/AdminPageShellViewModelFactory.php:96
 msgid "Review store compatibility, conflicts, cache interactions, and support diagnostics."
 msgstr ""
 
-#: src/Admin/AdminPageShellViewModelFactory.php:95
+#: src/Admin/AdminPageShellViewModelFactory.php:98
 msgid "Manage advanced behavior and diagnostic settings."
 msgstr ""
 
-#: src/Admin/AdminPageShellViewModelFactory.php:109
+#: src/Admin/AdminPageShellViewModelFactory.php:112
 msgid "We're working on display customization options for your store."
 msgstr ""
 
-#: src/Admin/AdminPageShellViewModelFactory.php:111
+#: src/Admin/AdminPageShellViewModelFactory.php:114
 msgid "We're working on checkout currency behavior options for your store."
 msgstr ""
 
-#: src/Admin/AdminPageShellViewModelFactory.php:113
+#: src/Admin/AdminPageShellViewModelFactory.php:116
 msgid "We're working on compatibility guidance and tooling for your store."
 msgstr ""
 
-#: src/Admin/AdminPageShellViewModelFactory.php:115
+#: src/Admin/AdminPageShellViewModelFactory.php:118
 msgid "We're working on advanced configuration options for your store."
 msgstr ""
 
-#: src/Admin/AdminPageShellViewModelFactory.php:118
+#: src/Admin/AdminPageShellViewModelFactory.php:121
 msgid "We're working on additional settings for this section."
 msgstr ""
 
@@ -180,6 +184,7 @@ msgid "Switch to store currency (%s)"
 msgstr ""
 
 #: src/Admin/CheckoutSettingsField.php:80
+#: src/Admin/DecisionInspectorSettingsField.php:242
 msgid "Checkout currency"
 msgstr ""
 
@@ -566,8 +571,8 @@ msgid "Automatic"
 msgstr ""
 
 #: src/Admin/CurrencyTableField.php:95
-#: src/Admin/SettingsPage.php:187
-#: src/Admin/SettingsPage.php:513
+#: src/Admin/SettingsPage.php:197
+#: src/Admin/SettingsPage.php:533
 msgid "Currencies"
 msgstr ""
 
@@ -599,6 +604,266 @@ msgstr ""
 
 #: src/Admin/CurrencyTableField.php:143
 msgid "Base currency (configured in WooCommerce → Settings → General)"
+msgstr ""
+
+#: src/Admin/DecisionInspectorController.php:62
+msgid "You do not have permission to run Decision Inspector."
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:83
+#: src/Admin/SettingsPage.php:202
+#: src/Admin/SettingsPage.php:641
+msgid "Decision Inspector"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:84
+msgid "Explain why a shopper would use a given currency, including Visitor Location and checkout policy when relevant. Simulation is side-effect-free and is not saved."
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:87
+msgid "Related tools"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:90
+#: src/Admin/Geo/GeoPanelRegistry.php:148
+#: src/Admin/Geo/GeoPanelRegistry.php:171
+msgid "Currency Routing"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:94
+#: src/Admin/Geo/GeoPanelRegistry.php:149
+#: src/Admin/Geo/GeoPanelRegistry.php:172
+#: src/Admin/Geo/GeoPanelRenderer.php:364
+msgid "Currency Simulation"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:98
+#: src/Admin/Geo/GeoPanelRenderer.php:334
+#: src/Admin/SettingsPage.php:203
+#: src/Admin/SettingsPage.php:691
+msgid "Compatibility"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:102
+#: src/Admin/Geo/GeoDetectionUi.php:123
+msgid "Universal Geo Context"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:112
+msgid "Simulation inputs"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:113
+msgid "Provide deterministic context. No shopper cookies or sessions are modified."
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:117
+#: src/Admin/Geo/GeoDetectionUi.php:275
+msgid "Country"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:119
+msgid "ISO alpha-2 country code for Visitor Location evaluation."
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:127
+msgid "Customer selection (explicit)"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:134
+msgid "Saved customer currency (session)"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:141
+msgid "Remembered currency (cookie)"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:148
+msgid "Session currency origin"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:149
+msgid "Explanatory metadata only. Never changes which currency wins."
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:153
+msgid "Unknown / not set"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:154
+#: src/Admin/DecisionInspectorSettingsField.php:341
+#: src/Admin/DecisionInspectorSettingsField.php:360
+msgid "Customer selection"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:155
+#: src/Admin/DecisionInspectorSettingsField.php:364
+#: src/Admin/DecisionInspectorSettingsField.php:382
+#: src/Admin/Geo/GeoPanelRegistry.php:173
+#: src/Admin/SettingsPage.php:199
+#: src/Admin/SettingsPage.php:587
+msgid "Visitor Location"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:163
+msgid "Manual selection flag"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:164
+msgid "Simulates the until_manual Visitor Location suppression flag."
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:169
+msgid "Visitor Location enabled"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:174
+msgid "Checkout locked for Visitor Location"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:179
+msgid "Include checkout policy"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:183
+msgid "Checkout mode"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:188
+msgid "Selected currency"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:189
+msgid "Store currency"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:197
+msgid "Payment gateway supports display currency"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:202
+msgid "Customer notice enabled"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:205
+msgid "Explain decision"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:215
+msgid "No explanation yet"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:216
+msgid "Enter simulation inputs and choose Explain decision."
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:232
+msgid "Explanation"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:233
+msgid "Structured stages from the same decision services used at runtime."
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:237
+#: src/Admin/DecisionInspectorSettingsField.php:384
+msgid "Display currency"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:246
+msgid "Session origin"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:250
+msgid "Resolver source"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:266
+msgid "Decision timeline"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:343
+msgid "Saved customer currency"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:345
+msgid "Remembered currency"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:347
+msgid "Store default"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:367
+msgid "Not set"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:378
+msgid "Order context"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:380
+msgid "Shopper selection"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:386
+msgid "Checkout policy"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:388
+msgid "Payment gateway"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:390
+msgid "Customer notice"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:404
+msgid "Won"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:406
+msgid "Considered"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:408
+msgid "Skipped"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:410
+msgid "Blocked"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:412
+msgid "Info"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:436
+msgid "Applied"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:438
+msgid "Candidate produced"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:440
+msgid "Did not apply"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:460
+msgid "Supports display currency"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:461
+msgid "Does not support display currency"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:465
+msgid "Notice would show"
+msgstr ""
+
+#: src/Admin/DecisionInspectorSettingsField.php:466
+msgid "No notice"
 msgstr ""
 
 #: src/Admin/DisplaySettingsField.php:123
@@ -891,10 +1156,6 @@ msgstr ""
 msgid "Update all automatic rates"
 msgstr ""
 
-#: src/Admin/Geo/GeoDetectionUi.php:123
-msgid "Universal Geo Context"
-msgstr ""
-
 #: src/Admin/Geo/GeoDetectionUi.php:124
 msgid "Primary detection provider for visitor country resolution."
 msgstr ""
@@ -969,10 +1230,6 @@ msgstr ""
 msgid "Other"
 msgstr ""
 
-#: src/Admin/Geo/GeoDetectionUi.php:275
-msgid "Country"
-msgstr ""
-
 #. translators: %s: country name
 #: src/Admin/Geo/GeoDetectionUi.php:292
 #, php-format
@@ -1012,29 +1269,12 @@ msgstr ""
 msgid "Visitor Location panels"
 msgstr ""
 
-#: src/Admin/Geo/GeoPanelRegistry.php:148
-#: src/Admin/Geo/GeoPanelRegistry.php:171
-msgid "Currency Routing"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRegistry.php:149
-#: src/Admin/Geo/GeoPanelRegistry.php:172
-#: src/Admin/Geo/GeoPanelRenderer.php:364
-msgid "Currency Simulation"
-msgstr ""
-
 #: src/Admin/Geo/GeoPanelRegistry.php:150
 msgid "Overview"
 msgstr ""
 
 #: src/Admin/Geo/GeoPanelRegistry.php:170
 msgid "Visitor Location overview"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRegistry.php:173
-#: src/Admin/SettingsPage.php:189
-#: src/Admin/SettingsPage.php:567
-msgid "Visitor Location"
 msgstr ""
 
 #: src/Admin/Geo/GeoPanelRegistry.php:184
@@ -1252,12 +1492,6 @@ msgstr ""
 
 #: src/Admin/Geo/GeoPanelRenderer.php:324
 msgid "Checkout country precedence"
-msgstr ""
-
-#: src/Admin/Geo/GeoPanelRenderer.php:334
-#: src/Admin/SettingsPage.php:192
-#: src/Admin/SettingsPage.php:644
-msgid "Compatibility"
 msgstr ""
 
 #: src/Admin/Geo/GeoPanelRenderer.php:335
@@ -1762,30 +1996,30 @@ msgstr ""
 msgid "Multicurrency settings sections"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:188
-#: src/Admin/SettingsPage.php:621
+#: src/Admin/SettingsPage.php:198
+#: src/Admin/SettingsPage.php:668
 msgid "Exchange Rates"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:190
-#: src/Admin/SettingsPage.php:540
+#: src/Admin/SettingsPage.php:200
+#: src/Admin/SettingsPage.php:560
 msgid "Display"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:191
-#: src/Admin/SettingsPage.php:594
+#: src/Admin/SettingsPage.php:201
+#: src/Admin/SettingsPage.php:614
 msgid "Checkout"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:193
+#: src/Admin/SettingsPage.php:204
 msgid "Advanced"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:398
+#: src/Admin/SettingsPage.php:418
 msgid "When the switcher is enabled, at least one device visibility option must be selected."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:415
+#: src/Admin/SettingsPage.php:435
 msgid "Horizontal list is only available with manual placement. Style was saved as Dropdown."
 msgstr ""
 

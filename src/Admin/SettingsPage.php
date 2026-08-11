@@ -34,14 +34,14 @@ use WC_Settings_Page;
  */
 final class SettingsPage extends WC_Settings_Page {
 
-	public const SECTION_CURRENCIES          = 'currencies';
-	public const SECTION_EXCHANGE_RATES      = 'exchange_rates';
-	public const SECTION_GEO_DETECTION       = 'geo_detection';
-	public const SECTION_DISPLAY             = 'display';
-	public const SECTION_CHECKOUT            = 'checkout';
-	public const SECTION_DECISION_INSPECTOR  = 'decision_inspector';
-	public const SECTION_COMPATIBILITY       = 'compatibility';
-	public const SECTION_ADVANCED            = 'advanced';
+	public const SECTION_CURRENCIES         = 'currencies';
+	public const SECTION_EXCHANGE_RATES     = 'exchange_rates';
+	public const SECTION_GEO_DETECTION      = 'geo_detection';
+	public const SECTION_DISPLAY            = 'display';
+	public const SECTION_CHECKOUT           = 'checkout';
+	public const SECTION_DECISION_INSPECTOR = 'decision_inspector';
+	public const SECTION_COMPATIBILITY      = 'compatibility';
+	public const SECTION_ADVANCED           = 'advanced';
 
 	/**
 	 * Merchant settings store.
@@ -135,35 +135,35 @@ final class SettingsPage extends WC_Settings_Page {
 	 * @param ExchangeRateStore $store    Rate persistence boundary.
 	 */
 	public function __construct( Settings $settings, Currency $base, ExchangeRateStore $store ) {
-		$this->id                  = 'umc';
-		$this->label               = __( 'Multicurrency', 'universal-multicurrency' );
-		$this->settings            = $settings;
-		$this->parser              = new CurrencySettingsParser( $settings, $base );
-		$this->exchange_field      = new ExchangeRateSettingsField( $settings, $store );
-		$registry                  = new CurrencyRegistry( $settings, $base );
-		$rates                     = new ManualRateProvider( $settings, $base->code() );
-		$context                   = new CurrencyContext( $registry, $rates, new CurrencyResolver() );
-		$display_repository        = new SwitcherSettingsRepository( $settings );
-		$this->display_field       = new DisplaySettingsField(
+		$this->id                       = 'umc';
+		$this->label                    = __( 'Multicurrency', 'universal-multicurrency' );
+		$this->settings                 = $settings;
+		$this->parser                   = new CurrencySettingsParser( $settings, $base );
+		$this->exchange_field           = new ExchangeRateSettingsField( $settings, $store );
+		$registry                       = new CurrencyRegistry( $settings, $base );
+		$rates                          = new ManualRateProvider( $settings, $base->code() );
+		$context                        = new CurrencyContext( $registry, $rates, new CurrencyResolver() );
+		$display_repository             = new SwitcherSettingsRepository( $settings );
+		$this->display_field            = new DisplaySettingsField(
 			$settings,
 			new SwitcherViewModelFactory( $context, new WooCommerceCurrencyProvider(), $display_repository ),
 			new SwitcherRenderer(),
 			$display_repository
 		);
-		$this->checkout_field      = new CheckoutSettingsField( $settings, $base );
-		$this->geo_field           = new GeoDetectionSettingsField( $settings, $base, $registry );
+		$this->checkout_field           = new CheckoutSettingsField( $settings, $base );
+		$this->geo_field                = new GeoDetectionSettingsField( $settings, $base, $registry );
 		$this->decision_inspector_field = new DecisionInspectorSettingsField( $settings, $base );
-		$conflict_detector         = new ConflictDetector(
+		$conflict_detector              = new ConflictDetector(
 			new DetectorRegistry(),
 			new WordPressEnvironmentProbe(),
 			new ConflictScorer()
 		);
-		$this->compatibility_field = new CompatibilitySettingsField(
+		$this->compatibility_field      = new CompatibilitySettingsField(
 			CompatibilityServices::scanner( $settings, $store, $base, $conflict_detector )
 		);
-		$this->section_header      = new SectionHeader();
-		$this->shell               = new AdminPageShell( new SectionNavigation() );
-		$this->overview_field      = new CurrencyOverviewField(
+		$this->section_header           = new SectionHeader();
+		$this->shell                    = new AdminPageShell( new SectionNavigation() );
+		$this->overview_field           = new CurrencyOverviewField(
 			new CurrencyViewModelFactory(
 				$settings,
 				$base,
