@@ -441,5 +441,5 @@ it. No interactive UI. No history / provider-management commands.
 - [x] Health model shared by admin / SH / Compatibility / CLI
 - [x] Order schema 4 additive; schemas 1–3 still read
 - [x] Full unit + integration suites green
-- [ ] Canonical `composer release-audit` green
-- [ ] Version prepared as **0.15.0** (no tag/push required by this spec alone)
+- [x] Canonical `composer release-audit` green
+- [x] Version prepared as **0.15.0** (no tag/push required by this spec alone)

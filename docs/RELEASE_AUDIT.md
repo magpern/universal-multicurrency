@@ -1,15 +1,15 @@
-# Release audit — v0.14.0 Currency Resolution & Explainability
+# Release audit — v0.15.0 Exchange Rate Operations & Reliability
 
-Executable release-blocking gate for Universal Multicurrency **v0.14.0**. This
+Executable release-blocking gate for Universal Multicurrency **v0.15.0**. This
 document records scope, criteria, commands, audit results, and the current
 release-preparation state.
 
 **Governing question:** If we published this release tomorrow, is there anything
 left in the repository that clearly should not ship?
 
-**Repository status:** **prepared for v0.14.0** on
-`feature/m15-currency-explainability`. Milestone 15 (Currency Resolution &
-Explainability; ADR-0020) awaits CI verification. Git tag **`v0.14.0`** and
+**Repository status:** **prepared for v0.15.0** on
+`feature/m16-exchange-rate-operations`. Milestone 16 (Exchange Rate Operations &
+Reliability; ADR-0021) awaits CI verification. Git tag **`v0.15.0`** and
 GitHub release publication follow full CI matrix pass and explicit approval to
 tag and push.
 
@@ -19,11 +19,11 @@ tag and push.
 
 | Item | Value |
 |---|---|
-| Version | **0.14.0** |
+| Version | **0.15.0** |
 | Settings schema | **5** (unchanged; no keys added, renamed, or removed) |
-| Order snapshot schema | **3** (unchanged) |
-| GeoContext (sandbox document) schema | **2** (was 1; removed unused `network`/`providers` reserved subtrees, ADR-0018) |
-| Persisted-data inventory version | **7** (was 6; `umc_currency_origin` session provenance key) |
+| Order snapshot schema | **4** (was 3; additive `_umc_rate_provider`, `_umc_rate_adjustment`) |
+| GeoContext (sandbox document) schema | **2** (unchanged) |
+| Persisted-data inventory version | **8** (was 7; order schema 4 provenance keys) |
 | Production migrations | **v0 → v1**, **v1 → v2**, **v2 → v3**, **v3 → v4**, **v4 → v5** (unchanged; no new migration in this release) |
 | Unresolved Critical security findings | **0** |
 | Unresolved High security findings | **0** |
@@ -42,18 +42,46 @@ tag and push.
 | GitHub release `v0.12.0` | **Published** (superseded) |
 | Git tag `v0.12.1` | **Created** |
 | GitHub release `v0.12.1` | **Published** |
-| Git tag `v0.14.0` | **Not yet created** |
-| GitHub release `v0.14.0` | **Not yet created** |
+| Git tag `v0.14.0` | **Created** |
+| GitHub release `v0.14.0` | **Published** |
+| Git tag `v0.15.0` | **Not yet created** |
+| GitHub release `v0.15.0` | **Not yet created** |
 | Milestone 8 | **Complete** — released and review-closed at v0.8.0 |
 | Milestone 11 | **Complete** — Checkout currency policy at v0.10.0 |
 | Milestone 12 | **Prepared** — Geo Detection engine (see v0.12.0 tag note above) |
 | Milestone 13 | **Complete** — Geo admin hub at v0.12.0 |
 | Milestone 14 | **Complete** — Visitor Location boundary alignment at v0.13.0 |
-| Milestone 15 | **Prepared** — Currency Resolution & Explainability on feature branch |
+| Milestone 15 | **Complete** — Currency Resolution & Explainability at v0.14.0 |
+| Milestone 16 | **Prepared** — Exchange Rate Operations & Reliability on feature branch |
 
 ---
 
-## v0.14.0 Currency Resolution & Explainability scope
+## v0.15.0 Exchange Rate Operations & Reliability scope
+
+Minor release shipping Milestone 16 (ADR-0021). Hardens the Milestone 8 rate
+stack into an operationally trustworthy subsystem: shared health reporting,
+presentation-only aging, scheduler correctness for effective automatic targets,
+structured refresh failures, admin ops UX, order rate provenance schema 4, and
+thin WP-CLI. Settings schema unchanged; no DB migration; storefront conversion
+semantics for stale rates unchanged — no live provider HTTP on storefront.
+
+### Shipped capabilities
+
+| Area | Summary |
+|---|---|
+| Health model | `RateHealthService` / `RateHealthReport` shared by admin, Site Health, Compatibility, CLI (no HTTP, no mutations) |
+| Aging | Presentation-only status at 50% of `rate_max_age_hours`; never blocks conversion |
+| Scheduler | `has_automatic_targets` — schedule when any currency has effective automatic mode; Action Scheduler is next-run truth |
+| Failure taxonomy | Unified `RateFetchResult` outcomes (success / partial / total / not modified / no targets) |
+| Admin ops UI | Exchange Rates operations experience (health, aging, force refresh) |
+| Order snapshot schema 4 | Additive `_umc_rate_provider`, `_umc_rate_adjustment` |
+| Diagnostics alignment | Site Health / Compatibility consume the same health report |
+| CLI | Thin `wp umc rates status\|refresh\|list` wrapper |
+| Non-goals | No multi-provider failover; stale rates remain non-blocking for conversion |
+
+---
+
+## v0.14.0 Currency Resolution & Explainability scope (shipped)
 
 Minor release shipping Milestone 15 (ADR-0020). Adds structured shopper
 currency evaluation, explanatory session provenance, an on-demand decision
@@ -402,10 +430,10 @@ needles remain confined to `Diagnostics/DetectorManifest.php` only.
 
 ## Metadata and compatibility
 
-| Field | Value (v0.14.0) |
+| Field | Value (v0.15.0) |
 |---|---|
-| Plugin version (header + `UMC_VERSION`) | **0.14.0** |
-| readme.txt Stable tag | **0.14.0** |
+| Plugin version (header + `UMC_VERSION`) | **0.15.0** |
+| readme.txt Stable tag | **0.15.0** |
 | Text domain | `universal-multicurrency` |
 | Requires PHP | 8.1 |
 | Requires Plugins | woocommerce |
@@ -419,10 +447,11 @@ Compatibility matrix and CI legs: see [`COMPATIBILITY.md`](COMPATIBILITY.md).
 ## Persisted-data audit
 
 Authoritative registry: [`PERSISTED_DATA.md`](PERSISTED_DATA.md) +
-[`src/PersistedKeys.php`](../src/PersistedKeys.php) (`INVENTORY_VERSION = 3`).
+[`src/PersistedKeys.php`](../src/PersistedKeys.php) (`INVENTORY_VERSION = 8`).
 
 - All persisted keys registered and documented, including the Milestone 8
-  operational-state option `umc_rate_state`
+  operational-state option `umc_rate_state` and Milestone 16 order provenance
+  keys `_umc_rate_provider` / `_umc_rate_adjustment`
 - No undocumented transients or object-cache keys
 - Uninstall policy matches ADR-0009
 
@@ -430,10 +459,10 @@ Authoritative registry: [`PERSISTED_DATA.md`](PERSISTED_DATA.md) +
 
 ## Settings upgrade audit
 
-- `Settings::SCHEMA_VERSION` is **3**
-- Production migration map: **v0 → v1**, **v1 → v2**, and **v2 → v3**
-- v1 → v2 is a real schema change (renames `rate` to `manual_rate`, adds the
-  automatic-rate fields), not an artificial bump
+- `Settings::SCHEMA_VERSION` is **5**
+- Production migration map: **v0 → v1**, **v1 → v2**, **v2 → v3**, **v3 → v4**,
+  **v4 → v5**
+- This release adds **no** new settings migration
 - Canonical reads avoid writes; failed migrations do not persist partial data
 - Conversion output is byte-identical across the v1 → v2 boundary in manual mode
   (`tests/unit/SettingsMigrationFidelityTest.php`)
@@ -487,12 +516,12 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Expected artifact: **`dist/universal-multicurrency-0.14.0.zip`**
+Expected artifact: **`dist/universal-multicurrency-0.15.0.zip`**
 
 ### Included
 
-- `universal-multicurrency.php` (header Version **0.14.0**), `uninstall.php`, `readme.txt` (Stable tag **0.14.0**)
-- `src/` production PHP including `src/Admin/DisplayControlRenderer.php`, `src/Admin/DisplaySettingsField.php`, `src/Display/`
+- `universal-multicurrency.php` (header Version **0.15.0**), `uninstall.php`, `readme.txt` (Stable tag **0.15.0**)
+- `src/` production PHP including `src/Admin/DisplayControlRenderer.php`, `src/Admin/DisplaySettingsField.php`, `src/Display/`, `src/Rates/RateHealthService.php`, `src/CLI/RatesCommand.php`
 - `assets/admin/umc-settings.css`, `assets/admin/umc-settings.js`, `assets/css/switcher.css`, `assets/js/switcher.js`
 - `src/` production PHP
 - `vendor/autoload.php` (+ production autoload only)
@@ -526,7 +555,7 @@ Integration matrix (five legs + ceiling early-warning) unchanged from M6/M7.
 | NB1 | No root `LICENSE` file; GPL declared in plugin header, `composer.json`, and `readme.txt` |
 | NB2 | Full five-leg integration matrix validated in CI, not re-run entirely in the local release-audit script |
 | NB3 | `docs/plans/` may exist locally but is classified non-shipping |
-| NB4 | WP-CLI rate commands are a deliberate Milestone 8 non-goal; the service layer is CLI-ready without redesign |
+| NB4 | WP-CLI rate commands shipped in Milestone 16 (`wp umc rates`); thin wrapper over existing services — see [`CLI.md`](CLI.md) |
 
 ---
 
