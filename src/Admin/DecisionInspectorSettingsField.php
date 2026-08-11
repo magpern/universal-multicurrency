@@ -9,13 +9,13 @@ declare(strict_types=1);
 
 namespace UMC\Admin;
 
+use UMC\Admin\Geo\GeoPanelRegistry;
 use UMC\Checkout\CheckoutSettings;
 use UMC\Currency;
 use UMC\CurrencySwitcher;
 use UMC\Decision\CurrencyDecisionExplanation;
 use UMC\Decision\ExplanationStage;
 use UMC\Geo\GeoDetectionSettingsRepository;
-use UMC\Geo\GeoPanelRegistry;
 use UMC\Geo\UgcIntegrationStatus;
 use UMC\Settings;
 
