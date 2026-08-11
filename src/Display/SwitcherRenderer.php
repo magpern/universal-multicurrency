@@ -102,7 +102,11 @@ final class SwitcherRenderer {
 			return $link;
 		}
 
-		return '<li>' . $link . '</li>';
+		return sprintf(
+			'<li class="umc-switcher__item%s">%s</li>',
+			$option->is_active() ? ' is-active' : '',
+			$link
+		);
 	}
 
 	/**

@@ -73,6 +73,13 @@ final class DisplaySettingsField {
 	private bool $show_coercion_notice = false;
 
 	/**
+	 * Whether submitted Custom CSS was rejected during the last {@see parse_post()} call.
+	 *
+	 * @var bool
+	 */
+	private bool $show_custom_css_rejected_notice = false;
+
+	/**
 	 * Binds the Display settings field to settings and preview services.
 	 *
 	 * @param Settings                    $settings            Merchant settings store.
@@ -100,6 +107,13 @@ final class DisplaySettingsField {
 	 */
 	public function show_coercion_notice(): bool {
 		return $this->show_coercion_notice;
+	}
+
+	/**
+	 * Whether the last parse attempt rejected submitted Custom CSS.
+	 */
+	public function show_custom_css_rejected_notice(): bool {
+		return $this->show_custom_css_rejected_notice;
 	}
 
 	/**
@@ -171,10 +185,11 @@ final class DisplaySettingsField {
 	/**
 	 * Parses Display settings from the current POST payload.
 	 *
-	 * @return array{display: array<string, mixed>, show_coercion_notice: bool}|null Null when visibility is invalid.
+	 * @return array{display: array<string, mixed>, show_coercion_notice: bool, show_custom_css_rejected_notice: bool}|null Null when visibility is invalid.
 	 */
 	public function parse_post(): ?array {
-		$this->show_coercion_notice = false;
+		$this->show_coercion_notice            = false;
+		$this->show_custom_css_rejected_notice = false;
 
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Verified by WooCommerce settings save.
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Values normalized and sanitized via SwitcherSettings.
@@ -192,22 +207,32 @@ final class DisplaySettingsField {
 			? $raw['placement']
 			: (string) ( $stored['placement'] ?? SwitcherSettings::PLACEMENT_MANUAL );
 
-		$merged               = array_replace_recursive( $stored, $raw );
-		$merged['position']   = $this->merge_position_preserving_inactive(
+		$merged              = array_replace_recursive( $stored, $raw );
+		$merged['position']  = $this->merge_position_preserving_inactive(
 			is_array( $stored['position'] ?? null ) ? $stored['position'] : SwitcherSettings::default_array()['position'],
 			is_array( $raw['position'] ?? null ) ? $raw['position'] : array(),
 			$active_placement
 		);
-		$merged['placement']  = $active_placement;
-		$merged['content']    = $this->merge_content(
+		$merged['placement'] = $active_placement;
+		$merged['content']   = $this->merge_content(
 			is_array( $stored['content'] ?? null ) ? $stored['content'] : array(),
 			is_array( $raw['content'] ?? null ) ? $raw['content'] : array()
 		);
+
+		$can_edit_css         = SwitcherCustomCss::can_edit();
+		$submitted_custom_css = $raw['custom_css'] ?? null;
 		$merged['custom_css'] = SwitcherCustomCss::resolve_for_save(
-			$raw['custom_css'] ?? null,
+			$submitted_custom_css,
 			$stored['custom_css'] ?? '',
-			SwitcherCustomCss::can_edit()
+			$can_edit_css
 		);
+
+		if ( $can_edit_css && is_string( $submitted_custom_css ) ) {
+			$normalized = trim( str_replace( array( "\r\n", "\r" ), "\n", $submitted_custom_css ) );
+			if ( '' !== $normalized && ! SwitcherCustomCss::is_valid( $normalized ) ) {
+				$this->show_custom_css_rejected_notice = true;
+			}
+		}
 
 		if ( ! SwitcherSettings::visibility_valid_for_save( $merged ) ) {
 			return null;
@@ -218,8 +243,9 @@ final class DisplaySettingsField {
 		$this->show_coercion_notice = $settings->was_style_coerced();
 
 		return array(
-			'display'              => SwitcherSettings::sanitize_raw( $merged ),
-			'show_coercion_notice' => $this->show_coercion_notice,
+			'display'                         => SwitcherSettings::sanitize_raw( $merged ),
+			'show_coercion_notice'            => $this->show_coercion_notice,
+			'show_custom_css_rejected_notice' => $this->show_custom_css_rejected_notice,
 		);
 	}
 
@@ -914,7 +940,7 @@ final class DisplaySettingsField {
 				<?php endif; ?>
 			</label>
 			<p class="description" id="umc-display-custom-css-help">
-				<?php esc_html_e( 'Write complete selectors. Custom CSS is not scoped for you — prefix rules with .umc-switcher so the rest of your site is unaffected. @import, url(), expression(), behavior:, -moz-binding, and raw angle brackets are rejected, and a rejected submission keeps your last saved CSS.', 'universal-multicurrency' ); ?>
+				<?php esc_html_e( 'Write complete selectors. Custom CSS is not scoped for you — prefix rules with .umc-switcher so the rest of your site is unaffected. @import, url(), backslash escape sequences, expression(), behavior:, -moz-binding, and raw angle brackets are rejected. A rejected submission keeps your last saved CSS and shows an error notice.', 'universal-multicurrency' ); ?>
 			</p>
 		</div>
 		<?php

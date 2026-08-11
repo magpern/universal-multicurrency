@@ -270,6 +270,10 @@ final class SwitcherSettingsTest extends TestCase {
 		$this->assertSame( '4px', $variables['--umc-switcher-radius'] );
 		$this->assertSame( '0ms', $variables['--umc-switcher-transition-duration'] );
 		$this->assertSame( '9990', $variables['--umc-switcher-z-index'] );
+		$this->assertSame( '16px', $variables['--umc-switcher-edge-offset'] );
+		$this->assertSame( '16px', $variables['--umc-edge-offset'] );
+		$this->assertArrayHasKey( '--umc-switcher-vertical-offset', $variables );
+		$this->assertArrayHasKey( '--umc-switcher-bottom-offset', $variables );
 	}
 
 	public function test_responsive_bag_is_normalized(): void {

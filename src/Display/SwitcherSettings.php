@@ -766,10 +766,17 @@ final class SwitcherSettings {
 	 * @return array<string, string>
 	 */
 	public function css_variables(): array {
+		$edge     = (string) $this->position['edge_offset'] . 'px';
+		$vertical = (string) $this->position['vertical_offset'] . 'px';
+		$bottom   = (string) $this->position['bottom_offset'] . 'px';
+
 		$variables = array(
-			'--umc-edge-offset'                  => (string) $this->position['edge_offset'] . 'px',
-			'--umc-vertical-offset'              => (string) $this->position['vertical_offset'] . 'px',
-			'--umc-bottom-offset'                => (string) $this->position['bottom_offset'] . 'px',
+			'--umc-switcher-edge-offset'         => $edge,
+			'--umc-switcher-vertical-offset'     => $vertical,
+			'--umc-switcher-bottom-offset'       => $bottom,
+			'--umc-edge-offset'                  => $edge,
+			'--umc-vertical-offset'              => $vertical,
+			'--umc-bottom-offset'                => $bottom,
 			'--umc-switcher-z-index'             => '9990',
 			'--umc-switcher-transition-duration' => self::MOTION_DURATIONS[ $this->design['motion'] ] ?? self::MOTION_DURATIONS[ self::MOTION_SUBTLE ],
 		);

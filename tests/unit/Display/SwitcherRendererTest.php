@@ -52,6 +52,15 @@ final class SwitcherRendererTest extends TestCase {
 		$this->assertStringNotContainsString( 'umc-switcher__option', $html );
 	}
 
+	public function test_dropdown_menu_items_use_public_item_class_and_active_state(): void {
+		$html = ( new SwitcherRenderer() )->render( $this->view_model() );
+
+		$this->assertStringContainsString( 'umc-switcher__menu', $html );
+		$this->assertStringContainsString( '<li class="umc-switcher__item is-active">', $html );
+		$this->assertMatchesRegularExpression( '/<li class="umc-switcher__item">/', $html );
+		$this->assertStringNotContainsString( 'umc-switcher--active', $html );
+	}
+
 	public function test_root_exposes_placement_and_style_hooks(): void {
 		$html = ( new SwitcherRenderer() )->render( $this->view_model() );
 

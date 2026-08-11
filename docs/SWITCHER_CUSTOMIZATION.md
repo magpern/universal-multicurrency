@@ -3,7 +3,7 @@
 Merchant and developer reference for Universal Multicurrency storefront switcher
 presentation (Milestone 17 / v0.16.0).
 
-Authoritative architecture: [`docs/architecture/switcher-customization.md`](architecture/switcher-customization.md)  
+Authoritative architecture: [`docs/architecture/switcher-customization.md`](architecture/switcher-customization.md)
 ADR: [`docs/adr/0022-switcher-customization-css-contract.md`](adr/0022-switcher-customization-css-contract.md)
 
 ---
@@ -92,8 +92,10 @@ any previously stored CSS when other Display settings are saved.
 Custom CSS is **not** automatically scoped to the switcher. Prefer selectors
 under `.umc-switcher` so you do not restyle the rest of the site.
 
-Rejected: `@import`, any `url(...)`, `expression(`, `behavior:`, `-moz-binding`,
-raw `<` / `>`, NUL, style/script breakout payloads. A rejected submission is
+Rejected: `@import`, any `url(...)`, backslash escape sequences (for example
+`\2014`), `expression(`, `behavior:`, `-moz-binding`, raw `<` / `>`, NUL, and
+style/script breakout payloads. A rejected save keeps the previously stored
+Custom CSS and shows an admin error notice. A rejected submission is
 discarded whole and your last saved CSS is kept.
 
 Custom CSS is printed after the plugin stylesheet with
