@@ -100,7 +100,7 @@ final class CurrencyViewModelFactoryTest extends WP_UnitTestCase {
 		$row = $this->view_model_factory()->overview()->rows[1];
 
 		$this->assertSame( '10.2', $row->effective_rate_value );
-		$this->assertSame( 'Automatic (+2%)', $row->effective_rate_source );
+		$this->assertSame( 'Automatic — Frankfurter (+2%)', $row->effective_rate_source );
 		$this->assertSame( '+2%', $row->adjustment_label );
 	}
 

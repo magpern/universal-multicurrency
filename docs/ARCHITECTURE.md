@@ -441,8 +441,28 @@ conditional headers simply never returns 304; there is no new failure mode
 6. **The storefront money path is unaware of providers.** Conversion reads
    `Settings`; no storefront request fetches, schedules, or writes rates.
 
-Plugin version is **0.13.0**. Milestone 14 (Visitor Location boundary
-alignment, ADR-0018) is prepared at v0.13.0. Milestone 10 (Compatibility
-diagnostics) shipped at v0.9.1; Milestone 9 shipped at v0.9.0; v0.8.1 was a
-maintenance release. See [`RELEASE_AUDIT.md`](RELEASE_AUDIT.md) and
+### Milestone 16 operations & reliability (v0.15.0)
+
+Milestone 16 hardens the M8 stack into an operationally trustworthy subsystem
+without changing conversion arithmetic, provider selection, or stale-rate
+storefront behaviour (ADR-0021). Authoritative spec:
+[`architecture/exchange-rate-operations.md`](architecture/exchange-rate-operations.md).
+
+| Class | Deps | Responsibility |
+|---|---|---|
+| `Rates\RateHealthService` / `RateHealthReport` | `Settings`, `ExchangeRateStore`, `Scheduler`, `RateStatusEvaluator` | Read-only health aggregate shared by admin, Site Health, Compatibility, and CLI. Issues **no** HTTP and performs **no** mutations. |
+| `Rates\RateStatusEvaluator` | `Settings`, `ExchangeRateStore` | Extends M8 labels with presentation-only **aging** (50% of `rate_max_age_hours`). Aging never blocks conversion. |
+| `Rates\Scheduler` | `ExchangeRateStore`, `RateUpdateService` | Schedules when **`has_automatic_targets`** — any currency whose *effective* mode is automatic — not only when the global mode is automatic. **Action Scheduler** is the only next-run truth; persisted `umc_rate_state.next_run_at` is not authoritative. |
+| `Rates\RateFetchResult` | — | Structured failure taxonomy (success, partial, total failure, not modified, no automatic targets) for a unified refresh contract. |
+| `CLI\RatesCommand` | `RateHealthService`, `RateUpdateService`, … | Thin `wp umc rates` wrapper over the same services; never live provider HTTP on the storefront path. |
+| `Order\OrderSnapshot` schema **4** | — | Additive provenance: `_umc_rate_provider`, `_umc_rate_adjustment`. Schemas 1–3 remain readable. |
+
+Additional M16 invariants:
+
+7. **Stale rates remain usable** — freshness is operational status only; conversion never fails closed solely because a quote is stale.
+8. **No multi-provider failover** — Frankfurter remains the single built-in automatic source; no per-currency provider selection.
+9. **Admin ops UI** presents health, aging, last/next run (from AS), and safe force-refresh without storefront side effects.
+
+Plugin version is prepared as **0.15.0** (Milestone 16). Milestone 15 shipped at
+v0.14.0; Milestone 14 at v0.13.0. See [`RELEASE_AUDIT.md`](RELEASE_AUDIT.md) and
 [`ROADMAP.md`](ROADMAP.md).

@@ -418,6 +418,11 @@
 	color: #2f5233;
 }
 
+.umc-status-badge--aging {
+	background: #f0c36d;
+	color: #614200;
+}
+
 .umc-status-badge--stale {
 	background: #f8dda7;
 	color: #614200;

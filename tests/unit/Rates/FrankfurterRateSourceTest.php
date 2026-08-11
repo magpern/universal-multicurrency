@@ -13,6 +13,7 @@ use PHPUnit\Framework\TestCase;
 use UMC\Rates\Http\HttpResponse;
 use UMC\Rates\ProviderMetadata;
 use UMC\Rates\Providers\FrankfurterRateSource;
+use UMC\Rates\RateFailureCode;
 use UMC\Tests\Support\FakeHttpTransport;
 
 /**
@@ -74,5 +75,25 @@ final class FrankfurterRateSourceTest extends TestCase {
 		$this->assertTrue( $source->supports_historical_rates() );
 		$this->assertTrue( $source->supports_currencies( array( 'SEK', 'USD' ) ) );
 		$this->assertFalse( $source->supports_currencies( array( 'XXX' ) ) );
+	}
+
+	public function test_transport_error_maps_to_network_error_code(): void {
+		$transport = new FakeHttpTransport();
+		$transport->register( self::URL, new HttpResponse( 0, array(), '', true ) );
+
+		$result = ( new FrankfurterRateSource( $transport ) )->fetch( 'EUR', array( 'SEK', 'NOK' ) );
+
+		$this->assertTrue( $result->is_total_failure() );
+		$this->assertSame( RateFailureCode::NETWORK_ERROR, $result->failures()['SEK'] ?? null );
+	}
+
+	public function test_rate_limited_status_maps_to_failure_code(): void {
+		$transport = new FakeHttpTransport();
+		$transport->register( self::URL, new HttpResponse( 429, array(), 'rate limited' ) );
+
+		$result = ( new FrankfurterRateSource( $transport ) )->fetch( 'EUR', array( 'SEK', 'NOK' ) );
+
+		$this->assertTrue( $result->is_total_failure() );
+		$this->assertSame( RateFailureCode::RATE_LIMITED, $result->failures()['SEK'] ?? null );
 	}
 }

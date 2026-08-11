@@ -262,7 +262,8 @@ final class AdminPageShellTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'name="umc_rate_mode"', $output );
 		$this->assertStringContainsString( 'name="umc_rate_update_interval"', $output );
 		$this->assertStringContainsString( 'name="umc_rate_max_age_hours"', $output );
-		$this->assertStringContainsString( 'Update all automatic rates', $output );
+		$this->assertStringContainsString( 'Refresh now', $output );
+		$this->assertStringContainsString( 'Exchange rate operations', $output );
 	}
 
 	public function test_currency_save_behavior_remains_unchanged(): void {

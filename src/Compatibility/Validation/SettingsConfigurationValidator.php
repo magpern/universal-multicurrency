@@ -21,8 +21,8 @@ use UMC\Currency\WooCommerceCurrencyProvider;
 use UMC\Display\SwitcherSettings;
 use UMC\Display\SwitcherSettingsRepository;
 use UMC\Display\SwitcherShortcodeScanner;
+use UMC\Rates\RateHealthService;
 use UMC\Rates\RateStatusEvaluator;
-use UMC\Rates\Scheduler;
 use UMC\Settings;
 
 /**
@@ -165,69 +165,69 @@ final class SettingsConfigurationValidator {
 		}
 
 		$evaluator = new RateStatusEvaluator( $settings, $inventory->rate_store() );
-		$stale     = 0;
-		$failed    = 0;
+		$health    = ( new RateHealthService( $settings, $inventory->rate_store(), $evaluator ) )->report();
 
-		foreach ( array_keys( $currencies ) as $code ) {
-			$label = $evaluator->label_for_currency( (string) $code );
-			if ( RateStatusEvaluator::LABEL_STALE === $label ) {
-				++$stale;
-			}
-			if ( RateStatusEvaluator::LABEL_FAILED === $label ) {
-				++$failed;
-			}
+		if ( $health->scheduler_missing() ) {
+			$results[] = new CompatibilityResult(
+				'config.automatic_not_scheduled',
+				CompatibilityCategory::CONFIGURATION,
+				CompatibilitySeverity::CONFLICT,
+				__( 'Automatic rate updates are not scheduled', 'universal-multicurrency' ),
+				__( 'Automatic currencies require a refresh schedule, but no recurring update is queued.', 'universal-multicurrency' ),
+				CompatibilityDeterminism::DETERMINISTIC,
+				array(),
+				array(
+					new CompatibilityAction(
+						__( 'Review exchange rates', 'universal-multicurrency' ),
+						admin_url( 'admin.php?page=wc-settings&tab=umc&section=exchange_rates' )
+					),
+				)
+			);
 		}
 
-		if ( $failed > 0 ) {
+		if ( $health->unavailable_count() > 0 ) {
 			$results[] = new CompatibilityResult(
-				'config.rate_fetch_failed',
+				'config.rate_unavailable',
 				CompatibilityCategory::CONFIGURATION,
-				CompatibilitySeverity::WARNING,
-				__( 'Recent exchange-rate fetch failures detected', 'universal-multicurrency' ),
+				CompatibilitySeverity::CONFLICT,
+				__( 'Enabled automatic currencies are missing usable rates', 'universal-multicurrency' ),
 				sprintf(
-					/* translators: %d: number of currencies with failed fetches */
+					/* translators: %d: number of unavailable automatic currencies */
 					_n(
-						'%d automatic currency has a failed fetch on record.',
-						'%d automatic currencies have failed fetches on record.',
-						$failed,
+						'%d enabled automatic currency has no usable exchange rate.',
+						'%d enabled automatic currencies have no usable exchange rate.',
+						$health->unavailable_count(),
 						'universal-multicurrency'
 					),
-					$failed
+					$health->unavailable_count()
 				),
-				CompatibilityDeterminism::DETERMINISTIC
+				CompatibilityDeterminism::DETERMINISTIC,
+				array(),
+				array(
+					new CompatibilityAction(
+						__( 'Review exchange rates', 'universal-multicurrency' ),
+						admin_url( 'admin.php?page=wc-settings&tab=umc&section=exchange_rates' )
+					),
+				)
 			);
-		} elseif ( $stale >= 3 ) {
+		} elseif ( $health->stale_count() > 0 ) {
 			$results[] = new CompatibilityResult(
 				'config.rate_stale',
 				CompatibilityCategory::CONFIGURATION,
 				CompatibilitySeverity::WARNING,
-				__( 'Multiple stale automatic exchange rates', 'universal-multicurrency' ),
+				__( 'Stale automatic exchange rates detected', 'universal-multicurrency' ),
 				sprintf(
 					/* translators: %d: number of currencies */
 					_n(
 						'%d automatic currency has a stale exchange rate.',
 						'%d automatic currencies have stale exchange rates.',
-						$stale,
+						$health->stale_count(),
 						'universal-multicurrency'
 					),
-					$stale
+					$health->stale_count()
 				),
 				CompatibilityDeterminism::HEURISTIC
 			);
-		}
-
-		if ( Settings::RATE_MODE_AUTOMATIC === ( $data['rate_mode'] ?? '' ) ) {
-			$scheduled = function_exists( 'as_next_scheduled_action' ) && false !== as_next_scheduled_action( Scheduler::HOOK );
-			if ( ! $scheduled ) {
-				$results[] = new CompatibilityResult(
-					'config.automatic_not_scheduled',
-					CompatibilityCategory::CONFIGURATION,
-					CompatibilitySeverity::WARNING,
-					__( 'Automatic rate updates are not scheduled', 'universal-multicurrency' ),
-					__( 'Automatic mode is enabled but no recurring update is scheduled.', 'universal-multicurrency' ),
-					CompatibilityDeterminism::DETERMINISTIC
-				);
-			}
 		}
 
 		$display       = ( new SwitcherSettingsRepository( $settings ) )->get();

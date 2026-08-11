@@ -57,14 +57,22 @@ final class RateFetchResult {
 	private string $provider_id;
 
 	/**
+	 * Whether the update skipped because no automatic targets were selected.
+	 *
+	 * @var bool
+	 */
+	private bool $no_automatic_targets;
+
+	/**
 	 * Builds a fetch result value object.
 	 *
-	 * @param RateQuote[]           $quotes       Successful quotes.
-	 * @param array<string, string> $failures     Per-target failure reasons.
-	 * @param ProviderMetadata|null $metadata     Batch metadata (null when not modified).
-	 * @param int                   $fetched_at   Unix timestamp of the fetch attempt.
-	 * @param bool                  $not_modified Whether the provider returned HTTP 304.
-	 * @param string                $provider_id  Provider identifier.
+	 * @param RateQuote[]           $quotes                Successful quotes.
+	 * @param array<string, string> $failures              Per-target failure reasons.
+	 * @param ProviderMetadata|null $metadata              Batch metadata (null when not modified).
+	 * @param int                   $fetched_at            Unix timestamp of the fetch attempt.
+	 * @param bool                  $not_modified          Whether the provider returned HTTP 304.
+	 * @param string                $provider_id           Provider identifier.
+	 * @param bool                  $no_automatic_targets  Whether no automatic targets were available.
 	 */
 	private function __construct(
 		array $quotes,
@@ -72,14 +80,16 @@ final class RateFetchResult {
 		?ProviderMetadata $metadata,
 		int $fetched_at,
 		bool $not_modified,
-		string $provider_id
+		string $provider_id,
+		bool $no_automatic_targets = false
 	) {
-		$this->quotes       = $quotes;
-		$this->failures     = $failures;
-		$this->metadata     = $metadata;
-		$this->fetched_at   = $fetched_at;
-		$this->not_modified = $not_modified;
-		$this->provider_id  = $provider_id;
+		$this->quotes               = $quotes;
+		$this->failures             = $failures;
+		$this->metadata             = $metadata;
+		$this->fetched_at           = $fetched_at;
+		$this->not_modified         = $not_modified;
+		$this->provider_id          = $provider_id;
+		$this->no_automatic_targets = $no_automatic_targets;
 	}
 
 	/**
@@ -109,6 +119,9 @@ final class RateFetchResult {
 	/**
 	 * Creates a not-modified fetch result for HTTP 304 responses.
 	 *
+	 * Distinct from {@see self::no_automatic_targets()}: this preserves 304
+	 * semantics for conditional HTTP caching and store write ceilings.
+	 *
 	 * @param string $provider_id Provider identifier.
 	 * @param int    $fetched_at  Unix timestamp of the fetch attempt.
 	 */
@@ -120,6 +133,27 @@ final class RateFetchResult {
 			$fetched_at,
 			true,
 			$provider_id
+		);
+	}
+
+	/**
+	 * Creates a result when a refresh had no automatic currency targets.
+	 *
+	 * Distinct from HTTP 304 {@see self::not_modified()} so callers can message
+	 * “no automatic currencies” without conflating conditional caching.
+	 *
+	 * @param string $provider_id Provider identifier.
+	 * @param int    $fetched_at  Unix timestamp of the attempt.
+	 */
+	public static function no_automatic_targets( string $provider_id, int $fetched_at ): self {
+		return new self(
+			array(),
+			array(),
+			null,
+			$fetched_at,
+			false,
+			$provider_id,
+			true
 		);
 	}
 
@@ -170,16 +204,39 @@ final class RateFetchResult {
 	}
 
 	/**
+	 * Whether the refresh found no automatic currency targets.
+	 */
+	public function is_no_automatic_targets(): bool {
+		return $this->no_automatic_targets;
+	}
+
+	/**
+	 * Whether every targeted currency succeeded with no failures.
+	 */
+	public function is_complete_success(): bool {
+		return ! $this->not_modified
+			&& ! $this->no_automatic_targets
+			&& array() !== $this->quotes
+			&& array() === $this->failures;
+	}
+
+	/**
 	 * Whether some targets succeeded and some failed.
 	 */
 	public function is_partial_failure(): bool {
-		return ! $this->not_modified && array() !== $this->quotes && array() !== $this->failures;
+		return ! $this->not_modified
+			&& ! $this->no_automatic_targets
+			&& array() !== $this->quotes
+			&& array() !== $this->failures;
 	}
 
 	/**
 	 * Whether every targeted currency failed.
 	 */
 	public function is_total_failure(): bool {
-		return ! $this->not_modified && array() === $this->quotes && array() !== $this->failures;
+		return ! $this->not_modified
+			&& ! $this->no_automatic_targets
+			&& array() === $this->quotes
+			&& array() !== $this->failures;
 	}
 }

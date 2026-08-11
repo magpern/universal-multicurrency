@@ -53,6 +53,8 @@ ADR-0006). Permanent audit data — **never deleted on uninstall**.
 | `_umc_checkout_mode` | `OrderSnapshot::META_CHECKOUT_MODE` | M11 |
 | `_umc_shopper_currency` | `OrderSnapshot::META_SHOPPER_CURRENCY` | M11 |
 | `_umc_fallback_occurred` | `OrderSnapshot::META_FALLBACK_OCCURRED` | M11 |
+| `_umc_rate_provider` | `OrderSnapshot::META_RATE_PROVIDER` | M16 (schema 4; empty when manual) |
+| `_umc_rate_adjustment` | `OrderSnapshot::META_RATE_ADJUSTMENT` | M16 (schema 4; merchant adjustment %) |
 
 Writer: `Order\OrderSnapshot` (classic checkout and Store API checkout adapter).
 
@@ -174,7 +176,7 @@ with `PersistedKeys::inventory()` — never edit one without the other.
 
 ```umc:persisted-inventory
 {
-  "inventory_version": 7,
+  "inventory_version": 8,
   "options": [
     "umc_settings",
     "umc_rate_state"
@@ -191,7 +193,9 @@ with `PersistedKeys::inventory()` — never edit one without the other.
     "_umc_transaction_decimals",
     "_umc_checkout_mode",
     "_umc_shopper_currency",
-    "_umc_fallback_occurred"
+    "_umc_fallback_occurred",
+    "_umc_rate_provider",
+    "_umc_rate_adjustment"
   ],
   "refund_meta": [
     "_umc_parent_transaction_currency",
@@ -239,7 +243,9 @@ with `PersistedKeys::inventory()` — never edit one without the other.
       "_umc_transaction_decimals",
       "_umc_checkout_mode",
       "_umc_shopper_currency",
-      "_umc_fallback_occurred"
+      "_umc_fallback_occurred",
+      "_umc_rate_provider",
+      "_umc_rate_adjustment"
     ],
     "preserve_refund_meta": [
       "_umc_parent_transaction_currency",

@@ -43,6 +43,13 @@ final class OrderSnapshot {
 	public const META_CHECKOUT_MODE        = '_umc_checkout_mode';
 	public const META_SHOPPER_CURRENCY     = '_umc_shopper_currency';
 	public const META_FALLBACK_OCCURRED    = '_umc_fallback_occurred';
+	public const META_RATE_PROVIDER        = '_umc_rate_provider';
+	public const META_RATE_ADJUSTMENT      = '_umc_rate_adjustment';
+
+	/**
+	 * Current order snapshot schema written for new orders.
+	 */
+	public const SCHEMA_VERSION = 4;
 
 	/**
 	 * Rate source identifier for the manual (admin-entered) provider.
@@ -156,6 +163,13 @@ final class OrderSnapshot {
 			? self::SOURCE_AUTOMATIC
 			: self::SOURCE_MANUAL;
 		$transition  = $this->transition_repository->get();
+		$config      = $this->settings->get_currency_config( $active_code );
+		$adjustment  = Settings::enforce_adjustment_range(
+			Settings::normalize_adjustment( is_array( $config ) ? ( $config['merchant_adjustment'] ?? '0' ) : '0' )
+		);
+		$provider    = self::SOURCE_AUTOMATIC === $rate_source
+			? (string) ( $this->settings->get()['rate_provider'] ?? Settings::DEFAULT_RATE_PROVIDER )
+			: '';
 
 		$meta = self::snapshot_meta(
 			$this->context->get_base_currency()->code(),
@@ -165,11 +179,13 @@ final class OrderSnapshot {
 			$rate_source,
 			$this->version,
 			$this->context->get_currency_signature(),
-			3,
+			self::SCHEMA_VERSION,
 			$this->context->get_active_currency()->decimals(),
 			null !== $transition ? $transition->mode() : '',
 			null !== $transition ? $transition->shopper_currency() : $this->context->get_shopper_code(),
-			null !== $transition && $transition->fallback_occurred()
+			null !== $transition && $transition->fallback_occurred(),
+			$provider,
+			$adjustment
 		);
 
 		/**
@@ -261,11 +277,13 @@ final class OrderSnapshot {
 	 * @param string $rate_source          Rate source identifier.
 	 * @param string $plugin_version       Plugin version.
 	 * @param string $rate_identity        Rate identity (code:rate).
-	 * @param int    $schema_version       Snapshot schema version (3 for M11+).
+	 * @param int    $schema_version       Snapshot schema version (3 for M11+, 4 for M16+).
 	 * @param int    $transaction_decimals Transaction currency decimals.
 	 * @param string $checkout_mode        Configured checkout mode.
 	 * @param string $shopper_currency     Shopper-selected currency code.
 	 * @param bool   $fallback_occurred    Whether checkout fell back to store currency.
+	 * @param string $rate_provider        Provider id when automatic; empty when manual (schema 4+).
+	 * @param string $rate_adjustment      Merchant adjustment percentage string (schema 4+).
 	 * @return array<string, scalar>
 	 */
 	public static function snapshot_meta(
@@ -280,7 +298,9 @@ final class OrderSnapshot {
 		int $transaction_decimals = 2,
 		string $checkout_mode = '',
 		string $shopper_currency = '',
-		bool $fallback_occurred = false
+		bool $fallback_occurred = false,
+		string $rate_provider = '',
+		string $rate_adjustment = ''
 	): array {
 		$meta = array(
 			self::META_BASE_CURRENCY        => $base_currency,
@@ -298,6 +318,11 @@ final class OrderSnapshot {
 			$meta[ self::META_CHECKOUT_MODE ]     = $checkout_mode;
 			$meta[ self::META_SHOPPER_CURRENCY ]  = $shopper_currency;
 			$meta[ self::META_FALLBACK_OCCURRED ] = $fallback_occurred ? 'yes' : 'no';
+		}
+
+		if ( $schema_version >= 4 ) {
+			$meta[ self::META_RATE_PROVIDER ]   = $rate_provider;
+			$meta[ self::META_RATE_ADJUSTMENT ] = $rate_adjustment;
 		}
 
 		return $meta;

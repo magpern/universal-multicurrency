@@ -88,7 +88,7 @@ final class SiteHealthRateIntegrationTest extends WP_UnitTestCase {
 		$this->assertSame( 'green', $result['badge']['color'] );
 	}
 
-	public function test_no_successful_fetch_yet_reports_good_without_stale_or_failure_claim(): void {
+	public function test_no_successful_fetch_yet_reports_unavailable_as_critical(): void {
 		$this->schedule_recurring_update();
 
 		$result = $this->run_rate_health_test(
@@ -100,9 +100,9 @@ final class SiteHealthRateIntegrationTest extends WP_UnitTestCase {
 			new RateUpdateState()
 		);
 
-		$this->assertSame( 'good', $result['status'] );
-		$this->assertSame( 'green', $result['badge']['color'] );
-		$this->assertStringNotContainsString( 'exceed the configured maximum age', (string) $result['description'] );
+		$this->assertSame( 'critical', $result['status'] );
+		$this->assertSame( 'red', $result['badge']['color'] );
+		$this->assertStringContainsString( 'usable', strtolower( (string) $result['description'] ) );
 	}
 
 	public function test_automatic_mode_without_a_scheduled_update_is_critical(): void {
@@ -117,7 +117,7 @@ final class SiteHealthRateIntegrationTest extends WP_UnitTestCase {
 
 		$this->assertSame( 'critical', $result['status'] );
 		$this->assertSame( 'red', $result['badge']['color'] );
-		$this->assertStringContainsString( 'scheduled', strtolower( (string) $result['description'] ) );
+		$this->assertStringContainsString( 'schedule', strtolower( (string) $result['description'] ) );
 	}
 
 	public function test_one_stale_currency_is_recommended(): void {
@@ -136,7 +136,7 @@ final class SiteHealthRateIntegrationTest extends WP_UnitTestCase {
 		$this->assertSame( 'orange', $result['badge']['color'] );
 	}
 
-	public function test_three_stale_currencies_escalate_to_critical(): void {
+	public function test_three_stale_currencies_remain_recommended(): void {
 		$this->schedule_recurring_update();
 		$stale = time() - ( 72 * self::HOUR );
 
@@ -157,7 +157,7 @@ final class SiteHealthRateIntegrationTest extends WP_UnitTestCase {
 			)
 		);
 
-		$this->assertSame( 'critical', $result['status'] );
+		$this->assertSame( 'recommended', $result['status'] );
 		$this->assertStringContainsString( '3', (string) $result['description'] );
 	}
 
@@ -174,7 +174,7 @@ final class SiteHealthRateIntegrationTest extends WP_UnitTestCase {
 		);
 
 		$this->assertSame( 'critical', $result['status'] );
-		$this->assertStringContainsString( 'fetch', strtolower( (string) $result['description'] ) );
+		$this->assertStringContainsString( 'usable', strtolower( (string) $result['description'] ) );
 		$this->assertStringNotContainsString( 'stale', strtolower( (string) $result['description'] ) );
 	}
 

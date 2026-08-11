@@ -122,6 +122,20 @@ final class OrderCurrencySnapshot {
 	private bool $is_future;
 
 	/**
+	 * Rate provider id for schema 4+ automatic rates (empty for manual).
+	 *
+	 * @var string|null
+	 */
+	private ?string $rate_provider;
+
+	/**
+	 * Merchant adjustment percentage string for schema 4+.
+	 *
+	 * @var string|null
+	 */
+	private ?string $rate_adjustment;
+
+	/**
 	 * Builds an immutable snapshot.
 	 *
 	 * @param int|null    $schema_version     Snapshot schema version (1, 2, or unknown).
@@ -138,6 +152,8 @@ final class OrderCurrencySnapshot {
 	 * @param bool        $is_partial         Whether some snapshot keys are missing.
 	 * @param bool        $is_malformed       Whether the snapshot metadata is malformed.
 	 * @param bool        $is_future          Whether the schema version is an unknown future one.
+	 * @param string|null $rate_provider      Provider id (schema 4+, optional).
+	 * @param string|null $rate_adjustment    Merchant adjustment (schema 4+, optional).
 	 */
 	public function __construct(
 		?int $schema_version,
@@ -153,7 +169,9 @@ final class OrderCurrencySnapshot {
 		bool $is_legacy,
 		bool $is_partial,
 		bool $is_malformed,
-		bool $is_future
+		bool $is_future,
+		?string $rate_provider = null,
+		?string $rate_adjustment = null
 	) {
 		$this->schema_version       = $schema_version;
 		$this->base_currency        = $base_currency;
@@ -169,6 +187,8 @@ final class OrderCurrencySnapshot {
 		$this->is_partial           = $is_partial;
 		$this->is_malformed         = $is_malformed;
 		$this->is_future            = $is_future;
+		$this->rate_provider        = $rate_provider;
+		$this->rate_adjustment      = $rate_adjustment;
 	}
 
 	/**
@@ -271,5 +291,19 @@ final class OrderCurrencySnapshot {
 	 */
 	public function is_future(): bool {
 		return $this->is_future;
+	}
+
+	/**
+	 * Rate provider id for schema 4+ orders, or null when absent.
+	 */
+	public function rate_provider(): ?string {
+		return $this->rate_provider;
+	}
+
+	/**
+	 * Merchant adjustment percentage for schema 4+ orders, or null when absent.
+	 */
+	public function rate_adjustment(): ?string {
+		return $this->rate_adjustment;
 	}
 }

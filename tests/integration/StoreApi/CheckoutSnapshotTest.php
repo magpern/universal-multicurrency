@@ -59,14 +59,16 @@ final class CheckoutSnapshotTest extends StoreApiTestCase {
 		$this->assertSame( $this->plugin_version(), $order->get_meta( OrderSnapshot::META_PLUGIN_VERSION ) );
 	}
 
-	public function test_snapshot_is_schema_version_three(): void {
+	public function test_snapshot_is_schema_version_four(): void {
 		$this->boot_plugin( self::CURRENCIES, 'SEK' );
 		$order = $this->place_order();
 
-		$this->assertSame( 3, (int) $order->get_meta( OrderSnapshot::META_SNAPSHOT_VERSION ) );
+		$this->assertSame( 4, (int) $order->get_meta( OrderSnapshot::META_SNAPSHOT_VERSION ) );
 		$this->assertSame( 2, (int) $order->get_meta( OrderSnapshot::META_TRANSACTION_DECIMALS ) );
 		$this->assertSame( 'selected', $order->get_meta( OrderSnapshot::META_CHECKOUT_MODE ) );
 		$this->assertSame( 'SEK', $order->get_meta( OrderSnapshot::META_SHOPPER_CURRENCY ) );
+		$this->assertSame( '', $order->get_meta( OrderSnapshot::META_RATE_PROVIDER ) );
+		$this->assertSame( '0', $order->get_meta( OrderSnapshot::META_RATE_ADJUSTMENT ) );
 	}
 
 	public function test_snapshot_survives_a_reload_from_storage(): void {

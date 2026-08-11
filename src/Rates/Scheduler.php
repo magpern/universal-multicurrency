@@ -84,7 +84,7 @@ final class Scheduler {
 
 		$config = $this->store->get_configuration();
 
-		if ( ! $config->is_automatic_enabled() ) {
+		if ( array() === $this->store->get_automatic_currency_codes() ) {
 			$this->unschedule_all();
 			return;
 		}

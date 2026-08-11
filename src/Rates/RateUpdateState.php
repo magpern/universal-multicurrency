@@ -173,6 +173,19 @@ class RateUpdateState {
 	}
 
 	/**
+	 * Whether an unexpired update lock is currently held.
+	 */
+	public function is_lock_held(): bool {
+		$lock = $this->get()['lock'] ?? null;
+
+		if ( ! is_array( $lock ) ) {
+			return false;
+		}
+
+		return ! empty( $lock['expires_at'] ) && (int) $lock['expires_at'] > time();
+	}
+
+	/**
 	 * Sanitizes one per-currency operational row.
 	 *
 	 * @param array<string, mixed> $row Raw currency operational row.

@@ -21,6 +21,7 @@ use UMC\Admin\PluginActionLinks;
 use UMC\Admin\RateFailureNotice;
 use UMC\Admin\RateUpdateController;
 use UMC\Admin\SettingsPage;
+use UMC\CLI\RatesCommand;
 use UMC\Diagnostics\Diagnostics;
 use UMC\Cart\CartRecalculation;
 use UMC\Checkout\CheckoutCurrencyPolicy;
@@ -64,6 +65,8 @@ use UMC\Rates\ExchangeRateSource;
 use UMC\Rates\ExchangeRateStore;
 use UMC\Rates\ManualRateProvider;
 use UMC\Rates\Providers\FrankfurterRateSource;
+use UMC\Rates\RateHealthService;
+use UMC\Rates\RateStatusEvaluator;
 use UMC\Rates\RateUpdateService;
 use UMC\Rates\RateUpdateState;
 use UMC\Rates\Scheduler;
@@ -141,8 +144,20 @@ final class Plugin {
 		$rate_store   = new ExchangeRateStore( $settings, $rate_state, $base->code() );
 		$rate_source  = $this->resolve_rate_source( $settings );
 		$rate_service = new RateUpdateService( $rate_source, $rate_store, $base->code() );
+		$rate_health  = new RateHealthService(
+			$settings,
+			$rate_store,
+			new RateStatusEvaluator( $settings, $rate_store )
+		);
 		( new Scheduler( $rate_store, $rate_service ) )->register();
 		( new PluginActionLinks() )->register();
+
+		if ( defined( 'WP_CLI' ) && WP_CLI && class_exists( 'WP_CLI' ) ) {
+			\WP_CLI::add_command(
+				'umc rates',
+				new RatesCommand( $rate_health, $rate_service, $settings, $rate_store )
+			);
+		}
 
 		if ( is_admin() ) {
 			( new AdminAssets() )->register();
@@ -285,8 +300,8 @@ final class Plugin {
 		// Admin settings tab (instantiated lazily, only when WC builds settings).
 		add_filter(
 			'woocommerce_get_settings_pages',
-			static function ( array $pages ) use ( $settings, $base, $rate_store ): array {
-				$pages[] = new SettingsPage( $settings, $base, $rate_store );
+			static function ( array $pages ) use ( $settings, $base, $rate_store, $rate_health ): array {
+				$pages[] = new SettingsPage( $settings, $base, $rate_store, $rate_health );
 
 				return $pages;
 			}
@@ -306,7 +321,7 @@ final class Plugin {
 		// registration cannot perturb the variation-price cache key because
 		// Diagnostics attaches no WooCommerce filters.
 		if ( is_admin() && ! wp_doing_ajax() && ! wp_doing_cron() && ! ( defined( 'WP_CLI' ) && WP_CLI ) ) {
-			( new Diagnostics( null, $settings, $rate_store ) )->register();
+			( new Diagnostics( null, $settings, $rate_store, $rate_health ) )->register();
 		}
 	}
 

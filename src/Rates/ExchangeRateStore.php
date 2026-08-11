@@ -88,15 +88,53 @@ final class ExchangeRateStore {
 	public function get_automatic_currency_codes(): array {
 		$codes = array();
 
-		foreach ( array_keys( $this->settings->get_currencies() ) as $code ) {
-			if ( Settings::RATE_MODE_AUTOMATIC === $this->settings->get_effective_rate_mode( $code ) ) {
-				$codes[] = $code;
+		foreach ( $this->settings->get_currencies() as $code => $config ) {
+			$enabled = ! isset( $config['enabled'] ) ? true : (bool) $config['enabled'];
+
+			if ( ! $enabled ) {
+				continue;
+			}
+
+			if ( Settings::RATE_MODE_AUTOMATIC === $this->settings->get_effective_rate_mode( (string) $code ) ) {
+				$codes[] = (string) $code;
 			}
 		}
 
 		sort( $codes );
 
 		return $codes;
+	}
+
+	/**
+	 * Whether any enabled currency has effective automatic rate mode.
+	 */
+	public function has_automatic_targets(): bool {
+		return array() !== $this->get_automatic_currency_codes();
+	}
+
+	/**
+	 * Whether the update lock is currently held by any owner.
+	 */
+	public function is_lock_held(): bool {
+		return $this->state->is_lock_held();
+	}
+
+	/**
+	 * Unix timestamp of the last rate-update run attempt.
+	 */
+	public function last_run_at(): int {
+		return (int) ( $this->state->get()['last_run_at'] ?? 0 );
+	}
+
+	/**
+	 * Bounded failure history from operational state.
+	 *
+	 * @return list<array<string, mixed>>
+	 */
+	public function failure_history(): array {
+		$history = $this->state->get()['failure_history'] ?? array();
+
+		return is_array( $history ) ? $history : array();
 	}
 
 	/**
@@ -293,10 +331,11 @@ final class ExchangeRateStore {
 				continue;
 			}
 
-			$error = $failures[ $code ] ?? ( $result->is_total_failure() ? 'provider_unavailable' : 'not_returned_by_provider' );
+			$raw_error = $failures[ $code ] ?? ( $result->is_total_failure() ? RateFailureCode::PROVIDER_UNAVAILABLE : RateFailureCode::NOT_RETURNED_BY_PROVIDER );
+			$error     = RateFailureCode::sanitize( (string) $raw_error );
 
 			$row['last_status']           = RateUpdateState::STATUS_FAILED;
-			$row['last_error']            = $this->cap_error( (string) $error );
+			$row['last_error']            = $this->cap_error( $error );
 			$row['consecutive_failures']  = (int) ( $row['consecutive_failures'] ?? 0 ) + 1;
 			$state['currencies'][ $code ] = $row;
 
@@ -304,7 +343,7 @@ final class ExchangeRateStore {
 				is_array( $state['failure_history'] ?? null ) ? $state['failure_history'] : array(),
 				$fetched_at,
 				$code,
-				(string) $error
+				$error
 			);
 		}
 
@@ -326,7 +365,7 @@ final class ExchangeRateStore {
 			array(
 				'at'    => $at,
 				'scope' => $scope,
-				'error' => $this->cap_error( $error ),
+				'error' => $this->cap_error( RateFailureCode::sanitize( $error ) ),
 			)
 		);
 

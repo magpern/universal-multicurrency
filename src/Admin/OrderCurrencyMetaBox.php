@@ -144,6 +144,8 @@ final class OrderCurrencyMetaBox {
 			'exchange_rate'        => $snapshot->exchange_rate(),
 			'rate_timestamp'       => $snapshot->rate_timestamp(),
 			'rate_source'          => $snapshot->rate_source(),
+			'rate_provider'        => $snapshot->rate_provider(),
+			'rate_adjustment'      => $snapshot->rate_adjustment(),
 			'plugin_version'       => $snapshot->plugin_version(),
 			'rate_identity'        => $snapshot->rate_identity(),
 		);
@@ -222,7 +224,13 @@ final class OrderCurrencyMetaBox {
 						<?php if ( $view['rate_source'] ) : ?>
 							<tr>
 								<td><strong><?php esc_html_e( 'Rate Source', 'universal-multicurrency' ); ?></strong></td>
-								<td><?php echo esc_html( $this->format_rate_source( (string) $view['rate_source'] ) ); ?></td>
+								<td><?php echo esc_html( $this->format_rate_source( (string) $view['rate_source'], isset( $view['rate_provider'] ) ? (string) $view['rate_provider'] : null ) ); ?></td>
+							</tr>
+						<?php endif; ?>
+						<?php if ( isset( $view['rate_adjustment'] ) && null !== $view['rate_adjustment'] && '' !== (string) $view['rate_adjustment'] ) : ?>
+							<tr>
+								<td><strong><?php esc_html_e( 'Rate Adjustment', 'universal-multicurrency' ); ?></strong></td>
+								<td><?php echo esc_html( (string) $view['rate_adjustment'] ); ?>%</td>
 							</tr>
 						<?php endif; ?>
 						<?php if ( isset( $view['resolved_decimals'] ) ) : ?>
@@ -272,11 +280,22 @@ final class OrderCurrencyMetaBox {
 	/**
 	 * Maps stored rate-source identifiers to merchant-facing labels.
 	 *
-	 * @param string $source Raw snapshot rate source value.
+	 * @param string      $source   Raw snapshot rate source value.
+	 * @param string|null $provider Optional provider id for automatic rates.
 	 */
-	private function format_rate_source( string $source ): string {
+	private function format_rate_source( string $source, ?string $provider = null ): string {
 		if ( OrderSnapshot::SOURCE_MANUAL === $source ) {
 			return __( 'Manual', 'universal-multicurrency' );
+		}
+
+		if ( OrderSnapshot::SOURCE_AUTOMATIC === $source ) {
+			$label = '' !== (string) $provider ? ucfirst( (string) $provider ) : 'Frankfurter';
+
+			return sprintf(
+				/* translators: %s: provider label, e.g. Frankfurter */
+				__( 'Automatic — %s', 'universal-multicurrency' ),
+				$label
+			);
 		}
 
 		return $source;

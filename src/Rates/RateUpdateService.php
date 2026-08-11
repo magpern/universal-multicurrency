@@ -75,7 +75,7 @@ final class RateUpdateService {
 			}
 
 			if ( array() === $targets ) {
-				return RateFetchResult::not_modified( $this->source->id(), time() );
+				return RateFetchResult::no_automatic_targets( $this->source->id(), time() );
 			}
 
 			$metadata = $this->store->get_last_provider_metadata();

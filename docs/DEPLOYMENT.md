@@ -26,7 +26,7 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Produces `dist/universal-multicurrency-0.14.0.zip`. The archive includes `readme.txt`,
+Produces `dist/universal-multicurrency-0.15.0.zip`. The archive includes `readme.txt`,
 production `src/`, `vendor/`, and `languages/universal-multicurrency.pot`.
 
 Performance subset:
@@ -36,7 +36,7 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release:** **v0.14.0** on `feature/m15-currency-explainability`.
+**Current release:** **v0.15.0** on `feature/m16-exchange-rate-operations`.
 Git tag and GitHub release follow CI verification — do not create without
 explicit approval.
 
@@ -996,7 +996,33 @@ unaffected.
 
 ---
 
-## v0.14.0 — Currency Resolution & Explainability (current)
+## v0.15.0 — Exchange Rate Operations & Reliability (current)
+
+### Summary
+
+Ships Milestone 16 under version **0.15.0** (ADR-0021). Settings schema
+remains **v5** — no migration. Adds shared rate health reporting, presentation-
+only aging, scheduler `has_automatic_targets`, structured refresh failures,
+admin ops UX, order snapshot schema **4** provenance, and thin WP-CLI
+(`wp umc rates`). Persisted-data inventory bumps 7→8. No live storefront
+provider HTTP; stale rates remain usable for conversion.
+
+### Deployment sequence
+
+1. Run `composer release-audit` on the **0.15.0** tree.
+2. Build `dist/universal-multicurrency-0.15.0.zip` with `composer install --no-dev`
+   + `bin/build-zip.sh`.
+3. Deploy over **0.14.x** in place. No settings migration step.
+
+### Rollback
+
+Downgrade to the **0.14.x** zip if needed. Order schema 4 provenance keys are
+additive; older readers ignore unknown `_umc_*` keys. Health/CLI/admin ops are
+additive surfaces.
+
+---
+
+## v0.14.0 — Currency Resolution & Explainability
 
 ### Summary
 

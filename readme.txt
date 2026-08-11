@@ -4,7 +4,7 @@ Tags: woocommerce, currency, multicurrency, exchange rates, money
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.14.0
+Stable tag: 0.15.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,6 +49,15 @@ Not for production traffic. Two runtime converters can double-convert prices. De
 The plugin ships a POT template (`languages/universal-multicurrency.pot`) for translators. Bundled locale `.mo` files are not included in this release.
 
 == Changelog ==
+
+= 0.15.0 =
+* Exchange rate operations & reliability: shared health model for admin, Site Health, Compatibility, and WP-CLI
+* Presentation-only rate aging (50% of max age); stale rates remain usable for conversion
+* Scheduler schedules when any currency has effective automatic mode (`has_automatic_targets`)
+* Structured refresh failure taxonomy; hardened lock behaviour; Action Scheduler as next-run truth
+* Exchange Rates admin operations UX and thin `wp umc rates` CLI
+* Order snapshot schema 4 adds `_umc_rate_provider` and `_umc_rate_adjustment` provenance
+* No settings schema change; no multi-provider failover; no live storefront provider HTTP
 
 = 0.14.0 =
 * Decision Inspector settings section explains why a shopper would use a currency (shopper selection, Visitor Location, checkout policy)
@@ -136,6 +145,9 @@ The plugin ships a POT template (`languages/universal-multicurrency.pot`) for tr
 * Storefront conversion, classic cart/checkout, order snapshots, historical order display, refunds, and Store API / blocks parity (milestones 2–5)
 
 == Upgrade Notice ==
+
+= 0.15.0 =
+Exchange rate operations & reliability. Order snapshot schema 4 adds rate provenance metadata. No settings schema change — safe upgrade from 0.14.x. Requires WooCommerce 8.2+, PHP 8.1+, and HPOS.
 
 = 0.13.0 =
 Visitor Location admin redesign (Overview, Currency Routing, Currency Simulation). No settings schema change — safe upgrade from 0.12.x. Requires WooCommerce 8.2+, PHP 8.1+, and HPOS.
