@@ -103,6 +103,7 @@ when the session expires or the customer clears their session — **not touched 
 | `umc_checkout_transition` | `Checkout\CheckoutTransitionStateRepository` | Current checkout transition state for policy/notices |
 | `umc_checkout_notice_signature` | `Checkout\CheckoutTransitionStateRepository` | Last classic checkout notice signature rendered |
 | `umc_manual_currency` | `CurrencySwitcher` | Manual switcher selection flag (`until_manual` geo suppression) |
+| `umc_currency_origin` | `CurrencySwitcher` | Explanatory origin of the persisted shopper currency (`customer` or `visitor_location`). **Never** used by `CurrencyResolver` for precedence. Updated on every `persist()` write. |
 | `umc_geo_applied` | `Geo\GeoCurrencyDecisionService` | Geo applied for `first_visit` / `until_manual` modes |
 | `umc_geo_session_done` | `Geo\GeoCurrencyDecisionService` | Geo applied once for `session` mode |
 | `umc_geo_prev_billing_country` | `Geo\GeoDetectionApplicator` | Previous checkout billing country for re-evaluation |
@@ -173,7 +174,7 @@ with `PersistedKeys::inventory()` — never edit one without the other.
 
 ```umc:persisted-inventory
 {
-  "inventory_version": 6,
+  "inventory_version": 7,
   "options": [
     "umc_settings",
     "umc_rate_state"
@@ -207,6 +208,7 @@ with `PersistedKeys::inventory()` — never edit one without the other.
     "umc_checkout_transition",
     "umc_checkout_notice_signature",
     "umc_manual_currency",
+    "umc_currency_origin",
     "umc_geo_applied",
     "umc_geo_session_done",
     "umc_geo_prev_billing_country",

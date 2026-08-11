@@ -4,7 +4,7 @@ Tags: woocommerce, currency, multicurrency, exchange rates, money
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.13.0
+Stable tag: 0.14.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,6 +49,13 @@ Not for production traffic. Two runtime converters can double-convert prices. De
 The plugin ships a POT template (`languages/universal-multicurrency.pot`) for translators. Bundled locale `.mo` files are not included in this release.
 
 == Changelog ==
+
+= 0.14.0 =
+* Decision Inspector settings section explains why a shopper would use a currency (shopper selection, Visitor Location, checkout policy)
+* Structured CurrencyResolutionResult via CurrencyResolver::evaluate() with truthful winning sources (explicit/session/cookie/base)
+* Session provenance metadata (umc_currency_origin) distinguishes customer vs Visitor Location writes without affecting precedence
+* Runtime/explanation parity via shared evaluators; GeoCurrencyDecisionService left unconsolidated where skip-reason labeling differs
+* No settings schema change; safe in-place upgrade from 0.13.x
 
 = 0.13.0 =
 * Visitor Location hub reduced from seven panels to three: Overview, Currency Routing, Currency Simulation

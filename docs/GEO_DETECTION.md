@@ -131,6 +131,12 @@ the full evaluation trace; the raw document is available in a collapsed
 "Technical details" block for support. The legacy **Test detection** action
 redirects here.
 
+For a full shopper + Visitor Location + checkout explanation, use
+**WooCommerce → Settings → Multicurrency → Decision Inspector** (Milestone 15).
+Currency Simulation remains the geo-focused what-if tool; Decision Inspector
+composes the same evaluators without duplicating them. See
+[`docs/architecture/currency-decision-explainability.md`](architecture/currency-decision-explainability.md).
+
 ## Admin route changes (M14)
 
 The Visitor Location hub previously had seven panels. Provider status,

@@ -23,13 +23,14 @@ final class AdminPageShellViewModelFactory {
 	 * @var array<string, string>
 	 */
 	private const SECTION_ICONS = array(
-		SettingsPage::SECTION_CURRENCIES     => 'dashicons-money',
-		SettingsPage::SECTION_EXCHANGE_RATES => 'dashicons-update',
-		SettingsPage::SECTION_GEO_DETECTION  => 'dashicons-location-alt',
-		SettingsPage::SECTION_DISPLAY        => 'dashicons-visibility',
-		SettingsPage::SECTION_CHECKOUT       => 'dashicons-cart',
-		SettingsPage::SECTION_COMPATIBILITY  => 'dashicons-admin-plugins',
-		SettingsPage::SECTION_ADVANCED       => 'dashicons-admin-generic',
+		SettingsPage::SECTION_CURRENCIES         => 'dashicons-money',
+		SettingsPage::SECTION_EXCHANGE_RATES     => 'dashicons-update',
+		SettingsPage::SECTION_GEO_DETECTION      => 'dashicons-location-alt',
+		SettingsPage::SECTION_DISPLAY            => 'dashicons-visibility',
+		SettingsPage::SECTION_CHECKOUT           => 'dashicons-cart',
+		SettingsPage::SECTION_DECISION_INSPECTOR => 'dashicons-search',
+		SettingsPage::SECTION_COMPATIBILITY      => 'dashicons-admin-plugins',
+		SettingsPage::SECTION_ADVANCED           => 'dashicons-admin-generic',
 	);
 
 	/**
@@ -89,6 +90,8 @@ final class AdminPageShellViewModelFactory {
 				return __( 'Configure how prices and currency information are displayed across your store.', 'universal-multicurrency' );
 			case SettingsPage::SECTION_CHECKOUT:
 				return __( 'Choose which currency customers use during checkout.', 'universal-multicurrency' );
+			case SettingsPage::SECTION_DECISION_INSPECTOR:
+				return __( 'Explain why a shopper would use a given currency, including Visitor Location and checkout policy.', 'universal-multicurrency' );
 			case SettingsPage::SECTION_COMPATIBILITY:
 				return __( 'Review store compatibility, conflicts, cache interactions, and support diagnostics.', 'universal-multicurrency' );
 			case SettingsPage::SECTION_ADVANCED:

@@ -68,6 +68,50 @@ final class CurrencySwitcherTest extends TestCase {
 		$this->assertSame( '', $this->cookies[ CurrencyContext::COOKIE_NAME ] );
 	}
 
+	public function test_manual_persist_sets_customer_origin(): void {
+		$switcher = $this->switcher( true );
+		$switcher->persist( 'SEK', true );
+
+		$this->assertSame( CurrencySwitcher::ORIGIN_CUSTOMER, $this->session[ CurrencySwitcher::SESSION_CURRENCY_ORIGIN ] );
+		$this->assertSame( '1', $this->session[ CurrencySwitcher::SESSION_MANUAL_SELECTION ] );
+	}
+
+	public function test_non_manual_persist_sets_visitor_location_origin(): void {
+		$switcher = $this->switcher( true );
+		$switcher->persist( 'SEK', false );
+
+		$this->assertSame( CurrencySwitcher::ORIGIN_VISITOR_LOCATION, $this->session[ CurrencySwitcher::SESSION_CURRENCY_ORIGIN ] );
+		$this->assertArrayNotHasKey( CurrencySwitcher::SESSION_MANUAL_SELECTION, $this->session );
+	}
+
+	public function test_origin_overwrite_follows_latest_persist_without_changing_resolver_outcome(): void {
+		$switcher = $this->switcher( true );
+		$resolver = new CurrencyResolver();
+
+		$switcher->persist( 'SEK', false );
+		$this->assertSame( CurrencySwitcher::ORIGIN_VISITOR_LOCATION, CurrencySwitcher::read_currency_origin() );
+
+		$switcher->persist( 'USD', true );
+		$this->assertSame( CurrencySwitcher::ORIGIN_CUSTOMER, CurrencySwitcher::read_currency_origin() );
+
+		$resolved = $resolver->resolve( null, $this->session[ CurrencyContext::SESSION_KEY ], null, 'EUR', array( 'SEK', 'USD' ) );
+		$this->assertSame( 'USD', $resolved );
+
+		$this->session[ CurrencySwitcher::SESSION_CURRENCY_ORIGIN ] = CurrencySwitcher::ORIGIN_VISITOR_LOCATION;
+		$resolved_with_stale_origin                                 = $resolver->resolve( null, $this->session[ CurrencyContext::SESSION_KEY ], null, 'EUR', array( 'SEK', 'USD' ) );
+		$this->assertSame( 'USD', $resolved_with_stale_origin );
+	}
+
+	public function test_clear_currency_origin_removes_metadata_only(): void {
+		$switcher = $this->switcher( true );
+		$switcher->persist( 'SEK', true );
+		$switcher->clear_currency_origin();
+
+		$this->assertSame( 'SEK', $this->session[ CurrencyContext::SESSION_KEY ] );
+		$this->assertNull( $this->session[ CurrencySwitcher::SESSION_CURRENCY_ORIGIN ] ?? null );
+		$this->assertNull( CurrencySwitcher::read_currency_origin() );
+	}
+
 	private function switcher( bool $remember ): CurrencySwitcher {
 		$settings = new Settings(
 			array_merge(

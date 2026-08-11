@@ -3,7 +3,7 @@
  * Plugin Name: Universal Multicurrency for WooCommerce
  * Plugin URI: https://github.com/magpern/universal-multicurrency
  * Description: Unlimited currencies with manual or automatic exchange rates. WooCommerce remains the single source of truth for products and inventory; currency affects monetary values only.
- * Version: 0.13.0
+ * Version: 0.14.0
  * Author: magpern
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -19,7 +19,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'UMC_VERSION', '0.13.0' );
+define( 'UMC_VERSION', '0.14.0' );
 define( 'UMC_PLUGIN_FILE', __FILE__ );
 
 // PHP version guard. The "Requires PHP" header stops activation on WP 5.1+,

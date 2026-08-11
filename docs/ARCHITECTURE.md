@@ -125,13 +125,23 @@ layers; fees are never converted.
 Request flow and collaborators:
 
 - `CurrencyResolver` — pure priority resolution (explicit → session → cookie →
-  optional geo → base) against the selectable allow-list.
+  base) against the selectable allow-list. Visitor Location is **not** a
+  resolver candidate; when geo applies it persists into session/cookie via
+  `CurrencySwitcher`, and later resolution sees `session`/`cookie`. Structured
+  evaluation is available via `evaluate()` → `CurrencyResolutionResult`
+  (truthful `winning_source` only). Explanatory session provenance
+  (`umc_currency_origin`) never participates in precedence — see ADR-0020.
 - `CurrencySwitcher` — validates a `?currency=` request, persists to the WC
   session, optionally to a remembered guest cookie (Display M1 policy), and
   safe-redirects without the parameter.
 - `CurrencyContext` — request-scoped facade: resolves the active `Currency`,
   computes the base→active rate once, builds the selectable set (enabled **and**
   rated, plus base), and decides `is_convertible_request()`. Memoized.
+  Checkout may set a request-scoped effective override without rewriting
+  shopper preference.
+- `Decision\CurrencyDecisionExplainer` / admin Decision Inspector — on-demand
+  composition of shopper + Visitor Location + checkout explanations (M15).
+  Not used on the storefront hot path.
 - `Integration\PriceConversionService` — the single conversion seam
   (empty/non-numeric passthrough + base no-op, then `Converter::apply_rate()`).
   All integration points (M2 price hooks and later cart/coupon/shipping) go

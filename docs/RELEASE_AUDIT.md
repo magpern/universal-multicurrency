@@ -1,17 +1,17 @@
-# Release audit — v0.13.0 Visitor Location boundary alignment
+# Release audit — v0.14.0 Currency Resolution & Explainability
 
-Executable release-blocking gate for Universal Multicurrency **v0.13.0**. This
+Executable release-blocking gate for Universal Multicurrency **v0.14.0**. This
 document records scope, criteria, commands, audit results, and the current
 release-preparation state.
 
 **Governing question:** If we published this release tomorrow, is there anything
 left in the repository that clearly should not ship?
 
-**Repository status:** **prepared for v0.13.0** on
-`feature/m14-visitor-location-boundary`. Milestone 14 (Visitor Location
-boundary alignment with Universal Geo Context; ADR-0018) awaits CI
-verification. Git tag **`v0.13.0`** and GitHub release publication follow
-full CI matrix pass and explicit approval to tag and push.
+**Repository status:** **prepared for v0.14.0** on
+`feature/m15-currency-explainability`. Milestone 15 (Currency Resolution &
+Explainability; ADR-0020) awaits CI verification. Git tag **`v0.14.0`** and
+GitHub release publication follow full CI matrix pass and explicit approval to
+tag and push.
 
 ---
 
@@ -19,11 +19,11 @@ full CI matrix pass and explicit approval to tag and push.
 
 | Item | Value |
 |---|---|
-| Version | **0.13.0** |
+| Version | **0.14.0** |
 | Settings schema | **5** (unchanged; no keys added, renamed, or removed) |
 | Order snapshot schema | **3** (unchanged) |
 | GeoContext (sandbox document) schema | **2** (was 1; removed unused `network`/`providers` reserved subtrees, ADR-0018) |
-| Persisted-data inventory version | **6** (was 5; two previously-undocumented sandbox user-meta keys added) |
+| Persisted-data inventory version | **7** (was 6; `umc_currency_origin` session provenance key) |
 | Production migrations | **v0 → v1**, **v1 → v2**, **v2 → v3**, **v3 → v4**, **v4 → v5** (unchanged; no new migration in this release) |
 | Unresolved Critical security findings | **0** |
 | Unresolved High security findings | **0** |
@@ -42,17 +42,40 @@ full CI matrix pass and explicit approval to tag and push.
 | GitHub release `v0.12.0` | **Published** (superseded) |
 | Git tag `v0.12.1` | **Created** |
 | GitHub release `v0.12.1` | **Published** |
-| Git tag `v0.13.0` | **Not yet created** |
-| GitHub release `v0.13.0` | **Not yet created** |
+| Git tag `v0.14.0` | **Not yet created** |
+| GitHub release `v0.14.0` | **Not yet created** |
 | Milestone 8 | **Complete** — released and review-closed at v0.8.0 |
 | Milestone 11 | **Complete** — Checkout currency policy at v0.10.0 |
 | Milestone 12 | **Prepared** — Geo Detection engine (see v0.12.0 tag note above) |
 | Milestone 13 | **Complete** — Geo admin hub at v0.12.0 |
-| Milestone 14 | **Prepared** — Visitor Location boundary alignment on feature branch |
+| Milestone 14 | **Complete** — Visitor Location boundary alignment at v0.13.0 |
+| Milestone 15 | **Prepared** — Currency Resolution & Explainability on feature branch |
 
 ---
 
-## v0.13.0 Visitor Location boundary alignment scope
+## v0.14.0 Currency Resolution & Explainability scope
+
+Minor release shipping Milestone 15 (ADR-0020). Adds structured shopper
+currency evaluation, explanatory session provenance, an on-demand decision
+explanation composer, and a stateless Decision Inspector admin section.
+No settings schema change; storefront currency-decision behaviour is
+unchanged — locked by characterization tests and resolve/evaluate parity.
+
+### Shipped capabilities
+
+| Area | Summary |
+|---|---|
+| `CurrencyResolutionResult` | Structured shopper ladder evaluation; truthful winning sources `explicit`/`session`/`cookie`/`base` |
+| Provenance | Session key `umc_currency_origin` (`customer` \| `visitor_location`); never affects precedence |
+| Explainer | `UMC\Decision\CurrencyDecisionExplainer` composes resolver + geo simulate + checkout policy |
+| Decision Inspector | New Multicurrency settings section (stateless simulation; no user-meta result persistence) |
+| Design system | Reusable `decision_timeline()` component |
+| Persisted-data inventory | Inventory v6 → v7 (`umc_currency_origin`) |
+| Non-consolidation | `GeoCurrencyDecisionService` left intact after skip-reason characterization gap |
+
+---
+
+## v0.13.0 Visitor Location boundary alignment scope (shipped)
 
 Minor release shipping Milestone 14 (ADR-0018). Admin-only realignment with
 Universal Geo Context: the Visitor Location hub shrinks from seven panels to
@@ -60,19 +83,16 @@ three, Overview becomes a merchant dashboard, Currency Routing absorbs the
 former Settings panel and presents rules as policy statements, and Currency
 Simulation (formerly Geo Sandbox) replaces raw JSON with design-system
 output. No settings schema change; storefront currency-decision behaviour
-is unchanged — verified by new characterization tests over the provider
-chain and applicator gate order predating any refactor in this milestone.
+is unchanged — verified by characterization tests over the provider
+chain and applicator gate order.
 
-### Shipped capabilities
+### Shipped capabilities (v0.13.0)
 
 | Area | Summary |
 |---|---|
-| `UgcIntegrationStatus` | Single source of truth for Universal Geo Context availability; fixes three call sites that previously skipped the API-version compatibility check |
-| Visitor Location IA | Overview, Currency Routing, Currency Simulation (was seven panels); retired panel URLs 302-redirect with a one-time notice |
-| Overview redesign | Integration-health card, detected-country/matched-rule/resulting-currency preview, needs-attention area, collapsed technical details |
-| Currency Routing | Folded Settings panel; ordered routing policy presented as condition/result/priority statements with inline validation |
-| Currency Simulation | Design-system result presentation; Universal Geo Context simulation awareness; GeoContext schema v2 |
-| Persisted-data inventory | Two previously-undocumented sandbox user-meta keys added (inventory v5 → v6); classified preserved, no uninstall.php change |
+| `UgcIntegrationStatus` | Single source of truth for Universal Geo Context availability |
+| Visitor Location IA | Overview, Currency Routing, Currency Simulation |
+| Persisted-data inventory | Inventory v5 → v6 (sandbox user-meta keys) |
 
 ---
 
@@ -382,10 +402,10 @@ needles remain confined to `Diagnostics/DetectorManifest.php` only.
 
 ## Metadata and compatibility
 
-| Field | Value (v0.13.0) |
+| Field | Value (v0.14.0) |
 |---|---|
-| Plugin version (header + `UMC_VERSION`) | **0.13.0** |
-| readme.txt Stable tag | **0.13.0** |
+| Plugin version (header + `UMC_VERSION`) | **0.14.0** |
+| readme.txt Stable tag | **0.14.0** |
 | Text domain | `universal-multicurrency` |
 | Requires PHP | 8.1 |
 | Requires Plugins | woocommerce |
@@ -467,11 +487,11 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Expected artifact: **`dist/universal-multicurrency-0.13.0.zip`**
+Expected artifact: **`dist/universal-multicurrency-0.14.0.zip`**
 
 ### Included
 
-- `universal-multicurrency.php` (header Version **0.13.0**), `uninstall.php`, `readme.txt` (Stable tag **0.13.0**)
+- `universal-multicurrency.php` (header Version **0.14.0**), `uninstall.php`, `readme.txt` (Stable tag **0.14.0**)
 - `src/` production PHP including `src/Admin/DisplayControlRenderer.php`, `src/Admin/DisplaySettingsField.php`, `src/Display/`
 - `assets/admin/umc-settings.css`, `assets/admin/umc-settings.js`, `assets/css/switcher.css`, `assets/js/switcher.js`
 - `src/` production PHP

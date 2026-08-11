@@ -42,6 +42,8 @@ final class SecuritySourceGuardTest extends TestCase {
 		'GeoLegacyPanelRedirect.php',
 		'GeoPanelRegistry.php',
 		'GeoSandboxController.php',
+		'DecisionInspectorController.php',
+		'DecisionInspectorSettingsField.php',
 		'OrderPayCurrencyLock.php',
 		'RateUpdateController.php',
 	);

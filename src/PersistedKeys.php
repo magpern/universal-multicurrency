@@ -31,7 +31,7 @@ final class PersistedKeys {
 	/**
 	 * Bump when the inventory shape or membership changes.
 	 */
-	public const INVENTORY_VERSION = 6;
+	public const INVENTORY_VERSION = 7;
 
 	/**
 	 * WordPress options written by the plugin.
@@ -104,6 +104,7 @@ final class PersistedKeys {
 			CheckoutTransitionStateRepository::SESSION_KEY,
 			CheckoutTransitionStateRepository::SESSION_NOTICE_KEY,
 			CurrencySwitcher::SESSION_MANUAL_SELECTION,
+			CurrencySwitcher::SESSION_CURRENCY_ORIGIN,
 			GeoCurrencyDecisionService::SESSION_GEO_APPLIED,
 			GeoCurrencyDecisionService::SESSION_GEO_SESSION_DONE,
 			'umc_geo_prev_billing_country',

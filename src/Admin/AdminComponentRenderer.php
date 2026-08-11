@@ -634,6 +634,60 @@ final class AdminComponentRenderer {
 	}
 
 	/**
+	 * Renders an ordered decision timeline.
+	 *
+	 * @param string                           $title Timeline heading.
+	 * @param array<int, array<string, mixed>> $steps Steps with title, status, label, summary.
+	 */
+	public function decision_timeline( string $title, array $steps ): string {
+		if ( array() === $steps ) {
+			return '';
+		}
+
+		$items = '';
+
+		foreach ( $steps as $step ) {
+			$status  = is_string( $step['status'] ?? null ) ? (string) $step['status'] : 'info';
+			$label   = is_string( $step['label'] ?? null ) ? (string) $step['label'] : $status;
+			$heading = is_string( $step['title'] ?? null ) ? (string) $step['title'] : '';
+			$summary = is_string( $step['summary'] ?? null ) ? (string) $step['summary'] : '';
+
+			switch ( $status ) {
+				case 'won':
+					$variant = 'active';
+					break;
+				case 'blocked':
+					$variant = 'error';
+					break;
+				case 'skipped':
+					$variant = 'disabled';
+					break;
+				case 'considered':
+					$variant = 'recommended';
+					break;
+				default:
+					$variant = 'available';
+					break;
+			}
+
+			$items .= sprintf(
+				'<li class="umc-ui-decision-timeline__step umc-ui-decision-timeline__step--%1$s"><div class="umc-ui-decision-timeline__header"><span class="umc-ui-decision-timeline__title">%2$s</span>%3$s</div><p class="umc-ui-decision-timeline__summary"><span class="screen-reader-text">%4$s: </span>%5$s</p></li>',
+				esc_attr( $status ),
+				esc_html( $heading ),
+				$this->status_badge( $label, $variant ),
+				esc_html( $label ),
+				esc_html( $summary )
+			);
+		}
+
+		return sprintf(
+			'<section class="umc-ui-decision-timeline" aria-label="%1$s"><h4 class="umc-ui-decision-timeline__heading">%1$s</h4><ol class="umc-ui-decision-timeline__list">%2$s</ol></section>',
+			esc_html( $title ),
+			$items
+		);
+	}
+
+	/**
 	 * Builds attribute HTML from an associative array.
 	 *
 	 * @param array<string, string|null> $attrs Attributes.
