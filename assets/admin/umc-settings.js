@@ -1,6 +1,30 @@
 ( function ( $ ) {
 	'use strict';
 
+	var CONTENT_ELEMENTS = [ 'code', 'symbol', 'name' ];
+
+	var PRESETS = [ 'default', 'minimal', 'pill', 'compact', 'borderless', 'floating' ];
+
+	var OVERRIDE_PROPERTIES = {
+		surface: '--umc-switcher-surface',
+		text: '--umc-switcher-text',
+		border: '--umc-switcher-border',
+		hover: '--umc-switcher-hover',
+		selected_bg: '--umc-switcher-selected-bg',
+		focus_ring: '--umc-switcher-focus-ring',
+		radius: '--umc-switcher-radius',
+		control_height: '--umc-switcher-control-height',
+		spacing: '--umc-switcher-spacing',
+		font_weight: '--umc-switcher-font-weight',
+	};
+
+	var OVERRIDE_DIMENSIONS = [ 'radius', 'control_height', 'spacing' ];
+
+	var MOTION_DURATIONS = {
+		none: '0ms',
+		subtle: '150ms',
+	};
+
 	function toggleEditor( targetId, open ) {
 		var $row = $( '#' + targetId );
 
@@ -16,6 +40,44 @@
 		}
 	}
 
+	function displaySubnavModule() {
+		var $root = $( '.umc-display-settings' );
+		var $nav = $root.find( '[data-umc-display-subnav]' );
+		var $pills = $nav.find( '[data-umc-display-tab]' );
+		var $panels = $root.find( '[data-umc-display-panel]' );
+
+		if ( ! $pills.length || ! $panels.length ) {
+			return;
+		}
+
+		function activate( key ) {
+			$pills.each( function () {
+				var $pill = $( this );
+				var active = String( $pill.data( 'umc-display-tab' ) ) === key;
+
+				$pill.toggleClass( 'is-active', active ).attr( 'aria-pressed', active ? 'true' : 'false' );
+			} );
+
+			$panels.each( function () {
+				var $panel = $( this );
+
+				$panel.toggleClass(
+					'umc-display-panel--hidden',
+					String( $panel.data( 'umc-display-panel' ) ) !== key
+				);
+			} );
+		}
+
+		$nav.prop( 'hidden', false );
+
+		$nav.on( 'click', '[data-umc-display-tab]', function ( event ) {
+			event.preventDefault();
+			activate( String( $( this ).data( 'umc-display-tab' ) ) );
+		} );
+
+		activate( String( $pills.first().data( 'umc-display-tab' ) ) );
+	}
+
 	function displayPreviewModule() {
 		var $root = $( '.umc-display-settings' );
 
@@ -25,6 +87,8 @@
 
 		var config = window.umcDisplayPreview || {};
 		var samples = config.samples || [];
+		var elements = ( config.elements && config.elements.length ) ? config.elements : CONTENT_ELEMENTS;
+		var presets = ( config.presets && config.presets.length ) ? config.presets : PRESETS;
 		var $switcher = $root.find( '.umc-switcher' ).first();
 		var $frame = $root.find( '[data-umc-preview-frame]' );
 
@@ -76,35 +140,54 @@
 			return value;
 		}
 
-		function formatLabel( sample, compact ) {
-			var showCode = !! fieldValue( 'content_show_code' );
-			var showSymbol = !! fieldValue( 'content_show_symbol' );
-			var showName = !! fieldValue( 'content_show_name' );
-			var parts = [];
+		function elementOrder( context ) {
+			var order = String( fieldValue( context + '_order' ) || '' )
+				.split( ',' )
+				.map( function ( part ) {
+					return part.replace( /^\s+|\s+$/g, '' );
+				} )
+				.filter( function ( part ) {
+					return elements.indexOf( part ) !== -1;
+				} );
 
-			if ( showCode ) {
-				parts.push( sample.code );
-			}
+			elements.forEach( function ( element ) {
+				if ( order.indexOf( element ) === -1 ) {
+					order.push( element );
+				}
+			} );
 
-			if ( showSymbol && sample.symbol ) {
-				parts.push( sample.symbol );
-			}
+			return order;
+		}
 
-			if ( ! parts.length ) {
-				if ( ! compact && showName && sample.name ) {
-					return sample.name;
+		function visibleElements( context ) {
+			var visible = elementOrder( context ).filter( function ( element ) {
+				return !! fieldValue( context + '_show_' + element );
+			} );
+
+			return visible.length ? visible : [ 'code' ];
+		}
+
+		function renderElements( $host, sample, context ) {
+			var rendered = 0;
+
+			$host.empty();
+
+			visibleElements( context ).forEach( function ( element ) {
+				if ( ! sample[ element ] ) {
+					return;
 				}
 
-				parts.push( sample.code );
+				$( '<span/>' )
+					.addClass( 'umc-switcher__' + element )
+					.text( sample[ element ] )
+					.appendTo( $host );
+
+				rendered++;
+			} );
+
+			if ( ! rendered ) {
+				$( '<span/>' ).addClass( 'umc-switcher__code' ).text( sample.code ).appendTo( $host );
 			}
-
-			var primary = parts.join( ' ' );
-
-			if ( ! compact && showName && sample.name ) {
-				return primary + ' \u2014 ' + sample.name;
-			}
-
-			return primary;
 		}
 
 		function setExclusiveClass( group, className ) {
@@ -201,34 +284,57 @@
 			}
 		}
 
+		function updateChevron( $trigger ) {
+			if ( ! $trigger.length ) {
+				return;
+			}
+
+			var enabled = !! fieldValue( 'show_chevron' );
+			var $chevron = $trigger.find( '.umc-switcher__chevron' );
+
+			if ( ! enabled ) {
+				$chevron.remove();
+				return;
+			}
+
+			if ( ! $chevron.length ) {
+				$( '<span/>' )
+					.addClass( 'umc-switcher__chevron' )
+					.attr( 'aria-hidden', 'true' )
+					.appendTo( $trigger );
+			}
+		}
+
 		function updateLabels() {
 			var $trigger = $switcher.find( '.umc-switcher__trigger' ).first();
+			var $triggerContent = $trigger.find( '.umc-switcher__trigger-content' ).first();
 			var $menu = $switcher.find( '.umc-switcher__menu' ).first();
 			var $links = $switcher.find( '.umc-switcher__link' );
-			var showName = !! fieldValue( 'content_show_name' );
 			var isDropdown = 'dropdown' === styleValue();
 
+			if ( $triggerContent.length && samples.length ) {
+				renderElements( $triggerContent, samples[ 0 ], 'trigger' );
+			}
+
 			samples.forEach( function ( sample, index ) {
-				var label = formatLabel( sample, false );
-				var compact = formatLabel( sample, true );
+				var $link = $links.eq( index );
 
-				if ( 0 === index && $trigger.length ) {
-					$trigger.text( compact );
-				}
-
-				if ( $links.eq( index ).length ) {
-					$links.eq( index ).text( label );
+				if ( $link.length ) {
+					renderElements( $link, sample, 'menu' );
 				}
 			} );
 
-			$switcher.toggleClass( 'umc-switcher--preview-show-names', showName && isDropdown );
+			updateChevron( $trigger );
+
+			// The preview keeps the dropdown open so menu composition stays visible.
+			$switcher.toggleClass( 'umc-switcher--preview-show-names', isDropdown );
 
 			if ( $menu.length ) {
-				$menu.prop( 'hidden', ! ( showName && isDropdown ) );
+				$menu.prop( 'hidden', ! isDropdown );
 			}
 
 			if ( $trigger.length ) {
-				$trigger.attr( 'aria-expanded', showName && isDropdown ? 'true' : 'false' );
+				$trigger.attr( 'aria-expanded', isDropdown ? 'true' : 'false' );
 			}
 		}
 
@@ -248,6 +354,44 @@
 		function updateVisibilityClasses() {
 			$switcher.toggleClass( 'umc-switcher--hide-desktop', ! fieldValue( 'visibility_desktop' ) );
 			$switcher.toggleClass( 'umc-switcher--hide-mobile', ! fieldValue( 'visibility_mobile' ) );
+		}
+
+		function updateResponsiveClasses() {
+			$switcher.toggleClass( 'umc-switcher--hide-name-on-mobile', !! fieldValue( 'hide_name_on_mobile' ) );
+			$switcher.toggleClass( 'umc-switcher--compact-on-mobile', !! fieldValue( 'compact_on_mobile' ) );
+		}
+
+		function updateOverrides() {
+			Object.keys( OVERRIDE_PROPERTIES ).forEach( function ( token ) {
+				var property = OVERRIDE_PROPERTIES[ token ];
+				var raw = fieldValue( 'override_' + token );
+				var value = ( null === raw || undefined === raw ) ? '' : String( raw ).replace( /^\s+|\s+$/g, '' );
+
+				if ( '' === value ) {
+					$switcher.css( property, '' );
+					return;
+				}
+
+				if ( OVERRIDE_DIMENSIONS.indexOf( token ) !== -1 ) {
+					if ( ! /^\d+$/.test( value ) ) {
+						$switcher.css( property, '' );
+						return;
+					}
+
+					value += 'px';
+				}
+
+				$switcher.css( property, value );
+			} );
+		}
+
+		function updateMotion() {
+			var motion = fieldValue( 'motion' ) || 'subtle';
+
+			$switcher.css(
+				'--umc-switcher-transition-duration',
+				MOTION_DURATIONS[ motion ] || MOTION_DURATIONS.subtle
+			);
 		}
 
 		function updateCssVariables() {
@@ -302,6 +446,15 @@
 				}[ fieldValue( 'vertical_alignment' ) || 'middle' ] || 'umc-switcher--align-middle'
 			);
 
+			var preset = fieldValue( 'preset' ) || 'default';
+
+			setExclusiveClass(
+				presets.map( function ( token ) {
+					return 'umc-switcher--preset-' + token;
+				} ),
+				'umc-switcher--preset-' + ( presets.indexOf( preset ) === -1 ? 'default' : preset )
+			);
+
 			setExclusiveClass(
 				[ 'umc-switcher--theme-automatic', 'umc-switcher--theme-light', 'umc-switcher--theme-dark' ],
 				{
@@ -340,7 +493,10 @@
 			updatePresentationClasses();
 			updatePreviewLayout();
 			updateCssVariables();
+			updateOverrides();
+			updateMotion();
 			updateVisibilityClasses();
+			updateResponsiveClasses();
 			updateDisabledPreviewOverlay();
 			updateLabels();
 			updateOrder();
@@ -501,6 +657,7 @@
 			} );
 		}
 
+		displaySubnavModule();
 		displayPreviewModule();
 		stickySaveModule();
 	} );

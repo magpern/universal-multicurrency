@@ -16,6 +16,7 @@ use UMC\Currency;
 use UMC\CurrencyRegistry;
 use UMC\CurrencyContext;
 use UMC\CurrencyResolver;
+use UMC\Display\SwitcherCustomCss;
 use UMC\Display\SwitcherShortcode;
 use UMC\Display\SwitcherRenderer;
 use UMC\Display\SwitcherSettings;
@@ -50,10 +51,39 @@ final class DisplaySettingsFieldTest extends WP_UnitTestCase {
 
 	public function tear_down(): void {
 		remove_all_filters( 'wp_redirect' );
+		remove_filter( 'map_meta_cap', array( $this, 'allow_edit_css' ), 10 );
+		remove_filter( 'map_meta_cap', array( $this, 'deny_edit_css' ), 10 );
+		wp_set_current_user( 0 );
 		unset( $_POST['umc_display'], $_GET['section'], $_REQUEST['section'] );
 		unset( $GLOBALS['current_section'] );
 		delete_option( Settings::OPTION );
 		parent::tear_down();
+	}
+
+	/**
+	 * Grants `edit_css` to the current user regardless of site configuration.
+	 *
+	 * Core maps `edit_css` onto `unfiltered_html`, which multisite restricts to
+	 * super admins. Mapping the capability directly keeps the expectation the
+	 * same on single-site and multisite runs.
+	 *
+	 * @param array<int, string> $caps Mapped primitive capabilities.
+	 * @param string             $cap  Requested capability.
+	 * @return array<int, string>
+	 */
+	public function allow_edit_css( $caps, $cap ) {
+		return SwitcherCustomCss::CAPABILITY === $cap ? array( 'exist' ) : $caps;
+	}
+
+	/**
+	 * Denies `edit_css` to the current user.
+	 *
+	 * @param array<int, string> $caps Mapped primitive capabilities.
+	 * @param string             $cap  Requested capability.
+	 * @return array<int, string>
+	 */
+	public function deny_edit_css( $caps, $cap ) {
+		return SwitcherCustomCss::CAPABILITY === $cap ? array( 'do_not_allow' ) : $caps;
 	}
 
 	public function test_display_section_exposes_display_field_not_placeholder(): void {
@@ -107,13 +137,112 @@ final class DisplaySettingsFieldTest extends WP_UnitTestCase {
 		$this->assertStringNotContainsString( 'data-umc-preview-disabled-overlay hidden', $html );
 	}
 
-	public function test_render_includes_segmented_appearance_controls(): void {
+	public function test_render_includes_segmented_design_controls(): void {
 		$html = $this->capture_render();
 
 		$this->assertStringContainsString( 'umc-display-segmented', $html );
-		$this->assertStringContainsString( 'name="umc_display[appearance][theme]"', $html );
-		$this->assertStringContainsString( 'name="umc_display[appearance][size]"', $html );
-		$this->assertStringContainsString( 'name="umc_display[appearance][shape]"', $html );
+		$this->assertStringContainsString( 'name="umc_display[design][preset]"', $html );
+		$this->assertStringContainsString( 'name="umc_display[design][theme]"', $html );
+		$this->assertStringContainsString( 'name="umc_display[design][size]"', $html );
+		$this->assertStringContainsString( 'name="umc_display[design][shape]"', $html );
+		$this->assertStringContainsString( 'name="umc_display[design][motion]"', $html );
+	}
+
+	public function test_render_includes_subnav_pill_and_panel_for_every_section(): void {
+		$html = $this->capture_render();
+
+		foreach ( DisplaySettingsField::PANELS as $panel ) {
+			$this->assertStringContainsString( 'data-umc-display-tab="' . $panel . '"', $html );
+			$this->assertStringContainsString( 'data-umc-display-panel="' . $panel . '"', $html );
+		}
+	}
+
+	public function test_render_includes_per_context_content_controls(): void {
+		$html = $this->capture_render();
+
+		foreach ( array( 'trigger', 'menu' ) as $context ) {
+			foreach ( array( 'show_code', 'show_symbol', 'show_name' ) as $toggle ) {
+				$this->assertStringContainsString(
+					'name="umc_display[content][' . $context . '][' . $toggle . ']"',
+					$html
+				);
+			}
+
+			$this->assertStringContainsString( 'name="umc_display[content][' . $context . '][order]"', $html );
+		}
+
+		$this->assertStringContainsString( 'name="umc_display[content][show_chevron]"', $html );
+	}
+
+	public function test_render_includes_override_and_responsive_controls(): void {
+		$html = $this->capture_render();
+
+		$this->assertStringContainsString( 'name="umc_display[design][overrides][surface]"', $html );
+		$this->assertStringContainsString( 'name="umc_display[design][overrides][radius]"', $html );
+		$this->assertStringContainsString( 'name="umc_display[design][overrides][font_weight]"', $html );
+		$this->assertStringContainsString( 'name="umc_display[responsive][hide_name_on_mobile]"', $html );
+		$this->assertStringContainsString( 'name="umc_display[responsive][compact_on_mobile]"', $html );
+	}
+
+	public function test_custom_css_field_is_editable_for_a_capable_user(): void {
+		$this->authorize_custom_css();
+
+		$html = $this->capture_render();
+
+		$this->assertStringContainsString( 'name="umc_display[custom_css]"', $html );
+	}
+
+	public function test_custom_css_field_is_locked_without_the_edit_css_capability(): void {
+		$this->forbid_custom_css();
+
+		$html = $this->capture_render();
+
+		$this->assertStringNotContainsString( 'name="umc_display[custom_css]"', $html );
+		$this->assertStringContainsString( 'aria-readonly="true"', $html );
+	}
+
+	public function test_parse_post_persists_custom_css_for_a_capable_user(): void {
+		$this->authorize_custom_css();
+
+		$_POST['umc_display'] = array(
+			'enabled'    => '1',
+			'custom_css' => '.umc-switcher { letter-spacing: 0.02em; }',
+		);
+
+		$parsed = $this->display_field()->parse_post();
+
+		$this->assertIsArray( $parsed );
+		$this->assertSame( '.umc-switcher { letter-spacing: 0.02em; }', $parsed['display']['custom_css'] );
+	}
+
+	public function test_parse_post_ignores_forged_custom_css_without_the_capability(): void {
+		$this->save_display( array( 'custom_css' => '.umc-switcher { letter-spacing: 0.02em; }' ) );
+		$this->forbid_custom_css();
+
+		$_POST['umc_display'] = array(
+			'enabled'    => '1',
+			'custom_css' => '.umc-switcher { display: none; }',
+		);
+
+		$parsed = $this->display_field()->parse_post();
+
+		$this->assertIsArray( $parsed );
+		$this->assertSame( '.umc-switcher { letter-spacing: 0.02em; }', $parsed['display']['custom_css'] );
+	}
+
+	public function test_parse_post_rejects_denylisted_custom_css_and_keeps_the_stored_value(): void {
+		$this->save_display( array( 'custom_css' => '.umc-switcher { letter-spacing: 0.02em; }' ) );
+		$this->authorize_custom_css();
+
+		$_POST['umc_display'] = array(
+			'enabled'    => '1',
+			'custom_css' => '.umc-switcher { background: url(https://evil.test/x.png); }',
+		);
+
+		$parsed = $this->display_field()->parse_post();
+
+		$this->assertIsArray( $parsed );
+		$this->assertSame( '.umc-switcher { letter-spacing: 0.02em; }', $parsed['display']['custom_css'] );
 	}
 
 	public function test_copy_shortcode_control_has_accessible_label(): void {
@@ -379,6 +508,16 @@ final class DisplaySettingsFieldTest extends WP_UnitTestCase {
 		( new AdminAssets() )->enqueue( 'woocommerce_page_wc-settings' );
 
 		$this->assertTrue( wp_style_is( 'umc-switcher', 'enqueued' ) );
+	}
+
+	private function authorize_custom_css(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		add_filter( 'map_meta_cap', array( $this, 'allow_edit_css' ), 10, 2 );
+	}
+
+	private function forbid_custom_css(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		add_filter( 'map_meta_cap', array( $this, 'deny_edit_css' ), 10, 2 );
 	}
 
 	private function settings_page(): SettingsPage {
