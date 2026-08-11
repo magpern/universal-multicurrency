@@ -105,6 +105,69 @@ final class SchedulerIntegrationTest extends WP_UnitTestCase {
 		$this->assertCount( 1, $first_ids );
 	}
 
+	/**
+	 * Characterization (pre-M16): Scheduler gates on global rate_mode only.
+	 *
+	 * Effective per-currency automatic under global manual still yields automatic
+	 * targets via ExchangeRateStore::get_automatic_currency_codes(), but
+	 * ensure_scheduled() unschedules because RateConfiguration::is_automatic_enabled()
+	 * is false. M16 must flip this contract to schedule whenever automatic targets exist.
+	 */
+	public function test_characterize_global_manual_with_per_currency_automatic_currently_unschedules(): void {
+		$settings  = new Settings(
+			array(
+				'rate_mode'            => Settings::RATE_MODE_MANUAL,
+				'rate_provider'        => Settings::DEFAULT_RATE_PROVIDER,
+				'rate_update_interval' => 'P1D',
+				'rate_max_age_hours'   => Settings::DEFAULT_RATE_MAX_AGE_HOURS,
+				'currencies'           => array(
+					'SEK' => array(
+						'enabled'   => true,
+						'rate_mode' => Settings::RATE_MODE_AUTOMATIC,
+					),
+				),
+			)
+		);
+		$store     = new ExchangeRateStore( $settings, new RateUpdateState(), 'EUR', 'test-lock' );
+		$scheduler = new Scheduler( $store, $this->make_service( $store ) );
+
+		$this->assertSame( array( 'SEK' ), $store->get_automatic_currency_codes() );
+		$this->assertFalse( $store->get_configuration()->is_automatic_enabled() );
+
+		as_schedule_recurring_action( time() + 3600, 86400, Scheduler::HOOK );
+		$scheduler->ensure_scheduled();
+
+		$this->assertCount(
+			0,
+			$this->pending_hook_actions(),
+			'Pre-M16 characterization: global manual unschedules even when automatic targets exist.'
+		);
+	}
+
+	public function test_global_manual_with_all_manual_currencies_unschedules(): void {
+		$settings  = new Settings(
+			array(
+				'rate_mode'            => Settings::RATE_MODE_MANUAL,
+				'rate_provider'        => Settings::DEFAULT_RATE_PROVIDER,
+				'rate_update_interval' => 'P1D',
+				'currencies'           => array(
+					'SEK' => array(
+						'enabled'     => true,
+						'rate_mode'   => Settings::RATE_MODE_MANUAL,
+						'manual_rate' => '11.50',
+					),
+				),
+			)
+		);
+		$store     = new ExchangeRateStore( $settings, new RateUpdateState(), 'EUR', 'test-lock' );
+		$scheduler = new Scheduler( $store, $this->make_service( $store ) );
+
+		as_schedule_recurring_action( time() + 3600, 86400, Scheduler::HOOK );
+		$scheduler->ensure_scheduled();
+
+		$this->assertCount( 0, $this->pending_hook_actions() );
+	}
+
 	public function test_duplicate_recurring_actions_are_collapsed_to_one(): void {
 		as_schedule_recurring_action( time() + 3600, 3600, Scheduler::HOOK );
 		as_schedule_recurring_action( time() + 7200, 7200, Scheduler::HOOK );
