@@ -212,6 +212,31 @@
     No settings schema change, storefront behavior change, or version bump.
     Safe in-place upgrade from **0.13.0**.
 
+15. Currency Resolution & Explainability (**v0.14.0**) — **in progress on
+    `feature/m15-currency-explainability`**. This is a **new** Milestone 15
+    (currency decision explainability). It does **not** revive the M15 plan
+    retired by ADR-0018 (“diagnostics from GeoContext resolution traces”).
+
+    ### Scope for v0.14.0
+
+    | Work item | Status |
+    |---|---|
+    | Structured `CurrencyResolutionResult` + `CurrencyResolver::evaluate()` | Planned |
+    | Shopper currency provenance metadata (explanatory only; no precedence) | Planned |
+    | `CurrencyDecisionExplanation` / explainer composition layer | Planned |
+    | Stateless Decision Inspector admin section | Planned |
+    | Visitor Location + checkout explanation stages | Planned |
+    | ADR-0020 + architecture specification | Prepared |
+
+    No settings schema change. No DB migration. No storefront currency-outcome
+    change. Inspector simulation is side-effect-free and does not persist
+    results. See
+    [`docs/adr/0020-currency-decision-explainability.md`](adr/0020-currency-decision-explainability.md)
+    and
+    [`docs/architecture/currency-decision-explainability.md`](architecture/currency-decision-explainability.md).
+
+    **Prepared as:** **v0.14.0**.
+
 ## Future milestones — not started, not implemented
 
 None of the following exists in the codebase today:
