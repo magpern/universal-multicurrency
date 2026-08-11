@@ -64,11 +64,13 @@ final class DecisionInspectorIntegrationTest extends WP_UnitTestCase {
 		remove_all_actions( self::ACTION );
 
 		unset( $_REQUEST['_wpnonce'], $_GET['_wpnonce'], $_POST['_wpnonce'], $_POST['umc_decision_inspector'] );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Test teardown clears inspector query fixtures.
 		foreach ( array_keys( $_GET ) as $key ) {
 			if ( is_string( $key ) && ( str_starts_with( $key, 'umc_di_' ) || 'umc_inspected' === $key || 'section' === $key ) ) {
 				unset( $_GET[ $key ] );
 			}
 		}
+		unset( $_COOKIE[ CurrencyContext::COOKIE_NAME ] );
 
 		if ( function_exists( 'WC' ) && WC()->session ) {
 			WC()->session->set( CurrencyContext::SESSION_KEY, null );
@@ -87,9 +89,9 @@ final class DecisionInspectorIntegrationTest extends WP_UnitTestCase {
 		$this->boot_controller();
 		$this->sign_request(
 			array(
-				'country_code'      => 'SE',
-				'session_currency'  => 'SEK',
-				'include_checkout'  => '1',
+				'country_code'     => 'SE',
+				'session_currency' => 'SEK',
+				'include_checkout' => '1',
 			)
 		);
 
@@ -170,11 +172,11 @@ final class DecisionInspectorIntegrationTest extends WP_UnitTestCase {
 		$this->boot_controller();
 		$this->sign_request(
 			array(
-				'country_code'      => 'SE',
-				'session_currency'  => 'SEK',
-				'currency_origin'   => CurrencySwitcher::ORIGIN_VISITOR_LOCATION,
-				'geo_enabled'       => '1',
-				'include_checkout'  => '0',
+				'country_code'     => 'SE',
+				'session_currency' => 'SEK',
+				'currency_origin'  => CurrencySwitcher::ORIGIN_VISITOR_LOCATION,
+				'geo_enabled'      => '1',
+				'include_checkout' => '0',
 			)
 		);
 
@@ -223,20 +225,28 @@ final class DecisionInspectorIntegrationTest extends WP_UnitTestCase {
 			WC()->session->get( CurrencySwitcher::SESSION_CURRENCY_ORIGIN )
 		);
 		$this->assertSame( '1', WC()->session->get( CurrencySwitcher::SESSION_MANUAL_SELECTION ) );
-		$this->assertSame( 'USD', $_COOKIE[ CurrencyContext::COOKIE_NAME ] );
+		$cookie_name = CurrencyContext::COOKIE_NAME;
+		$cookie      = isset( $_COOKIE[ $cookie_name ] )
+			? sanitize_text_field( wp_unslash( (string) $_COOKIE[ $cookie_name ] ) )
+			: '';
+		$this->assertSame( 'USD', $cookie );
 		$this->assertSame( $before, $this->user_meta_snapshot( $user_id ) );
 
 		// Tampered GET args are re-sanitized before recomputation.
-		$_GET['umc_di_country']       = 'N<script>O</script>EXTRA';
-		$_GET['umc_di_origin']        = 'evil';
-		$_GET['umc_di_checkout_mode'] = 'store;drop';
+		$tampered_country = 'N<script>O</script>EXTRA';
+		$tampered_origin  = 'evil';
+		$tampered_mode    = 'store;drop';
+
+		$_GET['umc_di_country']       = $tampered_country;
+		$_GET['umc_di_origin']        = $tampered_origin;
+		$_GET['umc_di_checkout_mode'] = $tampered_mode;
 
 		$service = new DecisionInspectorService( new Settings(), new Currency( 'EUR', 2 ) );
 		$input   = $service->input_from_array(
 			array(
-				'country_code'     => sanitize_text_field( wp_unslash( (string) $_GET['umc_di_country'] ) ),
-				'currency_origin'  => sanitize_text_field( wp_unslash( (string) $_GET['umc_di_origin'] ) ),
-				'checkout_mode'    => sanitize_text_field( wp_unslash( (string) $_GET['umc_di_checkout_mode'] ) ),
+				'country_code'     => sanitize_text_field( wp_unslash( $tampered_country ) ),
+				'currency_origin'  => sanitize_text_field( wp_unslash( $tampered_origin ) ),
+				'checkout_mode'    => sanitize_text_field( wp_unslash( $tampered_mode ) ),
 				'session_currency' => 'SEK',
 			)
 		);
@@ -335,8 +345,8 @@ final class DecisionInspectorIntegrationTest extends WP_UnitTestCase {
 							),
 						),
 						'checkout'                      => array(
-							'lock_on_entry'                 => false,
-							'reevaluate_on_billing_change'  => false,
+							'lock_on_entry'                => false,
+							'reevaluate_on_billing_change' => false,
 							'reevaluate_on_shipping_change' => false,
 						),
 					),
