@@ -270,7 +270,7 @@ final class DecisionInspectorIntegrationTest extends WP_UnitTestCase {
 	}
 
 	public function test_settings_schema_and_currency_origin_inventory_remain_stable(): void {
-		$this->assertSame( 5, Settings::SCHEMA_VERSION );
+		$this->assertSame( 6, Settings::SCHEMA_VERSION );
 		$this->assertContains(
 			CurrencySwitcher::SESSION_CURRENCY_ORIGIN,
 			PersistedKeys::session_keys()

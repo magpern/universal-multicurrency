@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace UMC\Admin;
 
+use UMC\Display\SwitcherCustomCss;
 use UMC\Display\SwitcherRenderer;
 use UMC\Display\SwitcherSettings;
 use UMC\Display\SwitcherSettingsRepository;
@@ -173,13 +174,22 @@ final class DisplaySettingsField {
 			? $raw['placement']
 			: (string) ( $stored['placement'] ?? SwitcherSettings::PLACEMENT_MANUAL );
 
-		$merged              = array_replace_recursive( $stored, $raw );
-		$merged['position']  = $this->merge_position_preserving_inactive(
+		$merged               = array_replace_recursive( $stored, $raw );
+		$merged['position']   = $this->merge_position_preserving_inactive(
 			is_array( $stored['position'] ?? null ) ? $stored['position'] : SwitcherSettings::default_array()['position'],
 			is_array( $raw['position'] ?? null ) ? $raw['position'] : array(),
 			$active_placement
 		);
-		$merged['placement'] = $active_placement;
+		$merged['placement']  = $active_placement;
+		$merged['content']    = $this->merge_content(
+			is_array( $stored['content'] ?? null ) ? $stored['content'] : array(),
+			is_array( $raw['content'] ?? null ) ? $raw['content'] : array()
+		);
+		$merged['custom_css'] = SwitcherCustomCss::resolve_for_save(
+			$raw['custom_css'] ?? null,
+			$stored['custom_css'] ?? '',
+			SwitcherCustomCss::can_edit()
+		);
 
 		if ( ! SwitcherSettings::visibility_valid_for_save( $merged ) ) {
 			return null;
@@ -464,7 +474,7 @@ final class DisplaySettingsField {
 	 * @param SwitcherSettings $settings Current display settings.
 	 */
 	private function render_content_card( SwitcherSettings $settings ): void {
-		$content = $settings->content();
+		$content = $settings->menu_content();
 		?>
 		<div class="umc-display-card">
 			<h3 class="umc-display-card__title"><?php esc_html_e( 'Content', 'universal-multicurrency' ); ?></h3>
@@ -704,17 +714,71 @@ final class DisplaySettingsField {
 	private function normalize_post_raw( array $raw ): array {
 		$raw['enabled'] = ! empty( $raw['enabled'] );
 
-		foreach ( array( 'content', 'behavior', 'visibility' ) as $group ) {
+		foreach ( array( 'content', 'behavior', 'visibility', 'responsive' ) as $group ) {
 			if ( ! isset( $raw[ $group ] ) || ! is_array( $raw[ $group ] ) ) {
 				continue;
 			}
 
 			foreach ( $raw[ $group ] as $key => $value ) {
+				if ( is_array( $value ) ) {
+					continue;
+				}
+
 				$raw[ $group ][ $key ] = ! empty( $value );
 			}
 		}
 
 		return $raw;
+	}
+
+	/**
+	 * Merges posted content toggles over the stored content composition.
+	 *
+	 * The Display screen still submits the flat schema-5 toggles. They drive
+	 * both contexts the same way the 5 → 6 migration does: code and symbol
+	 * apply to trigger and menu, the currency name applies to the menu only,
+	 * and the trigger's own name setting is preserved.
+	 *
+	 * @param array<string, mixed> $stored Stored content composition.
+	 * @param array<string, mixed> $posted Posted content payload.
+	 * @return array<string, mixed>
+	 */
+	private function merge_content( array $stored, array $posted ): array {
+		if ( array() === $posted ) {
+			return $stored;
+		}
+
+		$stored_trigger = is_array( $stored['trigger'] ?? null ) ? $stored['trigger'] : array();
+		$stored_menu    = is_array( $stored['menu'] ?? null ) ? $stored['menu'] : array();
+
+		if ( array_key_exists( 'trigger', $posted ) || array_key_exists( 'menu', $posted ) ) {
+			return array(
+				'trigger'      => is_array( $posted['trigger'] ?? null ) ? $posted['trigger'] : $stored_trigger,
+				'menu'         => is_array( $posted['menu'] ?? null ) ? $posted['menu'] : $stored_menu,
+				'show_chevron' => array_key_exists( 'show_chevron', $posted )
+					? ! empty( $posted['show_chevron'] )
+					: ! empty( $stored['show_chevron'] ),
+			);
+		}
+
+		$show_code   = ! empty( $posted['show_code'] );
+		$show_symbol = ! empty( $posted['show_symbol'] );
+
+		return array(
+			'trigger'      => array(
+				'show_code'   => $show_code,
+				'show_symbol' => $show_symbol,
+				'show_name'   => ! empty( $stored_trigger['show_name'] ),
+				'order'       => is_array( $stored_trigger['order'] ?? null ) ? $stored_trigger['order'] : array(),
+			),
+			'menu'         => array(
+				'show_code'   => $show_code,
+				'show_symbol' => $show_symbol,
+				'show_name'   => ! empty( $posted['show_name'] ),
+				'order'       => is_array( $stored_menu['order'] ?? null ) ? $stored_menu['order'] : array(),
+			),
+			'show_chevron' => ! empty( $stored['show_chevron'] ),
+		);
 	}
 
 	/**

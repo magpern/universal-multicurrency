@@ -54,7 +54,7 @@ These run automatically inside UMC when it first reads `umc_settings` after an
 upgrade. They are **not** a foreign-switcher import: `SettingsUpgrader` only
 ever reads UMC's own option.
 
-`Settings::SCHEMA_VERSION` is **5**. Five production migrations exist, keyed by
+`Settings::SCHEMA_VERSION` is **6**. Six production migrations exist, keyed by
 the version they produce, and are applied in ascending order:
 
 | From → To | Migration | Change |
@@ -64,6 +64,7 @@ the version they produce, and are applied in ascending order:
 | 2 → 3 | `SettingsUpgrader::migrate_2_to_3` | Adds the Display switcher settings block with safe defaults |
 | 3 → 4 | `SettingsUpgrader::migrate_3_to_4` | Adds checkout policy defaults (`checkout.mode`, `checkout.show_notice`) |
 | 4 → 5 | `SettingsUpgrader::migrate_4_to_5` | Adds Geo Detection defaults (`geo` subtree disabled, empty rules) |
+| 5 → 6 | `SettingsUpgrader::migrate_5_to_6` | Restructures the Display block for layered switcher presentation (below) |
 
 ### What v1 → v2 changes
 
@@ -100,6 +101,27 @@ it in WooCommerce → Settings → Multicurrency → Display.
 Existing currency, exchange-rate, and display configuration is preserved
 unchanged. Default checkout mode keeps v0.9.x behaviour (selected currency
 through checkout).
+
+### What v5 → v6 changes
+
+| Field | Before (v5) | After (v6) |
+|---|---|---|
+| Theme / size / shape | `display.appearance.theme|size|shape` | Copied verbatim into **`display.design.theme|size|shape`**; `appearance` is removed |
+| Preset | *(absent)* | **`design.preset`** always initialized to `default` (never inferred from shape) |
+| Structured overrides | *(absent)* | **`design.overrides`** initialized to `{}` |
+| Motion | *(absent)* | **`design.motion`** initialized to `subtle` |
+| Trigger content | flat `content.show_code|show_symbol|show_name` | **`content.trigger`** keeps code/symbol; `show_name` is `false` |
+| Menu content | flat `content.show_code|show_symbol|show_name` | **`content.menu`** keeps all three toggles |
+| Element order | *(absent)* | `content.trigger.order` / `content.menu.order` list the visible elements in `code → symbol → name` order |
+| Chevron | *(absent)* | **`content.show_chevron`** initialized to `false` |
+| Responsive bag | *(absent)* | **`responsive.hide_name_on_mobile|compact_on_mobile`** initialized to `false` |
+| Advanced Custom CSS | *(absent)* | **`custom_css`** initialized to `''` |
+| Schema marker | `schema_version: 5` | **`schema_version: 6`** |
+
+`enabled`, `placement`, `style`, `position`, `behavior`, and `visibility` are
+preserved unchanged. Because theme, size, and shape stay independent enums and
+`--preset-default` is a visual no-op, an upgraded switcher renders exactly as it
+did on v0.15 (ADR-0022).
 
 Defaults for the initialized display fields come from `Settings::sanitize()`,
 which every migration result passes through.

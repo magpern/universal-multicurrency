@@ -65,6 +65,7 @@ final class SettingsUpgrader {
 			3 => self::MIGRATE_2_TO_3,
 			4 => self::MIGRATE_3_TO_4,
 			5 => self::MIGRATE_4_TO_5,
+			6 => self::MIGRATE_5_TO_6,
 		);
 	}
 
@@ -299,6 +300,114 @@ final class SettingsUpgrader {
 	 * @var callable(array<string, mixed>): array<string, mixed>
 	 */
 	public const MIGRATE_4_TO_5 = array( self::class, 'migrate_4_to_5' );
+
+	/**
+	 * Real v5 → v6 migration.
+	 *
+	 * Restructures the Display switcher block for the layered presentation
+	 * system (ADR-0022): legacy `appearance.*` becomes first-class
+	 * `design.theme|size|shape`, flat content toggles split into trigger and
+	 * menu composition, and the preset, overrides, motion, responsive, and
+	 * Custom CSS fields are initialized. Existing appearance must not drift:
+	 * the preset is always `default` and theme/size/shape are copied verbatim.
+	 *
+	 * @param array<string, mixed> $data Raw settings at schema version 5.
+	 * @return array<string, mixed>
+	 */
+	public static function migrate_5_to_6( array $data ): array {
+		return array(
+			'schema_version'       => 6,
+			'rate_mode'            => $data['rate_mode'] ?? Settings::RATE_MODE_MANUAL,
+			'rate_provider'        => $data['rate_provider'] ?? Settings::DEFAULT_RATE_PROVIDER,
+			'rate_update_interval' => $data['rate_update_interval'] ?? Settings::DEFAULT_RATE_INTERVAL,
+			'rate_max_age_hours'   => $data['rate_max_age_hours'] ?? Settings::DEFAULT_RATE_MAX_AGE_HOURS,
+			'currencies'           => is_array( $data['currencies'] ?? null ) ? $data['currencies'] : array(),
+			'display'              => self::migrate_display_5_to_6(
+				is_array( $data['display'] ?? null ) ? $data['display'] : array()
+			),
+			'checkout'             => is_array( $data['checkout'] ?? null ) ? $data['checkout'] : CheckoutSettings::default_array(),
+			'geo'                  => is_array( $data['geo'] ?? null ) ? $data['geo'] : GeoDetectionSettings::default_array(),
+		);
+	}
+
+	/**
+	 * Migration callable for v5 → v6.
+	 *
+	 * @var callable(array<string, mixed>): array<string, mixed>
+	 */
+	public const MIGRATE_5_TO_6 = array( self::class, 'migrate_5_to_6' );
+
+	/**
+	 * Rewrites one schema-5 Display block into the schema-6 shape.
+	 *
+	 * Element ordering, the non-empty label guardrail, and enum validation are
+	 * delegated to {@see SwitcherSettings}, so re-running the step over already
+	 * migrated data is a no-op.
+	 *
+	 * @param array<string, mixed> $display Legacy Display block.
+	 * @return array<string, mixed>
+	 */
+	private static function migrate_display_5_to_6( array $display ): array {
+		$defaults   = SwitcherSettings::default_array();
+		$appearance = is_array( $display['appearance'] ?? null ) ? $display['appearance'] : array();
+		$content    = is_array( $display['content'] ?? null ) ? $display['content'] : array();
+
+		$legacy_menu = is_array( $content['menu'] ?? null ) ? $content['menu'] : $content;
+		$show_code   = self::legacy_toggle( $legacy_menu, 'show_code', true );
+		$show_symbol = self::legacy_toggle( $legacy_menu, 'show_symbol', true );
+		$show_name   = self::legacy_toggle( $legacy_menu, 'show_name', false );
+
+		$design = is_array( $display['design'] ?? null ) ? $display['design'] : array();
+
+		$upgraded = array(
+			'enabled'    => $display['enabled'] ?? $defaults['enabled'],
+			'placement'  => $display['placement'] ?? $defaults['placement'],
+			'style'      => $display['style'] ?? $defaults['style'],
+			'position'   => is_array( $display['position'] ?? null ) ? $display['position'] : $defaults['position'],
+			'content'    => array(
+				'trigger'      => array(
+					'show_code'   => $show_code,
+					'show_symbol' => $show_symbol,
+					'show_name'   => false,
+				),
+				'menu'         => array(
+					'show_code'   => $show_code,
+					'show_symbol' => $show_symbol,
+					'show_name'   => $show_name,
+				),
+				'show_chevron' => false,
+			),
+			'design'     => array(
+				'preset'    => SwitcherSettings::PRESET_DEFAULT,
+				'theme'     => $design['theme'] ?? $appearance['theme'] ?? $defaults['design']['theme'],
+				'size'      => $design['size'] ?? $appearance['size'] ?? $defaults['design']['size'],
+				'shape'     => $design['shape'] ?? $appearance['shape'] ?? $defaults['design']['shape'],
+				'overrides' => array(),
+				'motion'    => SwitcherSettings::MOTION_SUBTLE,
+			),
+			'behavior'   => is_array( $display['behavior'] ?? null ) ? $display['behavior'] : $defaults['behavior'],
+			'visibility' => is_array( $display['visibility'] ?? null ) ? $display['visibility'] : $defaults['visibility'],
+			'responsive' => $defaults['responsive'],
+			'custom_css' => '',
+		);
+
+		return SwitcherSettings::from_array( $upgraded )->to_array();
+	}
+
+	/**
+	 * Reads one legacy content toggle with its schema-5 default.
+	 *
+	 * @param array<string, mixed> $content Legacy content toggles.
+	 * @param string               $key     Toggle key.
+	 * @param bool                 $default Schema-5 default.
+	 */
+	private static function legacy_toggle( array $content, string $key, bool $default ): bool { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.defaultFound -- Mirrors the settings default vocabulary.
+		if ( ! array_key_exists( $key, $content ) ) {
+			return $default;
+		}
+
+		return (bool) $content[ $key ];
+	}
 
 	/**
 	 * Applies migrations from the stored version up to the target version.

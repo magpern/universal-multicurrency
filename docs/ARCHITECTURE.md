@@ -68,7 +68,7 @@ fitting SPL type (`InvalidArgumentException` / `RuntimeException`).
 
 ### Settings schema upgrade (Milestones 7–8)
 
-`Settings::SCHEMA_VERSION` is **5** and must not be bumped unless a genuine
+`Settings::SCHEMA_VERSION` is **6** and must not be bumped unless a genuine
 settings shape change requires it. Production migrations exist because the
 stored shape actually changed; none is an artificial bump.
 
@@ -95,6 +95,14 @@ behaviour for upgraded stores.
 `SettingsUpgrader::migrate_4_to_5` adds Geo Detection defaults (`geo`) with
 `enabled: false` and empty rules, preserving v0.10.x storefront behaviour until
 an administrator enables routing.
+
+`SettingsUpgrader::migrate_5_to_6` restructures the `display` block for the
+layered switcher presentation system (ADR-0022): legacy `appearance.theme|size|
+shape` becomes first-class `design.*`, flat content toggles split into
+`content.trigger` and `content.menu`, and `design.preset`, `design.overrides`,
+`design.motion`, `responsive`, and `custom_css` are initialized. The preset is
+always `default` and theme/size/shape are copied verbatim, so migrated stores
+render exactly as they did in v0.15.
 See [`MIGRATION.md`](MIGRATION.md) § Internal settings schema migrations.
 
 `SettingsUpgrader` responsibilities:

@@ -367,7 +367,8 @@ final class DisplaySettingsFieldTest extends WP_UnitTestCase {
 		$this->settings_page()->save();
 
 		$content = ( new Settings() )->get()['display']['content'];
-		$this->assertTrue( $content['show_name'] );
+		$this->assertTrue( $content['menu']['show_name'] );
+		$this->assertFalse( $content['trigger']['show_name'] );
 	}
 
 	public function test_admin_assets_enqueue_switcher_styles_only_on_display_section(): void {
