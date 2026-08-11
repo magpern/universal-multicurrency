@@ -14,6 +14,7 @@ use UMC\Admin\CurrencyActionController;
 use UMC\Admin\Geo\GeoLegacyPanelRedirect;
 use UMC\Admin\GeoDetectionSimulationController;
 use UMC\Admin\GeoRecommendedRulesController;
+use UMC\Admin\DecisionInspectorController;
 use UMC\Admin\GeoSandboxController;
 use UMC\Admin\OrderCurrencyMetaBox;
 use UMC\Admin\PluginActionLinks;
@@ -151,6 +152,7 @@ final class Plugin {
 			( new GeoRecommendedRulesController( $settings, $base ) )->register();
 			( new GeoDetectionSimulationController( $settings, $base ) )->register();
 			( new GeoSandboxController( $settings, $base ) )->register();
+			( new DecisionInspectorController( $settings, $base ) )->register();
 			( new GeoLegacyPanelRedirect() )->register();
 		}
 
