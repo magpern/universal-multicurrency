@@ -56,7 +56,10 @@ final class RateUpdateController {
 
 		try {
 			$result = 'all' === $scope ? $this->service->update( null ) : $this->service->update( array( $code ) );
-			$this->redirect_with_notice( $this->message_for_result( $result ), 'success' );
+			$this->redirect_with_notice(
+				$this->message_for_result( $result ),
+				$this->notice_type_for_result( $result )
+			);
 		} catch ( UpdateInProgressException $exception ) {
 			unset( $exception );
 			$this->redirect_with_notice( __( 'A rate update is already in progress. Try again shortly.', 'universal-multicurrency' ), 'warning' );
@@ -68,20 +71,48 @@ final class RateUpdateController {
 	 *
 	 * @param RateFetchResult $result Fetch outcome.
 	 */
-	private function message_for_result( RateFetchResult $result ): string {
+	public function message_for_result( RateFetchResult $result ): string {
+		if ( $result->is_no_automatic_targets() ) {
+			return __( 'No automatic currencies are configured for refresh. Last known rates were preserved.', 'universal-multicurrency' );
+		}
+
 		if ( $result->is_not_modified() ) {
 			return __( 'Rates are already up to date.', 'universal-multicurrency' );
 		}
 
 		if ( $result->is_total_failure() ) {
-			return __( 'Rate update failed. Last known rates were preserved.', 'universal-multicurrency' );
+			return __( 'Rate update failed for all targeted currencies. Last known rates were preserved.', 'universal-multicurrency' );
 		}
 
 		if ( $result->is_partial_failure() ) {
-			return __( 'Rates were partially updated. Check currency status for details.', 'universal-multicurrency' );
+			$failed = count( $result->failures() );
+
+			return sprintf(
+				/* translators: %d: number of currencies that failed to update */
+				_n(
+					'Rates were partially updated. %d currency failed; its last known rate was preserved.',
+					'Rates were partially updated. %d currencies failed; their last known rates were preserved.',
+					$failed,
+					'universal-multicurrency'
+				),
+				$failed
+			);
 		}
 
 		return __( 'Exchange rates updated successfully.', 'universal-multicurrency' );
+	}
+
+	/**
+	 * Notice type for a fetch result (`success` or `warning`).
+	 *
+	 * @param RateFetchResult $result Fetch outcome.
+	 */
+	public function notice_type_for_result( RateFetchResult $result ): string {
+		if ( $result->is_total_failure() || $result->is_partial_failure() || $result->is_no_automatic_targets() ) {
+			return 'warning';
+		}
+
+		return 'success';
 	}
 
 	/**
@@ -95,6 +126,7 @@ final class RateUpdateController {
 			array(
 				'page'    => 'wc-settings',
 				'tab'     => 'umc',
+				'section' => SettingsPage::SECTION_EXCHANGE_RATES,
 				'umc_msg' => rawurlencode( $message ),
 				'umc_typ' => $type,
 			),

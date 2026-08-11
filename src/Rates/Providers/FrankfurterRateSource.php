@@ -12,6 +12,7 @@ namespace UMC\Rates\Providers;
 use UMC\Rates\ExchangeRateSource;
 use UMC\Rates\Http\HttpTransport;
 use UMC\Rates\ProviderMetadata;
+use UMC\Rates\RateFailureCode;
 use UMC\Rates\RateFetchResult;
 use UMC\Rates\RateQuote;
 use UMC\Settings;
@@ -158,21 +159,25 @@ final class FrankfurterRateSource implements ExchangeRateSource {
 		$response = $this->transport->get( $url, $headers, 15 );
 
 		if ( $response->is_error() ) {
-			return $this->total_failure( $target_codes, 'provider_unavailable', $fetched_at );
+			return $this->total_failure( $target_codes, RateFailureCode::NETWORK_ERROR, $fetched_at );
 		}
 
 		if ( 304 === $response->status_code() ) {
 			return RateFetchResult::not_modified( self::PROVIDER_ID, $fetched_at );
 		}
 
+		if ( 429 === $response->status_code() ) {
+			return $this->total_failure( $target_codes, RateFailureCode::RATE_LIMITED, $fetched_at );
+		}
+
 		if ( $response->status_code() < 200 || $response->status_code() >= 300 ) {
-			return $this->total_failure( $target_codes, 'provider_unavailable', $fetched_at );
+			return $this->total_failure( $target_codes, RateFailureCode::PROVIDER_UNAVAILABLE, $fetched_at );
 		}
 
 		$payload = json_decode( $response->body(), true );
 
 		if ( ! is_array( $payload ) || ! isset( $payload['rates'] ) || ! is_array( $payload['rates'] ) ) {
-			return $this->total_failure( $target_codes, 'invalid_response', $fetched_at );
+			return $this->total_failure( $target_codes, RateFailureCode::INVALID_RESPONSE, $fetched_at );
 		}
 
 		$quotes   = array();
@@ -180,14 +185,14 @@ final class FrankfurterRateSource implements ExchangeRateSource {
 
 		foreach ( $target_codes as $code ) {
 			if ( ! array_key_exists( $code, $payload['rates'] ) ) {
-				$failures[ $code ] = 'not_returned_by_provider';
+				$failures[ $code ] = RateFailureCode::NOT_RETURNED_BY_PROVIDER;
 				continue;
 			}
 
 			$normalized = Settings::normalize_rate( $payload['rates'][ $code ] );
 
 			if ( '' === $normalized ) {
-				$failures[ $code ] = 'invalid_response';
+				$failures[ $code ] = RateFailureCode::INVALID_RESPONSE;
 				continue;
 			}
 
@@ -195,7 +200,7 @@ final class FrankfurterRateSource implements ExchangeRateSource {
 		}
 
 		if ( array() === $quotes && array() !== $failures ) {
-			return $this->total_failure( $target_codes, 'invalid_response', $fetched_at );
+			return $this->total_failure( $target_codes, RateFailureCode::INVALID_RESPONSE, $fetched_at );
 		}
 
 		$metadata = new ProviderMetadata(
@@ -248,9 +253,10 @@ final class FrankfurterRateSource implements ExchangeRateSource {
 	private function total_failure( array $target_codes, string $reason, int $fetched_at ): RateFetchResult {
 		$meta     = new ProviderMetadata( ProviderMetadata::SCHEMA_VERSION, self::PROVIDER_ID );
 		$failures = array();
+		$code     = RateFailureCode::sanitize( $reason );
 
-		foreach ( $target_codes as $code ) {
-			$failures[ $code ] = $reason;
+		foreach ( $target_codes as $target ) {
+			$failures[ $target ] = $code;
 		}
 
 		return RateFetchResult::success(

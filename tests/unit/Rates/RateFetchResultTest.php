@@ -56,5 +56,37 @@ final class RateFetchResultTest extends TestCase {
 
 		$this->assertTrue( $result->is_total_failure() );
 		$this->assertFalse( $result->is_partial_failure() );
+		$this->assertFalse( $result->is_complete_success() );
+		$this->assertFalse( $result->is_no_automatic_targets() );
+	}
+
+	public function test_complete_success_classification(): void {
+		$meta = new ProviderMetadata( ProviderMetadata::SCHEMA_VERSION, 'frankfurter', '2026-07-24' );
+
+		$result = RateFetchResult::success(
+			array( new RateQuote( 'EUR', 'SEK', '11.50' ) ),
+			array(),
+			$meta,
+			1_700_000_000
+		);
+
+		$this->assertTrue( $result->is_complete_success() );
+		$this->assertFalse( $result->is_partial_failure() );
+		$this->assertFalse( $result->is_total_failure() );
+		$this->assertFalse( $result->is_not_modified() );
+		$this->assertFalse( $result->is_no_automatic_targets() );
+	}
+
+	public function test_no_automatic_targets_is_distinct_from_not_modified(): void {
+		$no_targets = RateFetchResult::no_automatic_targets( 'frankfurter', 1_700_000_000 );
+		$not_mod    = RateFetchResult::not_modified( 'frankfurter', 1_700_000_000 );
+
+		$this->assertTrue( $no_targets->is_no_automatic_targets() );
+		$this->assertFalse( $no_targets->is_not_modified() );
+		$this->assertFalse( $no_targets->is_total_failure() );
+		$this->assertFalse( $no_targets->is_complete_success() );
+
+		$this->assertTrue( $not_mod->is_not_modified() );
+		$this->assertFalse( $not_mod->is_no_automatic_targets() );
 	}
 }

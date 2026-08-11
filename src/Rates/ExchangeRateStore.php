@@ -331,10 +331,11 @@ final class ExchangeRateStore {
 				continue;
 			}
 
-			$error = $failures[ $code ] ?? ( $result->is_total_failure() ? 'provider_unavailable' : 'not_returned_by_provider' );
+			$raw_error = $failures[ $code ] ?? ( $result->is_total_failure() ? RateFailureCode::PROVIDER_UNAVAILABLE : RateFailureCode::NOT_RETURNED_BY_PROVIDER );
+			$error     = RateFailureCode::sanitize( (string) $raw_error );
 
 			$row['last_status']           = RateUpdateState::STATUS_FAILED;
-			$row['last_error']            = $this->cap_error( (string) $error );
+			$row['last_error']            = $this->cap_error( $error );
 			$row['consecutive_failures']  = (int) ( $row['consecutive_failures'] ?? 0 ) + 1;
 			$state['currencies'][ $code ] = $row;
 
@@ -342,7 +343,7 @@ final class ExchangeRateStore {
 				is_array( $state['failure_history'] ?? null ) ? $state['failure_history'] : array(),
 				$fetched_at,
 				$code,
-				(string) $error
+				$error
 			);
 		}
 
@@ -364,7 +365,7 @@ final class ExchangeRateStore {
 			array(
 				'at'    => $at,
 				'scope' => $scope,
-				'error' => $this->cap_error( $error ),
+				'error' => $this->cap_error( RateFailureCode::sanitize( $error ) ),
 			)
 		);
 
