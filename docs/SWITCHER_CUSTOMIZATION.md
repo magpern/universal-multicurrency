@@ -55,7 +55,10 @@ Changing preset does not silently clear overrides or Custom CSS.
 
 Modifiers (settings-driven): `--dropdown`, `--horizontal-list`, `--manual`,
 `--floating-side`, `--floating-bottom`, `--side-*`, `--align-*`, `--theme-*`,
-`--size-*`, `--shape-*`, `--preset-*`, `--hide-mobile`, `--hide-desktop`.
+`--size-*`, `--shape-*`, `--preset-*`, `--hide-mobile`, `--hide-desktop`,
+`--hide-name-on-mobile`, `--compact-on-mobile`.
+
+The two responsive modifiers take effect below 768px only.
 
 Optional hooks: `[data-umc-placement]`, `[data-umc-style]`.
 
@@ -90,7 +93,14 @@ Custom CSS is **not** automatically scoped to the switcher. Prefer selectors
 under `.umc-switcher` so you do not restyle the rest of the site.
 
 Rejected: `@import`, any `url(...)`, `expression(`, `behavior:`, `-moz-binding`,
-raw `<` / `>`, NUL, style/script breakout payloads.
+raw `<` / `>`, NUL, style/script breakout payloads. A rejected submission is
+discarded whole and your last saved CSS is kept.
+
+Custom CSS is printed after the plugin stylesheet with
+`wp_add_inline_style( 'umc-switcher', … )`, on the storefront only, while that
+stylesheet is enqueued. A shortcode that renders after the page has already
+printed its styles falls back to a plain stylesheet link and omits Custom CSS on
+that request; place such switchers in normal content or use automatic placement.
 
 Example:
 

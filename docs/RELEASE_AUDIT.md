@@ -1,17 +1,16 @@
-# Release audit — v0.15.0 Exchange Rate Operations & Reliability
+# Release audit — v0.16.0 Switcher Customization
 
-Executable release-blocking gate for Universal Multicurrency **v0.15.0**. This
+Executable release-blocking gate for Universal Multicurrency **v0.16.0**. This
 document records scope, criteria, commands, audit results, and the current
 release-preparation state.
 
 **Governing question:** If we published this release tomorrow, is there anything
 left in the repository that clearly should not ship?
 
-**Repository status:** **prepared for v0.15.0** on
-`feature/m16-exchange-rate-operations`. Milestone 16 (Exchange Rate Operations &
-Reliability; ADR-0021) awaits CI verification. Git tag **`v0.15.0`** and
-GitHub release publication follow full CI matrix pass and explicit approval to
-tag and push.
+**Repository status:** **prepared for v0.16.0** on
+`feature/m17-switcher-customization`. Milestone 17 (Switcher Customization;
+ADR-0022) awaits CI verification. Git tag **`v0.16.0`** and GitHub release
+publication follow full CI matrix pass and explicit approval to tag and push.
 
 ---
 
@@ -19,12 +18,12 @@ tag and push.
 
 | Item | Value |
 |---|---|
-| Version | **0.15.0** |
-| Settings schema | **5** (unchanged; no keys added, renamed, or removed) |
-| Order snapshot schema | **4** (was 3; additive `_umc_rate_provider`, `_umc_rate_adjustment`) |
+| Version | **0.16.0** |
+| Settings schema | **6** (was 5; `display` restructured into `content`, `design`, `responsive`, `custom_css`) |
+| Order snapshot schema | **4** (unchanged) |
 | GeoContext (sandbox document) schema | **2** (unchanged) |
-| Persisted-data inventory version | **8** (was 7; order schema 4 provenance keys) |
-| Production migrations | **v0 → v1**, **v1 → v2**, **v2 → v3**, **v3 → v4**, **v4 → v5** (unchanged; no new migration in this release) |
+| Persisted-data inventory version | **8** (unchanged; no new option or meta key) |
+| Production migrations | **v0 → v1**, **v1 → v2**, **v2 → v3**, **v3 → v4**, **v4 → v5**, **v5 → v6** |
 | Unresolved Critical security findings | **0** |
 | Unresolved High security findings | **0** |
 | Unresolved release blockers | **0** |
@@ -44,19 +43,52 @@ tag and push.
 | GitHub release `v0.12.1` | **Published** |
 | Git tag `v0.14.0` | **Created** |
 | GitHub release `v0.14.0` | **Published** |
-| Git tag `v0.15.0` | **Not yet created** |
-| GitHub release `v0.15.0` | **Not yet created** |
+| Git tag `v0.15.0` | **Created** |
+| GitHub release `v0.15.0` | **Published** |
+| Git tag `v0.16.0` | **Not yet created** |
+| GitHub release `v0.16.0` | **Not yet created** |
 | Milestone 8 | **Complete** — released and review-closed at v0.8.0 |
 | Milestone 11 | **Complete** — Checkout currency policy at v0.10.0 |
 | Milestone 12 | **Prepared** — Geo Detection engine (see v0.12.0 tag note above) |
 | Milestone 13 | **Complete** — Geo admin hub at v0.12.0 |
 | Milestone 14 | **Complete** — Visitor Location boundary alignment at v0.13.0 |
 | Milestone 15 | **Complete** — Currency Resolution & Explainability at v0.14.0 |
-| Milestone 16 | **Prepared** — Exchange Rate Operations & Reliability on feature branch |
+| Milestone 16 | **Complete** — Exchange Rate Operations & Reliability at v0.15.0 |
+| Milestone 17 | **Prepared** — Switcher Customization on feature branch |
 
 ---
 
-## v0.15.0 Exchange Rate Operations & Reliability scope
+## v0.16.0 Switcher Customization scope
+
+Minor release shipping Milestone 17 (ADR-0022). Turns the storefront switcher
+into a customizable component without adding a second renderer: one semantic
+DOM, presets as CSS layers, per-context content composition, structured design
+overrides as CSS custom properties, and capability-gated Advanced Custom CSS
+emitted on the storefront only.
+
+Settings schema **v5 → v6** restructures the `display` subtree losslessly —
+existing content and appearance settings convert to the new shape and the
+storefront keeps its current appearance. Legacy `theme` / `size` / `shape`
+remain first-class and continue to win over a named preset; migration always
+sets `design.preset = default`.
+
+### Shipped capabilities
+
+| Area | Summary |
+|---|---|
+| Content composition | Independent trigger and menu element sets (`code`, `symbol`, `name`) plus element order and an optional chevron |
+| Presets | Six CSS-layer presets: default, minimal, pill, compact, borderless, floating |
+| Design overrides | Sparse allowlisted color / radius / control height / spacing / font-weight tokens emitted as inline `--umc-switcher-*` custom properties |
+| Motion | `design.motion` (`subtle` \| `none`); `prefers-reduced-motion` always wins |
+| Responsive | `umc-switcher--hide-name-on-mobile`, `umc-switcher--compact-on-mobile` below 768px |
+| Advanced Custom CSS | `display.custom_css`, requires Display-save authority **and** `edit_css`; unauthorized replace / clear / omission preserve stored CSS exactly |
+| CSS emission | `SwitcherPresentationCss` — inline custom properties per instance; Custom CSS via `wp_add_inline_style( 'umc-switcher', … )` on the storefront while the stylesheet is enqueued, never in wp-admin |
+| Admin UX | Display screen sub-navigation (Placement, Content, Design, Advanced); structured live preview only |
+| Non-goals | No filesystem CSS compiler, no iframe preview subsystem, no Custom JS/HTML, no second renderer |
+
+---
+
+## v0.15.0 Exchange Rate Operations & Reliability scope (shipped)
 
 Minor release shipping Milestone 16 (ADR-0021). Hardens the Milestone 8 rate
 stack into an operationally trustworthy subsystem: shared health reporting,
@@ -382,13 +414,13 @@ Exit code **non-zero** when any release-blocking step fails.
 
 ## Release-blocking criteria
 
-| ID | Criterion | Result (v0.9.0) |
+| ID | Criterion | Result (v0.16.0) |
 |---|---|---|
 | RB1 | No tracked secrets, dumps, caches, or `dist/` artifacts | **Pass** |
 | RB2 | `docs/plans/` remains untracked (local-only planning) | **Pass** |
 | RB3 | No foreign switcher runtime coupling outside allowlisted manifest | **Pass** |
 | RB4 | Plugin header, `UMC_VERSION`, readme Stable tag, text domain, PHP/WC metadata consistent | **Pass** |
-| RB5 | `Settings::SCHEMA_VERSION === 3`; production migrations v0 → v1 → v2 → v3 only | **Pass** |
+| RB5 | `Settings::SCHEMA_VERSION === 6`; production migrations v0 → v1 → v2 → v3 → v4 → v5 → v6 only | **Pass** |
 | RB6 | Persisted-key inventory matches docs + implementation (`umc_settings`, `umc_rate_state`, `umc_dismissed_notices`) | **Pass** |
 | RB7 | Uninstall deletes configuration options (`umc_settings`, `umc_rate_state`); preserves commerce + dismissal meta | **Pass** |
 | RB8 | `SECURITY_REVIEW.md`: zero open Critical/High | **Pass** |
@@ -399,6 +431,7 @@ Exit code **non-zero** when any release-blocking step fails.
 | RB13 | CI declares phpcs, pot, unit, integration, performance, build, release-audit jobs | **Pass** |
 | RB14 | No debug logging or stale TODO/FIXME in `src/` | **Pass** |
 | RB15 | No transients / object-cache persistence in `src/` | **Pass** |
+| RB16 | Advanced Custom CSS requires `edit_css`; unauthorized replace / clear / omission preserve stored CSS, and stored CSS is re-validated before storefront emission | **Pass** |
 
 **Unresolved blockers:** **0**
 
@@ -430,10 +463,10 @@ needles remain confined to `Diagnostics/DetectorManifest.php` only.
 
 ## Metadata and compatibility
 
-| Field | Value (v0.15.0) |
+| Field | Value (v0.16.0) |
 |---|---|
-| Plugin version (header + `UMC_VERSION`) | **0.15.0** |
-| readme.txt Stable tag | **0.15.0** |
+| Plugin version (header + `UMC_VERSION`) | **0.16.0** |
+| readme.txt Stable tag | **0.16.0** |
 | Text domain | `universal-multicurrency` |
 | Requires PHP | 8.1 |
 | Requires Plugins | woocommerce |
@@ -459,10 +492,12 @@ Authoritative registry: [`PERSISTED_DATA.md`](PERSISTED_DATA.md) +
 
 ## Settings upgrade audit
 
-- `Settings::SCHEMA_VERSION` is **5**
+- `Settings::SCHEMA_VERSION` is **6**
 - Production migration map: **v0 → v1**, **v1 → v2**, **v2 → v3**, **v3 → v4**,
-  **v4 → v5**
-- This release adds **no** new settings migration
+  **v4 → v5**, **v5 → v6**
+- This release adds the **v5 → v6** `display` restructure; it is lossless and
+  visually neutral (`tests/unit/SettingsMigrationV5ToV6Test.php`,
+  `tests/unit/Display/LegacyAppearanceMatrixTest.php`)
 - Canonical reads avoid writes; failed migrations do not persist partial data
 - Conversion output is byte-identical across the v1 → v2 boundary in manual mode
   (`tests/unit/SettingsMigrationFidelityTest.php`)
@@ -516,12 +551,12 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Expected artifact: **`dist/universal-multicurrency-0.15.0.zip`**
+Expected artifact: **`dist/universal-multicurrency-0.16.0.zip`**
 
 ### Included
 
-- `universal-multicurrency.php` (header Version **0.15.0**), `uninstall.php`, `readme.txt` (Stable tag **0.15.0**)
-- `src/` production PHP including `src/Admin/DisplayControlRenderer.php`, `src/Admin/DisplaySettingsField.php`, `src/Display/`, `src/Rates/RateHealthService.php`, `src/CLI/RatesCommand.php`
+- `universal-multicurrency.php` (header Version **0.16.0**), `uninstall.php`, `readme.txt` (Stable tag **0.16.0**)
+- `src/` production PHP including `src/Admin/DisplayControlRenderer.php`, `src/Admin/DisplaySettingsField.php`, `src/Display/` (with `SwitcherCustomCss.php`, `SwitcherPresentationCss.php`), `src/Rates/RateHealthService.php`, `src/CLI/RatesCommand.php`
 - `assets/admin/umc-settings.css`, `assets/admin/umc-settings.js`, `assets/css/switcher.css`, `assets/js/switcher.js`
 - `src/` production PHP
 - `vendor/autoload.php` (+ production autoload only)
@@ -556,6 +591,8 @@ Integration matrix (five legs + ceiling early-warning) unchanged from M6/M7.
 | NB2 | Full five-leg integration matrix validated in CI, not re-run entirely in the local release-audit script |
 | NB3 | `docs/plans/` may exist locally but is classified non-shipping |
 | NB4 | WP-CLI rate commands shipped in Milestone 16 (`wp umc rates`); thin wrapper over existing services — see [`CLI.md`](CLI.md) |
+| NB5 | Advanced Custom CSS is not technically scoped: merchants author complete selectors, and the product documents `.umc-switcher` prefixes as a recommendation rather than enforcing isolation (ADR-0022) |
+| NB6 | Custom CSS reaches the page through `wp_add_inline_style`, so a shortcode rendered after the stylesheet was already printed falls back to the plain `<link>` and omits Custom CSS on that request — the documented emission boundary |
 
 ---
 

@@ -32,6 +32,14 @@ inside `umc_settings` so the storefront hot path avoids a second option read
 (ADR-0012). Future export/import must use a field-level allowlist — never dump
 either option wholesale (see ADR-0012).
 
+Merchant-authored switcher CSS is persisted as the nested string
+`umc_settings.display.custom_css` (schema 6, M17). It is a configuration field
+inside the existing option, so it adds no inventory key and is deleted with
+`umc_settings` on uninstall. Writing it requires the `edit_css` capability in
+addition to Display-save authority, and the stored value is re-validated on
+every read before it is emitted on the storefront, so a payload injected
+directly into the option cannot reach a page (ADR-0022).
+
 ---
 
 ## Order metadata (HPOS CRUD)

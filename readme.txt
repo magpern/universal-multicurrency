@@ -4,7 +4,7 @@ Tags: woocommerce, currency, multicurrency, exchange rates, money
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.15.0
+Stable tag: 0.16.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,6 +49,16 @@ Not for production traffic. Two runtime converters can double-convert prices. De
 The plugin ships a POT template (`languages/universal-multicurrency.pot`) for translators. Bundled locale `.mo` files are not included in this release.
 
 == Changelog ==
+
+= 0.16.0 =
+* Switcher customization: Display screen reorganized into Placement, Content, Design, and Advanced sections
+* Separate trigger and menu composition — choose the currency code, symbol, and name independently for the button and the list, with a configurable element order
+* Six design presets (Default, Minimal, Pill, Compact, Borderless, Floating) layered under the existing theme, size, and shape settings, which continue to win over a preset
+* Structured color, radius, control height, spacing, and font-weight overrides emitted as scoped CSS custom properties
+* Motion setting for dropdown transitions; system reduced-motion preferences always win
+* Mobile adjustments: hide the currency name and use compact spacing below 768px
+* Advanced Custom CSS for the switcher, gated by the `edit_css` capability, sanitized against `@import`, `url(...)`, and script breakout payloads, and applied on the storefront only
+* Settings schema v5→v6 converts the previous content and appearance settings without visual change
 
 = 0.15.0 =
 * Exchange rate operations & reliability: shared health model for admin, Site Health, Compatibility, and WP-CLI
@@ -145,6 +155,9 @@ The plugin ships a POT template (`languages/universal-multicurrency.pot`) for tr
 * Storefront conversion, classic cart/checkout, order snapshots, historical order display, refunds, and Store API / blocks parity (milestones 2–5)
 
 == Upgrade Notice ==
+
+= 0.16.0 =
+Switcher customization release. Settings schema v5→v6 converts existing content and appearance settings automatically and preserves the current storefront appearance. Advanced Custom CSS additionally requires the `edit_css` capability. Requires WooCommerce 8.2+, PHP 8.1+, and HPOS.
 
 = 0.15.0 =
 Exchange rate operations & reliability. Order snapshot schema 4 adds rate provenance metadata. No settings schema change — safe upgrade from 0.14.x. Requires WooCommerce 8.2+, PHP 8.1+, and HPOS.
