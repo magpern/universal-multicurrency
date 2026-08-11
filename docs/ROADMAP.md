@@ -271,13 +271,13 @@
 
     **Released as:** **v0.15.0**.
 
-17. Switcher Customization (**v0.16.0**) — **implementation complete** on
-    `feature/m17-switcher-customization`; **prepared** as **v0.16.0**. Makes the
-    storefront switcher customizable through structured settings plus optional
-    Advanced Custom CSS, without adding a second renderer or a template system.
-    One semantic DOM serves every placement; presets are CSS layers.
+17. Switcher Customization (**v0.16.0**) — **complete and released as
+    v0.16.0**. Makes the storefront switcher customizable through structured
+    settings plus optional Advanced Custom CSS, without adding a second
+    renderer or a template system. One semantic DOM serves every placement;
+    presets are CSS layers.
 
-    ### Scope for v0.16.0
+    ### Shipped in v0.16.0
 
     | Work item | Status |
     |---|---|
@@ -294,17 +294,19 @@
 
     Explicit non-goals: no filesystem CSS compiler, no iframe preview
     subsystem, no Custom JS or HTML, no per-shortcode design overrides, and no
-    changes to Visitor Location, checkout policy, or rate operations. See
+    changes to Visitor Location, checkout policy, or rate operations. Flags /
+    currency icons remain deferred. See
     [`docs/adr/0022-switcher-customization-css-contract.md`](adr/0022-switcher-customization-css-contract.md)
     and
     [`docs/architecture/switcher-customization.md`](architecture/switcher-customization.md).
 
-    **Prepared as:** **v0.16.0** (tag and GitHub release not yet created).
+    **Released as:** **v0.16.0**.
 
 ## Future milestones — not started, not implemented
 
 None of the following exists in the codebase today:
 
+- Currency icon / flag presentation for the switcher (deferred from M17)
 - Additional exchange-rate providers and per-currency provider selection
 - `country_change` geo detection mode and broader continent presets
 - Multicurrency reporting and analytics

@@ -1,7 +1,7 @@
 # Switcher Customization & Presentation (Milestone 17)
 
 **Status:** Authoritative implementation specification for Milestone 17
-(**v0.16.0**).
+(**v0.16.0**) — **released**.
 
 **Branch:** `feature/m17-switcher-customization`
 

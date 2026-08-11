@@ -333,10 +333,11 @@ final class DocumentationSyncTest extends TestCase {
 		$this->assertStringContainsString( 'Version | **' . self::CURRENT_VERSION . '**', $audit );
 		$this->assertStringContainsString( 'Unresolved release blockers | **0**', $audit );
 		$this->assertStringContainsString( 'Open Milestone 8 review findings | **0**', $audit );
-		$this->assertStringContainsString( 'Git tag `v' . self::CURRENT_VERSION . '` | **Not yet created**', $audit );
-		$this->assertStringContainsString( 'GitHub release `v' . self::CURRENT_VERSION . '` | **Not yet created**', $audit );
+		$this->assertStringContainsString( 'Git tag `v' . self::CURRENT_VERSION . '` | **Created**', $audit );
+		$this->assertStringContainsString( 'GitHub release `v' . self::CURRENT_VERSION . '` | **Published**', $audit );
 		$this->assertStringContainsString( 'Git tag `v0.8.0` | **Created**', $audit );
 		$this->assertStringContainsString( 'Milestone 8 | **Complete**', $audit );
+		$this->assertStringContainsString( 'Milestone 17 | **Complete**', $audit );
 		$this->assertStringContainsString( '## Post-release review findings', $audit );
 	}
 

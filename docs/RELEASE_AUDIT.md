@@ -7,10 +7,10 @@ release-preparation state.
 **Governing question:** If we published this release tomorrow, is there anything
 left in the repository that clearly should not ship?
 
-**Repository status:** **prepared for v0.16.0** on
-`feature/m17-switcher-customization`. Milestone 17 (Switcher Customization;
-ADR-0022) awaits CI verification. Git tag **`v0.16.0`** and GitHub release
-publication follow full CI matrix pass and explicit approval to tag and push.
+**Repository status:** **released as v0.16.0**. Milestone 17 (Switcher
+Customization; ADR-0022) is complete. Git tag **`v0.16.0`** and GitHub release
+are published. Release commit on `main`: `956556458d391181df3c23cf85e578b841d6852f`.
+Annotated tag object: `1102ab0787b74765887c7a4e6bfa5c0ec5f86cd8`.
 
 ---
 
@@ -45,8 +45,8 @@ publication follow full CI matrix pass and explicit approval to tag and push.
 | GitHub release `v0.14.0` | **Published** |
 | Git tag `v0.15.0` | **Created** |
 | GitHub release `v0.15.0` | **Published** |
-| Git tag `v0.16.0` | **Not yet created** |
-| GitHub release `v0.16.0` | **Not yet created** |
+| Git tag `v0.16.0` | **Created** |
+| GitHub release `v0.16.0` | **Published** |
 | Milestone 8 | **Complete** — released and review-closed at v0.8.0 |
 | Milestone 11 | **Complete** — Checkout currency policy at v0.10.0 |
 | Milestone 12 | **Prepared** — Geo Detection engine (see v0.12.0 tag note above) |
@@ -54,7 +54,7 @@ publication follow full CI matrix pass and explicit approval to tag and push.
 | Milestone 14 | **Complete** — Visitor Location boundary alignment at v0.13.0 |
 | Milestone 15 | **Complete** — Currency Resolution & Explainability at v0.14.0 |
 | Milestone 16 | **Complete** — Exchange Rate Operations & Reliability at v0.15.0 |
-| Milestone 17 | **Prepared** — Switcher Customization on feature branch |
+| Milestone 17 | **Complete** — Switcher Customization & Presentation at v0.16.0 |
 
 ---
 
