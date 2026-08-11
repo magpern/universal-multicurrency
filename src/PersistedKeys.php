@@ -31,7 +31,7 @@ final class PersistedKeys {
 	/**
 	 * Bump when the inventory shape or membership changes.
 	 */
-	public const INVENTORY_VERSION = 7;
+	public const INVENTORY_VERSION = 8;
 
 	/**
 	 * WordPress options written by the plugin.
@@ -64,6 +64,8 @@ final class PersistedKeys {
 			OrderSnapshot::META_CHECKOUT_MODE,
 			OrderSnapshot::META_SHOPPER_CURRENCY,
 			OrderSnapshot::META_FALLBACK_OCCURRED,
+			OrderSnapshot::META_RATE_PROVIDER,
+			OrderSnapshot::META_RATE_ADJUSTMENT,
 		);
 	}
 

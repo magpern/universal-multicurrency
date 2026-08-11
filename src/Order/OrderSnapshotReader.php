@@ -39,6 +39,16 @@ final class OrderSnapshotReader {
 	private const SCHEMA_VERSION_3 = 3;
 
 	/**
+	 * Snapshot version for M16+ orders (rate provider + adjustment metadata).
+	 */
+	private const SCHEMA_VERSION_4 = 4;
+
+	/**
+	 * Highest schema version this reader treats as known (not future).
+	 */
+	private const SCHEMA_VERSION_CURRENT = self::SCHEMA_VERSION_4;
+
+	/**
 	 * Reads and classifies the snapshot from an order.
 	 *
 	 * @param WC_Order $order Order to read from.
@@ -54,6 +64,8 @@ final class OrderSnapshotReader {
 		$rate_identity        = (string) $order->get_meta( OrderSnapshot::META_RATE_IDENTITY );
 		$snapshot_version     = $order->get_meta( OrderSnapshot::META_SNAPSHOT_VERSION );
 		$stored_decimals_raw  = $order->get_meta( OrderSnapshot::META_TRANSACTION_DECIMALS );
+		$rate_provider_raw    = (string) $order->get_meta( OrderSnapshot::META_RATE_PROVIDER );
+		$rate_adjustment_raw  = (string) $order->get_meta( OrderSnapshot::META_RATE_ADJUSTMENT );
 
 		// Convert types for classification.
 		$rate_timestamp  = '' !== (string) $rate_timestamp_raw ? (int) $rate_timestamp_raw : null;
@@ -74,12 +86,12 @@ final class OrderSnapshotReader {
 			// Validate that the version can be parsed as an integer.
 			if ( (string) $version_int !== (string) $snapshot_version || $version_int < 1 ) {
 				$is_malformed = true;
-			} elseif ( $version_int > self::SCHEMA_VERSION_3 ) {
+			} elseif ( $version_int > self::SCHEMA_VERSION_CURRENT ) {
 				// Unknown future version.
 				$is_future      = true;
 				$schema_version = $version_int;
 			} else {
-				// Valid version 1 or 2.
+				// Valid known version.
 				$schema_version = $version_int;
 			}
 		} elseif ( $has_any_m3_keys ) {
@@ -111,6 +123,14 @@ final class OrderSnapshotReader {
 		$plugin_version_out       = '' !== $plugin_version ? $plugin_version : null;
 		$rate_identity_out        = '' !== $rate_identity ? $rate_identity : null;
 		$stored_decimals_out      = null !== $stored_decimals && $stored_decimals >= 0 ? $stored_decimals : null;
+		$rate_provider_out        = null;
+		$rate_adjustment_out      = null;
+
+		if ( null !== $schema_version && $schema_version >= self::SCHEMA_VERSION_4 ) {
+			// Schema 4 always writes these keys; empty provider means manual mode.
+			$rate_provider_out   = $rate_provider_raw;
+			$rate_adjustment_out = $rate_adjustment_raw;
+		}
 
 		return new OrderCurrencySnapshot(
 			$schema_version,
@@ -126,7 +146,9 @@ final class OrderSnapshotReader {
 			$is_legacy,
 			$is_partial,
 			$is_malformed,
-			$is_future
+			$is_future,
+			$rate_provider_out,
+			$rate_adjustment_out
 		);
 	}
 

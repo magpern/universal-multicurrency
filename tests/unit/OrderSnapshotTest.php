@@ -114,6 +114,54 @@ final class OrderSnapshotTest extends TestCase {
 		$this->assertSame( CheckoutSettings::MODE_STORE, $meta[ OrderSnapshot::META_CHECKOUT_MODE ] );
 		$this->assertSame( 'SEK', $meta[ OrderSnapshot::META_SHOPPER_CURRENCY ] );
 		$this->assertSame( 'yes', $meta[ OrderSnapshot::META_FALLBACK_OCCURRED ] );
+		$this->assertArrayNotHasKey( OrderSnapshot::META_RATE_PROVIDER, $meta );
+		$this->assertArrayNotHasKey( OrderSnapshot::META_RATE_ADJUSTMENT, $meta );
+	}
+
+	public function test_snapshot_meta_v4_includes_provider_and_adjustment(): void {
+		$meta = OrderSnapshot::snapshot_meta(
+			'EUR',
+			'SEK',
+			'11.50',
+			1_700_000_000,
+			OrderSnapshot::SOURCE_AUTOMATIC,
+			'0.15.0',
+			'SEK:11.50',
+			4,
+			2,
+			CheckoutSettings::MODE_SELECTED,
+			'SEK',
+			false,
+			'frankfurter',
+			'2.5'
+		);
+
+		$this->assertSame( 4, $meta[ OrderSnapshot::META_SNAPSHOT_VERSION ] );
+		$this->assertSame( 'frankfurter', $meta[ OrderSnapshot::META_RATE_PROVIDER ] );
+		$this->assertSame( '2.5', $meta[ OrderSnapshot::META_RATE_ADJUSTMENT ] );
+		$this->assertSame( 'SEK:11.50', $meta[ OrderSnapshot::META_RATE_IDENTITY ] );
+	}
+
+	public function test_snapshot_meta_v4_manual_uses_empty_provider(): void {
+		$meta = OrderSnapshot::snapshot_meta(
+			'EUR',
+			'SEK',
+			'11.50',
+			1_700_000_000,
+			OrderSnapshot::SOURCE_MANUAL,
+			'0.15.0',
+			'SEK:11.50',
+			4,
+			2,
+			'',
+			'SEK',
+			false,
+			'',
+			'0'
+		);
+
+		$this->assertSame( '', $meta[ OrderSnapshot::META_RATE_PROVIDER ] );
+		$this->assertSame( '0', $meta[ OrderSnapshot::META_RATE_ADJUSTMENT ] );
 	}
 
 	public function test_snapshot_meta_m4_keys_match_constants(): void {
