@@ -10,33 +10,39 @@ declare(strict_types=1);
 namespace UMC\Display;
 
 /**
- * Builds human-readable currency labels from configured content toggles.
+ * Builds plain-text currency labels from configured content toggles.
+ *
+ * Structured markup is produced by {@see SwitcherElementComposer}; this class
+ * renders the same ordered parts as text for accessible names and fallbacks.
  */
 final class SwitcherLabelFormatter {
 
 	/**
-	 * Content visibility toggles.
+	 * Composer for the configured content context.
 	 *
-	 * @var array<string, bool>
+	 * @var SwitcherElementComposer
 	 */
-	private array $content;
+	private SwitcherElementComposer $composer;
 
 	/**
-	 * Currency symbols that appear more than once among selectable currencies.
+	 * Composer for compact labels, which never include the currency name.
 	 *
-	 * @var array<string, true>
+	 * @var SwitcherElementComposer
 	 */
-	private array $duplicate_symbols;
+	private SwitcherElementComposer $compact_composer;
 
 	/**
 	 * Binds label formatting to content toggles and symbol disambiguation.
 	 *
-	 * @param array<string, bool> $content           Content toggles.
-	 * @param array<string, true> $duplicate_symbols Duplicate symbol map.
+	 * @param array<string, mixed> $content           Content toggles and order.
+	 * @param array<string, true>  $duplicate_symbols Duplicate symbol map.
 	 */
 	public function __construct( array $content, array $duplicate_symbols = array() ) {
-		$this->content           = $content;
-		$this->duplicate_symbols = $duplicate_symbols;
+		$this->composer = new SwitcherElementComposer( $content, $duplicate_symbols );
+
+		$compact                = $content;
+		$compact['show_name']   = false;
+		$this->compact_composer = new SwitcherElementComposer( $compact, $duplicate_symbols );
 	}
 
 	/**
@@ -47,7 +53,7 @@ final class SwitcherLabelFormatter {
 	 * @param string $name   Currency name.
 	 */
 	public function format( string $code, string $symbol, string $name ): string {
-		return $this->compose( $code, $symbol, $name, false );
+		return self::join( $this->composer->parts( $code, $symbol, $name ) );
 	}
 
 	/**
@@ -58,7 +64,7 @@ final class SwitcherLabelFormatter {
 	 * @param string $name   Currency name.
 	 */
 	public function format_compact( string $code, string $symbol, string $name ): string {
-		return $this->compose( $code, $symbol, $name, true );
+		return self::join( $this->compact_composer->parts( $code, $symbol, $name ) );
 	}
 
 	/**
@@ -68,82 +74,30 @@ final class SwitcherLabelFormatter {
 	 * @return array<string, true>
 	 */
 	public static function duplicate_symbol_map( array $symbols ): array {
-		$counts = array();
+		return SwitcherElementComposer::duplicate_symbol_map( $symbols );
+	}
 
-		foreach ( $symbols as $symbol ) {
-			if ( '' === $symbol ) {
+	/**
+	 * Joins composed parts into a single label.
+	 *
+	 * The currency name is separated by an em dash when it follows another
+	 * element, so long labels stay readable as plain text.
+	 *
+	 * @param array<int, array<string, string>> $parts Ordered content parts.
+	 */
+	private static function join( array $parts ): string {
+		$label = '';
+
+		foreach ( $parts as $index => $part ) {
+			if ( 0 === $index ) {
+				$label = $part['value'];
 				continue;
 			}
 
-			$counts[ $symbol ] = ( $counts[ $symbol ] ?? 0 ) + 1;
+			$separator = SwitcherElementComposer::ELEMENT_NAME === $part['type'] ? ' — ' : ' ';
+			$label    .= $separator . $part['value'];
 		}
 
-		$duplicates = array();
-
-		foreach ( $counts as $symbol => $count ) {
-			if ( $count > 1 ) {
-				$duplicates[ $symbol ] = true;
-			}
-		}
-
-		return $duplicates;
-	}
-
-	/**
-	 * Composes a label from configured visibility toggles.
-	 *
-	 * @param string $code    Currency code.
-	 * @param string $symbol  Display symbol.
-	 * @param string $name    Currency name.
-	 * @param bool   $compact Whether to omit the name in compact mode.
-	 */
-	private function compose( string $code, string $symbol, string $name, bool $compact ): string {
-		$parts = array();
-
-		if ( $this->content['show_code'] ) {
-			$parts[] = $code;
-		}
-
-		if ( $this->content['show_symbol'] && '' !== $symbol ) {
-			$parts[] = $symbol;
-		}
-
-		if ( $this->needs_code_for_disambiguation( $code, $symbol ) && ! in_array( $code, $parts, true ) ) {
-			array_unshift( $parts, $code );
-		}
-
-		if ( array() === $parts ) {
-			if ( $this->content['show_name'] && '' !== $name ) {
-				return $name;
-			}
-
-			$parts[] = $code;
-		}
-
-		$primary = implode( ' ', $parts );
-
-		if ( ! $compact && $this->content['show_name'] && '' !== $name ) {
-			return $primary . ' — ' . $name;
-		}
-
-		return $primary;
-	}
-
-	/**
-	 * Whether the currency code must be shown to disambiguate duplicate symbols.
-	 *
-	 * @param string $code   Currency code.
-	 * @param string $symbol Display symbol.
-	 */
-	private function needs_code_for_disambiguation( string $code, string $symbol ): bool {
-		if ( ! $this->content['show_symbol'] || '' === $symbol ) {
-			return false;
-		}
-
-		if ( $this->content['show_code'] ) {
-			return false;
-		}
-
-		return isset( $this->duplicate_symbols[ $symbol ] );
+		return $label;
 	}
 }

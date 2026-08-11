@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace UMC\Admin;
 
+use UMC\Display\SwitcherCustomCss;
 use UMC\Display\SwitcherRenderer;
 use UMC\Display\SwitcherSettings;
 use UMC\Display\SwitcherSettingsRepository;
@@ -21,6 +22,13 @@ use UMC\Settings;
  * Renders Display configuration cards with a live preview shell.
  */
 final class DisplaySettingsField {
+
+	/**
+	 * In-page Display sub-navigation panels, in presentation order.
+	 *
+	 * @var array<int, string>
+	 */
+	public const PANELS = array( 'placement', 'content', 'design', 'advanced' );
 
 	/**
 	 * Merchant settings store.
@@ -65,6 +73,13 @@ final class DisplaySettingsField {
 	private bool $show_coercion_notice = false;
 
 	/**
+	 * Whether submitted Custom CSS was rejected during the last {@see parse_post()} call.
+	 *
+	 * @var bool
+	 */
+	private bool $show_custom_css_rejected_notice = false;
+
+	/**
 	 * Binds the Display settings field to settings and preview services.
 	 *
 	 * @param Settings                    $settings            Merchant settings store.
@@ -95,6 +110,13 @@ final class DisplaySettingsField {
 	}
 
 	/**
+	 * Whether the last parse attempt rejected submitted Custom CSS.
+	 */
+	public function show_custom_css_rejected_notice(): bool {
+		return $this->show_custom_css_rejected_notice;
+	}
+
+	/**
 	 * Renders the Display settings workspace.
 	 */
 	public function render(): void {
@@ -111,12 +133,23 @@ final class DisplaySettingsField {
 					<div class="umc-display-configurator">
 						<?php $this->render_enable_row( $settings ); ?>
 						<?php $this->render_notices( $settings ); ?>
-						<?php $this->render_switcher_card( $settings ); ?>
-						<?php $this->render_position_card( $settings ); ?>
-						<?php $this->render_content_card( $settings ); ?>
-						<?php $this->render_appearance_card( $settings ); ?>
-						<?php $this->render_behavior_card( $settings ); ?>
-						<?php $this->render_visibility_card( $settings ); ?>
+						<?php $this->render_subnav(); ?>
+						<div class="umc-display-tabpanel" data-umc-display-panel="placement" role="group" aria-label="<?php esc_attr_e( 'Placement settings', 'universal-multicurrency' ); ?>">
+							<?php $this->render_switcher_card( $settings ); ?>
+							<?php $this->render_position_card( $settings ); ?>
+						</div>
+						<div class="umc-display-tabpanel" data-umc-display-panel="content" role="group" aria-label="<?php esc_attr_e( 'Content settings', 'universal-multicurrency' ); ?>">
+							<?php $this->render_content_card( $settings ); ?>
+							<?php $this->render_behavior_card( $settings ); ?>
+						</div>
+						<div class="umc-display-tabpanel" data-umc-display-panel="design" role="group" aria-label="<?php esc_attr_e( 'Design settings', 'universal-multicurrency' ); ?>">
+							<?php $this->render_design_card( $settings ); ?>
+							<?php $this->render_responsive_card( $settings ); ?>
+							<?php $this->render_visibility_card( $settings ); ?>
+						</div>
+						<div class="umc-display-tabpanel" data-umc-display-panel="advanced" role="group" aria-label="<?php esc_attr_e( 'Advanced settings', 'universal-multicurrency' ); ?>">
+							<?php $this->render_advanced_card( $settings ); ?>
+						</div>
 					</div>
 					<div class="umc-display-preview">
 						<div class="umc-display-preview__header">
@@ -152,10 +185,11 @@ final class DisplaySettingsField {
 	/**
 	 * Parses Display settings from the current POST payload.
 	 *
-	 * @return array{display: array<string, mixed>, show_coercion_notice: bool}|null Null when visibility is invalid.
+	 * @return array{display: array<string, mixed>, show_coercion_notice: bool, show_custom_css_rejected_notice: bool}|null Null when visibility is invalid.
 	 */
 	public function parse_post(): ?array {
-		$this->show_coercion_notice = false;
+		$this->show_coercion_notice            = false;
+		$this->show_custom_css_rejected_notice = false;
 
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Verified by WooCommerce settings save.
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Values normalized and sanitized via SwitcherSettings.
@@ -180,6 +214,25 @@ final class DisplaySettingsField {
 			$active_placement
 		);
 		$merged['placement'] = $active_placement;
+		$merged['content']   = $this->merge_content(
+			is_array( $stored['content'] ?? null ) ? $stored['content'] : array(),
+			is_array( $raw['content'] ?? null ) ? $raw['content'] : array()
+		);
+
+		$can_edit_css         = SwitcherCustomCss::can_edit();
+		$submitted_custom_css = $raw['custom_css'] ?? null;
+		$merged['custom_css'] = SwitcherCustomCss::resolve_for_save(
+			$submitted_custom_css,
+			$stored['custom_css'] ?? '',
+			$can_edit_css
+		);
+
+		if ( $can_edit_css && is_string( $submitted_custom_css ) ) {
+			$normalized = trim( str_replace( array( "\r\n", "\r" ), "\n", $submitted_custom_css ) );
+			if ( '' !== $normalized && ! SwitcherCustomCss::is_valid( $normalized ) ) {
+				$this->show_custom_css_rejected_notice = true;
+			}
+		}
 
 		if ( ! SwitcherSettings::visibility_valid_for_save( $merged ) ) {
 			return null;
@@ -190,8 +243,9 @@ final class DisplaySettingsField {
 		$this->show_coercion_notice = $settings->was_style_coerced();
 
 		return array(
-			'display'              => SwitcherSettings::sanitize_raw( $merged ),
-			'show_coercion_notice' => $this->show_coercion_notice,
+			'display'                         => SwitcherSettings::sanitize_raw( $merged ),
+			'show_coercion_notice'            => $this->show_coercion_notice,
+			'show_custom_css_rejected_notice' => $this->show_custom_css_rejected_notice,
 		);
 	}
 
@@ -260,6 +314,35 @@ final class DisplaySettingsField {
 				__( 'Automatic placement injects the switcher on every storefront page. Use manual placement with a shortcode when you need precise control.', 'universal-multicurrency' )
 			)
 		);
+	}
+
+	/**
+	 * Renders the in-page Display sub-navigation.
+	 *
+	 * The pill group stays hidden until the settings script activates it, so a
+	 * scripting failure leaves every panel readable and savable instead of
+	 * offering controls that cannot switch anything.
+	 */
+	private function render_subnav(): void {
+		$labels = array(
+			'placement' => __( 'Placement', 'universal-multicurrency' ),
+			'content'   => __( 'Content', 'universal-multicurrency' ),
+			'design'    => __( 'Design', 'universal-multicurrency' ),
+			'advanced'  => __( 'Advanced', 'universal-multicurrency' ),
+		);
+
+		?>
+		<div class="umc-display-subnav" role="group" aria-label="<?php esc_attr_e( 'Display sections', 'universal-multicurrency' ); ?>" data-umc-display-subnav hidden>
+			<?php foreach ( self::PANELS as $index => $panel ) : ?>
+				<button
+					type="button"
+					class="button umc-display-subnav__pill<?php echo 0 === $index ? ' is-active' : ''; ?>"
+					data-umc-display-tab="<?php echo esc_attr( $panel ); ?>"
+					aria-pressed="<?php echo 0 === $index ? 'true' : 'false'; ?>"
+				><?php echo esc_html( $labels[ $panel ] ); ?></button>
+			<?php endforeach; ?>
+		</div>
+		<?php
 	}
 
 	/**
@@ -464,52 +547,172 @@ final class DisplaySettingsField {
 	 * @param SwitcherSettings $settings Current display settings.
 	 */
 	private function render_content_card( SwitcherSettings $settings ): void {
-		$content = $settings->content();
 		?>
 		<div class="umc-display-card">
 			<h3 class="umc-display-card__title"><?php esc_html_e( 'Content', 'universal-multicurrency' ); ?></h3>
 			<?php
-			$this->echo_control_markup( $this->controls->toggle_row( 'umc_display[content][show_code]', $content['show_code'], __( 'Show currency code', 'universal-multicurrency' ), '', array( 'data-umc-display-field' => 'content_show_code' ) ) );
-			$this->echo_control_markup( $this->controls->toggle_row( 'umc_display[content][show_symbol]', $content['show_symbol'], __( 'Show currency symbol', 'universal-multicurrency' ), '', array( 'data-umc-display-field' => 'content_show_symbol' ) ) );
-			$this->echo_control_markup( $this->controls->toggle_row( 'umc_display[content][show_name]', $content['show_name'], __( 'Show currency name', 'universal-multicurrency' ), '', array( 'data-umc-display-field' => 'content_show_name' ) ) );
-			$this->echo_control_markup( $this->controls->toggle_row( 'umc_display[behavior][active_first]', $settings->active_first(), __( 'Show selected currency first', 'universal-multicurrency' ), '', array( 'data-umc-display-field' => 'active_first' ) ) );
+			$this->render_content_group(
+				'trigger',
+				__( 'Closed switcher (trigger)', 'universal-multicurrency' ),
+				__( 'What customers see before they open the switcher.', 'universal-multicurrency' ),
+				$settings->trigger_content()
+			);
+
+			$this->render_content_group(
+				'menu',
+				__( 'Currency list (menu)', 'universal-multicurrency' ),
+				__( 'What each currency option shows in the list.', 'universal-multicurrency' ),
+				$settings->menu_content()
+			);
+
+			$this->echo_control_markup(
+				$this->controls->toggle_row(
+					'umc_display[content][show_chevron]',
+					$settings->show_chevron(),
+					__( 'Show a dropdown arrow on the trigger', 'universal-multicurrency' ),
+					__( 'Decorative only; the arrow is hidden from assistive technology.', 'universal-multicurrency' ),
+					array( 'data-umc-display-field' => 'show_chevron' )
+				)
+			);
 			?>
 		</div>
 		<?php
 	}
 
 	/**
-	 * Renders the Appearance theme, size, and shape card.
+	 * Renders one content composition group (trigger or menu).
+	 *
+	 * @param string               $context     Group key: trigger or menu.
+	 * @param string               $legend      Visible group legend.
+	 * @param string               $description Supporting description.
+	 * @param array<string, mixed> $group       Normalized group values.
+	 */
+	private function render_content_group( string $context, string $legend, string $description, array $group ): void {
+		$order = is_array( $group['order'] ?? null ) ? $group['order'] : array();
+		?>
+		<fieldset class="umc-display-fieldset">
+			<legend><?php echo esc_html( $legend ); ?></legend>
+			<p class="description"><?php echo esc_html( $description ); ?></p>
+			<?php
+			foreach ( $this->content_element_labels() as $element => $label ) {
+				$this->echo_control_markup(
+					$this->controls->toggle_row(
+						sprintf( 'umc_display[content][%s][show_%s]', $context, $element ),
+						! empty( $group[ 'show_' . $element ] ),
+						$label,
+						'',
+						array( 'data-umc-display-field' => $context . '_show_' . $element )
+					)
+				);
+			}
+			?>
+			<label class="umc-display-field">
+				<span><?php esc_html_e( 'Element order', 'universal-multicurrency' ); ?></span>
+				<select name="<?php echo esc_attr( sprintf( 'umc_display[content][%s][order]', $context ) ); ?>" data-umc-display-field="<?php echo esc_attr( $context . '_order' ); ?>">
+					<?php foreach ( $this->order_choices() as $value => $label ) : ?>
+						<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $value, $this->order_choice_value( $order ) ); ?>><?php echo esc_html( $label ); ?></option>
+					<?php endforeach; ?>
+				</select>
+			</label>
+			<p class="description"><?php esc_html_e( 'Hidden elements are skipped; the order applies to the elements you enabled.', 'universal-multicurrency' ); ?></p>
+		</fieldset>
+		<?php
+	}
+
+	/**
+	 * Visible label for each orderable content element.
+	 *
+	 * @return array<string, string>
+	 */
+	private function content_element_labels(): array {
+		return array(
+			SwitcherSettings::ELEMENT_CODE   => __( 'Show currency code', 'universal-multicurrency' ),
+			SwitcherSettings::ELEMENT_SYMBOL => __( 'Show currency symbol', 'universal-multicurrency' ),
+			SwitcherSettings::ELEMENT_NAME   => __( 'Show currency name', 'universal-multicurrency' ),
+		);
+	}
+
+	/**
+	 * Selectable element orderings, keyed by their submitted value.
+	 *
+	 * @return array<string, string>
+	 */
+	private function order_choices(): array {
+		return array(
+			'code,symbol,name' => __( 'Code, symbol, name', 'universal-multicurrency' ),
+			'code,name,symbol' => __( 'Code, name, symbol', 'universal-multicurrency' ),
+			'symbol,code,name' => __( 'Symbol, code, name', 'universal-multicurrency' ),
+			'symbol,name,code' => __( 'Symbol, name, code', 'universal-multicurrency' ),
+			'name,code,symbol' => __( 'Name, code, symbol', 'universal-multicurrency' ),
+			'name,symbol,code' => __( 'Name, symbol, code', 'universal-multicurrency' ),
+		);
+	}
+
+	/**
+	 * Maps a stored (visible-only) order list onto a full ordering choice.
+	 *
+	 * @param array<int, string> $order Stored element order.
+	 */
+	private function order_choice_value( array $order ): string {
+		$complete = array();
+
+		foreach ( $order as $element ) {
+			if ( is_string( $element ) && in_array( $element, SwitcherSettings::ELEMENT_SEQUENCE, true ) && ! in_array( $element, $complete, true ) ) {
+				$complete[] = $element;
+			}
+		}
+
+		foreach ( SwitcherSettings::ELEMENT_SEQUENCE as $element ) {
+			if ( ! in_array( $element, $complete, true ) ) {
+				$complete[] = $element;
+			}
+		}
+
+		return implode( ',', $complete );
+	}
+
+	/**
+	 * Renders the Design card: preset, theme, size, shape, overrides, motion.
 	 *
 	 * @param SwitcherSettings $settings Current display settings.
 	 */
-	private function render_appearance_card( SwitcherSettings $settings ): void {
+	private function render_design_card( SwitcherSettings $settings ): void {
 		$appearance = $settings->appearance();
-		$themes     = array(
-			SwitcherSettings::THEME_AUTOMATIC => __( 'Automatic', 'universal-multicurrency' ),
-			SwitcherSettings::THEME_LIGHT     => __( 'Light', 'universal-multicurrency' ),
-			SwitcherSettings::THEME_DARK      => __( 'Dark', 'universal-multicurrency' ),
-		);
-		$sizes      = array(
-			SwitcherSettings::SIZE_COMPACT  => __( 'Compact', 'universal-multicurrency' ),
-			SwitcherSettings::SIZE_STANDARD => __( 'Standard', 'universal-multicurrency' ),
-			SwitcherSettings::SIZE_LARGE    => __( 'Large', 'universal-multicurrency' ),
-		);
-		$shapes     = array(
-			SwitcherSettings::SHAPE_SLIGHT  => __( 'Slight', 'universal-multicurrency' ),
-			SwitcherSettings::SHAPE_ROUNDED => __( 'Rounded', 'universal-multicurrency' ),
-			SwitcherSettings::SHAPE_PILL    => __( 'Pill', 'universal-multicurrency' ),
-		);
 		?>
 		<div class="umc-display-card">
-			<h3 class="umc-display-card__title"><?php esc_html_e( 'Appearance', 'universal-multicurrency' ); ?></h3>
+			<h3 class="umc-display-card__title"><?php esc_html_e( 'Design', 'universal-multicurrency' ); ?></h3>
+			<fieldset class="umc-display-fieldset">
+				<legend><?php esc_html_e( 'Preset', 'universal-multicurrency' ); ?></legend>
+				<?php
+				$this->echo_control_markup(
+					$this->controls->segmented_control(
+						'umc_display[design][preset]',
+						array(
+							SwitcherSettings::PRESET_DEFAULT => __( 'Default', 'universal-multicurrency' ),
+							SwitcherSettings::PRESET_MINIMAL => __( 'Minimal', 'universal-multicurrency' ),
+							SwitcherSettings::PRESET_PILL => __( 'Pill', 'universal-multicurrency' ),
+							SwitcherSettings::PRESET_COMPACT => __( 'Compact', 'universal-multicurrency' ),
+							SwitcherSettings::PRESET_BORDERLESS => __( 'Borderless', 'universal-multicurrency' ),
+							SwitcherSettings::PRESET_FLOATING => __( 'Floating', 'universal-multicurrency' ),
+						),
+						$settings->preset(),
+						array( 'data-umc-display-field' => 'preset' )
+					)
+				);
+				?>
+				<p class="description"><?php esc_html_e( 'A preset is a starting point. Default changes nothing, and theme, size, shape, and your own overrides always win over the preset.', 'universal-multicurrency' ); ?></p>
+			</fieldset>
 			<fieldset class="umc-display-fieldset">
 				<legend><?php esc_html_e( 'Theme', 'universal-multicurrency' ); ?></legend>
 				<?php
 				$this->echo_control_markup(
 					$this->controls->segmented_control(
-						'umc_display[appearance][theme]',
-						$themes,
+						'umc_display[design][theme]',
+						array(
+							SwitcherSettings::THEME_AUTOMATIC => __( 'Automatic', 'universal-multicurrency' ),
+							SwitcherSettings::THEME_LIGHT => __( 'Light', 'universal-multicurrency' ),
+							SwitcherSettings::THEME_DARK  => __( 'Dark', 'universal-multicurrency' ),
+						),
 						$appearance['theme'],
 						array( 'data-umc-display-field' => 'theme' )
 					)
@@ -521,8 +724,12 @@ final class DisplaySettingsField {
 				<?php
 				$this->echo_control_markup(
 					$this->controls->segmented_control(
-						'umc_display[appearance][size]',
-						$sizes,
+						'umc_display[design][size]',
+						array(
+							SwitcherSettings::SIZE_COMPACT => __( 'Compact', 'universal-multicurrency' ),
+							SwitcherSettings::SIZE_STANDARD => __( 'Standard', 'universal-multicurrency' ),
+							SwitcherSettings::SIZE_LARGE   => __( 'Large', 'universal-multicurrency' ),
+						),
 						$appearance['size'],
 						array( 'data-umc-display-field' => 'size' )
 					)
@@ -534,14 +741,207 @@ final class DisplaySettingsField {
 				<?php
 				$this->echo_control_markup(
 					$this->controls->segmented_control(
-						'umc_display[appearance][shape]',
-						$shapes,
+						'umc_display[design][shape]',
+						array(
+							SwitcherSettings::SHAPE_SLIGHT => __( 'Slight', 'universal-multicurrency' ),
+							SwitcherSettings::SHAPE_ROUNDED => __( 'Rounded', 'universal-multicurrency' ),
+							SwitcherSettings::SHAPE_PILL   => __( 'Pill', 'universal-multicurrency' ),
+						),
 						$appearance['shape'],
 						array( 'data-umc-display-field' => 'shape' )
 					)
 				);
 				?>
 			</fieldset>
+			<fieldset class="umc-display-fieldset">
+				<legend><?php esc_html_e( 'Motion', 'universal-multicurrency' ); ?></legend>
+				<?php
+				$this->echo_control_markup(
+					$this->controls->segmented_control(
+						'umc_display[design][motion]',
+						array(
+							SwitcherSettings::MOTION_SUBTLE => __( 'Subtle', 'universal-multicurrency' ),
+							SwitcherSettings::MOTION_NONE => __( 'None', 'universal-multicurrency' ),
+						),
+						$settings->motion(),
+						array( 'data-umc-display-field' => 'motion' )
+					)
+				);
+				?>
+				<p class="description"><?php esc_html_e( 'Customers who ask their system to reduce motion never see transitions, whichever option you choose.', 'universal-multicurrency' ); ?></p>
+			</fieldset>
+			<?php $this->render_override_fields( $settings->overrides() ); ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Renders the sparse structured override inputs.
+	 *
+	 * @param array<string, int|string> $overrides Stored override map.
+	 */
+	private function render_override_fields( array $overrides ): void {
+		$colors = array(
+			'surface'     => __( 'Background', 'universal-multicurrency' ),
+			'text'        => __( 'Text', 'universal-multicurrency' ),
+			'border'      => __( 'Border', 'universal-multicurrency' ),
+			'hover'       => __( 'Hover background', 'universal-multicurrency' ),
+			'selected_bg' => __( 'Selected background', 'universal-multicurrency' ),
+			'focus_ring'  => __( 'Focus ring', 'universal-multicurrency' ),
+		);
+
+		$numbers = array(
+			'radius'         => array( __( 'Corner radius (px)', 'universal-multicurrency' ), 0, 500 ),
+			'control_height' => array( __( 'Control height (px)', 'universal-multicurrency' ), 0, 500 ),
+			'spacing'        => array( __( 'Spacing (px)', 'universal-multicurrency' ), 0, 500 ),
+			'font_weight'    => array( __( 'Font weight', 'universal-multicurrency' ), 400, 700 ),
+		);
+
+		?>
+		<fieldset class="umc-display-fieldset">
+			<legend><?php esc_html_e( 'Color overrides', 'universal-multicurrency' ); ?></legend>
+			<p class="description"><?php esc_html_e( 'Leave a field empty to inherit the theme value. Accepts hex (#1f2937) or rgb()/rgba() colors.', 'universal-multicurrency' ); ?></p>
+			<div class="umc-display-override-grid">
+				<?php foreach ( $colors as $key => $label ) : ?>
+					<label class="umc-display-field">
+						<span><?php echo esc_html( $label ); ?></span>
+						<input
+							type="text"
+							name="<?php echo esc_attr( sprintf( 'umc_display[design][overrides][%s]', $key ) ); ?>"
+							value="<?php echo esc_attr( $this->override_value( $overrides, $key ) ); ?>"
+							class="umc-display-color-input"
+							spellcheck="false"
+							autocomplete="off"
+							placeholder="<?php esc_attr_e( 'Inherit', 'universal-multicurrency' ); ?>"
+							data-umc-display-field="<?php echo esc_attr( 'override_' . $key ); ?>"
+						/>
+					</label>
+				<?php endforeach; ?>
+			</div>
+		</fieldset>
+		<fieldset class="umc-display-fieldset">
+			<legend><?php esc_html_e( 'Size and spacing overrides', 'universal-multicurrency' ); ?></legend>
+			<p class="description"><?php esc_html_e( 'Leave a field empty to inherit the preset, theme, and size values.', 'universal-multicurrency' ); ?></p>
+			<div class="umc-display-override-grid">
+				<?php foreach ( $numbers as $key => $meta ) : ?>
+					<label class="umc-display-field">
+						<span><?php echo esc_html( $meta[0] ); ?></span>
+						<input
+							type="number"
+							min="<?php echo esc_attr( (string) $meta[1] ); ?>"
+							max="<?php echo esc_attr( (string) $meta[2] ); ?>"
+							name="<?php echo esc_attr( sprintf( 'umc_display[design][overrides][%s]', $key ) ); ?>"
+							value="<?php echo esc_attr( $this->override_value( $overrides, $key ) ); ?>"
+							placeholder="<?php esc_attr_e( 'Inherit', 'universal-multicurrency' ); ?>"
+							data-umc-display-field="<?php echo esc_attr( 'override_' . $key ); ?>"
+						/>
+					</label>
+				<?php endforeach; ?>
+			</div>
+		</fieldset>
+		<?php
+	}
+
+	/**
+	 * Reads one override as a form value, treating absence as inherit.
+	 *
+	 * @param array<string, int|string> $overrides Stored override map.
+	 * @param string                    $key       Override key.
+	 */
+	private function override_value( array $overrides, string $key ): string {
+		return array_key_exists( $key, $overrides ) ? (string) $overrides[ $key ] : '';
+	}
+
+	/**
+	 * Renders the small responsive override bag.
+	 *
+	 * @param SwitcherSettings $settings Current display settings.
+	 */
+	private function render_responsive_card( SwitcherSettings $settings ): void {
+		$responsive = $settings->responsive();
+		?>
+		<div class="umc-display-card">
+			<h3 class="umc-display-card__title"><?php esc_html_e( 'Mobile adjustments', 'universal-multicurrency' ); ?></h3>
+			<?php
+			$this->echo_control_markup(
+				$this->controls->toggle_row(
+					'umc_display[responsive][hide_name_on_mobile]',
+					! empty( $responsive['hide_name_on_mobile'] ),
+					__( 'Hide the currency name on small screens', 'universal-multicurrency' ),
+					'',
+					array( 'data-umc-display-field' => 'hide_name_on_mobile' )
+				)
+			);
+
+			$this->echo_control_markup(
+				$this->controls->toggle_row(
+					'umc_display[responsive][compact_on_mobile]',
+					! empty( $responsive['compact_on_mobile'] ),
+					__( 'Use compact spacing on small screens', 'universal-multicurrency' ),
+					'',
+					array( 'data-umc-display-field' => 'compact_on_mobile' )
+				)
+			);
+			?>
+			<p class="description"><?php esc_html_e( 'These adjustments apply on screens narrower than 768px. Check them on a device or a narrow browser window — the admin preview frame is not a real viewport.', 'universal-multicurrency' ); ?></p>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Renders the Advanced Custom CSS card.
+	 *
+	 * @param SwitcherSettings $settings Current display settings.
+	 */
+	private function render_advanced_card( SwitcherSettings $settings ): void {
+		$can_edit = SwitcherCustomCss::can_edit();
+		$css      = $settings->custom_css();
+
+		?>
+		<div class="umc-display-card umc-display-card--advanced">
+			<h3 class="umc-display-card__title"><?php esc_html_e( 'Advanced Custom CSS', 'universal-multicurrency' ); ?></h3>
+			<?php
+			$this->echo_control_markup(
+				$this->controls->callout(
+					'info',
+					__( 'Custom CSS applies on the storefront after you save. The live preview reflects the structured Design settings only — verify Custom CSS on a storefront page.', 'universal-multicurrency' )
+				)
+			);
+
+			if ( ! $can_edit ) {
+				$this->echo_control_markup(
+					$this->controls->callout(
+						'warning',
+						__( 'Editing Custom CSS also requires the WordPress "edit_css" capability. Your stored CSS is shown read-only and is preserved exactly when you save other Display settings.', 'universal-multicurrency' )
+					)
+				);
+			}
+			?>
+			<label class="umc-display-field umc-display-custom-css">
+				<span><?php esc_html_e( 'Switcher CSS', 'universal-multicurrency' ); ?></span>
+				<?php if ( $can_edit ) : ?>
+					<textarea
+						name="umc_display[custom_css]"
+						class="umc-display-custom-css__input code"
+						rows="12"
+						spellcheck="false"
+						autocomplete="off"
+						aria-describedby="umc-display-custom-css-help"
+					><?php echo esc_textarea( $css ); ?></textarea>
+				<?php else : ?>
+					<textarea
+						class="umc-display-custom-css__input code"
+						rows="12"
+						spellcheck="false"
+						readonly
+						aria-readonly="true"
+						aria-describedby="umc-display-custom-css-help"
+					><?php echo esc_textarea( $css ); ?></textarea>
+				<?php endif; ?>
+			</label>
+			<p class="description" id="umc-display-custom-css-help">
+				<?php esc_html_e( 'Write complete selectors. Custom CSS is not scoped for you — prefix rules with .umc-switcher so the rest of your site is unaffected. @import, url(), backslash escape sequences, expression(), behavior:, -moz-binding, and raw angle brackets are rejected. A rejected submission keeps your last saved CSS and shows an error notice.', 'universal-multicurrency' ); ?>
+			</p>
 		</div>
 		<?php
 	}
@@ -556,6 +956,16 @@ final class DisplaySettingsField {
 		<div class="umc-display-card">
 			<h3 class="umc-display-card__title"><?php esc_html_e( 'Behavior', 'universal-multicurrency' ); ?></h3>
 			<?php
+			$this->echo_control_markup(
+				$this->controls->toggle_row(
+					'umc_display[behavior][active_first]',
+					$settings->active_first(),
+					__( 'Show selected currency first', 'universal-multicurrency' ),
+					'',
+					array( 'data-umc-display-field' => 'active_first' )
+				)
+			);
+
 			$this->echo_control_markup(
 				$this->controls->toggle_row(
 					'umc_display[behavior][remember_selection]',
@@ -704,17 +1114,111 @@ final class DisplaySettingsField {
 	private function normalize_post_raw( array $raw ): array {
 		$raw['enabled'] = ! empty( $raw['enabled'] );
 
-		foreach ( array( 'content', 'behavior', 'visibility' ) as $group ) {
+		foreach ( array( 'content', 'behavior', 'visibility', 'responsive' ) as $group ) {
 			if ( ! isset( $raw[ $group ] ) || ! is_array( $raw[ $group ] ) ) {
 				continue;
 			}
 
 			foreach ( $raw[ $group ] as $key => $value ) {
+				if ( is_array( $value ) ) {
+					continue;
+				}
+
 				$raw[ $group ][ $key ] = ! empty( $value );
 			}
 		}
 
+		if ( is_array( $raw['content'] ?? null ) ) {
+			foreach ( array( 'trigger', 'menu' ) as $context ) {
+				if ( is_array( $raw['content'][ $context ] ?? null ) ) {
+					$raw['content'][ $context ] = $this->normalize_content_group_post( $raw['content'][ $context ] );
+				}
+			}
+		}
+
 		return $raw;
+	}
+
+	/**
+	 * Normalizes one posted content group's toggles and element ordering.
+	 *
+	 * The Display screen submits the ordering as one delimited select value so
+	 * merchants get a single native control; the stored shape stays a list.
+	 *
+	 * @param array<string, mixed> $group Posted group payload.
+	 * @return array<string, mixed>
+	 */
+	private function normalize_content_group_post( array $group ): array {
+		foreach ( SwitcherSettings::ELEMENT_SEQUENCE as $element ) {
+			$key = 'show_' . $element;
+
+			if ( array_key_exists( $key, $group ) ) {
+				$group[ $key ] = ! empty( $group[ $key ] );
+			}
+		}
+
+		if ( is_string( $group['order'] ?? null ) ) {
+			$group['order'] = array_values(
+				array_filter(
+					array_map( 'trim', explode( ',', $group['order'] ) ),
+					static fn( string $element ): bool => '' !== $element
+				)
+			);
+		}
+
+		return $group;
+	}
+
+	/**
+	 * Merges posted content toggles over the stored content composition.
+	 *
+	 * The Content card submits the schema-6 shape (per-context toggles plus an
+	 * element order), which replaces the stored composition wholesale. A flat
+	 * schema-5 payload — an older cached screen, or a programmatic save — is
+	 * still accepted and spread the way the 5 → 6 migration does: code and
+	 * symbol apply to both contexts, the currency name applies to the menu
+	 * only, and the trigger's own name setting is preserved.
+	 *
+	 * @param array<string, mixed> $stored Stored content composition.
+	 * @param array<string, mixed> $posted Posted content payload.
+	 * @return array<string, mixed>
+	 */
+	private function merge_content( array $stored, array $posted ): array {
+		if ( array() === $posted ) {
+			return $stored;
+		}
+
+		$stored_trigger = is_array( $stored['trigger'] ?? null ) ? $stored['trigger'] : array();
+		$stored_menu    = is_array( $stored['menu'] ?? null ) ? $stored['menu'] : array();
+
+		if ( array_key_exists( 'trigger', $posted ) || array_key_exists( 'menu', $posted ) ) {
+			return array(
+				'trigger'      => is_array( $posted['trigger'] ?? null ) ? $posted['trigger'] : $stored_trigger,
+				'menu'         => is_array( $posted['menu'] ?? null ) ? $posted['menu'] : $stored_menu,
+				'show_chevron' => array_key_exists( 'show_chevron', $posted )
+					? ! empty( $posted['show_chevron'] )
+					: ! empty( $stored['show_chevron'] ),
+			);
+		}
+
+		$show_code   = ! empty( $posted['show_code'] );
+		$show_symbol = ! empty( $posted['show_symbol'] );
+
+		return array(
+			'trigger'      => array(
+				'show_code'   => $show_code,
+				'show_symbol' => $show_symbol,
+				'show_name'   => ! empty( $stored_trigger['show_name'] ),
+				'order'       => is_array( $stored_trigger['order'] ?? null ) ? $stored_trigger['order'] : array(),
+			),
+			'menu'         => array(
+				'show_code'   => $show_code,
+				'show_symbol' => $show_symbol,
+				'show_name'   => ! empty( $posted['show_name'] ),
+				'order'       => is_array( $stored_menu['order'] ?? null ) ? $stored_menu['order'] : array(),
+			),
+			'show_chevron' => ! empty( $stored['show_chevron'] ),
+		);
 	}
 
 	/**

@@ -862,6 +862,65 @@
 	display: none !important;
 }
 
+.umc-display-subnav {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin-bottom: var(--umc-space-2);
+	padding: 4px;
+	border: 1px solid var(--umc-border);
+	border-radius: 999px;
+	background: #fff;
+}
+
+.umc-display-subnav__pill.button {
+	border: 0;
+	border-radius: 999px;
+	background: transparent;
+	box-shadow: none;
+	color: var(--umc-muted);
+	font-weight: 600;
+}
+
+.umc-display-subnav__pill.button:hover {
+	background: var(--umc-accent-soft);
+	color: inherit;
+}
+
+.umc-display-subnav__pill.button.is-active {
+	background: var(--umc-accent-soft);
+	color: var(--umc-accent);
+	box-shadow: inset 0 0 0 1px var(--umc-accent);
+}
+
+.umc-display-tabpanel {
+	display: flex;
+	flex-direction: column;
+	gap: var(--umc-space-2);
+}
+
+.umc-display-override-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: var(--umc-space-1) var(--umc-space-2);
+}
+
+.umc-display-override-grid .umc-display-field {
+	margin-bottom: var(--umc-space-1);
+}
+
+.umc-display-custom-css__input {
+	width: 100%;
+	font-family: Menlo, Consolas, monospace;
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+.umc-display-custom-css__input[readonly] {
+	background: var(--umc-surface-muted, #f6f7f7);
+	color: var(--umc-muted);
+}
+
 .umc-display-card__title {
 	margin: 0 0 var(--umc-space-2);
 	font-size: 15px;

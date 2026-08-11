@@ -39,21 +39,19 @@ final class SwitcherRenderer {
 			return '';
 		}
 
-		$classes = $this->class_attr( $view_model->root_classes() );
-		$style   = $this->style_attr( $view_model->css_variables() );
-		$items   = '';
+		$items = '';
 
 		foreach ( $view_model->options() as $option ) {
 			$items .= $this->render_option_link( $option, $view_model->is_preview() );
 		}
 
 		return sprintf(
-			'<div class="%1$s" style="%2$s"><button type="button" class="umc-switcher__trigger" id="%3$s" aria-expanded="false" aria-controls="%4$s">%5$s</button><ul class="umc-switcher__menu" id="%4$s" hidden>%6$s</ul></div>',
-			esc_attr( $classes ),
-			esc_attr( $style ),
+			'<div %1$s><button type="button" class="umc-switcher__trigger" id="%2$s" aria-expanded="false" aria-controls="%3$s"><span class="umc-switcher__trigger-content">%4$s</span>%5$s</button><ul class="umc-switcher__menu" id="%3$s" hidden>%6$s</ul></div>',
+			$this->root_attributes( $view_model ),
 			esc_attr( $view_model->trigger_id() ),
 			esc_attr( $view_model->menu_id() ),
-			esc_html( $active->compact_label() ),
+			$this->trigger_content( $active ),
+			$view_model->show_chevron() ? '<span class="umc-switcher__chevron" aria-hidden="true"></span>' : '',
 			$items
 		);
 	}
@@ -64,9 +62,7 @@ final class SwitcherRenderer {
 	 * @param SwitcherViewModel $view_model Render payload.
 	 */
 	private function render_horizontal_list( SwitcherViewModel $view_model ): string {
-		$classes = $this->class_attr( array_merge( $view_model->root_classes(), array( 'umc-switcher--expanded' ) ) );
-		$style   = $this->style_attr( $view_model->css_variables() );
-		$items   = '';
+		$items = '';
 
 		foreach ( $view_model->options() as $option ) {
 			$items .= sprintf(
@@ -77,9 +73,8 @@ final class SwitcherRenderer {
 		}
 
 		return sprintf(
-			'<div class="%1$s" style="%2$s"><ul class="umc-switcher__list">%3$s</ul></div>',
-			esc_attr( $classes ),
-			esc_attr( $style ),
+			'<div %1$s><ul class="umc-switcher__list">%2$s</ul></div>',
+			$this->root_attributes( $view_model, array( 'umc-switcher--expanded' ) ),
 			$items
 		);
 	}
@@ -94,49 +89,69 @@ final class SwitcherRenderer {
 	private function render_option_link( SwitcherOptionViewModel $option, bool $preview, bool $inline = false ): string {
 		$current = $option->is_active() ? ' aria-current="true"' : '';
 		$rel     = $preview ? '' : ' rel="nofollow"';
-		$href    = esc_url( $option->url() );
-		$label   = $inline ? $option->label() : $option->label();
+
+		$link = sprintf(
+			'<a class="umc-switcher__link" href="%1$s"%2$s%3$s>%4$s</a>',
+			esc_url( $option->url() ),
+			$rel,
+			$current,
+			$this->menu_content( $option )
+		);
 
 		if ( $inline ) {
-			return sprintf(
-				'<a class="umc-switcher__link" href="%1$s"%2$s%3$s>%4$s</a>',
-				$href,
-				$rel,
-				$current,
-				esc_html( $label )
-			);
+			return $link;
 		}
 
 		return sprintf(
-			'<li><a class="umc-switcher__link" href="%1$s"%2$s%3$s>%4$s</a></li>',
-			$href,
-			$rel,
-			$current,
-			esc_html( $label )
+			'<li class="umc-switcher__item%s">%s</li>',
+			$option->is_active() ? ' is-active' : '',
+			$link
 		);
 	}
 
 	/**
-	 * Joins CSS class names for a root element attribute.
+	 * Escaped element markup for the trigger, falling back to the plain label.
 	 *
-	 * @param array<int, string> $classes CSS classes.
+	 * @param SwitcherOptionViewModel $option Active currency option.
 	 */
-	private function class_attr( array $classes ): string {
-		return implode( ' ', $classes );
+	private function trigger_content( SwitcherOptionViewModel $option ): string {
+		$html = $option->trigger_content_html();
+
+		if ( '' !== $html ) {
+			return $html;
+		}
+
+		return esc_html( $option->compact_label() );
 	}
 
 	/**
-	 * Serializes CSS custom properties for an inline style attribute.
+	 * Escaped element markup for a menu link, falling back to the plain label.
 	 *
-	 * @param array<string, string> $variables CSS custom properties.
+	 * @param SwitcherOptionViewModel $option Currency option.
 	 */
-	private function style_attr( array $variables ): string {
-		$parts = array();
+	private function menu_content( SwitcherOptionViewModel $option ): string {
+		$html = $option->menu_html();
 
-		foreach ( $variables as $name => $value ) {
-			$parts[] = $name . ':' . $value;
+		if ( '' !== $html ) {
+			return $html;
 		}
 
-		return implode( ';', $parts );
+		return esc_html( $option->label() );
+	}
+
+	/**
+	 * Builds the escaped attribute list for the switcher root element.
+	 *
+	 * @param SwitcherViewModel  $view_model    Render payload.
+	 * @param array<int, string> $extra_classes Additional root classes.
+	 */
+	private function root_attributes( SwitcherViewModel $view_model, array $extra_classes = array() ): string {
+		return sprintf(
+			'class="%1$s" style="%2$s" data-umc-placement="%3$s" data-umc-style="%4$s"',
+			esc_attr( implode( ' ', array_merge( $view_model->root_classes(), $extra_classes ) ) ),
+			esc_attr( SwitcherPresentationCss::style_attribute( $view_model->css_variables() ) ),
+			esc_attr( $view_model->placement_attribute() ),
+			esc_attr( $view_model->style_attribute() )
+		);
 	}
 }

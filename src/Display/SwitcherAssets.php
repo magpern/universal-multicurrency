@@ -49,6 +49,13 @@ final class SwitcherAssets {
 	private bool $fallback_printed = false;
 
 	/**
+	 * Whether merchant Custom CSS was already attached for this request.
+	 *
+	 * @var bool
+	 */
+	private bool $custom_css_attached = false;
+
+	/**
 	 * Binds asset policy to request context and dependencies.
 	 *
 	 * @param StorefrontRequestContext   $context             Request guards.
@@ -171,6 +178,41 @@ final class SwitcherAssets {
 		if ( ! wp_script_is( self::SCRIPT_HANDLE, 'enqueued' ) ) {
 			wp_enqueue_script( self::SCRIPT_HANDLE );
 		}
+
+		$this->maybe_attach_custom_css();
+	}
+
+	/**
+	 * Appends merchant Custom CSS after the enqueued switcher stylesheet.
+	 *
+	 * ADR-0022 permits exactly one emission path: `wp_add_inline_style()` on the
+	 * storefront while the stylesheet is enqueued. Custom CSS must never reach
+	 * ordinary wp-admin, where the same handle backs the Display live preview,
+	 * so the admin request guard is re-checked here rather than trusted from the
+	 * caller.
+	 */
+	public function maybe_attach_custom_css(): void {
+		if ( $this->custom_css_attached ) {
+			return;
+		}
+
+		if ( is_admin() || ! $this->context->allows_storefront_assets() ) {
+			return;
+		}
+
+		if ( ! wp_style_is( self::STYLE_HANDLE, 'enqueued' ) ) {
+			return;
+		}
+
+		$this->custom_css_attached = true;
+
+		$css = SwitcherPresentationCss::storefront_custom_css( $this->settings_repository->get() );
+
+		if ( '' === $css ) {
+			return;
+		}
+
+		wp_add_inline_style( self::STYLE_HANDLE, $css );
 	}
 
 	/**

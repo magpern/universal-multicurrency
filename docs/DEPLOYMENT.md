@@ -26,7 +26,7 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Produces `dist/universal-multicurrency-0.15.0.zip`. The archive includes `readme.txt`,
+Produces `dist/universal-multicurrency-0.16.0.zip`. The archive includes `readme.txt`,
 production `src/`, `vendor/`, and `languages/universal-multicurrency.pot`.
 
 Performance subset:
@@ -36,9 +36,9 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release:** **v0.15.0** on `feature/m16-exchange-rate-operations`.
+**Current release:** **v0.16.0** on `feature/m17-switcher-customization`.
 Git tag and GitHub release follow CI verification — do not create without
-explicit approval.
+explicit approval. The previous release, **v0.15.0**, is tagged and published.
 
 ---
 
@@ -996,7 +996,46 @@ unaffected.
 
 ---
 
-## v0.15.0 — Exchange Rate Operations & Reliability (current)
+## v0.16.0 — Switcher Customization (current)
+
+### Summary
+
+Ships Milestone 17 under version **0.16.0** (ADR-0022). Settings schema moves
+**v5 → v6**: the `display` subtree is restructured into `content` (per-context
+element composition and order), `design` (preset, theme, size, shape, sparse
+overrides, motion), `responsive`, and `custom_css`. The migration is lossless
+and visually neutral — legacy `theme` / `size` / `shape` are preserved as
+first-class settings and `design.preset` is always set to `default`.
+
+Advanced Custom CSS (`display.custom_css`) requires Display-save authority
+**and** the `edit_css` capability. It is emitted on the storefront only, via
+`wp_add_inline_style( 'umc-switcher', … )` while the stylesheet is enqueued, and
+is never injected into wp-admin or the Display live preview. Persisted-data
+inventory is unchanged (no new option or meta key).
+
+### Deployment sequence
+
+1. Run `composer release-audit` on the **0.16.0** tree.
+2. Build `dist/universal-multicurrency-0.16.0.zip` with `composer install --no-dev`
+   + `bin/build-zip.sh`.
+3. Deploy over **0.15.x** in place. The schema **v5 → v6** migration runs on the
+   first canonical settings read; no manual step.
+4. Confirm the storefront switcher renders unchanged, then review
+   **WooCommerce → Settings → Multicurrency → Display**.
+
+### Rollback
+
+Downgrade to the **0.15.x** zip if needed. Older builds read `umc_settings` at
+schema 6 through their own sanitizer: the legacy `display.content.show_*` and
+`display.appearance.*` keys are no longer present, so a downgraded build falls
+back to Display defaults for content and appearance until the settings are saved
+again. Currencies, rates, checkout policy, geo rules, and order snapshots are
+unaffected. Capture the `umc_settings` option before upgrading if an exact
+appearance rollback is required.
+
+---
+
+## v0.15.0 — Exchange Rate Operations & Reliability
 
 ### Summary
 

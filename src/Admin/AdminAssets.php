@@ -86,6 +86,8 @@ final class AdminAssets {
 						SwitcherSettings::STYLE_DROPDOWN,
 						SwitcherSettings::STYLE_HORIZONTAL_LIST,
 					),
+					'presets'     => SwitcherSettings::PRESETS,
+					'elements'    => SwitcherSettings::ELEMENT_SEQUENCE,
 					'samples'     => array(
 						array(
 							'code'   => 'EUR',

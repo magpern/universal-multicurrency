@@ -269,7 +269,37 @@
     and
     [`docs/architecture/exchange-rate-operations.md`](architecture/exchange-rate-operations.md).
 
-    **Prepared as:** **v0.15.0** (tag and GitHub release not yet created).
+    **Released as:** **v0.15.0**.
+
+17. Switcher Customization (**v0.16.0**) — **implementation complete** on
+    `feature/m17-switcher-customization`; **prepared** as **v0.16.0**. Makes the
+    storefront switcher customizable through structured settings plus optional
+    Advanced Custom CSS, without adding a second renderer or a template system.
+    One semantic DOM serves every placement; presets are CSS layers.
+
+    ### Scope for v0.16.0
+
+    | Work item | Status |
+    |---|---|
+    | Authoritative architecture spec + ADR-0022 | **Complete** |
+    | Settings schema **v5 → v6** display restructure (lossless, visually neutral) | **Complete** |
+    | Per-context content composition (trigger vs menu) + element order + chevron | **Complete** |
+    | Six CSS-layer presets under theme / size / shape | **Complete** |
+    | Sparse structured overrides emitted as `--umc-switcher-*` custom properties | **Complete** |
+    | Motion setting honoring `prefers-reduced-motion` | **Complete** |
+    | Responsive adjustments (`hide_name_on_mobile`, `compact_on_mobile`) | **Complete** |
+    | Advanced Custom CSS (`edit_css` gated, storefront-only, sanitized) | **Complete** |
+    | Display admin sub-navigation (Placement / Content / Design / Advanced) | **Complete** |
+    | Merchant + developer guide | **Complete** — [`docs/SWITCHER_CUSTOMIZATION.md`](SWITCHER_CUSTOMIZATION.md) |
+
+    Explicit non-goals: no filesystem CSS compiler, no iframe preview
+    subsystem, no Custom JS or HTML, no per-shortcode design overrides, and no
+    changes to Visitor Location, checkout policy, or rate operations. See
+    [`docs/adr/0022-switcher-customization-css-contract.md`](adr/0022-switcher-customization-css-contract.md)
+    and
+    [`docs/architecture/switcher-customization.md`](architecture/switcher-customization.md).
+
+    **Prepared as:** **v0.16.0** (tag and GitHub release not yet created).
 
 ## Future milestones — not started, not implemented
 

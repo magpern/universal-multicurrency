@@ -432,6 +432,14 @@ final class SettingsPage extends WC_Settings_Page {
 			$this->settings->save( $merged );
 			$this->fire_saved_hook();
 
+			if ( ! empty( $parsed['show_custom_css_rejected_notice'] ) ) {
+				$this->redirect_display_notice(
+					__( 'Custom CSS was not saved because it contained disallowed constructs (for example @import, url(), escape sequences with backslashes, expression(), behavior:, -moz-binding, or angle brackets). Your previous Custom CSS was kept. Other Display settings were saved.', 'universal-multicurrency' ),
+					'error'
+				);
+				return;
+			}
+
 			if ( ! empty( $parsed['show_coercion_notice'] ) ) {
 				$this->redirect_display_notice(
 					__( 'Horizontal list is only available with manual placement. Style was saved as Dropdown.', 'universal-multicurrency' ),

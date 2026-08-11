@@ -68,7 +68,7 @@ fitting SPL type (`InvalidArgumentException` / `RuntimeException`).
 
 ### Settings schema upgrade (Milestones 7–8)
 
-`Settings::SCHEMA_VERSION` is **5** and must not be bumped unless a genuine
+`Settings::SCHEMA_VERSION` is **6** and must not be bumped unless a genuine
 settings shape change requires it. Production migrations exist because the
 stored shape actually changed; none is an artificial bump.
 
@@ -95,6 +95,14 @@ behaviour for upgraded stores.
 `SettingsUpgrader::migrate_4_to_5` adds Geo Detection defaults (`geo`) with
 `enabled: false` and empty rules, preserving v0.10.x storefront behaviour until
 an administrator enables routing.
+
+`SettingsUpgrader::migrate_5_to_6` restructures the `display` block for the
+layered switcher presentation system (ADR-0022): legacy `appearance.theme|size|
+shape` becomes first-class `design.*`, flat content toggles split into
+`content.trigger` and `content.menu`, and `design.preset`, `design.overrides`,
+`design.motion`, `responsive`, and `custom_css` are initialized. The preset is
+always `default` and theme/size/shape are copied verbatim, so migrated stores
+render exactly as they did in v0.15.
 See [`MIGRATION.md`](MIGRATION.md) § Internal settings schema migrations.
 
 `SettingsUpgrader` responsibilities:
@@ -463,6 +471,46 @@ Additional M16 invariants:
 8. **No multi-provider failover** — Frankfurter remains the single built-in automatic source; no per-currency provider selection.
 9. **Admin ops UI** presents health, aging, last/next run (from AS), and safe force-refresh without storefront side effects.
 
-Plugin version is prepared as **0.15.0** (Milestone 16). Milestone 15 shipped at
-v0.14.0; Milestone 14 at v0.13.0. See [`RELEASE_AUDIT.md`](RELEASE_AUDIT.md) and
+## Switcher presentation layer (Milestone 17)
+
+Milestone 17 makes the storefront switcher customizable without adding a second
+renderer, a template system, or a CSS compiler (ADR-0022). Authoritative spec:
+[`architecture/switcher-customization.md`](architecture/switcher-customization.md).
+Merchant-facing guide: [`SWITCHER_CUSTOMIZATION.md`](SWITCHER_CUSTOMIZATION.md).
+
+One semantic DOM serves every placement and style. Everything a merchant can
+change is expressed as a modifier class, a CSS custom property, or — as a last
+resort — their own stylesheet text.
+
+| Class | Deps | Responsibility |
+|---|---|---|
+| `Display\SwitcherSettings` | — | Sole sanitizer and defaults owner for the schema-6 `display` block. Derives the modifier class list and the inline custom-property map, and keeps `design.overrides` sparse behind an allowlist of typed tokens. |
+| `Display\SwitcherElementComposer` | `SwitcherSettings` | Builds the per-context element sequence (code / symbol / name) for the trigger and the menu from the composition settings and order. |
+| `Display\SwitcherRenderer` | `SwitcherViewModel` | Emits the single semantic markup contract for both presentations; delegates the inline style attribute to `SwitcherPresentationCss`. |
+| `Display\SwitcherPresentationCss` | `SwitcherCustomCss` | Pure composer of the two CSS payloads: the per-instance custom-property attribute and the storefront Custom CSS string (banner + re-validated payload). |
+| `Display\SwitcherCustomCss` | — | Validation authority for merchant CSS: length and control-character limits, the breakout denylist, the `edit_css` capability probe, and `resolve_for_save()`, which decides what a save may persist. |
+| `Display\SwitcherAssets` | `StorefrontRequestContext`, `SwitcherSettingsRepository`, `CurrencyContext` | WordPress asset policy. Registers the stylesheet and script, enqueues them for automatic placement or a detected shortcode, and attaches Custom CSS with `wp_add_inline_style()` once per request. |
+| `Admin\DisplaySettingsField` | `Settings`, `SwitcherViewModelFactory`, `SwitcherRenderer`, `SwitcherSettingsRepository` | Renders the Display workspace (Placement / Content / Design / Advanced) and parses the POST payload, preserving inactive placement data and unauthorized Custom CSS. |
+
+Presentation precedence, from weakest to strongest: base stylesheet → preset →
+theme / size / shape → structured overrides → responsive adjustments → Advanced
+Custom CSS. A named preset therefore never overrides an explicit theme, size, or
+shape choice, and `migrate_5_to_6` always writes `design.preset = default`.
+
+Custom CSS invariants:
+
+1. **Two authorities.** Writing requires Display-save authority **and**
+   `edit_css`. An unauthorized replace, clear, or omitted field preserves the
+   stored value exactly (`SwitcherCustomCss::resolve_for_save()`).
+2. **Storefront only.** Emission happens in `SwitcherAssets` behind an
+   `is_admin()` guard and the storefront request context, so Custom CSS never
+   reaches wp-admin — where the same style handle backs the Display live preview.
+3. **Re-validated on read.** `SwitcherPresentationCss` sanitizes the stored
+   value again before emitting it, so a payload written directly into
+   `umc_settings` by an older release or another actor cannot reach a page.
+4. **Never previewed.** The admin preview reflects structured settings only; the
+   Advanced card states that Custom CSS applies on the storefront after saving.
+
+Plugin version is prepared as **0.16.0** (Milestone 17). Milestone 16 shipped at
+v0.15.0; Milestone 15 at v0.14.0. See [`RELEASE_AUDIT.md`](RELEASE_AUDIT.md) and
 [`ROADMAP.md`](ROADMAP.md).

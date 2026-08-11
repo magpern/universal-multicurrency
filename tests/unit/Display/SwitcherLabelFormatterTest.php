@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
 use UMC\Display\SwitcherLabelFormatter;
 
 /**
- * Covers label composition and duplicate-symbol disambiguation.
+ * Covers label composition, ordering, and duplicate-symbol disambiguation.
  */
 final class SwitcherLabelFormatterTest extends TestCase {
 
@@ -47,6 +47,31 @@ final class SwitcherLabelFormatterTest extends TestCase {
 		);
 	}
 
+	public function test_compact_label_drops_name_even_when_enabled(): void {
+		$formatter = new SwitcherLabelFormatter(
+			array(
+				'show_code'   => true,
+				'show_symbol' => true,
+				'show_name'   => true,
+			)
+		);
+
+		$this->assertSame( 'SEK kr', $formatter->format_compact( 'SEK', 'kr', 'Swedish krona' ) );
+	}
+
+	public function test_configured_order_reorders_label(): void {
+		$formatter = new SwitcherLabelFormatter(
+			array(
+				'show_code'   => true,
+				'show_symbol' => true,
+				'show_name'   => false,
+				'order'       => array( 'symbol', 'code' ),
+			)
+		);
+
+		$this->assertSame( 'kr SEK', $formatter->format( 'SEK', 'kr', 'Swedish krona' ) );
+	}
+
 	public function test_duplicate_symbol_forces_code_when_symbol_only(): void {
 		$formatter = new SwitcherLabelFormatter(
 			array(
@@ -77,5 +102,17 @@ final class SwitcherLabelFormatterTest extends TestCase {
 		);
 
 		$this->assertSame( 'Swedish krona', $formatter->format( 'SEK', 'kr', 'Swedish krona' ) );
+	}
+
+	public function test_all_toggles_off_falls_back_to_code(): void {
+		$formatter = new SwitcherLabelFormatter(
+			array(
+				'show_code'   => false,
+				'show_symbol' => false,
+				'show_name'   => false,
+			)
+		);
+
+		$this->assertSame( 'SEK', $formatter->format( 'SEK', 'kr', 'Swedish krona' ) );
 	}
 }
