@@ -75,6 +75,8 @@ final class GeoDetectionApplicatorTest extends WP_UnitTestCase {
 
 		if ( function_exists( 'WC' ) && WC()->session ) {
 			WC()->session->set( CurrencyContext::SESSION_KEY, null );
+			WC()->session->set( CurrencySwitcher::SESSION_CURRENCY_ORIGIN, null );
+			WC()->session->set( CurrencySwitcher::SESSION_MANUAL_SELECTION, null );
 		}
 
 		delete_option( Settings::OPTION );
@@ -272,6 +274,10 @@ final class GeoDetectionApplicatorTest extends WP_UnitTestCase {
 
 		$this->assertSame( 'SEK', WC()->session->get( CurrencyContext::SESSION_KEY ) );
 		$this->assertEmpty( WC()->session->get( CurrencySwitcher::SESSION_MANUAL_SELECTION ) );
+		$this->assertSame(
+			CurrencySwitcher::ORIGIN_VISITOR_LOCATION,
+			WC()->session->get( CurrencySwitcher::SESSION_CURRENCY_ORIGIN )
+		);
 	}
 
 	/**

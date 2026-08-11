@@ -36,11 +36,36 @@ final class SettingsPageSectionsTest extends WP_UnitTestCase {
 				SettingsPage::SECTION_GEO_DETECTION,
 				SettingsPage::SECTION_DISPLAY,
 				SettingsPage::SECTION_CHECKOUT,
+				SettingsPage::SECTION_DECISION_INSPECTOR,
 				SettingsPage::SECTION_COMPATIBILITY,
 				SettingsPage::SECTION_ADVANCED,
 			),
 			array_keys( $page->get_sections() )
 		);
+	}
+
+	public function test_decision_inspector_sits_between_checkout_and_compatibility(): void {
+		$keys = array_keys( $this->page()->get_sections() );
+
+		$checkout_index   = array_search( SettingsPage::SECTION_CHECKOUT, $keys, true );
+		$inspector_index  = array_search( SettingsPage::SECTION_DECISION_INSPECTOR, $keys, true );
+		$compat_index     = array_search( SettingsPage::SECTION_COMPATIBILITY, $keys, true );
+
+		$this->assertIsInt( $checkout_index );
+		$this->assertIsInt( $inspector_index );
+		$this->assertIsInt( $compat_index );
+		$this->assertSame( $checkout_index + 1, $inspector_index );
+		$this->assertSame( $inspector_index + 1, $compat_index );
+	}
+
+	public function test_decision_inspector_section_exposes_inspector_field_and_is_not_saveable(): void {
+		$page = $this->page();
+
+		$types = array_column( $page->get_settings_for_section( SettingsPage::SECTION_DECISION_INSPECTOR ), 'type' );
+
+		$this->assertContains( 'umc_decision_inspector', $types );
+		$this->assertNotContains( 'umc_currencies', $types );
+		$this->assertFalse( $page->section_has_saveable_settings( SettingsPage::SECTION_DECISION_INSPECTOR ) );
 	}
 
 	public function test_exchange_rates_section_exposes_global_fields_only(): void {
