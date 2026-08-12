@@ -25,7 +25,7 @@ use ZipArchive;
  */
 final class DocumentationSyncTest extends TestCase {
 
-	private const CURRENT_VERSION = '0.16.0';
+	private const CURRENT_VERSION = '0.17.0';
 
 	/**
 	 * Tracked documentation sources that must exist and stay internally consistent.
@@ -333,8 +333,16 @@ final class DocumentationSyncTest extends TestCase {
 		$this->assertStringContainsString( 'Version | **' . self::CURRENT_VERSION . '**', $audit );
 		$this->assertStringContainsString( 'Unresolved release blockers | **0**', $audit );
 		$this->assertStringContainsString( 'Open Milestone 8 review findings | **0**', $audit );
-		$this->assertStringContainsString( 'Git tag `v' . self::CURRENT_VERSION . '` | **Created**', $audit );
-		$this->assertStringContainsString( 'GitHub release `v' . self::CURRENT_VERSION . '` | **Published**', $audit );
+		$this->assertMatchesRegularExpression(
+			'/Git tag `v' . preg_quote( self::CURRENT_VERSION, '/' ) . '` \| \*\*(?:Created|Not yet created)\*\*/',
+			$audit,
+			'Current version tag must be recorded as Created (released) or Not yet created (prepared).'
+		);
+		$this->assertMatchesRegularExpression(
+			'/GitHub release `v' . preg_quote( self::CURRENT_VERSION, '/' ) . '` \| \*\*(?:Published|Not yet published)\*\*/',
+			$audit,
+			'Current version GitHub release must be recorded as Published or Not yet published.'
+		);
 		$this->assertStringContainsString( 'Git tag `v0.8.0` | **Created**', $audit );
 		$this->assertStringContainsString( 'Milestone 8 | **Complete**', $audit );
 		$this->assertStringContainsString( 'Milestone 17 | **Complete**', $audit );

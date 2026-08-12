@@ -4,7 +4,7 @@ Tags: woocommerce, currency, multicurrency, exchange rates, money
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.16.0
+Stable tag: 0.17.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,6 +49,13 @@ Not for production traffic. Two runtime converters can double-convert prices. De
 The plugin ships a POT template (`languages/universal-multicurrency.pot`) for translators. Bundled locale `.mo` files are not included in this release.
 
 == Changelog ==
+
+= 0.17.0 =
+* WooCommerce Compatibility & Transaction Integrity (Milestone 18)
+* Free-shipping minimum order amounts convert base→active at eligibility time so thresholds match converted cart totals
+* Evidence-linked WooCommerce core transaction integrity matrix (Classic, Blocks/Store API, admin, REST boundary)
+* Expanded Classic ↔ Store API parity, cart currency/rate transitions, variation cache (currency and rate), and fee Known-limitation characterization
+* No settings schema, PersistedKeys, or order snapshot schema change
 
 = 0.16.0 =
 * Switcher customization: Display screen reorganized into Placement, Content, Design, and Advanced sections
@@ -155,6 +162,9 @@ The plugin ships a POT template (`languages/universal-multicurrency.pot`) for tr
 * Storefront conversion, classic cart/checkout, order snapshots, historical order display, refunds, and Store API / blocks parity (milestones 2–5)
 
 == Upgrade Notice ==
+
+= 0.17.0 =
+WooCommerce Compatibility & Transaction Integrity. Free-shipping thresholds now convert with the cart. No settings schema change — safe upgrade from 0.16.x. Requires WooCommerce 8.2+, PHP 8.1+, and HPOS.
 
 = 0.16.0 =
 Switcher customization release. Settings schema v5→v6 converts existing content and appearance settings automatically and preserves the current storefront appearance. Advanced Custom CSS additionally requires the `edit_css` capability. Requires WooCommerce 8.2+, PHP 8.1+, and HPOS.

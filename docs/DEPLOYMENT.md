@@ -26,7 +26,7 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Produces `dist/universal-multicurrency-0.16.0.zip`. The archive includes `readme.txt`,
+Produces `dist/universal-multicurrency-0.17.0.zip`. The archive includes `readme.txt`,
 production `src/`, `vendor/`, and `languages/universal-multicurrency.pot`.
 
 Performance subset:
@@ -36,7 +36,7 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release:** **v0.16.0** on `feature/m17-switcher-customization`.
+**Current release:** **v0.17.0** on `feature/m18-woocommerce-compatibility`.
 Git tag and GitHub release follow CI verification — do not create without
 explicit approval. The previous release, **v0.15.0**, is tagged and published.
 
@@ -996,7 +996,11 @@ unaffected.
 
 ---
 
-## v0.16.0 — Switcher Customization (current)
+## v0.17.0 — WooCommerce Compatibility & Transaction Integrity (current)
+
+Ships Milestone 18 under version **0.17.0** (ADR-0023). Settings schema remains **6**; PersistedKeys inventory **8**; order snapshot schema **4**. Free-shipping `min_amount` converts at eligibility time. Fees remain unwired.
+
+## v0.16.0 — Switcher Customization
 
 ### Summary
 
@@ -1015,8 +1019,8 @@ inventory is unchanged (no new option or meta key).
 
 ### Deployment sequence
 
-1. Run `composer release-audit` on the **0.16.0** tree.
-2. Build `dist/universal-multicurrency-0.16.0.zip` with `composer install --no-dev`
+1. Run `composer release-audit` on the **0.17.0** tree.
+2. Build `dist/universal-multicurrency-0.17.0.zip` with `composer install --no-dev`
    + `bin/build-zip.sh`.
 3. Deploy over **0.15.x** in place. The schema **v5 → v6** migration runs on the
    first canonical settings read; no manual step.
