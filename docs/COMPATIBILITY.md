@@ -188,6 +188,36 @@ every other leg at the full 315.
 | Order-pay and order-confirmation through the **classic** (non-block) flow | Supported | 0.4.0 | `ci:current`, `ci:floor` — unaffected by the Store API route gap above |
 | Product price-filter block | Works with (base currency only) | 0.5.0 | Known limitation carried from Milestone 5 |
 
+## WooCommerce transaction integrity (Milestone 18)
+
+Evidence-linked commerce matrix. Labels:
+
+- **Supported** — automated evidence on blocking CI
+- **Characterized** — covered by tests but not a full combinatorial claim
+- **Known limitation** — intentional boundary
+- **Out of scope** — deferred (typically M19)
+
+| Feature | Classic | Blocks/Store API | Admin | Status | Test evidence |
+|---|---|---|---|---|---|
+| Simple / sale / variation prices | ✓ | ✓ | base/stored | Supported | `StorefrontConversionTest`, `ProductsRouteConversionTest` |
+| Variation price hash (code **and** rate) | ✓ | ✓ | — | Supported | `StorefrontConversionTest::test_variation_prices_hash_includes_currency_and_rate` |
+| Grouped / external product display | ✓ | — | — | Characterized | `StorefrontConversionTest` smoke |
+| Fixed + percentage coupons; min/max spend | ✓ | ✓ | — | Supported | `CouponConversionTest`, `CartRouteConversionTest` |
+| Core shipping cost conversion | ✓ | ✓ | — | Supported | `ShippingConversionTest`, `ShippingRateParityTest` |
+| Free-shipping `min_amount` threshold | ✓ | ✓ | — | Supported | `FreeShippingThresholdTest`, `FreeShippingThresholdParityTest`, `ClassicStoreApiParityTest` |
+| Cart currency / rate transition | ✓ | ✓ | — | Supported | `CartConversionTest`, `CartCurrencyTransitionTest`, `CartCurrencySwitchTest` |
+| Tax on converted amounts (WC owns tax) | ✓ | ✓ | — | Supported | `TaxReconciliationTest`, `ClassicStoreApiParityTest` |
+| Classic ↔ Store API totals parity | ✓ | ✓ | — | Supported | `ClassicStoreApiParityTest` |
+| Order snapshot schema 4 / HPOS CRUD | ✓ | ✓ | meta box | Supported | `TransactionOrderTest`, `CheckoutSnapshotTest` |
+| Refunds use parent order context | — | — | ✓ | Supported | `RefundConversionTest` |
+| Order-pay / thank-you / emails historical | ✓ | ✓ | — | Supported | `OrderPayCurrencyLockTest`, `HistoricalOrderDisplayTest` |
+| `/wc/store/` shopper conversion | — | ✓ | — | Supported | Store API suite, `RestCurrencyBoundaryTest` |
+| `/wc/v3` admin REST non-conversion | — | — | ✓ | Supported | `RestCurrencyBoundaryTest` |
+| Cart fees auto-converted | — | — | — | Known limitation | `FeeBoundaryTest`, `StorefrontGuardTest` |
+| Third-party shipping / extensions | — | — | — | Out of scope | Deferred to M19 |
+
+Authoritative invariants: [`docs/architecture/woocommerce-transaction-integrity.md`](architecture/woocommerce-transaction-integrity.md), ADR-0023.
+
 ## The floor's Store API order-route exclusion
 
 At the WooCommerce floor (8.2.x), WooCommerce's own Store API `RoutesController`

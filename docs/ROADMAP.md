@@ -303,31 +303,32 @@
     **Released as:** **v0.16.0**.
 
 18. WooCommerce Compatibility & Transaction Integrity (**v0.17.0**) —
-    **in progress** on `feature/m18-woocommerce-compatibility`. Proves and
-    hardens Universal Multicurrency against WooCommerce **core** commerce
-    semantics before third-party extension compatibility (M19): transaction
-    integrity invariants, Classic / Blocks / Store API parity, tax / shipping /
-    coupon / threshold correctness (including free-shipping `min_amount`),
-    order / refund / order-pay historical context, REST boundary, and an
-    evidence-linked compatibility matrix.
+    **implementation complete** on `feature/m18-woocommerce-compatibility`;
+    **prepared** as **v0.17.0**. Proves and hardens Universal Multicurrency
+    against WooCommerce **core** commerce semantics before third-party
+    extension compatibility (M19): transaction integrity invariants, Classic /
+    Blocks / Store API parity, tax / shipping / coupon / threshold correctness
+    (including free-shipping `min_amount`), order / refund / order-pay
+    historical context, REST boundary, and an evidence-linked compatibility
+    matrix.
 
     ### Scope for v0.17.0
 
     | Work item | Status |
     |---|---|
-    | Authoritative architecture spec + ADR-0023 | **In progress** |
-    | Characterization of monetary integration boundaries | Planned |
-    | Product / variation cache parity (currency **and** rate identity) | Planned |
-    | Tax reconciliation on converted amounts (WC owns tax) | Planned |
-    | Coupons + free-shipping threshold conversion | Planned |
-    | Fees remain unwired (Known limitation) | Planned |
-    | Cart currency / rate transition integrity | Planned |
-    | Classic ↔ Store API parity expansion | Planned |
-    | Orders / HPOS / refunds / order-pay / emails | Planned |
-    | `/wc/v3` vs `/wc/store/` REST boundary | Planned |
-    | Compatibility matrix in `COMPATIBILITY.md` | Planned |
-    | Developer monetary-boundary guidance | Planned |
-    | Full CI matrix + release readiness for **v0.17.0** | Planned |
+    | Authoritative architecture spec + ADR-0023 | **Complete** |
+    | Characterization of monetary integration boundaries | **Complete** |
+    | Product / variation cache parity (currency **and** rate identity) | **Complete** |
+    | Tax reconciliation on converted amounts (WC owns tax) | **Complete** |
+    | Coupons + free-shipping threshold conversion | **Complete** |
+    | Fees remain unwired (Known limitation) | **Complete** |
+    | Cart currency / rate transition integrity | **Complete** |
+    | Classic ↔ Store API parity expansion | **Complete** |
+    | Orders / HPOS / refunds / order-pay / emails | **Complete** (existing + regression) |
+    | `/wc/v3` vs `/wc/store/` REST boundary | **Complete** |
+    | Compatibility matrix in `COMPATIBILITY.md` | **Complete** |
+    | Developer monetary-boundary guidance | **Complete** |
+    | Full CI matrix + release readiness for **v0.17.0** | **Prepared** |
 
     No `Settings::SCHEMA_VERSION` bump. No PersistedKeys inventory bump. No
     order snapshot schema bump. No DB migration. No CurrencyResolver,
