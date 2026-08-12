@@ -36,7 +36,7 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release:** **v0.17.0** on `feature/m18-woocommerce-compatibility`.
+**Current release:** **v0.17.0** on `main` (tagged and published).
 Git tag and GitHub release follow CI verification — do not create without
 explicit approval. The previous release, **v0.15.0**, is tagged and published.
 

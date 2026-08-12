@@ -7,11 +7,11 @@ release-preparation state.
 **Governing question:** If we published this release tomorrow, is there anything
 left in the repository that clearly should not ship?
 
-**Repository status:** **prepared as v0.17.0** on
-`feature/m18-woocommerce-compatibility`. Milestone 18 (WooCommerce Compatibility
-& Transaction Integrity; ADR-0023) is implementation-complete pending PR merge,
-tag, and GitHub release. Do **not** treat this document as evidence that
-`v0.17.0` is tagged until the release closure record below is updated.
+**Repository status:** **released as v0.17.0**. Milestone 18 (WooCommerce
+Compatibility & Transaction Integrity; ADR-0023) is complete. Git tag
+**`v0.17.0`** and GitHub release are published. Release commit on `main`:
+`9ed710f37fbd917591e9b6ba5de07ffab5f00a8b`. Annotated tag object:
+`f8285f450a5a3b9c76020bb22c6ccaf3e95d93dd`. PR **#19**.
 
 ---
 
@@ -31,10 +31,10 @@ tag, and GitHub release. Do **not** treat this document as evidence that
 | Open Milestone 8 review findings | **0** |
 | Git tag `v0.8.0` | **Created** |
 | Milestone 8 | **Complete** — released and review-closed at v0.8.0 |
-| Git tag `v0.17.0` | **Not yet created** |
-| GitHub release `v0.17.0` | **Not yet published** |
+| Git tag `v0.17.0` | **Created** |
+| GitHub release `v0.17.0` | **Published** |
 | Milestone 17 | **Complete** — Switcher Customization & Presentation at v0.16.0 |
-| Milestone 18 | **Prepared** — WooCommerce Compatibility & Transaction Integrity at v0.17.0 |
+| Milestone 18 | **Complete** — WooCommerce Compatibility & Transaction Integrity at v0.17.0 |
 
 ---
 

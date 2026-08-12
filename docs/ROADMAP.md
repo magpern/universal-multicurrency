@@ -303,16 +303,15 @@
     **Released as:** **v0.16.0**.
 
 18. WooCommerce Compatibility & Transaction Integrity (**v0.17.0**) —
-    **implementation complete** on `feature/m18-woocommerce-compatibility`;
-    **prepared** as **v0.17.0**. Proves and hardens Universal Multicurrency
-    against WooCommerce **core** commerce semantics before third-party
-    extension compatibility (M19): transaction integrity invariants, Classic /
-    Blocks / Store API parity, tax / shipping / coupon / threshold correctness
-    (including free-shipping `min_amount`), order / refund / order-pay
-    historical context, REST boundary, and an evidence-linked compatibility
-    matrix.
+    **complete and released as v0.17.0**. Proves and hardens Universal
+    Multicurrency against WooCommerce **core** commerce semantics before
+    third-party extension compatibility (M19): transaction integrity
+    invariants, Classic / Blocks / Store API parity, tax / shipping / coupon /
+    threshold correctness (including free-shipping `min_amount`), order /
+    refund / order-pay historical context, REST boundary, and an
+    evidence-linked compatibility matrix.
 
-    ### Scope for v0.17.0
+    ### Shipped in v0.17.0
 
     | Work item | Status |
     |---|---|
@@ -328,7 +327,7 @@
     | `/wc/v3` vs `/wc/store/` REST boundary | **Complete** |
     | Compatibility matrix in `COMPATIBILITY.md` | **Complete** |
     | Developer monetary-boundary guidance | **Complete** |
-    | Full CI matrix + release readiness for **v0.17.0** | **Prepared** |
+    | Full CI matrix + release readiness for **v0.17.0** | **Complete** |
 
     No `Settings::SCHEMA_VERSION` bump. No PersistedKeys inventory bump. No
     order snapshot schema bump. No DB migration. No CurrencyResolver,
@@ -338,7 +337,7 @@
     and
     [`docs/architecture/woocommerce-transaction-integrity.md`](architecture/woocommerce-transaction-integrity.md).
 
-    **Target release:** **v0.17.0**.
+    **Released as:** **v0.17.0**.
 
 ## Future milestones — not started, not implemented
 

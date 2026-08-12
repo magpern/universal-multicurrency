@@ -1,8 +1,7 @@
 # WooCommerce transaction integrity (Milestone 18)
 
 This document is the authoritative specification for Milestone 18
-(**v0.17.0**): prove and harden Universal Multicurrency against **WooCommerce
-core** commerce semantics. It formalizes transaction-integrity invariants,
+(**v0.17.0**) — **released**. It formalizes transaction-integrity invariants,
 conversion boundaries, Classic / Blocks / Store API parity, and the known
 limitation surface before third-party extension work (M19).
 
