@@ -18,17 +18,22 @@ prices.
 M3 adds conversion **only** for the monetary inputs M2 never touched:
 
 - **fixed coupon amounts** and **coupon min/max thresholds** (`CouponConversion`),
-- **core shipping costs** (`ShippingConversion`, core methods only).
+- **core shipping costs** (`ShippingConversion`, core methods only),
+- **free-shipping `min_amount`** (Milestone 18 — evaluation-time conversion so
+  eligibility compares threshold and cart in the same currency).
 
 It converts **nothing else**. In particular:
 
 - **Taxes are never converted.** Tax rates are currency-agnostic percentages;
   WooCommerce computes tax natively on the converted amounts.
-- **Fees are not converted** in M3 (disabled by decision; opt-in only).
+- **Fees are not converted** (disabled by decision; opt-in `umc_convert_fee`
+  remains unwired — Known limitation, ADR-0023).
 - The cart stores **product references, not prices**, so every recalculation
   reconverts from the base price — a converted value is never reused as input.
 - M3 **never calls `set_price()`** on a cart item, so a converted price is never
   written back and re-read.
+
+See also [`woocommerce-transaction-integrity.md`](woocommerce-transaction-integrity.md).
 
 ## Why there is no double conversion
 

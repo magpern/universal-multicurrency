@@ -126,6 +126,22 @@ All storefront hooks below register on `woocommerce_init` and gate on
 |---|---|---|---|
 | `woocommerce_package_rates` | `($rates, $package)` | 90 | Convert cost + per-class taxes for **core** methods (`flat_rate`, `free_shipping`, `local_pickup`) base→active by the same rate; non-core / third-party rates pass through unchanged (assumed already in the transaction currency). |
 | `woocommerce_cart_shipping_packages` | `($packages)` | 10 | Inject the rate identity into each package so WooCommerce's `shipping_for_package_*` cache is keyed per currency+rate and self-invalidates on a switch or rate edit. |
+| `woocommerce_shipping_free_shipping_is_available` | `($available, $package, $method)` | 10 | Re-evaluate free-shipping eligibility using a **converted** `min_amount` (base→active) so the threshold is compared in the same currency as the cart. Request-scoped only — does not persist settings or permanently mutate `$method->min_amount`. |
+
+### Extension monetary boundaries (Milestone 18)
+
+| Concern | Contract |
+|---|---|
+| Base currency | WooCommerce store currency; authored product/coupon/shipping amounts live here |
+| Active shopper currency | Resolved for convertible requests; drives conversion seam |
+| Effective checkout currency | M11 checkout policy may settle/fallback before order creation |
+| Order-owned currency | Authoritative after order creation (order-pay, emails, account, admin historical) |
+| Fixed monetary inputs | Convert once via `PriceConversionService` |
+| Free-shipping `min_amount` | Base-authored; converted at eligibility evaluation (M18) |
+| Fees | **Not converted** — fee authors must supply amounts in the effective active currency; `umc_convert_fee` remains unwired |
+| Third-party shipping | Pass-through unless `umc_convert_shipping_rate` opts in (M19 for adapters) |
+
+See [`docs/architecture/woocommerce-transaction-integrity.md`](architecture/woocommerce-transaction-integrity.md) and ADR-0023.
 
 ### Gateways (`Integration\GatewayCompatibility`)
 

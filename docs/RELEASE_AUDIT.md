@@ -1,16 +1,17 @@
-# Release audit — v0.16.0 Switcher Customization
+# Release audit — v0.17.0 WooCommerce Compatibility & Transaction Integrity
 
-Executable release-blocking gate for Universal Multicurrency **v0.16.0**. This
+Executable release-blocking gate for Universal Multicurrency **v0.17.0**. This
 document records scope, criteria, commands, audit results, and the current
 release-preparation state.
 
 **Governing question:** If we published this release tomorrow, is there anything
 left in the repository that clearly should not ship?
 
-**Repository status:** **released as v0.16.0**. Milestone 17 (Switcher
-Customization; ADR-0022) is complete. Git tag **`v0.16.0`** and GitHub release
-are published. Release commit on `main`: `956556458d391181df3c23cf85e578b841d6852f`.
-Annotated tag object: `1102ab0787b74765887c7a4e6bfa5c0ec5f86cd8`.
+**Repository status:** **prepared as v0.17.0** on
+`feature/m18-woocommerce-compatibility`. Milestone 18 (WooCommerce Compatibility
+& Transaction Integrity; ADR-0023) is implementation-complete pending PR merge,
+tag, and GitHub release. Do **not** treat this document as evidence that
+`v0.17.0` is tagged until the release closure record below is updated.
 
 ---
 
@@ -18,8 +19,8 @@ Annotated tag object: `1102ab0787b74765887c7a4e6bfa5c0ec5f86cd8`.
 
 | Item | Value |
 |---|---|
-| Version | **0.16.0** |
-| Settings schema | **6** (was 5; `display` restructured into `content`, `design`, `responsive`, `custom_css`) |
+| Version | **0.17.0** |
+| Settings schema | **6** (unchanged) |
 | Order snapshot schema | **4** (unchanged) |
 | GeoContext (sandbox document) schema | **2** (unchanged) |
 | Persisted-data inventory version | **8** (unchanged; no new option or meta key) |
@@ -28,63 +29,38 @@ Annotated tag object: `1102ab0787b74765887c7a4e6bfa5c0ec5f86cd8`.
 | Unresolved High security findings | **0** |
 | Unresolved release blockers | **0** |
 | Open Milestone 8 review findings | **0** |
-| Deterministic performance gates | See § Performance gate |
-| POT drift | See § Translation audit |
-| Dependency audit (`composer audit`) | See § Security gate |
-| Package inspection | See § Release ZIP audit |
-| Git tag `v0.10.0` | **Created** (superseded) |
-| GitHub release `v0.10.0` | **Published** (superseded) |
-| Git tag `v0.8.0` | **Created** (superseded) |
-| Git tag `v0.11.0` | **Not yet created** (superseded by M13/M14 prep) |
-| GitHub release `v0.11.0` | **Not yet created** (superseded by M13/M14 prep) |
-| Git tag `v0.12.0` | **Created** (superseded) |
-| GitHub release `v0.12.0` | **Published** (superseded) |
-| Git tag `v0.12.1` | **Created** |
-| GitHub release `v0.12.1` | **Published** |
-| Git tag `v0.14.0` | **Created** |
-| GitHub release `v0.14.0` | **Published** |
-| Git tag `v0.15.0` | **Created** |
-| GitHub release `v0.15.0` | **Published** |
-| Git tag `v0.16.0` | **Created** |
-| GitHub release `v0.16.0` | **Published** |
+| Git tag `v0.8.0` | **Created** |
 | Milestone 8 | **Complete** — released and review-closed at v0.8.0 |
-| Milestone 11 | **Complete** — Checkout currency policy at v0.10.0 |
-| Milestone 12 | **Prepared** — Geo Detection engine (see v0.12.0 tag note above) |
-| Milestone 13 | **Complete** — Geo admin hub at v0.12.0 |
-| Milestone 14 | **Complete** — Visitor Location boundary alignment at v0.13.0 |
-| Milestone 15 | **Complete** — Currency Resolution & Explainability at v0.14.0 |
-| Milestone 16 | **Complete** — Exchange Rate Operations & Reliability at v0.15.0 |
+| Git tag `v0.17.0` | **Not yet created** |
+| GitHub release `v0.17.0` | **Not yet published** |
 | Milestone 17 | **Complete** — Switcher Customization & Presentation at v0.16.0 |
+| Milestone 18 | **Prepared** — WooCommerce Compatibility & Transaction Integrity at v0.17.0 |
 
 ---
 
-## v0.16.0 Switcher Customization scope
+## v0.17.0 WooCommerce Compatibility & Transaction Integrity scope
 
-Minor release shipping Milestone 17 (ADR-0022). Turns the storefront switcher
-into a customizable component without adding a second renderer: one semantic
-DOM, presets as CSS layers, per-context content composition, structured design
-overrides as CSS custom properties, and capability-gated Advanced Custom CSS
-emitted on the storefront only.
+Minor release shipping Milestone 18 (ADR-0023). Formalizes transaction-integrity
+invariants against WooCommerce core, converts free-shipping `min_amount` into
+the active currency at eligibility time, expands Classic ↔ Store API parity and
+cart transition coverage, and publishes an evidence-linked compatibility matrix.
+Fees remain intentionally unwired. Third-party extensions stay out of scope
+(M19).
 
-Settings schema **v5 → v6** restructures the `display` subtree losslessly —
-existing content and appearance settings convert to the new shape and the
-storefront keeps its current appearance. Legacy `theme` / `size` / `shape`
-remain first-class and continue to win over a named preset; migration always
-sets `design.preset = default`.
+Settings schema **6**, PersistedKeys inventory **8**, and order snapshot schema
+**4** are unchanged. No DB migration.
 
 ### Shipped capabilities
 
 | Area | Summary |
 |---|---|
-| Content composition | Independent trigger and menu element sets (`code`, `symbol`, `name`) plus element order and an optional chevron |
-| Presets | Six CSS-layer presets: default, minimal, pill, compact, borderless, floating |
-| Design overrides | Sparse allowlisted color / radius / control height / spacing / font-weight tokens emitted as inline `--umc-switcher-*` custom properties |
-| Motion | `design.motion` (`subtle` \| `none`); `prefers-reduced-motion` always wins |
-| Responsive | `umc-switcher--hide-name-on-mobile`, `umc-switcher--compact-on-mobile` below 768px |
-| Advanced Custom CSS | `display.custom_css`, requires Display-save authority **and** `edit_css`; unauthorized replace / clear / omission preserve stored CSS exactly |
-| CSS emission | `SwitcherPresentationCss` — inline custom properties per instance; Custom CSS via `wp_add_inline_style( 'umc-switcher', … )` on the storefront while the stylesheet is enqueued, never in wp-admin |
-| Admin UX | Display screen sub-navigation (Placement, Content, Design, Advanced); structured live preview only |
-| Non-goals | No filesystem CSS compiler, no iframe preview subsystem, no Custom JS/HTML, no second renderer |
+| Free-shipping threshold | Base-authored `min_amount` converted once at evaluation via `woocommerce_shipping_free_shipping_is_available` |
+| Transaction integrity matrix | Evidence-linked rows in `COMPATIBILITY.md` with Supported / Characterized / Known limitation / Out of scope |
+| Parity & transitions | Expanded Classic/Store API, cart currency/rate transitions, variation hash currency+rate, REST `/wc/v3` vs `/wc/store/` boundary |
+| Fee boundary | Characterized non-conversion; guards unchanged |
+
+For prior release history (v0.16.0 and earlier), see git history of this file
+and `docs/ROADMAP.md`.
 
 ---
 
@@ -414,7 +390,7 @@ Exit code **non-zero** when any release-blocking step fails.
 
 ## Release-blocking criteria
 
-| ID | Criterion | Result (v0.16.0) |
+| ID | Criterion | Result (v0.17.0) |
 |---|---|---|
 | RB1 | No tracked secrets, dumps, caches, or `dist/` artifacts | **Pass** |
 | RB2 | `docs/plans/` remains untracked (local-only planning) | **Pass** |
@@ -463,10 +439,10 @@ needles remain confined to `Diagnostics/DetectorManifest.php` only.
 
 ## Metadata and compatibility
 
-| Field | Value (v0.16.0) |
+| Field | Value (v0.17.0) |
 |---|---|
-| Plugin version (header + `UMC_VERSION`) | **0.16.0** |
-| readme.txt Stable tag | **0.16.0** |
+| Plugin version (header + `UMC_VERSION`) | **0.17.0** |
+| readme.txt Stable tag | **0.17.0** |
 | Text domain | `universal-multicurrency` |
 | Requires PHP | 8.1 |
 | Requires Plugins | woocommerce |
@@ -551,11 +527,11 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Expected artifact: **`dist/universal-multicurrency-0.16.0.zip`**
+Expected artifact: **`dist/universal-multicurrency-0.17.0.zip`**
 
 ### Included
 
-- `universal-multicurrency.php` (header Version **0.16.0**), `uninstall.php`, `readme.txt` (Stable tag **0.16.0**)
+- `universal-multicurrency.php` (header Version **0.17.0**), `uninstall.php`, `readme.txt` (Stable tag **0.17.0**)
 - `src/` production PHP including `src/Admin/DisplayControlRenderer.php`, `src/Admin/DisplaySettingsField.php`, `src/Display/` (with `SwitcherCustomCss.php`, `SwitcherPresentationCss.php`), `src/Rates/RateHealthService.php`, `src/CLI/RatesCommand.php`
 - `assets/admin/umc-settings.css`, `assets/admin/umc-settings.js`, `assets/css/switcher.css`, `assets/js/switcher.js`
 - `src/` production PHP

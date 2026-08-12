@@ -302,6 +302,44 @@
 
     **Released as:** **v0.16.0**.
 
+18. WooCommerce Compatibility & Transaction Integrity (**v0.17.0**) —
+    **implementation complete** on `feature/m18-woocommerce-compatibility`;
+    **prepared** as **v0.17.0**. Proves and hardens Universal Multicurrency
+    against WooCommerce **core** commerce semantics before third-party
+    extension compatibility (M19): transaction integrity invariants, Classic /
+    Blocks / Store API parity, tax / shipping / coupon / threshold correctness
+    (including free-shipping `min_amount`), order / refund / order-pay
+    historical context, REST boundary, and an evidence-linked compatibility
+    matrix.
+
+    ### Scope for v0.17.0
+
+    | Work item | Status |
+    |---|---|
+    | Authoritative architecture spec + ADR-0023 | **Complete** |
+    | Characterization of monetary integration boundaries | **Complete** |
+    | Product / variation cache parity (currency **and** rate identity) | **Complete** |
+    | Tax reconciliation on converted amounts (WC owns tax) | **Complete** |
+    | Coupons + free-shipping threshold conversion | **Complete** |
+    | Fees remain unwired (Known limitation) | **Complete** |
+    | Cart currency / rate transition integrity | **Complete** |
+    | Classic ↔ Store API parity expansion | **Complete** |
+    | Orders / HPOS / refunds / order-pay / emails | **Complete** (existing + regression) |
+    | `/wc/v3` vs `/wc/store/` REST boundary | **Complete** |
+    | Compatibility matrix in `COMPATIBILITY.md` | **Complete** |
+    | Developer monetary-boundary guidance | **Complete** |
+    | Full CI matrix + release readiness for **v0.17.0** | **Prepared** |
+
+    No `Settings::SCHEMA_VERSION` bump. No PersistedKeys inventory bump. No
+    order snapshot schema bump. No DB migration. No CurrencyResolver,
+    checkout-policy, or rate-architecture redesign. Fees stay unwired.
+    Third-party extensions deferred to M19. See
+    [`docs/adr/0023-woocommerce-transaction-integrity-contract.md`](adr/0023-woocommerce-transaction-integrity-contract.md)
+    and
+    [`docs/architecture/woocommerce-transaction-integrity.md`](architecture/woocommerce-transaction-integrity.md).
+
+    **Target release:** **v0.17.0**.
+
 ## Future milestones — not started, not implemented
 
 None of the following exists in the codebase today:
@@ -311,6 +349,9 @@ None of the following exists in the codebase today:
 - `country_change` geo detection mode and broader continent presets
 - Multicurrency reporting and analytics
 - Public APIs beyond the documented hooks in [`HOOKS.md`](HOOKS.md)
+- Third-party extension compatibility matrix (Subscriptions, Bookings,
+  Bundles, Add-Ons, Composite, Dynamic Pricing, gift cards, memberships,
+  third-party shipping/checkout) — deferred to **M19**
 
 The plugin is standalone and replaces FOX/WOOCS and the old MP helper; only
 WooCommerce is a dependency (see docs/adr/0003).

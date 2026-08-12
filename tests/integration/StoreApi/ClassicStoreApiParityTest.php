@@ -10,7 +10,9 @@ declare( strict_types=1 );
 namespace UMC\Tests\Integration\StoreApi;
 
 use UMC\Order\OrderSnapshot;
+use UMC\Tests\Support\GoldenTransactionFixtures as Golden;
 use WC_Order;
+use WC_Shipping_Zone;
 
 /**
  * Runs one scenario twice — once through WC_Cart as a storefront page would,
@@ -25,6 +27,13 @@ use WC_Order;
 final class ClassicStoreApiParityTest extends StoreApiTestCase {
 
 	private const CURRENCIES = array( 'SEK' => array( 'rate' => '11.50' ) );
+
+	/**
+	 * Shipping zone created for free-shipping parity, removed on teardown.
+	 *
+	 * @var WC_Shipping_Zone|null
+	 */
+	private ?WC_Shipping_Zone $shipping_zone = null;
 
 	public function set_up(): void {
 		parent::set_up();
@@ -41,6 +50,13 @@ final class ClassicStoreApiParityTest extends StoreApiTestCase {
 	}
 
 	public function tear_down(): void {
+		if ( $this->shipping_zone instanceof WC_Shipping_Zone ) {
+			$this->shipping_zone->delete( true );
+			$this->shipping_zone = null;
+		}
+
+		\WC_Cache_Helper::get_transient_version( 'shipping', true );
+
 		delete_option( 'woocommerce_cheque_settings' );
 		update_option( 'woocommerce_calc_taxes', 'no' );
 		WC()->payment_gateways()->init();
@@ -123,6 +139,55 @@ final class ClassicStoreApiParityTest extends StoreApiTestCase {
 
 		$this->assertSame( $classic_order->get_currency(), $blocks_order->get_currency() );
 		$this->assertSame( $classic_order->get_total(), $blocks_order->get_total() );
+	}
+
+	public function test_free_shipping_threshold_eligibility_agrees(): void {
+		update_option( 'woocommerce_ship_to_countries', 'all' );
+		update_option( 'woocommerce_enable_shipping_calc', 'yes' );
+		update_option( 'woocommerce_shipping_cost_requires_address', 'no' );
+
+		WC()->customer->set_shipping_country( 'SE' );
+		WC()->customer->set_shipping_postcode( '11122' );
+
+		$this->boot_plugin( Golden::currencies(), Golden::FOREIGN, Golden::BASE, 2 );
+		$this->install_free_shipping_min( Golden::FREE_SHIPPING_MIN );
+
+		$below_id = $this->shippable_product( '999' )->get_id();
+		$at_id    = $this->shippable_product( Golden::FREE_SHIPPING_MIN )->get_id();
+
+		foreach (
+			array(
+				'below' => array( $below_id, false ),
+				'at'    => array( $at_id, true ),
+			) as $label => $case
+		) {
+			[ $product_id, $expected ] = $case;
+
+			\WC_Cache_Helper::get_transient_version( 'shipping', true );
+			WC()->shipping()->unregister_shipping_methods();
+			$this->reset_cart();
+			WC()->customer->set_shipping_country( 'SE' );
+			WC()->customer->set_shipping_state( '' );
+			WC()->customer->set_shipping_postcode( '11122' );
+
+			$classic = $this->classic_offers_free_shipping( $product_id );
+
+			\WC_Cache_Helper::get_transient_version( 'shipping', true );
+			WC()->shipping()->unregister_shipping_methods();
+			$this->reset_cart();
+			WC()->customer->set_shipping_country( 'SE' );
+			WC()->customer->set_shipping_state( '' );
+			WC()->customer->set_shipping_postcode( '11122' );
+
+			$blocks = $this->blocks_offers_free_shipping( $product_id );
+
+			$this->assertSame(
+				$classic,
+				$blocks,
+				"Classic and Store API must agree on free-shipping eligibility ({$label})."
+			);
+			$this->assertSame( $expected, $blocks, "Unexpected eligibility for {$label}." );
+		}
 	}
 
 	/**
@@ -318,5 +383,132 @@ final class ClassicStoreApiParityTest extends StoreApiTestCase {
 			'email'      => 'shopper@example.com',
 			'phone'      => '0700000000',
 		);
+	}
+
+	/**
+	 * Installs free shipping requiring a base-currency minimum order amount.
+	 *
+	 * @param string $min_amount Minimum in store base currency.
+	 */
+	private function install_free_shipping_min( string $min_amount ): void {
+		$zone = new WC_Shipping_Zone();
+		$zone->set_zone_name( 'Parity Free Shipping' );
+		$zone->add_location( 'SE', 'country' );
+		$instance_id = (int) $zone->add_shipping_method( 'free_shipping' );
+		$zone->save();
+
+		update_option(
+			'woocommerce_free_shipping_' . $instance_id . '_settings',
+			array(
+				'enabled'          => 'yes',
+				'title'            => 'Free shipping',
+				'requires'         => 'min_amount',
+				'min_amount'       => $min_amount,
+				'ignore_discounts' => 'no',
+			)
+		);
+
+		$this->shipping_zone = $zone;
+
+		WC()->shipping()->unregister_shipping_methods();
+		\WC_Cache_Helper::get_transient_version( 'shipping', true );
+	}
+
+	/**
+	 * Creates a physical product priced in the store base currency.
+	 *
+	 * @param string $regular Regular price.
+	 */
+	private function shippable_product( string $regular ): \WC_Product_Simple {
+		$product = $this->simple_product( $regular );
+		$product->set_virtual( false );
+		$product->save();
+
+		return wc_get_product( $product->get_id() );
+	}
+
+	/**
+	 * Whether free shipping is offered on the classic cart path.
+	 *
+	 * @param int $product_id Product to place in the cart.
+	 */
+	private function classic_offers_free_shipping( int $product_id ): bool {
+		return (bool) $this->as_storefront_request(
+			function () use ( $product_id ): bool {
+				$this->reset_cart();
+				WC()->customer->set_shipping_country( 'SE' );
+				WC()->customer->set_shipping_postcode( '11122' );
+				WC()->cart->add_to_cart( $product_id, 1 );
+				WC()->cart->calculate_totals();
+
+				$packages = WC()->shipping()->calculate_shipping( WC()->cart->get_shipping_packages() );
+
+				foreach ( $packages as $package ) {
+					foreach ( $package['rates'] as $rate ) {
+						if ( 'free_shipping' === $rate->get_method_id() ) {
+							return true;
+						}
+					}
+				}
+
+				return false;
+			}
+		);
+	}
+
+	/**
+	 * Whether free shipping appears among Store API cart shipping rates.
+	 *
+	 * @param int $product_id Product to place in the cart.
+	 */
+	private function blocks_offers_free_shipping( int $product_id ): bool {
+		$this->reset_cart();
+		WC()->customer->set_shipping_country( 'SE' );
+		WC()->customer->set_shipping_state( '' );
+		WC()->customer->set_shipping_postcode( '11122' );
+		WC()->customer->set_billing_country( 'SE' );
+		WC()->customer->set_billing_postcode( '11122' );
+
+		$this->store_api_request(
+			'POST',
+			'/cart/add-item',
+			array(
+				'id'       => $product_id,
+				'quantity' => 1,
+			)
+		);
+
+		$this->store_api_request(
+			'POST',
+			'/cart/update-customer',
+			array(
+				'shipping_address' => array(
+					'country'   => 'SE',
+					'postcode'  => '11122',
+					'city'      => 'Stockholm',
+					'address_1' => '1 Test Street',
+				),
+				'billing_address'  => array(
+					'country'   => 'SE',
+					'postcode'  => '11122',
+					'city'      => 'Stockholm',
+					'address_1' => '1 Test Street',
+					'email'     => 'shopper@example.com',
+				),
+			)
+		);
+
+		$cart = $this->response_data( $this->store_api_request( 'GET', '/cart' ) );
+
+		foreach ( (array) ( $cart['shipping_rates'] ?? array() ) as $package ) {
+			foreach ( (array) ( $package['shipping_rates'] ?? array() ) as $rate ) {
+				$rate_id = (string) ( $rate['rate_id'] ?? $rate['method_id'] ?? '' );
+				if ( 0 === strpos( $rate_id, 'free_shipping' ) || 'free_shipping' === ( $rate['method_id'] ?? '' ) ) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 }

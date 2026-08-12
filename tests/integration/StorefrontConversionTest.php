@@ -242,4 +242,72 @@ final class StorefrontConversionTest extends WP_UnitTestCase {
 		$this->assertSame( '100', $product->get_regular_price( 'edit' ) );
 		$this->assertSame( '100', get_post_meta( $product->get_id(), '_regular_price', true ) );
 	}
+
+	public function test_variation_prices_hash_includes_currency_and_rate(): void {
+		$this->activate( array( 'SEK' => array( 'rate' => '11.50' ) ), 'SEK' );
+
+		$hash = apply_filters( 'woocommerce_get_variation_prices_hash', array( 'baseline' ) );
+
+		$this->assertIsArray( $hash );
+		$this->assertContains( 'SEK', $hash, 'Hash must vary by active currency code.' );
+		$this->assertContains( '11.50', $hash, 'Hash must vary by rate so rate edits invalidate the cache.' );
+
+		$this->activate( array( 'SEK' => array( 'rate' => '20' ) ), 'SEK' );
+		$updated = apply_filters( 'woocommerce_get_variation_prices_hash', array( 'baseline' ) );
+
+		$this->assertContains( '20', $updated );
+		$this->assertNotSame( $hash, $updated, 'A rate change must produce a different variation-prices hash.' );
+	}
+
+	public function test_grouped_product_child_prices_convert_when_supported(): void {
+		if ( ! class_exists( \WC_Product_Grouped::class ) ) {
+			$this->markTestSkipped( 'WC_Product_Grouped is not available.' );
+		}
+
+		$this->activate( array( 'SEK' => array( 'rate' => '11.50' ) ), 'SEK' );
+
+		$child_a = $this->simple_product( '100' );
+		$child_b = $this->simple_product( '200' );
+
+		$grouped = new \WC_Product_Grouped();
+		$grouped->set_name( 'Grouped' );
+		$grouped->set_status( 'publish' );
+		$grouped->set_children( array( $child_a->get_id(), $child_b->get_id() ) );
+		$grouped->save();
+
+		$grouped = wc_get_product( $grouped->get_id() );
+		$this->assertInstanceOf( \WC_Product_Grouped::class, $grouped );
+
+		$children = array_map( 'wc_get_product', $grouped->get_children() );
+		$prices   = array_map(
+			static function ( $child ): string {
+				return (string) $child->get_price();
+			},
+			$children
+		);
+
+		$this->assertContains( '1150.00', $prices );
+		$this->assertContains( '2300.00', $prices );
+	}
+
+	public function test_external_product_price_converts_when_supported(): void {
+		if ( ! class_exists( \WC_Product_External::class ) ) {
+			$this->markTestSkipped( 'WC_Product_External is not available.' );
+		}
+
+		$this->activate( array( 'SEK' => array( 'rate' => '11.50' ) ), 'SEK' );
+
+		$product = new \WC_Product_External();
+		$product->set_name( 'External' );
+		$product->set_regular_price( '100' );
+		$product->set_product_url( 'https://example.com/buy' );
+		$product->set_button_text( 'Buy' );
+		$product->set_status( 'publish' );
+		$product->save();
+
+		$product = wc_get_product( $product->get_id() );
+
+		$this->assertSame( '1150.00', $product->get_price() );
+		$this->assertSame( '1150.00', $product->get_regular_price() );
+	}
 }
