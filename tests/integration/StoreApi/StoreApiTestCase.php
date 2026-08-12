@@ -112,6 +112,7 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 		'woocommerce_coupon_get_maximum_amount',
 		'woocommerce_package_rates',
 		'woocommerce_cart_shipping_packages',
+		'woocommerce_shipping_free_shipping_is_available',
 		'woocommerce_available_payment_gateways',
 		'woocommerce_checkout_create_order',
 		'woocommerce_before_checkout_form',

@@ -30,6 +30,7 @@ final class ShippingConversionTest extends WP_UnitTestCase {
 	private const MANAGED_HOOKS = array(
 		'woocommerce_package_rates',
 		'woocommerce_cart_shipping_packages',
+		'woocommerce_shipping_free_shipping_is_available',
 		'umc_convert_shipping_rate',
 	);
 
