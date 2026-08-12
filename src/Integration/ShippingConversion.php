@@ -26,6 +26,14 @@ use WC_Shipping_Rate;
  * `tax = cost × tax_rate` stays consistent after conversion. Conversion runs
  * through {@see PriceConversionService::convert_amount()} only.
  *
+ * Free-shipping **minimum order amounts** are also base-authored. WooCommerce
+ * compares them to the (already converted) cart subtotal; without converting the
+ * threshold, eligibility is wrong in foreign currencies. Milestone 18 reconverts
+ * the threshold at evaluation time via
+ * `woocommerce_shipping_free_shipping_is_available` — request-scoped only, never
+ * persisted into method settings, and never by mutating the shared method's
+ * `$min_amount` permanently.
+ *
  * WooCommerce caches calculated rates in the session keyed by a hash of the
  * package; identical packages across currencies would otherwise reuse one
  * currency's cached rates for another. Injecting the rate identity into each
@@ -70,11 +78,12 @@ final class ShippingConversion {
 	}
 
 	/**
-	 * Registers the rate-conversion and package-cache-isolation filters.
+	 * Registers the rate-conversion, free-shipping threshold, and package-cache filters.
 	 */
 	public function register(): void {
 		add_filter( 'woocommerce_package_rates', array( $this, 'convert_rates' ), 90, 2 );
 		add_filter( 'woocommerce_cart_shipping_packages', array( $this, 'isolate_package_cache' ), 10, 1 );
+		add_filter( 'woocommerce_shipping_free_shipping_is_available', array( $this, 'filter_free_shipping_availability' ), 10, 3 );
 	}
 
 	/**
@@ -119,6 +128,103 @@ final class ShippingConversion {
 		}
 
 		return $packages;
+	}
+
+	/**
+	 * Re-evaluates free-shipping eligibility using a converted min_amount.
+	 *
+	 * WooCommerce has already compared the base-authored threshold to the
+	 * active-currency cart total. When converting, that comparison is wrong; this
+	 * filter replaces the boolean using the same cart-total rules WooCommerce
+	 * uses, against a one-shot converted threshold. The method object's
+	 * `$min_amount` and persisted settings are left untouched.
+	 *
+	 * @param mixed $is_available Whether WooCommerce considered the method available.
+	 * @param mixed $package      Shipping package.
+	 * @param mixed $method       Free shipping method instance.
+	 * @return mixed
+	 */
+	public function filter_free_shipping_availability( $is_available, $package = array(), $method = null ) {
+		unset( $package );
+
+		if ( ! $this->should_convert() || ! is_object( $method ) ) {
+			return $is_available;
+		}
+
+		$requires = isset( $method->requires ) ? (string) $method->requires : '';
+
+		if ( ! in_array( $requires, array( 'min_amount', 'either', 'both' ), true ) ) {
+			return $is_available;
+		}
+
+		$base_min = isset( $method->min_amount ) ? $method->min_amount : 0;
+
+		if ( ! is_numeric( $base_min ) ) {
+			return $is_available;
+		}
+
+		$converted_min      = (float) $this->service->convert_amount( $base_min );
+		$has_met_min_amount = $this->cart_meets_free_shipping_minimum( $method, $converted_min );
+		$has_coupon         = $this->cart_has_free_shipping_coupon();
+
+		switch ( $requires ) {
+			case 'min_amount':
+				return $has_met_min_amount;
+			case 'either':
+				return $has_met_min_amount || $has_coupon;
+			case 'both':
+				return $has_met_min_amount && $has_coupon;
+			default:
+				return $is_available;
+		}
+	}
+
+	/**
+	 * Whether the current cart meets a free-shipping minimum (active currency).
+	 *
+	 * Mirrors `WC_Shipping_Free_Shipping::is_available()` total composition so
+	 * `ignore_discounts` and tax-display semantics stay identical.
+	 *
+	 * @param object $method        Free shipping method instance.
+	 * @param float  $converted_min Threshold already converted to the active currency.
+	 */
+	private function cart_meets_free_shipping_minimum( object $method, float $converted_min ): bool {
+		if ( null === WC()->cart ) {
+			return false;
+		}
+
+		$total = (float) WC()->cart->get_displayed_subtotal();
+
+		$ignore_discounts = isset( $method->ignore_discounts ) ? (string) $method->ignore_discounts : 'no';
+
+		if ( 'no' === $ignore_discounts ) {
+			$total -= (float) WC()->cart->get_discount_total();
+
+			if ( WC()->cart->display_prices_including_tax() ) {
+				$total -= (float) WC()->cart->get_discount_tax();
+			}
+		}
+
+		$total = round( $total, wc_get_price_decimals() );
+
+		return $total >= $converted_min;
+	}
+
+	/**
+	 * Whether the cart holds a valid free-shipping coupon.
+	 */
+	private function cart_has_free_shipping_coupon(): bool {
+		if ( null === WC()->cart ) {
+			return false;
+		}
+
+		foreach ( WC()->cart->get_coupons() as $coupon ) {
+			if ( $coupon->is_valid() && $coupon->get_free_shipping() ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
