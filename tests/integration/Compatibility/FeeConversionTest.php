@@ -18,6 +18,7 @@ use UMC\Integration\CurrencyFormatting;
 use UMC\Integration\FeeConversion;
 use UMC\Integration\PriceConversionService;
 use UMC\Integration\PriceHooks;
+use UMC\Tests\Support\ProductPricingTestGraph;
 use UMC\Rates\ManualRateProvider;
 use UMC\Settings;
 use WC_Product_Simple;
@@ -122,7 +123,7 @@ final class FeeConversionTest extends WP_UnitTestCase {
 		$context  = new CurrencyContext( $registry, $rates, new CurrencyResolver() );
 		$service  = new PriceConversionService( $context );
 
-		( new PriceHooks( $service, $context ) )->register();
+		ProductPricingTestGraph::register( $context, $registry );
 		( new CurrencyFormatting( $context ) )->register();
 		( new CartRecalculation( $context ) )->register();
 		( new FeeConversion( $service, $context ) )->register();

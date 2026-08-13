@@ -46,6 +46,7 @@ final class SecuritySourceGuardTest extends TestCase {
 		'DecisionInspectorSettingsField.php',
 		'OrderPayCurrencyLock.php',
 		'RateUpdateController.php',
+		'ProductFixedPricesPanel.php',
 	);
 
 	/**
