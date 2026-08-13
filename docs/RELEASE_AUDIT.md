@@ -7,14 +7,15 @@ release-preparation state.
 **Governing question:** If we published this release tomorrow, is there anything
 left in the repository that clearly should not ship?
 
-**Repository status:** **prepared for v0.19.0**. Milestone 20 (Authoritative
-Per-Currency Fixed Product Pricing, Phase 1; ADR-0025) implementation complete
-on feature branch pending PR review. Git tag and GitHub release **not yet**
-created.
+**Repository status:** **released as v0.19.0**. Milestone 20 (Authoritative
+Per-Currency Fixed Product Pricing, Phase 1; ADR-0025) is complete. Git tag
+**`v0.19.0`** and GitHub release are published. Release commit on `main`:
+`bdc4b4f813dbd98cba3de08650d7ce49b3229895`. Annotated tag object points at that
+merge commit. PR **#21**.
 
 ---
 
-## v0.19.0 release preparation record
+## v0.19.0 release closure record
 
 | Item | Value |
 |---|---|
@@ -24,10 +25,15 @@ created.
 | Persisted-data inventory version | **9** (`_umc_fixed_prices`, line-item provenance) |
 | Production migrations | none |
 | Fixed product pricing | Simple + variations; WC sale schedule gates fixed sale |
-| Unresolved release blockers | **0** (pre-PR review) |
-| Git tag `v0.19.0` | **Not yet created** |
-| GitHub release `v0.19.0` | **Not yet published** |
+| Unresolved release blockers | **0** |
+| Git tag `v0.19.0` | **Created** |
+| GitHub release `v0.19.0` | **Published** |
 | Milestone 20 | **Complete** — Authoritative Fixed Product Pricing at v0.19.0 |
+| PR CI run | **31737126104** (SHA `244b1be3edc307f1c61a5893421d0a7a9747c766`) |
+| Main CI run | **31737273088** (SHA `bdc4b4f813dbd98cba3de08650d7ce49b3229895`) |
+| Release workflow | **31737524502** (success) |
+| Artifact | `universal-multicurrency-0.19.0.zip` (456721 bytes; SHA-256 `d11bc0da…`) |
+| Deployment | **Not performed** |
 
 ---
 

@@ -392,16 +392,15 @@
     [`docs/architecture/extension-compatibility.md`](architecture/extension-compatibility.md).
 
 20. Authoritative Per-Currency Product Pricing — Phase 1 (**v0.19.0**) —
-    **implementation complete** on `feature/m20-authoritative-fixed-pricing`
-    (review-ready; not yet tagged). Optional merchant-authored regular/sale
-    prices per **non-base** foreign currency on simple products and variations,
-    with FX conversion as fallback.
+    **complete and released**. Optional merchant-authored regular/sale prices per
+    **non-base** foreign currency on simple products and variations, with FX
+    conversion as fallback.
 
-    ### Scope for v0.19.0
+    ### Shipped in v0.19.0
 
     | Work item | Status |
     |---|---|
-    | Authoritative architecture spec + ADR-0025 | **Complete** (WP0) |
+    | Authoritative architecture spec + ADR-0025 | **Complete** |
     | PriceHooks characterization + architecture guards | **Complete** |
     | Fixed-price domain model + repository | **Complete** |
     | ProductPriceResolutionService + sale-state gating | **Complete** |
@@ -411,7 +410,10 @@
     | Line-item pricing provenance | **Complete** |
     | Cart/checkout/Store API parity | **Complete** |
     | Diagnostics + compatibility docs | **Complete** |
-    | Release preparation **0.19.0** | **Complete** (branch; tag pending PR) |
+    | Release closure for **v0.19.0** | **Complete** |
+
+    **Released as:** **v0.19.0** (PR **#21**, merge `bdc4b4f`, tag `v0.19.0`).
+    M19 extension evidence tiers unchanged. No generic dynamic-pricing claim.
 
     No `Settings::SCHEMA_VERSION` bump. `PersistedKeys` **8 → 9**. Order
     snapshot schema **4** unchanged. See

@@ -36,9 +36,8 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release:** **v0.18.0** on `main` (tagged and published). **Prepared:**
-**v0.19.0** on `feature/m20-authoritative-fixed-pricing` (not yet tagged). PR **#20**;
-merge commit `2c80db3`. Deployment is a separate operation — not performed as part of release.
+**Current release:** **v0.19.0** on `main` (tagged and published). PR **#21**;
+merge commit `bdc4b4f`. Deployment is a separate operation — not performed as part of release.
 
 ---
 
@@ -996,20 +995,20 @@ unaffected.
 
 ---
 
-## v0.19.0 — Authoritative Fixed Product Pricing (prepared)
+## v0.19.0 — Authoritative Fixed Product Pricing (released)
 
 Ships Milestone 20 under version **0.19.0** (ADR-0025). Settings schema remains **6**; PersistedKeys inventory **9**; order snapshot schema **4**. Optional merchant-authored fixed regular/sale prices per non-base foreign currency on simple products and variations; WooCommerce sale schedule gates fixed sale amounts; line-item pricing provenance.
 
-**Prepared as:** **0.19.0** — tag and GitHub release pending PR merge.
+**Released as:** **v0.19.0** — tag `v0.19.0`, GitHub release published, artifact `universal-multicurrency-0.19.0.zip` (SHA-256 `d11bc0da886177aba2e2400ada8cd511dfbb044aa1f3178834bab3dcf896e44c`).
 
-### Deployment sequence
+### Deployment sequence (release verification completed)
 
 1. Run `composer release-audit` on the **0.19.0** tree.
 2. Build `dist/universal-multicurrency-0.19.0.zip` with `composer install --no-dev`
    + `bin/build-zip.sh`.
-3. Deploy over **0.18.0** in place. No migration step — products without `_umc_fixed_prices` behave unchanged.
+3. Deploy over **0.18.0** in place. No migration step — products without `_umc_fixed_prices` behave unchanged. **Not performed as part of release closure.**
 
-## v0.18.0 — Third-Party Extension Compatibility (released)
+---
 
 Ships Milestone 19 under version **0.18.0** (ADR-0024). Settings schema remains **6**; PersistedKeys inventory **8**; order snapshot schema **4**. Extension compatibility framework with E0–E3 evidence tiers. Opt-in fee conversion wired; third-party shipping pass-through formalized. Priority adapters: Subscriptions, Product Add-Ons, Product Bundles (**Characterized E2 only** — not Integrated or Supported). Real-extension E3 validation remains pending.
 
