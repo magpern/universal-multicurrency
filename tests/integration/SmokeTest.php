@@ -82,7 +82,6 @@ final class SmokeTest extends WP_UnitTestCase {
 			'woocommerce_product_get_stock_quantity',
 			'woocommerce_product_get_stock_status',
 			'woocommerce_payment_complete_reduce_order_stock',
-			'woocommerce_order_status_changed',
 		);
 
 		foreach ( $forbidden as $hook ) {
@@ -92,6 +91,12 @@ final class SmokeTest extends WP_UnitTestCase {
 				"The plugin must not hook '{$hook}'."
 			);
 		}
+
+		$this->assertSame(
+			array( 'UMC\Reporting\ReportingCacheInvalidator::invalidate' ),
+			$this->plugin_callbacks_on( 'woocommerce_order_status_changed' ),
+			'Only ReportingCacheInvalidator may hook woocommerce_order_status_changed.'
+		);
 
 		$this->assertSame(
 			array( 'UMC\Integration\FeeConversion::convert_opt_in_fees' ),

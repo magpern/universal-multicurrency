@@ -37,6 +37,7 @@ final class SettingsPageSectionsTest extends WP_UnitTestCase {
 				SettingsPage::SECTION_DISPLAY,
 				SettingsPage::SECTION_CHECKOUT,
 				SettingsPage::SECTION_DECISION_INSPECTOR,
+				SettingsPage::SECTION_REPORTING,
 				SettingsPage::SECTION_COMPATIBILITY,
 				SettingsPage::SECTION_ADVANCED,
 			),
@@ -44,18 +45,18 @@ final class SettingsPageSectionsTest extends WP_UnitTestCase {
 		);
 	}
 
-	public function test_decision_inspector_sits_between_checkout_and_compatibility(): void {
+	public function test_reporting_sits_between_decision_inspector_and_compatibility(): void {
 		$keys = array_keys( $this->page()->get_sections() );
 
-		$checkout_index  = array_search( SettingsPage::SECTION_CHECKOUT, $keys, true );
 		$inspector_index = array_search( SettingsPage::SECTION_DECISION_INSPECTOR, $keys, true );
+		$reporting_index = array_search( SettingsPage::SECTION_REPORTING, $keys, true );
 		$compat_index    = array_search( SettingsPage::SECTION_COMPATIBILITY, $keys, true );
 
-		$this->assertIsInt( $checkout_index );
 		$this->assertIsInt( $inspector_index );
+		$this->assertIsInt( $reporting_index );
 		$this->assertIsInt( $compat_index );
-		$this->assertSame( $checkout_index + 1, $inspector_index );
-		$this->assertSame( $inspector_index + 1, $compat_index );
+		$this->assertSame( $inspector_index + 1, $reporting_index );
+		$this->assertSame( $reporting_index + 1, $compat_index );
 	}
 
 	public function test_decision_inspector_section_exposes_inspector_field_and_is_not_saveable(): void {

@@ -171,20 +171,26 @@ final class PersistedKeysInventoryTest extends TestCase {
 	}
 
 	public function test_runtime_src_does_not_use_transients_or_object_cache(): void {
+		$allowed   = PersistedKeys::transient_writer_basenames();
 		$offenders = array();
 
 		foreach ( $this->umc_source_files() as $file ) {
+			$basename = basename( $file );
+			if ( in_array( $basename, $allowed, true ) ) {
+				continue;
+			}
+
 			$source = (string) file_get_contents( $file );
 
 			if ( 1 === preg_match( '/\b(set_transient|get_transient|delete_transient|wp_cache_set|wp_cache_get|wp_cache_delete|wp_cache_add)\s*\(/', $source ) ) {
-				$offenders[] = basename( $file );
+				$offenders[] = $basename;
 			}
 		}
 
 		$this->assertSame(
 			array(),
 			$offenders,
-			'Runtime src/ must not write transients or object-cache entries; update PersistedKeys if this changes.'
+			'Runtime src/ must not write transients or object-cache entries outside PersistedKeys::transient_writer_basenames().'
 		);
 	}
 

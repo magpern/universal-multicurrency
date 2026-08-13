@@ -335,11 +335,11 @@ abstract class M20PricingTestCase extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Asserts order snapshot schema remains at version 4.
+	 * Asserts order snapshot schema matches the current writer version.
 	 *
 	 * @param WC_Order $order Order under test.
 	 */
 	protected function assert_snapshot_schema_unchanged( WC_Order $order ): void {
-		$this->assertSame( '4', (string) $order->get_meta( OrderSnapshot::META_SNAPSHOT_VERSION ) );
+		$this->assertSame( (string) OrderSnapshot::SCHEMA_VERSION, (string) $order->get_meta( OrderSnapshot::META_SNAPSHOT_VERSION ) );
 	}
 }

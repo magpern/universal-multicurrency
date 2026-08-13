@@ -211,6 +211,47 @@ if ( ! function_exists( 'admin_url' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wp_timezone' ) ) {
+	function wp_timezone(): \DateTimeZone { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound
+		return new \DateTimeZone( 'UTC' );
+	}
+}
+
+// phpcs:disable Universal.Files.SeparateFunctionsFromOO.Mixed -- Test bootstrap WC_Order stub shares file with function stubs.
+if ( ! class_exists( 'WC_Order' ) ) {
+	/**
+	 * Minimal WooCommerce order stub for unit tests.
+	 */
+	class WC_Order {
+		/**
+		 * @return string
+		 */
+		public function get_currency() {
+			return '';
+		}
+
+		/**
+		 * @return float
+		 */
+		public function get_total_refunded() {
+			return 0.0;
+		}
+	}
+}
+// phpcs:enable Universal.Files.SeparateFunctionsFromOO.Mixed
+
+if ( ! function_exists( 'get_transient' ) ) {
+	function get_transient( $transient ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound, Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		return false;
+	}
+}
+
+if ( ! function_exists( 'set_transient' ) ) {
+	function set_transient( $transient, $value, $expiration ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound, Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		return true;
+	}
+}
+
 // Test doubles never match *Test.php, so PHPUnit's directory-based
 // discovery never loads them; required explicitly, matching how
 // tests/integration/bootstrap.php loads StoreApiTestCase.

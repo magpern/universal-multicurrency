@@ -33,7 +33,6 @@ final class StorefrontGuardTest extends WP_UnitTestCase {
 		'woocommerce_product_get_stock_quantity',
 		'woocommerce_product_get_stock_status',
 		'woocommerce_payment_complete_reduce_order_stock',
-		'woocommerce_order_status_changed',
 	);
 
 	/**
@@ -61,6 +60,14 @@ final class StorefrontGuardTest extends WP_UnitTestCase {
 				"Milestone 3 must not hook '{$hook}'."
 			);
 		}
+	}
+
+	public function test_reporting_cache_invalidator_is_the_only_order_status_changed_callback(): void {
+		$this->assertSame(
+			array( 'UMC\Reporting\ReportingCacheInvalidator::invalidate' ),
+			$this->umc_callbacks_on( 'woocommerce_order_status_changed' ),
+			'Only ReportingCacheInvalidator may hook woocommerce_order_status_changed (M21 cache invalidation).'
+		);
 	}
 
 	public function test_plugin_boot_is_idempotent(): void {

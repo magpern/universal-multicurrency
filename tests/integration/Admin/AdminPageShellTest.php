@@ -74,18 +74,19 @@ final class AdminPageShellTest extends WP_UnitTestCase {
 		return $manifest;
 	}
 
-	public function test_shell_navigation_renders_eight_items_with_active_state(): void {
+	public function test_shell_navigation_renders_nine_items_with_active_state(): void {
 		global $current_section;
 
 		$current_section = SettingsPage::SECTION_DISPLAY;
 		$output          = $this->render_shell_sections();
 
-		$this->assertSame( 8, preg_match_all( '/class="umc-shell-nav__item(?:\s|")/', $output ) );
+		$this->assertSame( 9, preg_match_all( '/class="umc-shell-nav__item(?:\s|")/', $output ) );
 		$this->assertStringContainsString( 'aria-current="page"', $output );
 		$this->assertStringContainsString( 'umc-shell-nav__item--active', $output );
 		$this->assertStringContainsString( 'Exchange Rates', $output );
 		$this->assertStringContainsString( 'Visitor Location', $output );
 		$this->assertStringContainsString( 'Decision Inspector', $output );
+		$this->assertStringContainsString( 'Reporting', $output );
 		$this->assertStringContainsString( 'Checkout', $output );
 		$this->assertStringContainsString( 'Compatibility', $output );
 	}
@@ -104,6 +105,7 @@ final class AdminPageShellTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'section=display', $output );
 		$this->assertStringContainsString( 'section=checkout', $output );
 		$this->assertStringContainsString( 'section=decision_inspector', $output );
+		$this->assertStringContainsString( 'section=reporting', $output );
 		$this->assertStringContainsString( 'section=compatibility', $output );
 	}
 

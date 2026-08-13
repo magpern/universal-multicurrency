@@ -44,6 +44,8 @@ final class SecuritySourceGuardTest extends TestCase {
 		'GeoSandboxController.php',
 		'DecisionInspectorController.php',
 		'DecisionInspectorSettingsField.php',
+		'ReportingSettingsField.php',
+		'ReportingExportController.php',
 		'OrderPayCurrencyLock.php',
 		'RateUpdateController.php',
 		'ProductFixedPricesPanel.php',
@@ -66,6 +68,7 @@ final class SecuritySourceGuardTest extends TestCase {
 		'CompatibilityInventory.php',
 		'ExtensionRuntimeInventory.php',
 		'SwitcherShortcodeScanner.php',
+		'ReportingCache.php',
 	);
 
 	private function root(): string {
