@@ -363,3 +363,26 @@ including the 304 path.
   `umc_rate_state`, confined option reads inside `src/Rates/`, all outbound HTTP
   inside `WordPressHttpTransport` using only `wp_safe_remote_get()`, and a
   scheduler that never names a provider.
+
+## Milestone 19 — extension compatibility
+
+Three evidence layers (ADR-0024):
+
+1. **E1 — contract tests** (`tests/unit/Compatibility/Extension/`) — no WordPress;
+   fake contracts and registry guards (`ExtensionEvidenceTest`).
+2. **E2 — hook-semantics doubles** — UMC-owned test plugins installed when
+   `UMC_TEST_EXTENSION_FIXTURES=1`; integration tests under
+   `tests/integration/Compatibility/`.
+3. **E3 — real licensed extensions** — documented optional workflow; skipped when
+   ZIPs absent; required for Integrated status only.
+
+Key integration tests:
+
+- `SubscriptionsAdapterTest` — renewal browsing-currency isolation
+- `ProductAddonsAdapterTest` — simulated add-on raw price conversion
+- `BundlesAdapterTest` — simulated bundled item price conversion
+- `FeeConversionTest` — opt-in fee conversion; default pass-through
+- `FeeBoundaryTest` — default fees remain unconverted without opt-in
+
+Authoritative spec: `docs/architecture/extension-compatibility.md`, ADR-0024,
+`docs/EXTENSION_INTEGRATION.md`.

@@ -213,10 +213,26 @@ Evidence-linked commerce matrix. Labels:
 | Order-pay / thank-you / emails historical | ✓ | ✓ | — | Supported | `OrderPayCurrencyLockTest`, `HistoricalOrderDisplayTest` |
 | `/wc/store/` shopper conversion | — | ✓ | — | Supported | Store API suite, `RestCurrencyBoundaryTest` |
 | `/wc/v3` admin REST non-conversion | — | — | ✓ | Supported | `RestCurrencyBoundaryTest` |
-| Cart fees auto-converted | — | — | — | Known limitation | `FeeBoundaryTest`, `StorefrontGuardTest` |
-| Third-party shipping / extensions | — | — | — | Out of scope | Deferred to M19 |
+| Cart fees auto-converted | — | — | — | Known limitation | Default pass-through; opt-in via `umc_convert_fee` (`FeeConversionTest`, `FeeBoundaryTest`) |
+| Third-party shipping | — | — | — | Characterized | Pass-through + opt-in `umc_convert_shipping_rate` (`ShippingConversionTest`) |
+| Third-party extensions | — | — | Compatibility Center | Characterized (E2) | See § Third-party WooCommerce extensions (Milestone 19) |
 
 Authoritative invariants: [`docs/architecture/woocommerce-transaction-integrity.md`](architecture/woocommerce-transaction-integrity.md), ADR-0023.
+
+## Third-party WooCommerce extensions (Milestone 19)
+
+Evidence-linked extension matrix. **Integrated** requires E3 real-extension
+validation only. E1/E2 cap at **Characterized** with explicit sub-labels.
+
+| Extension | Status line | Evidence | Surfaces |
+|---|---|---|---|
+| WooCommerce Subscriptions | Characterized — simulated extension hooks | E2 | Initial checkout conversion; renewal browsing-currency isolation |
+| Product Add-Ons | Characterized — simulated extension hooks | E2 | Flat/quantity add-on raw prices via documented hook contract |
+| Product Bundles | Characterized — simulated extension hooks | E2 | Bundled item base-authored prices |
+| Composite Products | Not evaluated | E0 | Investigation deferred; Bundles chosen as bounded M19 integration |
+| WooCommerce Bookings | Not evaluated | E0 | M19 audit-only |
+
+Authoritative spec: [`docs/architecture/extension-compatibility.md`](architecture/extension-compatibility.md), ADR-0024, [`docs/EXTENSION_INTEGRATION.md`](EXTENSION_INTEGRATION.md).
 
 ## The floor's Store API order-route exclusion
 

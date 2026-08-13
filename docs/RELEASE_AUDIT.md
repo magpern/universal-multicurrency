@@ -1,3 +1,35 @@
+# Release audit — v0.18.0 Third-Party Extension Compatibility
+
+Executable release-preparation gate for Universal Multicurrency **v0.18.0**.
+This document records scope, criteria, commands, audit results, and the current
+release-preparation state.
+
+**Governing question:** If we published this release tomorrow, is there anything
+left in the repository that clearly should not ship?
+
+**Repository status:** **release preparation — not tagged, not published**. Milestone 19
+(Third-Party Extension Compatibility Framework; ADR-0024) implementation complete
+on feature branch pending PR review. Git tag **`v0.18.0`** and GitHub release
+**Not yet created**.
+
+---
+
+## v0.18.0 release closure record (pre-merge)
+
+| Item | Value |
+|---|---|
+| Version | **0.18.0** |
+| Settings schema | **6** (unchanged) |
+| Order snapshot schema | **4** (unchanged) |
+| Persisted-data inventory version | **8** (unchanged; no new option or meta key) |
+| Production migrations | unchanged |
+| Extension evidence model | E0–E3 with Characterized sub-labels |
+| Priority adapters | Subscriptions, Product Add-Ons, Product Bundles (E2 Characterized) |
+| Git tag `v0.18.0` | **Not yet created** |
+| GitHub release `v0.18.0` | **Not yet published** |
+
+---
+
 # Release audit — v0.17.0 WooCommerce Compatibility & Transaction Integrity
 
 Executable release-blocking gate for Universal Multicurrency **v0.17.0**. This

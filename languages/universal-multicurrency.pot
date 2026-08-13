@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Universal Multicurrency for WooCommerce 0.17.0\n"
+"Project-Id-Version: Universal Multicurrency for WooCommerce 0.18.0\n"
 "Report-Msgid-Bugs-To: https://github.com/magpern/universal-multicurrency/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1927,7 +1927,9 @@ msgid "%s — matched"
 msgstr ""
 
 #. translators: 1: rule label, 2: reason the rule did not apply
+#. translators: 1: extension label, 2: status line
 #: src/Admin/Geo/GeoPanelRenderer.php:559
+#: src/Compatibility/Checks/ExtensionCompatibilityCheck.php:117
 #, php-format
 msgid "%1$s — %2$s"
 msgstr ""
@@ -2560,6 +2562,18 @@ msgstr ""
 
 #: src/Compatibility/Checks/EnvironmentCheck.php:110
 msgid "DISABLE_WP_CRON is set. Ensure a system cron task triggers wp-cron.php if automatic rate updates are used."
+msgstr ""
+
+#. translators: 1: detected version, 2: tested-through version
+#: src/Compatibility/Checks/ExtensionCompatibilityCheck.php:56
+#, php-format
+msgid "Untested version: detected %1$s, validated through %2$s."
+msgstr ""
+
+#. translators: 1: extension label, 2: status line
+#: src/Compatibility/Checks/ExtensionCompatibilityCheck.php:109
+#, php-format
+msgid "%1$s is installed but inactive. Status: %2$s"
 msgstr ""
 
 #. translators: %s: integration label

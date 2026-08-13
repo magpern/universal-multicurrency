@@ -26,7 +26,7 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Produces `dist/universal-multicurrency-0.17.0.zip`. The archive includes `readme.txt`,
+Produces `dist/universal-multicurrency-0.18.0.zip`. The archive includes `readme.txt`,
 production `src/`, `vendor/`, and `languages/universal-multicurrency.pot`.
 
 Performance subset:
@@ -36,7 +36,8 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release:** **v0.17.0** on `main` (tagged and published).
+**Current release:** **v0.17.0** on `main` (tagged and published). **v0.18.0**
+release preparation on feature branch — not tagged or published.
 Git tag and GitHub release follow CI verification — do not create without
 explicit approval. The previous release, **v0.15.0**, is tagged and published.
 
@@ -996,9 +997,22 @@ unaffected.
 
 ---
 
-## v0.17.0 — WooCommerce Compatibility & Transaction Integrity (current)
+## v0.18.0 — Third-Party Extension Compatibility (release preparation)
 
-Ships Milestone 18 under version **0.17.0** (ADR-0023). Settings schema remains **6**; PersistedKeys inventory **8**; order snapshot schema **4**. Free-shipping `min_amount` converts at eligibility time. Fees remain unwired.
+Ships Milestone 19 under version **0.18.0** (ADR-0024). Settings schema remains **6**; PersistedKeys inventory **8**; order snapshot schema **4**. Extension compatibility framework with E0–E3 evidence tiers. Opt-in fee conversion wired; third-party shipping pass-through formalized. Priority adapters: Subscriptions, Product Add-Ons, Product Bundles (Characterized E2).
+
+### Deployment sequence
+
+1. Run `composer release-audit` on the **0.18.0** tree.
+2. Build `dist/universal-multicurrency-0.18.0.zip` with `composer install --no-dev`
+   + `bin/build-zip.sh`.
+3. Deploy over **0.17.x** in place. No migration step.
+
+---
+
+## v0.17.0 — WooCommerce Compatibility & Transaction Integrity
+
+Ships Milestone 18 under version **0.17.0** (ADR-0023). Settings schema remains **6**; PersistedKeys inventory **8**; order snapshot schema **4**. Free-shipping `min_amount` converts at eligibility time.
 
 ## v0.16.0 — Switcher Customization
 

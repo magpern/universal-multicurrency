@@ -340,30 +340,30 @@
     **Released as:** **v0.17.0**.
 
 19. Third-Party Extension Compatibility Framework & Priority Integrations
-    (**v0.18.0**) — **in progress**. Establishes a maintainable third-party
-    extension compatibility framework on top of M18 transaction integrity, then
-    applies it to bounded priority integrations with honest evidence
-    classification.
+    (**v0.18.0**) — **complete on feature branch; release preparation**. Establishes
+    a maintainable third-party extension compatibility framework on top of M18
+    transaction integrity, then applies it to bounded priority integrations with
+    honest evidence classification.
 
-    ### Scope
+    ### Shipped in v0.18.0 (pending merge)
 
     | Work item | Status |
     |---|---|
-    | Authoritative architecture spec + ADR-0024 | **In progress** |
-    | Extension compatibility status / evidence contract (E0–E3) | **Planned** |
-    | Extension test harness (Layer 1 contract + Layer 2 hook doubles) | **Planned** |
-    | ExtensionCompatibilityRegistry + ExtensionDetector | **Planned** |
-    | Fee opt-in seam (`umc_convert_fee` wired) | **Planned** |
-    | Third-party shipping contract formalization | **Planned** |
-    | WooCommerce Subscriptions characterization + adapter | **Planned** |
-    | Product Add-Ons hook contract + adapter | **Planned** |
-    | Product Bundles / Composite investigation | **Planned** |
-    | Bookings audit (conditional) | **Planned** |
-    | Dynamic pricing boundary documentation | **Planned** |
-    | Gateway compatibility validation | **Planned** |
-    | Compatibility Center extension evidence UX | **Planned** |
-    | Developer extension-integration guide | **Planned** |
-    | Release readiness for **v0.18.0** (PR boundary) | **Planned** |
+    | Authoritative architecture spec + ADR-0024 | **Complete** |
+    | Extension compatibility status / evidence contract (E0–E3) | **Complete** |
+    | Extension test harness (Layer 1 contract + Layer 2 hook doubles) | **Complete** |
+    | ExtensionCompatibilityRegistry + ExtensionDetector | **Complete** |
+    | Fee opt-in seam (`umc_convert_fee` wired) | **Complete** |
+    | Third-party shipping contract formalization | **Complete** |
+    | WooCommerce Subscriptions characterization + adapter (E2) | **Complete** |
+    | Product Add-Ons hook contract + adapter (E2) | **Complete** |
+    | Product Bundles adapter (E2); Composite deferred | **Complete** |
+    | Bookings audit → Not evaluated | **Complete** |
+    | Dynamic pricing boundary documentation | **Complete** |
+    | Gateway compatibility validation | **Complete** |
+    | Compatibility Center extension evidence UX | **Complete** |
+    | Developer extension-integration guide | **Complete** |
+    | Release readiness for **v0.18.0** (PR boundary) | **Complete** |
 
     ### Success criteria
 
