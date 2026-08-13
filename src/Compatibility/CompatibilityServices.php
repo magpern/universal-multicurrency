@@ -13,6 +13,7 @@ use UMC\Compatibility\Checks\ExtensionCompatibilityCheck;
 use UMC\Compatibility\Checks\CacheCheck;
 use UMC\Compatibility\Checks\CheckoutConfigurationCheck;
 use UMC\Compatibility\Checks\ConfigurationCheck;
+use UMC\Compatibility\Checks\FixedProductPricingCheck;
 use UMC\Compatibility\Checks\ConflictCheck;
 use UMC\Compatibility\Checks\EnvironmentCheck;
 use UMC\Compatibility\Checks\IntegrationCheck;
@@ -50,6 +51,7 @@ final class CompatibilityServices {
 			array(
 				new ConflictCheck(),
 				new ConfigurationCheck(),
+				new FixedProductPricingCheck(),
 				new CheckoutConfigurationCheck(),
 				new IntegrationCheck(),
 				new ExtensionCompatibilityCheck(),
