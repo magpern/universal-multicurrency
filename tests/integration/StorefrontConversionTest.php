@@ -18,6 +18,7 @@ use UMC\Integration\PriceConversionService;
 use UMC\Integration\PriceHooks;
 use UMC\Rates\ManualRateProvider;
 use UMC\Settings;
+use UMC\Tests\Support\ProductPricingTestGraph;
 use WC_Product_Simple;
 use WC_Product_Variable;
 use WC_Product_Variation;
@@ -78,7 +79,7 @@ final class StorefrontConversionTest extends WP_UnitTestCase {
 		$context  = new CurrencyContext( $registry, $rates, new CurrencyResolver() );
 		$service  = new PriceConversionService( $context );
 
-		( new PriceHooks( $service, $context ) )->register();
+		ProductPricingTestGraph::register( $context, $registry );
 		( new CurrencyFormatting( $context ) )->register();
 
 		$_COOKIE[ CurrencyContext::COOKIE_NAME ] = $active;

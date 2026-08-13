@@ -68,6 +68,35 @@ Writer: `Order\OrderSnapshot` (classic checkout and Store API checkout adapter).
 
 ---
 
+## Product metadata (WooCommerce CRUD)
+
+Optional merchant-authored fixed prices per **non-base** foreign currency (M20).
+Stored on simple products and variations. **Deleted with the product** when the
+product post is removed; not touched by plugin uninstall (same as other product
+meta).
+
+| Key | Constant | Since |
+|---|---|---|
+| `_umc_fixed_prices` | `FixedPriceDocument::META_KEY` | M20 |
+
+Writer: `Pricing\FixedPriceRepository` via `Admin\ProductFixedPricesPanel`.
+
+---
+
+## Order line-item metadata (HPOS CRUD)
+
+Write-once pricing provenance for product line items at checkout (M20). Permanent
+audit data — **never deleted on uninstall** (same policy as order snapshot meta).
+
+| Key | Constant | Since |
+|---|---|---|
+| `_umc_line_price_source` | `LineItemPriceProvenance::META_SOURCE` | M20 (`fixed` \| `converted`) |
+| `_umc_line_price_currency` | `LineItemPriceProvenance::META_CURRENCY` | M20 |
+
+Writer: `Order\LineItemPriceProvenance`.
+
+---
+
 ## Refund metadata (HPOS CRUD)
 
 Write-once audit linkage to the parent order snapshot. **Never deleted on
@@ -184,7 +213,7 @@ with `PersistedKeys::inventory()` — never edit one without the other.
 
 ```umc:persisted-inventory
 {
-  "inventory_version": 8,
+  "inventory_version": 9,
   "options": [
     "umc_settings",
     "umc_rate_state"
@@ -208,6 +237,13 @@ with `PersistedKeys::inventory()` — never edit one without the other.
   "refund_meta": [
     "_umc_parent_transaction_currency",
     "_umc_parent_rate_identity"
+  ],
+  "product_meta": [
+    "_umc_fixed_prices"
+  ],
+  "order_line_item_meta": [
+    "_umc_line_price_source",
+    "_umc_line_price_currency"
   ],
   "user_meta": [
     "umc_dismissed_notices",
@@ -258,6 +294,11 @@ with `PersistedKeys::inventory()` — never edit one without the other.
     "preserve_refund_meta": [
       "_umc_parent_transaction_currency",
       "_umc_parent_rate_identity"
+    ],
+    "preserve_product_meta": [],
+    "preserve_order_line_item_meta": [
+      "_umc_line_price_source",
+      "_umc_line_price_currency"
     ],
     "preserve_user_meta": [
       "umc_dismissed_notices",

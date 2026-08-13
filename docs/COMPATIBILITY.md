@@ -234,6 +234,21 @@ validation only. E1/E2 cap at **Characterized** with explicit sub-labels.
 
 Authoritative spec: [`docs/architecture/extension-compatibility.md`](architecture/extension-compatibility.md), ADR-0024, [`docs/EXTENSION_INTEGRATION.md`](EXTENSION_INTEGRATION.md).
 
+### Milestone 20 — fixed product pricing (v0.19.0)
+
+M20 adds optional merchant-authored fixed regular/sale prices per **non-base**
+foreign currency on simple products and variations. FX conversion remains the
+fallback when no applicable fixed price exists.
+
+| Topic | M20 posture |
+|---|---|
+| WooCommerce native base prices | Supported — sole authority for store base currency |
+| Fixed product/variation prices | Supported — M20 core scope |
+| Post-UMC third-party price modifiers | Governed by M19 extension boundary; no generic dynamic-pricing claim |
+| M19 extension evidence tiers | Unchanged — M20 does not promote any extension |
+
+Authoritative spec: [`docs/architecture/authoritative-fixed-product-pricing.md`](architecture/authoritative-fixed-product-pricing.md), ADR-0025.
+
 ## The floor's Store API order-route exclusion
 
 At the WooCommerce floor (8.2.x), WooCommerce's own Store API `RoutesController`

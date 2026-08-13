@@ -391,6 +391,34 @@
     and
     [`docs/architecture/extension-compatibility.md`](architecture/extension-compatibility.md).
 
+20. Authoritative Per-Currency Product Pricing — Phase 1 (**v0.19.0**) —
+    **implementation complete** on `feature/m20-authoritative-fixed-pricing`
+    (review-ready; not yet tagged). Optional merchant-authored regular/sale
+    prices per **non-base** foreign currency on simple products and variations,
+    with FX conversion as fallback.
+
+    ### Scope for v0.19.0
+
+    | Work item | Status |
+    |---|---|
+    | Authoritative architecture spec + ADR-0025 | **Complete** (WP0) |
+    | PriceHooks characterization + architecture guards | **Complete** |
+    | Fixed-price domain model + repository | **Complete** |
+    | ProductPriceResolutionService + sale-state gating | **Complete** |
+    | Simple + variation storefront integration | **Complete** |
+    | Variation cache fingerprint extension | **Complete** |
+    | Product editor admin UX | **Complete** |
+    | Line-item pricing provenance | **Complete** |
+    | Cart/checkout/Store API parity | **Complete** |
+    | Diagnostics + compatibility docs | **Complete** |
+    | Release preparation **0.19.0** | **Complete** (branch; tag pending PR) |
+
+    No `Settings::SCHEMA_VERSION` bump. `PersistedKeys` **8 → 9**. Order
+    snapshot schema **4** unchanged. See
+    [`docs/adr/0025-authoritative-fixed-product-pricing.md`](adr/0025-authoritative-fixed-product-pricing.md)
+    and
+    [`docs/architecture/authoritative-fixed-product-pricing.md`](architecture/authoritative-fixed-product-pricing.md).
+
 ## Future milestones — not started, not implemented
 
 None of the following exists in the codebase today:

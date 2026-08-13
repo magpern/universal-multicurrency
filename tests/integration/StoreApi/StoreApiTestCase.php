@@ -27,6 +27,7 @@ use UMC\Integration\CurrencyFormatting;
 use UMC\Integration\GatewayCompatibility;
 use UMC\Integration\PriceConversionService;
 use UMC\Integration\PriceHooks;
+use UMC\Tests\Support\ProductPricingTestGraph;
 use UMC\Integration\ShippingConversion;
 use UMC\Order\HistoricalFormattingResolver;
 use UMC\Order\OrderCurrencyContext;
@@ -282,7 +283,7 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 		$this->context = new CurrencyContext( $registry, $rates, new CurrencyResolver() );
 		$service       = new PriceConversionService( $this->context );
 
-		( new PriceHooks( $service, $this->context ) )->register();
+		ProductPricingTestGraph::register( $this->context, $registry );
 		( new CurrencyFormatting( $this->context ) )->register();
 		( new CartRecalculation( $this->context ) )->register();
 		( new CouponConversion( $service, $this->context ) )->register();

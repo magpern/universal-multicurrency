@@ -4,7 +4,7 @@ Tags: woocommerce, currency, multicurrency, exchange rates, money
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.18.0
+Stable tag: 0.19.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,6 +49,13 @@ Not for production traffic. Two runtime converters can double-convert prices. De
 The plugin ships a POT template (`languages/universal-multicurrency.pot`) for translators. Bundled locale `.mo` files are not included in this release.
 
 == Changelog ==
+
+= 0.19.0 =
+* Authoritative per-currency fixed product pricing (Milestone 20, Phase 1)
+* Optional merchant-authored regular and sale prices per non-base foreign currency on simple products and variations
+* WooCommerce native sale schedule gates fixed sale amounts; FX conversion remains fallback when fixed prices are absent
+* Order line-item pricing provenance (`_umc_line_price_source`, `_umc_line_price_currency`)
+* PersistedKeys inventory 8→9; no settings schema or order snapshot schema change
 
 = 0.18.0 =
 * Third-Party Extension Compatibility Framework (Milestone 19)

@@ -24,7 +24,7 @@ use UMC\CurrencyContext;
  * It only ever calls the converter with a positive rate the context guarantees,
  * so it does not throw on valid display input.
  */
-final class PriceConversionService {
+final class PriceConversionService implements DisplayPriceConverter {
 
 	/**
 	 * Request-scoped currency facade.

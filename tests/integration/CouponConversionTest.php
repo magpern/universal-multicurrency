@@ -17,6 +17,7 @@ use UMC\Integration\CouponConversion;
 use UMC\Integration\CurrencyFormatting;
 use UMC\Integration\PriceConversionService;
 use UMC\Integration\PriceHooks;
+use UMC\Tests\Support\ProductPricingTestGraph;
 use UMC\Rates\ManualRateProvider;
 use UMC\Settings;
 use WC_Coupon;
@@ -90,7 +91,7 @@ final class CouponConversionTest extends WP_UnitTestCase {
 		$context  = new CurrencyContext( $registry, $rates, new CurrencyResolver() );
 		$service  = new PriceConversionService( $context );
 
-		( new PriceHooks( $service, $context ) )->register();
+		ProductPricingTestGraph::register( $context, $registry );
 		( new CurrencyFormatting( $context ) )->register();
 		( new CouponConversion( $service, $context ) )->register();
 
