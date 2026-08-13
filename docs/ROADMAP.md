@@ -340,12 +340,12 @@
     **Released as:** **v0.17.0**.
 
 19. Third-Party Extension Compatibility Framework & Priority Integrations
-    (**v0.18.0**) — **complete on feature branch; release preparation**. Establishes
-    a maintainable third-party extension compatibility framework on top of M18
-    transaction integrity, then applies it to bounded priority integrations with
-    honest evidence classification.
+    (**v0.18.0**) — **complete and released**. Establishes a maintainable
+    third-party extension compatibility framework on top of M18 transaction
+    integrity, then applies it to bounded priority integrations with honest
+    evidence classification.
 
-    ### Shipped in v0.18.0 (pending merge)
+    ### Shipped in v0.18.0
 
     | Work item | Status |
     |---|---|
@@ -355,15 +355,19 @@
     | ExtensionCompatibilityRegistry + ExtensionDetector | **Complete** |
     | Fee opt-in seam (`umc_convert_fee` wired) | **Complete** |
     | Third-party shipping contract formalization | **Complete** |
-    | WooCommerce Subscriptions characterization + adapter (E2) | **Complete** |
-    | Product Add-Ons hook contract + adapter (E2) | **Complete** |
-    | Product Bundles adapter (E2); Composite deferred | **Complete** |
-    | Bookings audit → Not evaluated | **Complete** |
+    | WooCommerce Subscriptions E2 isolation characterization | **Complete** |
+    | Product Add-Ons E2 generic seam characterization | **Complete** |
+    | Product Bundles E2 generic seam characterization | **Complete** |
+    | Composite Products → Not evaluated (E0) | **Complete** |
+    | Bookings audit → Not evaluated (E0) | **Complete** |
     | Dynamic pricing boundary documentation | **Complete** |
     | Gateway compatibility validation | **Complete** |
     | Compatibility Center extension evidence UX | **Complete** |
     | Developer extension-integration guide | **Complete** |
-    | Release readiness for **v0.18.0** (PR boundary) | **Complete** |
+    | Release closure for **v0.18.0** | **Complete** |
+
+    **Released as:** **v0.18.0** (PR **#20**, merge `2c80db3`, tag `v0.18.0`).
+    No named premium extension is Integrated or Supported. E3 validation pending.
 
     ### Success criteria
 
@@ -381,7 +385,6 @@
     - Claim Integrated from test doubles
     - Global automatic fee conversion
     - Bookings full support unless investigation proves bounded
-    - Git tag / GitHub release / deploy during M19 implementation
 
     See
     [`docs/adr/0024-third-party-extension-compatibility-contract.md`](adr/0024-third-party-extension-compatibility-contract.md)

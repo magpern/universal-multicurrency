@@ -7,14 +7,15 @@ release-preparation state.
 **Governing question:** If we published this release tomorrow, is there anything
 left in the repository that clearly should not ship?
 
-**Repository status:** **release preparation — not tagged, not published**. Milestone 19
-(Third-Party Extension Compatibility Framework; ADR-0024) implementation complete
-on feature branch pending PR review. Git tag **`v0.18.0`** and GitHub release
-**Not yet created**.
+**Repository status:** **released as v0.18.0**. Milestone 19
+(Third-Party Extension Compatibility Framework; ADR-0024) is complete. Git tag
+**`v0.18.0`** and GitHub release are published. Release commit on `main`:
+`2c80db3ca3807ffb141dab05f17db0a97ec1a864`. Annotated tag object points at that
+merge commit. PR **#20**.
 
 ---
 
-## v0.18.0 release closure record (pre-merge)
+## v0.18.0 release closure record
 
 | Item | Value |
 |---|---|
@@ -24,9 +25,12 @@ on feature branch pending PR review. Git tag **`v0.18.0`** and GitHub release
 | Persisted-data inventory version | **8** (unchanged; no new option or meta key) |
 | Production migrations | unchanged |
 | Extension evidence model | E0–E3 with Characterized sub-labels |
-| Priority adapters | Subscriptions, Product Add-Ons, Product Bundles (E2 Characterized) |
-| Git tag `v0.18.0` | **Not yet created** |
-| GitHub release `v0.18.0` | **Not yet published** |
+| Priority adapters | Subscriptions, Product Add-Ons, Product Bundles (**Characterized E2 only**; not Integrated) |
+| Unresolved release blockers | **0** |
+| Git tag `v0.18.0` | **Created** |
+| GitHub release `v0.18.0` | **Published** |
+| Milestone 19 | **Complete** — Third-Party Extension Compatibility at v0.18.0 |
+| E3 real-extension validation | **Pending** — no named premium extension claimed Integrated |
 
 ---
 

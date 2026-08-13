@@ -36,10 +36,10 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release:** **v0.17.0** on `main` (tagged and published). **v0.18.0**
-release preparation on feature branch — not tagged or published.
-Git tag and GitHub release follow CI verification — do not create without
-explicit approval. The previous release, **v0.15.0**, is tagged and published.
+**Current release:** **v0.18.0** on `main` (tagged and published). PR **#20**;
+merge commit `2c80db3`. The previous release, **v0.17.0**, remains tagged and
+published. Git tag and GitHub release for v0.18.0 follow CI verification on
+`main`. Deployment is a separate operation — not performed as part of release.
 
 ---
 
@@ -997,16 +997,18 @@ unaffected.
 
 ---
 
-## v0.18.0 — Third-Party Extension Compatibility (release preparation)
+## v0.18.0 — Third-Party Extension Compatibility (released)
 
-Ships Milestone 19 under version **0.18.0** (ADR-0024). Settings schema remains **6**; PersistedKeys inventory **8**; order snapshot schema **4**. Extension compatibility framework with E0–E3 evidence tiers. Opt-in fee conversion wired; third-party shipping pass-through formalized. Priority adapters: Subscriptions, Product Add-Ons, Product Bundles (Characterized E2).
+Ships Milestone 19 under version **0.18.0** (ADR-0024). Settings schema remains **6**; PersistedKeys inventory **8**; order snapshot schema **4**. Extension compatibility framework with E0–E3 evidence tiers. Opt-in fee conversion wired; third-party shipping pass-through formalized. Priority adapters: Subscriptions, Product Add-Ons, Product Bundles (**Characterized E2 only** — not Integrated or Supported). Real-extension E3 validation remains pending.
 
-### Deployment sequence
+**Released as:** **v0.18.0** — tag `v0.18.0`, GitHub release published, artifact `universal-multicurrency-0.18.0.zip`.
+
+### Deployment sequence (release verification completed)
 
 1. Run `composer release-audit` on the **0.18.0** tree.
 2. Build `dist/universal-multicurrency-0.18.0.zip` with `composer install --no-dev`
    + `bin/build-zip.sh`.
-3. Deploy over **0.17.x** in place. No migration step.
+3. Deploy over **0.17.x** in place. No migration step. **Not performed as part of release closure.**
 
 ---
 
