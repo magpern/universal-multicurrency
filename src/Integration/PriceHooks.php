@@ -10,39 +10,23 @@ declare(strict_types=1);
 namespace UMC\Integration;
 
 use UMC\CurrencyContext;
+use UMC\Pricing\ProductPriceResolutionService;
+use WC_Product;
 
 /**
- * Registers the view-context price filters and delegates amounts to the
+ * Registers product price filters and delegates to fixed-price resolution or
  * {@see PriceConversionService}.
- *
- * Each callback short-circuits when the request is not convertible or the base
- * currency is active, and a re-entrancy guard prevents recursion. There is no
- * broad exception handling: the service is exception-safe on valid display
- * input, and unrelated programming errors must surface rather than be swallowed.
  */
 final class PriceHooks {
 
-	/**
-	 * Product price getter filters (simple + variation), all `($value, $product)`.
-	 */
-	private const PRICE_FILTERS = array(
-		'woocommerce_product_get_price',
-		'woocommerce_product_get_regular_price',
-		'woocommerce_product_get_sale_price',
-		'woocommerce_product_variation_get_price',
-		'woocommerce_product_variation_get_regular_price',
-		'woocommerce_product_variation_get_sale_price',
-		'woocommerce_variation_prices_price',
-		'woocommerce_variation_prices_regular_price',
-		'woocommerce_variation_prices_sale_price',
-	);
+	public const FILTER_PRIORITY = 10;
 
 	/**
-	 * Conversion seam.
+	 * Fixed-vs-converted product price resolver.
 	 *
-	 * @var PriceConversionService
+	 * @var ProductPriceResolutionService
 	 */
-	private PriceConversionService $service;
+	private ProductPriceResolutionService $resolver;
 
 	/**
 	 * Request-scoped currency facade.
@@ -52,78 +36,259 @@ final class PriceHooks {
 	private CurrencyContext $context;
 
 	/**
-	 * Re-entrancy guard.
+	 * WooCommerce sale state helper for cache identity.
+	 *
+	 * @var ProductSaleStateResolver|null
+	 */
+	private ?\UMC\Pricing\ProductSaleStateResolver $sale_state;
+
+	/**
+	 * Re-entrancy guard while resolving nested getters.
 	 *
 	 * @var bool
 	 */
-	private bool $converting = false;
+	private bool $resolving = false;
 
 	/**
-	 * Binds the hooks to the seam and the context.
+	 * Binds the resolver, currency context, and optional sale-state helper.
 	 *
-	 * @param PriceConversionService $service Conversion seam.
-	 * @param CurrencyContext        $context Request-scoped currency facade.
+	 * @param ProductPriceResolutionService              $resolver   Fixed/converted resolution seam.
+	 * @param CurrencyContext                            $context    Request-scoped currency facade.
+	 * @param \UMC\Pricing\ProductSaleStateResolver|null $sale_state Sale cache tokens.
 	 */
-	public function __construct( PriceConversionService $service, CurrencyContext $context ) {
-		$this->service = $service;
-		$this->context = $context;
+	public function __construct(
+		ProductPriceResolutionService $resolver,
+		CurrencyContext $context,
+		?\UMC\Pricing\ProductSaleStateResolver $sale_state = null
+	) {
+		$this->resolver   = $resolver;
+		$this->context    = $context;
+		$this->sale_state = $sale_state ?? new \UMC\Pricing\ProductSaleStateResolver();
 	}
 
 	/**
-	 * Registers all price filters.
-	 *
-	 * Attached unconditionally (on every request type) so the variation-price
-	 * cache hash — which embeds attached-callback signatures — stays stable;
-	 * each callback decides per request whether to convert.
+	 * Registers all price filters at the characterized priority.
 	 */
 	public function register(): void {
-		foreach ( self::PRICE_FILTERS as $filter ) {
-			add_filter( $filter, array( $this, 'convert_price' ), 10, 1 );
-		}
+		add_filter( 'woocommerce_product_get_price', array( $this, 'filter_product_get_price' ), self::FILTER_PRIORITY, 2 );
+		add_filter( 'woocommerce_product_get_regular_price', array( $this, 'filter_product_get_regular_price' ), self::FILTER_PRIORITY, 2 );
+		add_filter( 'woocommerce_product_get_sale_price', array( $this, 'filter_product_get_sale_price' ), self::FILTER_PRIORITY, 2 );
 
-		add_filter( 'woocommerce_get_variation_prices_hash', array( $this, 'append_currency_to_hash' ), 10, 1 );
+		add_filter( 'woocommerce_product_variation_get_price', array( $this, 'filter_variation_get_price' ), self::FILTER_PRIORITY, 2 );
+		add_filter( 'woocommerce_product_variation_get_regular_price', array( $this, 'filter_variation_get_regular_price' ), self::FILTER_PRIORITY, 2 );
+		add_filter( 'woocommerce_product_variation_get_sale_price', array( $this, 'filter_variation_get_sale_price' ), self::FILTER_PRIORITY, 2 );
+
+		add_filter( 'woocommerce_variation_prices_price', array( $this, 'filter_variation_prices_price' ), self::FILTER_PRIORITY, 3 );
+		add_filter( 'woocommerce_variation_prices_regular_price', array( $this, 'filter_variation_prices_regular_price' ), self::FILTER_PRIORITY, 3 );
+		add_filter( 'woocommerce_variation_prices_sale_price', array( $this, 'filter_variation_prices_sale_price' ), self::FILTER_PRIORITY, 3 );
+
+		add_filter( 'woocommerce_get_variation_prices_hash', array( $this, 'append_identity_to_hash' ), self::FILTER_PRIORITY, 3 );
 	}
 
 	/**
-	 * Converts a single price value in the active currency.
+	 * Filters the simple product active price getter.
 	 *
-	 * @param mixed $value Base-currency price (may be '' for an unset sale price).
-	 * @return mixed Converted value, or the input unchanged when not converting.
+	 * @param mixed $price   Base-authored price.
+	 * @param mixed $product Product instance.
 	 */
-	public function convert_price( $value ) {
-		if ( $this->converting || ! $this->should_convert() ) {
-			return $value;
-		}
-
-		$this->converting = true;
-		$converted        = $this->service->convert( $value );
-		$this->converting = false;
-
-		return $converted;
+	public function filter_product_get_price( $price, $product ) {
+		return $this->filter_product_price( $price, $product, ProductPriceResolutionService::FIELD_PRICE );
 	}
 
 	/**
-	 * Adds the active currency + rate to the variation-price cache hash so
-	 * cached prices never cross currencies (and self-invalidate on rate edits).
+	 * Filters the simple product regular price getter.
 	 *
-	 * @param array<int|string, mixed> $hash Hash components.
+	 * @param mixed $price   Base-authored price.
+	 * @param mixed $product Product instance.
+	 */
+	public function filter_product_get_regular_price( $price, $product ) {
+		return $this->filter_product_price( $price, $product, ProductPriceResolutionService::FIELD_REGULAR );
+	}
+
+	/**
+	 * Filters the simple product sale price getter.
+	 *
+	 * @param mixed $price   Base-authored price.
+	 * @param mixed $product Product instance.
+	 */
+	public function filter_product_get_sale_price( $price, $product ) {
+		return $this->filter_product_price( $price, $product, ProductPriceResolutionService::FIELD_SALE );
+	}
+
+	/**
+	 * Filters the variation active price getter.
+	 *
+	 * @param mixed $price   Base-authored price.
+	 * @param mixed $product Variation product instance.
+	 */
+	public function filter_variation_get_price( $price, $product ) {
+		return $this->filter_product_price( $price, $product, ProductPriceResolutionService::FIELD_PRICE );
+	}
+
+	/**
+	 * Filters the variation regular price getter.
+	 *
+	 * @param mixed $price   Base-authored price.
+	 * @param mixed $product Variation product instance.
+	 */
+	public function filter_variation_get_regular_price( $price, $product ) {
+		return $this->filter_product_price( $price, $product, ProductPriceResolutionService::FIELD_REGULAR );
+	}
+
+	/**
+	 * Filters the variation sale price getter.
+	 *
+	 * @param mixed $price   Base-authored price.
+	 * @param mixed $product Variation product instance.
+	 */
+	public function filter_variation_get_sale_price( $price, $product ) {
+		return $this->filter_product_price( $price, $product, ProductPriceResolutionService::FIELD_SALE );
+	}
+
+	/**
+	 * Filters cached variation active prices.
+	 *
+	 * @param mixed $price            Base-authored price.
+	 * @param mixed $variation        Variation product.
+	 * @param mixed $variable_product Variable parent product.
+	 */
+	public function filter_variation_prices_price( $price, $variation, $variable_product ) {
+		unset( $variable_product );
+
+		return $this->filter_variation_prices( $price, $variation, ProductPriceResolutionService::FIELD_PRICE );
+	}
+
+	/**
+	 * Filters cached variation regular prices.
+	 *
+	 * @param mixed $price            Base-authored price.
+	 * @param mixed $variation        Variation product.
+	 * @param mixed $variable_product Variable parent product.
+	 */
+	public function filter_variation_prices_regular_price( $price, $variation, $variable_product ) {
+		unset( $variable_product );
+
+		return $this->filter_variation_prices( $price, $variation, ProductPriceResolutionService::FIELD_REGULAR );
+	}
+
+	/**
+	 * Filters cached variation sale prices.
+	 *
+	 * @param mixed $price            Base-authored price.
+	 * @param mixed $variation        Variation product.
+	 * @param mixed $variable_product Variable parent product.
+	 */
+	public function filter_variation_prices_sale_price( $price, $variation, $variable_product ) {
+		unset( $variable_product );
+
+		return $this->filter_variation_prices( $price, $variation, ProductPriceResolutionService::FIELD_SALE );
+	}
+
+	/**
+	 * Resolves one product price getter through the fixed/converted seam.
+	 *
+	 * @param mixed  $price   Base-authored price.
+	 * @param mixed  $product Product instance.
+	 * @param string $field   Resolution field.
+	 */
+	public function filter_product_price( $price, $product, string $field ) {
+		if ( ! $product instanceof WC_Product ) {
+			return $price;
+		}
+
+		return $this->resolve( $price, $product, $field );
+	}
+
+	/**
+	 * Resolves one cached variation price through the fixed/converted seam.
+	 *
+	 * @param mixed  $price     Base-authored price.
+	 * @param mixed  $variation Variation product.
+	 * @param string $field     Resolution field.
+	 */
+	public function filter_variation_prices( $price, $variation, string $field ) {
+		if ( ! $variation instanceof WC_Product ) {
+			return $price;
+		}
+
+		return $this->resolve( $price, $variation, $field );
+	}
+
+	/**
+	 * Converts or fixes one product price field for the active currency.
+	 *
+	 * @param mixed      $price   Base-authored price.
+	 * @param WC_Product $product Product or variation.
+	 * @param string     $field   Resolution field.
+	 */
+	private function resolve( mixed $price, WC_Product $product, string $field ) {
+		if ( $this->resolving || ! $this->should_convert( $product ) ) {
+			return $price;
+		}
+
+		$this->resolving = true;
+		$resolution      = $this->resolver->resolve( $price, $product, $field );
+		$this->resolving = false;
+
+		return $resolution->amount();
+	}
+
+	/**
+	 * Adds currency, rate, fixed-price, and sale-state identity to variation cache hash.
+	 *
+	 * @param array<int|string, mixed> $hash        Hash components.
+	 * @param mixed                    $product     Variable product.
+	 * @param mixed                    $for_display Whether prices are for display.
 	 * @return array<int|string, mixed>
 	 */
-	public function append_currency_to_hash( $hash ) {
-		if ( ! is_array( $hash ) || ! $this->should_convert() ) {
+	public function append_identity_to_hash( $hash, $product = null, $for_display = false ) {
+		unset( $for_display );
+
+		if ( ! is_array( $hash ) || ! $this->context->is_convertible_request() || $this->context->is_base_active() ) {
 			return $hash;
 		}
 
 		$hash[] = $this->context->get_active_code();
 		$hash[] = $this->context->get_rate();
+		$hash[] = 'umc_fixed_v1';
+
+		if ( $product instanceof WC_Product && $product->is_type( 'variable' ) ) {
+			$hash[] = $this->variable_product_fixed_fingerprint( $product );
+		}
 
 		return $hash;
 	}
 
 	/**
-	 * Whether the current request+currency should convert prices.
+	 * Builds a composite fixed-price fingerprint for all variations.
+	 *
+	 * @param WC_Product $product Variable product.
 	 */
-	private function should_convert(): bool {
+	private function variable_product_fixed_fingerprint( WC_Product $product ): string {
+		$parts = array();
+
+		foreach ( $product->get_children() as $child_id ) {
+			$child_id = (int) $child_id;
+			$child    = wc_get_product( $child_id );
+
+			if ( ! $child instanceof WC_Product ) {
+				continue;
+			}
+
+			$parts[] = $child_id . ':' . $this->resolver->fixed_price_fingerprint( $child ) . ':' . $this->sale_state->cache_token( $child );
+		}
+
+		sort( $parts, SORT_STRING );
+
+		return md5( implode( '|', $parts ) );
+	}
+
+	/**
+	 * Whether product prices should convert for this request.
+	 *
+	 * @param WC_Product $product Product being priced.
+	 */
+	private function should_convert( WC_Product $product ): bool {
 		if ( ! $this->context->is_convertible_request() || $this->context->is_base_active() ) {
 			return false;
 		}
@@ -131,13 +296,13 @@ final class PriceHooks {
 		/**
 		 * Whether product prices should convert in the current request context.
 		 *
-		 * Extension adapters (e.g. Subscriptions renewals) may return false to
-		 * prevent browsing currency from altering subscription-owned amounts.
-		 *
 		 * @since 0.18.0
 		 *
-		 * @param bool $should Default true when convertible and non-base active.
+		 * @param bool       $should  Default true when convertible and non-base active.
+		 * @param WC_Product $product Product being priced.
 		 */
-		return (bool) apply_filters( 'umc_should_convert_product_price', true );
+		$should = (bool) apply_filters( 'umc_should_convert_product_price', true, $product );
+
+		return $should;
 	}
 }

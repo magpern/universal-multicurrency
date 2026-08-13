@@ -17,6 +17,8 @@ use UMC\CurrencySwitcher;
 use UMC\Geo\GeoCurrencyDecisionService;
 use UMC\Order\OrderSnapshot;
 use UMC\Order\RefundSnapshot;
+use UMC\Order\LineItemPriceProvenance;
+use UMC\Pricing\FixedPriceDocument;
 use UMC\StoreApi\CartExtensionData;
 
 /**
@@ -31,7 +33,7 @@ final class PersistedKeys {
 	/**
 	 * Bump when the inventory shape or membership changes.
 	 */
-	public const INVENTORY_VERSION = 8;
+	public const INVENTORY_VERSION = 9;
 
 	/**
 	 * WordPress options written by the plugin.
@@ -78,6 +80,29 @@ final class PersistedKeys {
 		return array(
 			RefundSnapshot::META_PARENT_TRANSACTION_CURRENCY,
 			RefundSnapshot::META_PARENT_RATE_IDENTITY,
+		);
+	}
+
+	/**
+	 * Product and variation metadata keys for fixed pricing.
+	 *
+	 * @return list<string>
+	 */
+	public static function product_meta_keys(): array {
+		return array(
+			FixedPriceDocument::META_KEY,
+		);
+	}
+
+	/**
+	 * Order line-item metadata keys written at checkout.
+	 *
+	 * @return list<string>
+	 */
+	public static function order_line_item_meta_keys(): array {
+		return array(
+			LineItemPriceProvenance::META_SOURCE,
+			LineItemPriceProvenance::META_CURRENCY,
 		);
 	}
 
@@ -181,10 +206,12 @@ final class PersistedKeys {
 	 */
 	public static function uninstall_policy(): array {
 		return array(
-			'delete_options'       => self::uninstall_deleted_option_keys(),
-			'preserve_order_meta'  => self::order_meta_keys(),
-			'preserve_refund_meta' => self::refund_meta_keys(),
-			'preserve_user_meta'   => self::uninstall_preserved_user_meta_keys(),
+			'delete_options'                => self::uninstall_deleted_option_keys(),
+			'preserve_order_meta'           => self::order_meta_keys(),
+			'preserve_refund_meta'          => self::refund_meta_keys(),
+			'preserve_product_meta'         => array(),
+			'preserve_order_line_item_meta' => self::order_line_item_meta_keys(),
+			'preserve_user_meta'            => self::uninstall_preserved_user_meta_keys(),
 		);
 	}
 
@@ -199,6 +226,8 @@ final class PersistedKeys {
 			'options'                        => self::option_keys(),
 			'order_meta'                     => self::order_meta_keys(),
 			'refund_meta'                    => self::refund_meta_keys(),
+			'product_meta'                   => self::product_meta_keys(),
+			'order_line_item_meta'           => self::order_line_item_meta_keys(),
 			'user_meta'                      => self::user_meta_keys(),
 			'session_keys'                   => self::session_keys(),
 			'cookies'                        => self::cookie_names(),

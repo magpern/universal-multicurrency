@@ -17,6 +17,7 @@ use UMC\Admin\GeoRecommendedRulesController;
 use UMC\Admin\DecisionInspectorController;
 use UMC\Admin\GeoSandboxController;
 use UMC\Admin\OrderCurrencyMetaBox;
+use UMC\Admin\ProductFixedPricesPanel;
 use UMC\Admin\PluginActionLinks;
 use UMC\Admin\RateFailureNotice;
 use UMC\Admin\RateUpdateController;
@@ -55,6 +56,7 @@ use UMC\Integration\GatewayCompatibility;
 use UMC\Integration\PriceConversionService;
 use UMC\Integration\PriceHooks;
 use UMC\Integration\ShippingConversion;
+use UMC\Order\LineItemPriceProvenance;
 use UMC\Order\HistoricalFormattingResolver;
 use UMC\Order\HistoricalOrderDisplay;
 use UMC\Order\OrderCurrencyContext;
@@ -72,6 +74,10 @@ use UMC\Rates\RateStatusEvaluator;
 use UMC\Rates\RateUpdateService;
 use UMC\Rates\RateUpdateState;
 use UMC\Rates\Scheduler;
+use UMC\Pricing\FixedPriceRepository;
+use UMC\Pricing\ProductPriceProvenanceRegistry;
+use UMC\Pricing\ProductPriceResolutionService;
+use UMC\Pricing\ProductSaleStateResolver;
 use UMC\StoreApi\CartExtensionData;
 use UMC\StoreApi\CheckoutBlocksNoticeAssets;
 use UMC\StoreApi\CheckoutSnapshotAdapter;
@@ -173,11 +179,16 @@ final class Plugin {
 			( new GeoLegacyPanelRedirect() )->register();
 		}
 
-		$registry = new CurrencyRegistry( $settings, $base );
-		$rates    = new ManualRateProvider( $settings, $base->code() );
-		$context  = new CurrencyContext( $registry, $rates, new CurrencyResolver() );
-		$service  = new PriceConversionService( $context );
-		$version  = defined( 'UMC_VERSION' ) ? (string) UMC_VERSION : '';
+		$registry         = new CurrencyRegistry( $settings, $base );
+		$fixed_repository = new FixedPriceRepository( $base->code() );
+		$rates            = new ManualRateProvider( $settings, $base->code() );
+		$context          = new CurrencyContext( $registry, $rates, new CurrencyResolver() );
+		$service          = new PriceConversionService( $context );
+		$version          = defined( 'UMC_VERSION' ) ? (string) UMC_VERSION : '';
+
+		if ( is_admin() ) {
+			( new ProductFixedPricesPanel( $settings, $registry, $fixed_repository ) )->register();
+		}
 
 		// Storefront: attach conversion filters, handle the switch, register the
 		// shortcode. Registered on woocommerce_init so the WC session is
@@ -191,7 +202,7 @@ final class Plugin {
 		// and refund metadata.
 		add_action(
 			'woocommerce_init',
-			static function () use ( $context, $service, $settings, $version, $registry ) {
+			static function () use ( $context, $service, $settings, $version, $registry, $fixed_repository ) {
 				// One GatewayCompatibility instance is shared between the
 				// storefront callback and the order-pay lock so the lock can
 				// deregister the storefront callback (matched by instance) and
@@ -222,7 +233,18 @@ final class Plugin {
 					$context
 				) )->register();
 
-				( new PriceHooks( $service, $context ) )->register();
+				$provenance_registry = new ProductPriceProvenanceRegistry();
+				$price_resolution    = new ProductPriceResolutionService(
+					$fixed_repository,
+					new ProductSaleStateResolver(),
+					$service,
+					$context,
+					$registry,
+					$provenance_registry
+				);
+
+				( new PriceHooks( $price_resolution, $context ) )->register();
+				( new LineItemPriceProvenance( $provenance_registry ) )->register();
 				( new CurrencyFormatting( $context ) )->register();
 				( new CartRecalculation( $context ) )->register();
 				( new CouponConversion( $service, $context ) )->register();
