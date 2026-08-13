@@ -124,6 +124,20 @@ final class PriceHooks {
 	 * Whether the current request+currency should convert prices.
 	 */
 	private function should_convert(): bool {
-		return $this->context->is_convertible_request() && ! $this->context->is_base_active();
+		if ( ! $this->context->is_convertible_request() || $this->context->is_base_active() ) {
+			return false;
+		}
+
+		/**
+		 * Whether product prices should convert in the current request context.
+		 *
+		 * Extension adapters (e.g. Subscriptions renewals) may return false to
+		 * prevent browsing currency from altering subscription-owned amounts.
+		 *
+		 * @since 0.18.0
+		 *
+		 * @param bool $should Default true when convertible and non-base active.
+		 */
+		return (bool) apply_filters( 'umc_should_convert_product_price', true );
 	}
 }

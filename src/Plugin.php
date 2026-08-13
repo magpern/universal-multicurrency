@@ -46,9 +46,11 @@ use UMC\Geo\GeoDetectionApplicator;
 use UMC\Geo\GeoDetectionSettingsRepository;
 use UMC\Geo\UniversalGeoContextAdapter;
 use UMC\Geo\WooCommerceFallbackProvider;
+use UMC\Compatibility\Extension\ExtensionCompatibilityBootstrap;
 use UMC\Integration\ClassicCheckoutPolicyAdapter;
 use UMC\Integration\CouponConversion;
 use UMC\Integration\CurrencyFormatting;
+use UMC\Integration\FeeConversion;
 use UMC\Integration\GatewayCompatibility;
 use UMC\Integration\PriceConversionService;
 use UMC\Integration\PriceHooks;
@@ -85,8 +87,8 @@ use UMC\StoreApi\StoreApiCheckoutPolicyAdapter;
  * compatibility, order snapshot), historical order rendering and refunds, and
  * the Store API adapters serving the Cart and Checkout blocks.
  *
- * Stock is never touched, fees are never converted, and no monetary total is
- * ever written: WooCommerce owns those. Everything registers on every request
+ * Stock is never touched; fees pass through unless opted in via `umc_convert_fee`,
+ * and no monetary total is ever written: WooCommerce owns those. Everything registers on every request
  * type and gates itself at call time, which keeps the variation-price cache key
  * stable regardless of how a request arrived.
  */
@@ -225,6 +227,7 @@ final class Plugin {
 				( new CartRecalculation( $context ) )->register();
 				( new CouponConversion( $service, $context ) )->register();
 				( new ShippingConversion( $service, $context ) )->register();
+				( new FeeConversion( $service, $context ) )->register();
 				$gateway_compat->register();
 
 				$checkout_settings  = new CheckoutSettingsRepository( $settings );
@@ -294,6 +297,8 @@ final class Plugin {
 				);
 				$geo_applicator->register();
 				$geo_applicator->maybe_apply();
+
+				( new ExtensionCompatibilityBootstrap( $service, $context, $order_context ) )->register();
 			}
 		);
 
