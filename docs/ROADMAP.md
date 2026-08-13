@@ -392,25 +392,26 @@
     [`docs/architecture/extension-compatibility.md`](architecture/extension-compatibility.md).
 
 20. Authoritative Per-Currency Product Pricing — Phase 1 (**v0.19.0**) —
-    **in progress** on `feature/m20-authoritative-fixed-pricing`. Optional
-    merchant-authored regular/sale prices per **non-base** foreign currency on
-    simple products and variations, with FX conversion as fallback.
+    **implementation complete** on `feature/m20-authoritative-fixed-pricing`
+    (review-ready; not yet tagged). Optional merchant-authored regular/sale
+    prices per **non-base** foreign currency on simple products and variations,
+    with FX conversion as fallback.
 
     ### Scope for v0.19.0
 
     | Work item | Status |
     |---|---|
     | Authoritative architecture spec + ADR-0025 | **Complete** (WP0) |
-    | PriceHooks characterization + architecture guards | Planned |
-    | Fixed-price domain model + repository | Planned |
-    | ProductPriceResolutionService + sale-state gating | Planned |
-    | Simple + variation storefront integration | Planned |
-    | Variation cache fingerprint extension | Planned |
-    | Product editor admin UX | Planned |
-    | Line-item pricing provenance | Planned |
-    | Cart/checkout/Store API parity | Planned |
-    | Diagnostics + compatibility docs | Planned |
-    | Release preparation **0.19.0** | Planned |
+    | PriceHooks characterization + architecture guards | **Complete** |
+    | Fixed-price domain model + repository | **Complete** |
+    | ProductPriceResolutionService + sale-state gating | **Complete** |
+    | Simple + variation storefront integration | **Complete** |
+    | Variation cache fingerprint extension | **Complete** |
+    | Product editor admin UX | **Complete** |
+    | Line-item pricing provenance | **Complete** |
+    | Cart/checkout/Store API parity | **Complete** |
+    | Diagnostics + compatibility docs | **Complete** |
+    | Release preparation **0.19.0** | **Complete** (branch; tag pending PR) |
 
     No `Settings::SCHEMA_VERSION` bump. `PersistedKeys` **8 → 9**. Order
     snapshot schema **4** unchanged. See

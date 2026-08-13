@@ -1,3 +1,36 @@
+# Release audit — v0.19.0 Authoritative Fixed Product Pricing (Phase 1)
+
+Executable release-preparation gate for Universal Multicurrency **v0.19.0**.
+This document records scope, criteria, commands, audit results, and the current
+release-preparation state.
+
+**Governing question:** If we published this release tomorrow, is there anything
+left in the repository that clearly should not ship?
+
+**Repository status:** **prepared for v0.19.0**. Milestone 20 (Authoritative
+Per-Currency Fixed Product Pricing, Phase 1; ADR-0025) implementation complete
+on feature branch pending PR review. Git tag and GitHub release **not yet**
+created.
+
+---
+
+## v0.19.0 release preparation record
+
+| Item | Value |
+|---|---|
+| Version | **0.19.0** |
+| Settings schema | **6** (unchanged) |
+| Order snapshot schema | **4** (unchanged) |
+| Persisted-data inventory version | **9** (`_umc_fixed_prices`, line-item provenance) |
+| Production migrations | none |
+| Fixed product pricing | Simple + variations; WC sale schedule gates fixed sale |
+| Unresolved release blockers | **0** (pre-PR review) |
+| Git tag `v0.19.0` | **Not yet created** |
+| GitHub release `v0.19.0` | **Not yet published** |
+| Milestone 20 | **Complete** — Authoritative Fixed Product Pricing at v0.19.0 |
+
+---
+
 # Release audit — v0.18.0 Third-Party Extension Compatibility
 
 Executable release-preparation gate for Universal Multicurrency **v0.18.0**.

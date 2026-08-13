@@ -26,7 +26,7 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Produces `dist/universal-multicurrency-0.18.0.zip`. The archive includes `readme.txt`,
+Produces `dist/universal-multicurrency-0.19.0.zip`. The archive includes `readme.txt`,
 production `src/`, `vendor/`, and `languages/universal-multicurrency.pot`.
 
 Performance subset:
@@ -36,10 +36,9 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release:** **v0.18.0** on `main` (tagged and published). PR **#20**;
-merge commit `2c80db3`. The previous release, **v0.17.0**, remains tagged and
-published. Git tag and GitHub release for v0.18.0 follow CI verification on
-`main`. Deployment is a separate operation — not performed as part of release.
+**Current release:** **v0.18.0** on `main` (tagged and published). **Prepared:**
+**v0.19.0** on `feature/m20-authoritative-fixed-pricing` (not yet tagged). PR **#20**;
+merge commit `2c80db3`. Deployment is a separate operation — not performed as part of release.
 
 ---
 
@@ -996,6 +995,19 @@ unaffected.
 ---
 
 ---
+
+## v0.19.0 — Authoritative Fixed Product Pricing (prepared)
+
+Ships Milestone 20 under version **0.19.0** (ADR-0025). Settings schema remains **6**; PersistedKeys inventory **9**; order snapshot schema **4**. Optional merchant-authored fixed regular/sale prices per non-base foreign currency on simple products and variations; WooCommerce sale schedule gates fixed sale amounts; line-item pricing provenance.
+
+**Prepared as:** **0.19.0** — tag and GitHub release pending PR merge.
+
+### Deployment sequence
+
+1. Run `composer release-audit` on the **0.19.0** tree.
+2. Build `dist/universal-multicurrency-0.19.0.zip` with `composer install --no-dev`
+   + `bin/build-zip.sh`.
+3. Deploy over **0.18.0** in place. No migration step — products without `_umc_fixed_prices` behave unchanged.
 
 ## v0.18.0 — Third-Party Extension Compatibility (released)
 

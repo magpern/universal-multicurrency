@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Universal Multicurrency for WooCommerce 0.18.0\n"
+"Project-Id-Version: Universal Multicurrency for WooCommerce 0.19.0\n"
 "Report-Msgid-Bugs-To: https://github.com/magpern/universal-multicurrency/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2272,6 +2272,25 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
+#: src/Admin/ProductFixedPricesPanel.php:95
+msgid "Multicurrency fixed prices"
+msgstr ""
+
+#. translators: %s: store base currency code
+#: src/Admin/ProductFixedPricesPanel.php:99
+#, php-format
+msgid "Base prices remain in WooCommerce (%s). Leave blank to use automatic conversion. Fixed sale amounts follow the product's WooCommerce sale schedule."
+msgstr ""
+
+#: src/Admin/ProductFixedPricesPanel.php:122
+msgid "currency disabled"
+msgstr ""
+
+#: src/Admin/ProductFixedPricesPanel.php:128
+#: src/Admin/ProductFixedPricesPanel.php:135
+msgid "Auto convert"
+msgstr ""
+
 #. translators: %s: comma-separated currency codes
 #: src/Admin/RateFailureNotice.php:89
 #, php-format
@@ -2575,6 +2594,39 @@ msgstr ""
 #, php-format
 msgid "%1$s is installed but inactive. Status: %2$s"
 msgstr ""
+
+#: src/Compatibility/Checks/FixedProductPricingCheck.php:46
+msgid "Base currency prices remain WooCommerce-native; _umc_fixed_prices never overrides the store base currency."
+msgstr ""
+
+#: src/Compatibility/Checks/FixedProductPricingCheck.php:47
+msgid "Blank foreign-currency fields use automatic FX conversion."
+msgstr ""
+
+#: src/Compatibility/Checks/FixedProductPricingCheck.php:48
+msgid "Disabled currencies retain authored fixed prices but ignore them at runtime."
+msgstr ""
+
+#: src/Compatibility/Checks/FixedProductPricingCheck.php:49
+msgid "WooCommerce sale schedules gate fixed sale amounts."
+msgstr ""
+
+#: src/Compatibility/Checks/FixedProductPricingCheck.php:58
+#: src/Compatibility/Checks/FixedProductPricingCheck.php:79
+msgid "Fixed product pricing"
+msgstr ""
+
+#: src/Compatibility/Checks/FixedProductPricingCheck.php:59
+msgid "No enabled foreign currencies are configured; fixed pricing is inactive until a non-base currency is enabled."
+msgstr ""
+
+#. translators: 1: number of enabled foreign currencies, 2: base currency code
+#: src/Compatibility/Checks/FixedProductPricingCheck.php:82
+#, php-format
+msgid "%1$d enabled foreign currency can use optional fixed prices; base %2$s remains WooCommerce-native."
+msgid_plural "%1$d enabled foreign currencies can use optional fixed prices; base %2$s remains WooCommerce-native."
+msgstr[0] ""
+msgstr[1] ""
 
 #. translators: %s: integration label
 #: src/Compatibility/Checks/IntegrationCheck.php:56

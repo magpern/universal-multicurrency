@@ -339,6 +339,8 @@ otherwise `good`. Covered by
 | `umc_convert_shipping_rate` (filter) | `($convert, $rate, $package)` | 0.3.0 | Override per rate whether to convert; defaults true for core methods, false otherwise. |
 | `umc_convert_fee` (filter) | `($should, $fee)` | 0.3.0 | Opt-in fee conversion. Default false — only base-authored fees that return true are converted once (M19 `FeeConversion`). |
 | `umc_should_convert_product_price` (filter) | `($should)` | 0.18.0 | Extension adapters may return false during subscription renewal context to prevent browsing currency from altering renewal-owned amounts. |
+| `umc_use_fixed_product_price` (filter) | `($use_fixed, $product)` | 0.19.0 | Return false to force FX conversion even when fixed prices exist for the active currency. |
+| `umc_fixed_prices_saved` (action) | `($product_id, $document)` | 0.19.0 | Fires after fixed prices are saved from the product editor. |
 | `umc_convert_product_addon_price` (filter) | `($convert, $price)` | 0.18.0 | Opt-in for Product Add-Ons flat/quantity raw prices. Default true when adapter active. |
 | `umc_convert_bundled_item_price` (filter) | `($convert, $price)` | 0.18.0 | Opt-in for Product Bundles bundled item prices. Default true when adapter active. |
 | `umc_extension_compatibilities` (filter) | `($definitions)` | 0.18.0 | Append third-party extension compatibility definitions to the M19 registry. |
