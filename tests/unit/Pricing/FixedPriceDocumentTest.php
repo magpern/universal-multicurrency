@@ -36,6 +36,11 @@ final class FixedPriceDocumentTest extends TestCase {
 		$this->assertSame( '1100', $document->get_currency( 'SEK' )?->regular() );
 	}
 
+	public function test_normalize_price_rejects_non_numeric_strings(): void {
+		$this->assertSame( '', FixedPriceValidator::normalize_price( 'foo' ) );
+		$this->assertSame( '', FixedPriceValidator::normalize_price( '12.34.56' ) );
+	}
+
 	public function test_to_storage_json_omits_empty_document(): void {
 		$this->assertSame( '', FixedPriceDocument::empty()->to_storage_json() );
 	}

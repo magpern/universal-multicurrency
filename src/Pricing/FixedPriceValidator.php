@@ -30,6 +30,10 @@ final class FixedPriceValidator {
 			return '';
 		}
 
+		if ( ! is_numeric( $value ) ) {
+			return '';
+		}
+
 		if ( function_exists( 'wc_format_decimal' ) ) {
 			$formatted = wc_format_decimal( $value, wc_get_price_decimals() );
 

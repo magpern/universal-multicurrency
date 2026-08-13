@@ -11,6 +11,7 @@ namespace UMC\Pricing;
 
 use UMC\CurrencyContext;
 use UMC\CurrencyRegistry;
+use UMC\Integration\DisplayPriceConverter;
 use UMC\Integration\PriceConversionService;
 use WC_Product;
 
@@ -28,7 +29,7 @@ final class ProductPriceResolutionService {
 	 *
 	 * @param FixedPriceRepository           $repository   Fixed price meta access.
 	 * @param ProductSaleStateResolver       $sale_state   WC sale activation.
-	 * @param PriceConversionService         $converter    FX conversion seam.
+	 * @param DisplayPriceConverter          $converter    FX conversion seam.
 	 * @param CurrencyContext                $context      Active currency facade.
 	 * @param CurrencyRegistry               $registry     Currency enablement.
 	 * @param ProductPriceProvenanceRegistry $provenance   Checkout provenance map.
@@ -36,7 +37,7 @@ final class ProductPriceResolutionService {
 	public function __construct(
 		private FixedPriceRepository $repository,
 		private ProductSaleStateResolver $sale_state,
-		private PriceConversionService $converter,
+		private DisplayPriceConverter $converter,
 		private CurrencyContext $context,
 		private CurrencyRegistry $registry,
 		private ProductPriceProvenanceRegistry $provenance
