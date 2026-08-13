@@ -421,22 +421,23 @@
     and
     [`docs/architecture/authoritative-fixed-product-pricing.md`](architecture/authoritative-fixed-product-pricing.md).
 
-21. Multicurrency Reporting & Analytics Foundation (**v0.20.0**) — **in progress**
-    (WP0 specification frozen). UMC-owned admin reporting that reads immutable
-    order facts in **native transaction currency only** — no live FX, no inverse
-    FX, no base-equivalent normalization.
+21. Multicurrency Reporting & Analytics Foundation (**v0.20.0**) — **prepared
+    for release** (implementation complete on feature branch; PR boundary).
+    UMC-owned admin reporting that reads immutable order facts in **native
+    transaction currency only** — no live FX, no inverse FX, no base-equivalent
+    normalization.
 
     ### Scope for v0.20.0
 
     | Work item | Status |
     |---|---|
-    | Authoritative architecture spec + ADR-0026 | **In progress** — WP0 |
-    | WC refund API characterization + frozen refund authority | **Planned** — WP0/WP4 |
-    | OrderSnapshot schema 5 (`_umc_currency_origin`) | **Planned** — WP1 |
-    | Reporting domain, repository, aggregators, cache | **Planned** — WP2–WP6 |
-    | Admin Reporting section + CSV export (same models as UI) | **Planned** — WP7–WP8 |
-    | Integration, architecture, and performance guards | **Planned** — WP9–WP11 |
-    | Release closure for **v0.20.0** | **Planned** — WP12 |
+    | Authoritative architecture spec + ADR-0026 | **Complete** |
+    | WC refund API characterization + frozen refund authority | **Complete** |
+    | OrderSnapshot schema 5 (`_umc_currency_origin`) | **Complete** |
+    | Reporting domain, repository, aggregators, cache | **Complete** |
+    | Admin Reporting section + CSV export (same models as UI) | **Complete** |
+    | Integration, architecture, and performance guards | **Complete** |
+    | Release closure for **v0.20.0** | **Prepared** — PR boundary |
 
     Phase 1 reports: Currency Performance (incl. AOV), Pricing Source, Currency
     Origin, Checkout Fallback; rate provenance table-only. Origin persistence:

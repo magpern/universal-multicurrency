@@ -26,7 +26,7 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Produces `dist/universal-multicurrency-0.19.0.zip`. The archive includes `readme.txt`,
+Produces `dist/universal-multicurrency-0.20.0.zip`. The archive includes `readme.txt`,
 production `src/`, `vendor/`, and `languages/universal-multicurrency.pot`.
 
 Performance subset:
@@ -36,8 +36,24 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release:** **v0.19.0** on `main` (tagged and published). PR **#21**;
-merge commit `bdc4b4f`. Deployment is a separate operation — not performed as part of release.
+**Current release on `main`:** **v0.19.0** (tagged and published). **v0.20.0** is
+prepared on `feature/m21-multicurrency-reporting` (PR boundary — not yet tagged).
+Deployment is a separate operation — not performed as part of release.
+
+---
+
+## v0.20.0 — Multicurrency Reporting & Analytics Foundation (prepared)
+
+Ships Milestone 21 under version **0.20.0** (ADR-0026). Settings schema remains **6**; PersistedKeys inventory **10**; order snapshot schema **5** (`_umc_currency_origin`). Admin reporting in native transaction currency; aggregate CSV export; 15-minute report cache with lifecycle invalidation. No FX normalization, no WooCommerce Analytics integration, no DB migration.
+
+**Prepared as:** **v0.20.0** — tag and GitHub release **not yet created** (PR boundary). Build artifact: `dist/universal-multicurrency-0.20.0.zip`.
+
+### Deployment sequence (release preparation)
+
+1. Run `composer release-audit` on the **0.20.0** tree.
+2. Build `dist/universal-multicurrency-0.20.0.zip` with `composer install --no-dev`
+   + `bin/build-zip.sh`.
+3. Deploy over **0.19.0** in place. No migration step — legacy orders without origin meta classify as `unknown` in reporting only. **Not performed as part of release preparation.**
 
 ---
 
