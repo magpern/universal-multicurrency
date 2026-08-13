@@ -339,6 +339,55 @@
 
     **Released as:** **v0.17.0**.
 
+19. Third-Party Extension Compatibility Framework & Priority Integrations
+    (**v0.18.0**) — **in progress**. Establishes a maintainable third-party
+    extension compatibility framework on top of M18 transaction integrity, then
+    applies it to bounded priority integrations with honest evidence
+    classification.
+
+    ### Scope
+
+    | Work item | Status |
+    |---|---|
+    | Authoritative architecture spec + ADR-0024 | **In progress** |
+    | Extension compatibility status / evidence contract (E0–E3) | **Planned** |
+    | Extension test harness (Layer 1 contract + Layer 2 hook doubles) | **Planned** |
+    | ExtensionCompatibilityRegistry + ExtensionDetector | **Planned** |
+    | Fee opt-in seam (`umc_convert_fee` wired) | **Planned** |
+    | Third-party shipping contract formalization | **Planned** |
+    | WooCommerce Subscriptions characterization + adapter | **Planned** |
+    | Product Add-Ons hook contract + adapter | **Planned** |
+    | Product Bundles / Composite investigation | **Planned** |
+    | Bookings audit (conditional) | **Planned** |
+    | Dynamic pricing boundary documentation | **Planned** |
+    | Gateway compatibility validation | **Planned** |
+    | Compatibility Center extension evidence UX | **Planned** |
+    | Developer extension-integration guide | **Planned** |
+    | Release readiness for **v0.18.0** (PR boundary) | **Planned** |
+
+    ### Success criteria
+
+    - Compatibility framework + evidence model + Compatibility Center complete
+    - ≥2 priority adapters validated at E1/E2 (Characterized)
+    - Integrated status requires E3 real-extension evidence only
+    - Subscriptions monetary contract documented before adapter
+    - M18 transaction invariants remain green
+    - Settings schema **6**, PersistedKeys **8**, snapshot schema **4** unchanged
+
+    ### Explicit non-goals
+
+    - Support every WooCommerce extension
+    - Licensed premium ZIPs as M19 release prerequisite
+    - Claim Integrated from test doubles
+    - Global automatic fee conversion
+    - Bookings full support unless investigation proves bounded
+    - Git tag / GitHub release / deploy during M19 implementation
+
+    See
+    [`docs/adr/0024-third-party-extension-compatibility-contract.md`](adr/0024-third-party-extension-compatibility-contract.md)
+    and
+    [`docs/architecture/extension-compatibility.md`](architecture/extension-compatibility.md).
+
 ## Future milestones — not started, not implemented
 
 None of the following exists in the codebase today:
@@ -348,9 +397,9 @@ None of the following exists in the codebase today:
 - `country_change` geo detection mode and broader continent presets
 - Multicurrency reporting and analytics
 - Public APIs beyond the documented hooks in [`HOOKS.md`](HOOKS.md)
-- Third-party extension compatibility matrix (Subscriptions, Bookings,
-  Bundles, Add-Ons, Composite, Dynamic Pricing, gift cards, memberships,
-  third-party shipping/checkout) — deferred to **M19**
+- Gift cards, memberships, and additional third-party extension adapters beyond
+  M19 priority set (may follow in a future compatibility milestone)
+- Bookings full integration if M19 audit defers it
 
 The plugin is standalone and replaces FOX/WOOCS and the old MP helper; only
 WooCommerce is a dependency (see docs/adr/0003).
