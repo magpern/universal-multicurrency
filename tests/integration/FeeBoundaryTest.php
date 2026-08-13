@@ -130,8 +130,56 @@ final class FeeBoundaryTest extends WP_UnitTestCase {
 		$this->assertSame(
 			array(),
 			$umc,
-			'UMC must not hook woocommerce_cart_calculate_fees (fee conversion unwired).'
+			'FeeBoundaryTest activates conversion without FeeConversion; no UMC fee hook expected.'
 		);
+	}
+
+	public function test_only_fee_conversion_may_hook_calculate_fees_when_booted(): void {
+		$this->activate_with_fee_conversion( array( 'SEK' => array( 'rate' => '11.50' ) ), 'SEK' );
+
+		$classes = $this->umc_classes_on_hook( 'woocommerce_cart_calculate_fees' );
+
+		$this->assertSame(
+			array( \UMC\Integration\FeeConversion::class ),
+			$classes,
+			'Only FeeConversion may hook woocommerce_cart_calculate_fees.'
+		);
+	}
+
+	/**
+	 * @return array<int, string>
+	 */
+	private function umc_classes_on_hook( string $hook ): array {
+		$filter    = $GLOBALS['wp_filter'][ $hook ] ?? null;
+		$callbacks = ( $filter instanceof \WP_Hook ) ? $filter->callbacks : array();
+		$classes   = array();
+
+		foreach ( $callbacks as $priority ) {
+			foreach ( $priority as $callback ) {
+				$fn = $callback['function'] ?? null;
+				if ( is_array( $fn ) && is_object( $fn[0] ) && 0 === strpos( get_class( $fn[0] ), 'UMC\\' ) ) {
+					$classes[] = get_class( $fn[0] );
+				}
+			}
+		}
+
+		sort( $classes );
+
+		return $classes;
+	}
+
+	/**
+	 * @param array<string, array<string, mixed>> $currencies Settings currencies.
+	 * @param string                              $active     Active currency code.
+	 */
+	private function activate_with_fee_conversion( array $currencies, string $active ): void {
+		$this->activate( $currencies, $active );
+		$settings = new Settings();
+		$registry = new CurrencyRegistry( $settings, new Currency( 'EUR', 2 ) );
+		$rates    = new ManualRateProvider( $settings, 'EUR' );
+		$context  = new CurrencyContext( $registry, $rates, new CurrencyResolver() );
+		$service  = new PriceConversionService( $context );
+		( new \UMC\Integration\FeeConversion( $service, $context ) )->register();
 	}
 
 	/**

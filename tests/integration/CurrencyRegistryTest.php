@@ -131,12 +131,8 @@ final class CurrencyRegistryTest extends WP_UnitTestCase {
 			)
 		);
 
-		// The domain layer must never touch stock/order/cart hooks. Storefront
-		// price/currency filters are legitimately added by the plugin from
-		// Milestone 2 on, so they are asserted in StorefrontGuardTest instead.
-		foreach ( array( 'woocommerce_product_get_stock_quantity', 'woocommerce_cart_calculate_fees' ) as $hook ) {
-			$this->assertSame( array(), $this->umc_callbacks_on( $hook ), "The domain layer must not hook '{$hook}'." );
-		}
+		// The domain layer must never touch stock hooks.
+		$this->assertSame( array(), $this->umc_callbacks_on( 'woocommerce_product_get_stock_quantity' ), 'The domain layer must not hook stock.' );
 	}
 
 	/**

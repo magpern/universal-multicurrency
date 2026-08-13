@@ -29,7 +29,6 @@ final class StorefrontGuardTest extends WP_UnitTestCase {
 	 * the Store API checkout hooks are released to M5 (CheckoutSnapshotAdapter).
 	 */
 	private const FORBIDDEN_HOOKS = array(
-		'woocommerce_cart_calculate_fees',
 		'woocommerce_shipping_packages',
 		'woocommerce_product_get_stock_quantity',
 		'woocommerce_product_get_stock_status',

@@ -70,14 +70,13 @@ final class SmokeTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The plugin must never register stock, fee or order-status callbacks.
-	 * Fees stay disabled and stock is never touched; the cart, coupon,
-	 * core-shipping, order-create and Store API hooks it *does* add are asserted
-	 * in StorefrontGuardTest. Only plugin-origin callbacks count.
+	 * The plugin must never register stock or order-status callbacks.
+	 * Fee conversion is opt-in via FeeConversion (M19) — asserted in
+	 * FeeBoundaryTest. Core shipping and cart hooks are asserted in
+	 * StorefrontGuardTest.
 	 */
 	public function test_registers_no_out_of_scope_hooks(): void {
 		$forbidden = array(
-			'woocommerce_cart_calculate_fees',
 			'woocommerce_shipping_packages',
 			'woocommerce_cart_hash',
 			'woocommerce_product_get_stock_quantity',
@@ -93,6 +92,12 @@ final class SmokeTest extends WP_UnitTestCase {
 				"The plugin must not hook '{$hook}'."
 			);
 		}
+
+		$this->assertSame(
+			array( 'UMC\Integration\FeeConversion::convert_opt_in_fees' ),
+			$this->plugin_callbacks_on( 'woocommerce_cart_calculate_fees' ),
+			'Only FeeConversion may hook woocommerce_cart_calculate_fees.'
+		);
 	}
 
 	/**

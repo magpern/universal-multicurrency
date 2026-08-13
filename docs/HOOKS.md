@@ -128,6 +128,12 @@ All storefront hooks below register on `woocommerce_init` and gate on
 | `woocommerce_cart_shipping_packages` | `($packages)` | 10 | Inject the rate identity into each package so WooCommerce's `shipping_for_package_*` cache is keyed per currency+rate and self-invalidates on a switch or rate edit. |
 | `woocommerce_shipping_free_shipping_is_available` | `($available, $package, $method)` | 10 | Re-evaluate free-shipping eligibility using a **converted** `min_amount` (base→active) so the threshold is compared in the same currency as the cart. Request-scoped only — does not persist settings or permanently mutate `$method->min_amount`. |
 
+### Fees — opt-in only (`Integration\FeeConversion`)
+
+| Hook | Args | Prio | Why |
+|---|---|---|---|
+| `woocommerce_cart_calculate_fees` | `()` | 99 | After fees are added, convert only those that opt in via `umc_convert_fee`. Default pass-through. |
+
 ### Extension monetary boundaries (Milestone 18)
 
 | Concern | Contract |
@@ -138,8 +144,8 @@ All storefront hooks below register on `woocommerce_init` and gate on
 | Order-owned currency | Authoritative after order creation (order-pay, emails, account, admin historical) |
 | Fixed monetary inputs | Convert once via `PriceConversionService` |
 | Free-shipping `min_amount` | Base-authored; converted at eligibility evaluation (M18) |
-| Fees | **Not converted** — fee authors must supply amounts in the effective active currency; `umc_convert_fee` remains unwired |
-| Third-party shipping | Pass-through unless `umc_convert_shipping_rate` opts in (M19 for adapters) |
+| Fees | **Pass-through by default** — opt in per fee via `umc_convert_fee` (wired M19); amounts convert once when opted in |
+| Third-party shipping | Pass-through unless `umc_convert_shipping_rate` opts in |
 
 See [`docs/architecture/woocommerce-transaction-integrity.md`](architecture/woocommerce-transaction-integrity.md) and ADR-0023.
 
@@ -220,9 +226,9 @@ session-based result. Both endpoint forms are supported: the standard
 
 ## Deliberately NOT hooked (out of scope)
 
-Fees are **not** converted (disabled by decision; opt-in only via `umc_convert_fee`),
-so `woocommerce_cart_calculate_fees` carries no plugin callback. No stock hooks,
-ever. Order-status hooks carry no callback either.
+Fees are **pass-through by default** (M19 wires opt-in conversion via `FeeConversion`
+and `umc_convert_fee`). Arbitrary fees remain untouched unless an integration
+opts in. No stock hooks, ever. Order-status hooks carry no callback either.
 
 Milestone 6 adds: no `deactivate_plugins` or related deactivation APIs; no
 frontend conflict notice; no JavaScript or other frontend assets for diagnostics.
@@ -331,7 +337,11 @@ otherwise `good`. Covered by
 | `umc_currency_signature` (filter) | `($signature, $code, $rate)` | 0.3.0 | Override the rate identity (`code:rate`) used for cache isolation. |
 | `umc_coupon_amount_is_base` (filter) | `($is_base, $coupon)` | 0.3.0 | Return false to declare a coupon already priced in the active currency (skips conversion). |
 | `umc_convert_shipping_rate` (filter) | `($convert, $rate, $package)` | 0.3.0 | Override per rate whether to convert; defaults true for core methods, false otherwise. |
-| `umc_convert_fee` (filter) | `($should, $fee)` | 0.3.0 | Opt-in fee conversion. Default false — fees are not converted in Milestone 3. |
+| `umc_convert_fee` (filter) | `($should, $fee)` | 0.3.0 | Opt-in fee conversion. Default false — only base-authored fees that return true are converted once (M19 `FeeConversion`). |
+| `umc_should_convert_product_price` (filter) | `($should)` | 0.18.0 | Extension adapters may return false during subscription renewal context to prevent browsing currency from altering renewal-owned amounts. |
+| `umc_convert_product_addon_price` (filter) | `($convert, $price)` | 0.18.0 | Opt-in for Product Add-Ons flat/quantity raw prices. Default true when adapter active. |
+| `umc_convert_bundled_item_price` (filter) | `($convert, $price)` | 0.18.0 | Opt-in for Product Bundles bundled item prices. Default true when adapter active. |
+| `umc_extension_compatibilities` (filter) | `($definitions)` | 0.18.0 | Append third-party extension compatibility definitions to the M19 registry. |
 | `umc_gateway_supported_currencies` (filter) | `($codes, $gateway)` | 0.3.0 | Declare a gateway's supported currencies; null = all. |
 | `umc_order_snapshot_meta` (filter) | `($meta, $order, $context)` | 0.3.0 | Filter the order snapshot metadata before it is written. |
 | `umc_cart_recalculated` (action) | `($current, $previous)` | 0.3.0 | Fires after the cart is recalculated for a new rate identity. |
@@ -352,8 +362,20 @@ otherwise `good`. Covered by
 | `umc_geo_country_resolved` (action) | `(CountryContext $context)` | 0.11.0 | Fires after country context is resolved for geo routing. |
 | `umc_geo_currency_decided` (action) | `($currency, GeoRuleEvaluationResult $result, CountryContext $country)` | 0.11.0 | Fires after geo routing selects a currency on the storefront. |
 
-Note: `umc_convert_fee` is documented for integrations but **not wired** in
-Milestone 3 — no fee conversion ships enabled.
+### Test-only extension seams (E2 evidence)
+
+These hooks are fired only by UMC-owned test-double plugins or integration tests.
+They must not be used to claim real-plugin compatibility.
+
+| Hook | Args | Since | Role |
+|---|---|---|---|
+| `umc_test_extension_subscriptions_renewal_start` (action) | `($currency_or_subscription)` | 0.18.0 | Simulates subscription renewal context entry for E2 tests. |
+| `umc_test_extension_subscriptions_renewal_end` (action) | `()` | 0.18.0 | Simulates subscription renewal context exit for E2 tests. |
+| `umc_test_extension_product_addons_price_raw` (filter) | `($price)` | 0.18.0 | Simulates Product Add-Ons raw price seam for E2 tests. |
+| `umc_test_extension_bundled_item_price` (filter) | `($price)` | 0.18.0 | Simulates Product Bundles item price seam for E2 tests. |
+
+`umc_convert_fee` is wired in Milestone 19 via `Integration\FeeConversion` — default
+pass-through; integrations opt in per fee.
 
 Every entry in this table is verified against `src/` by
 `tests/unit/HooksDocumentationSyncTest.php`: each documented `umc_*` hook must
