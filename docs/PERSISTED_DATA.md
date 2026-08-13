@@ -63,6 +63,7 @@ ADR-0006). Permanent audit data — **never deleted on uninstall**.
 | `_umc_fallback_occurred` | `OrderSnapshot::META_FALLBACK_OCCURRED` | M11 |
 | `_umc_rate_provider` | `OrderSnapshot::META_RATE_PROVIDER` | M16 (schema 4; empty when manual) |
 | `_umc_rate_adjustment` | `OrderSnapshot::META_RATE_ADJUSTMENT` | M16 (schema 4; merchant adjustment %) |
+| `_umc_currency_origin` | `OrderSnapshot::META_CURRENCY_ORIGIN` | M21 (schema 5; `customer` \| `visitor_location` only; absent when unknown) |
 
 Writer: `Order\OrderSnapshot` (classic checkout and Store API checkout adapter).
 
@@ -168,8 +169,14 @@ when the session expires or the customer clears their session — **not touched 
 
 ## Transients
 
-**None.** Runtime code under `src/` does not call `set_transient()` or
-`get_transient()`.
+M21 reporting may cache immutable aggregate report payloads:
+
+| Pattern | Owner | TTL | Uninstall |
+|---|---|---|---|
+| `umc_report_*` | `Reporting\ReportingCache` | 15 minutes | Expires naturally |
+
+Generation invalidation uses option `umc_reporting_cache_gen`. No other runtime
+code under `src/` calls `set_transient()` or `get_transient()`.
 
 ---
 
@@ -213,7 +220,7 @@ with `PersistedKeys::inventory()` — never edit one without the other.
 
 ```umc:persisted-inventory
 {
-  "inventory_version": 9,
+  "inventory_version": 10,
   "options": [
     "umc_settings",
     "umc_rate_state"
@@ -232,7 +239,8 @@ with `PersistedKeys::inventory()` — never edit one without the other.
     "_umc_shopper_currency",
     "_umc_fallback_occurred",
     "_umc_rate_provider",
-    "_umc_rate_adjustment"
+    "_umc_rate_adjustment",
+    "_umc_currency_origin"
   ],
   "refund_meta": [
     "_umc_parent_transaction_currency",
@@ -268,7 +276,9 @@ with `PersistedKeys::inventory()` — never edit one without the other.
   "store_api_extension_namespaces": [
     "umc"
   ],
-  "transients": [],
+  "transients": [
+    "umc_report_*"
+  ],
   "object_cache": [],
   "uninstall_policy": {
     "delete_options": [
@@ -289,7 +299,8 @@ with `PersistedKeys::inventory()` — never edit one without the other.
       "_umc_shopper_currency",
       "_umc_fallback_occurred",
       "_umc_rate_provider",
-      "_umc_rate_adjustment"
+      "_umc_rate_adjustment",
+      "_umc_currency_origin"
     ],
     "preserve_refund_meta": [
       "_umc_parent_transaction_currency",

@@ -19,6 +19,7 @@ use UMC\Order\OrderSnapshot;
 use UMC\Order\RefundSnapshot;
 use UMC\Order\LineItemPriceProvenance;
 use UMC\Pricing\FixedPriceDocument;
+use UMC\Reporting\ReportingCache;
 use UMC\StoreApi\CartExtensionData;
 
 /**
@@ -33,7 +34,7 @@ final class PersistedKeys {
 	/**
 	 * Bump when the inventory shape or membership changes.
 	 */
-	public const INVENTORY_VERSION = 9;
+	public const INVENTORY_VERSION = 10;
 
 	/**
 	 * WordPress options written by the plugin.
@@ -68,6 +69,7 @@ final class PersistedKeys {
 			OrderSnapshot::META_FALLBACK_OCCURRED,
 			OrderSnapshot::META_RATE_PROVIDER,
 			OrderSnapshot::META_RATE_ADJUSTMENT,
+			OrderSnapshot::META_CURRENCY_ORIGIN,
 		);
 	}
 
@@ -169,7 +171,20 @@ final class PersistedKeys {
 	 * @return list<string>
 	 */
 	public static function transient_keys(): array {
-		return array();
+		return array(
+			ReportingCache::TRANSIENT_PREFIX . '*',
+		);
+	}
+
+	/**
+	 * Production files permitted to read/write reporting transients.
+	 *
+	 * @return list<string>
+	 */
+	public static function transient_writer_basenames(): array {
+		return array(
+			'ReportingCache.php',
+		);
 	}
 
 	/**
