@@ -25,16 +25,12 @@ final class HooksDocumentationSyncTest extends TestCase {
 	use SourceGuardTrait;
 
 	/**
-	 * Hook names documented for integrators but deliberately not wired.
-	 *
-	 * `umc_convert_fee` is the published opt-in seam for fee conversion; no
-	 * Milestone 3+ callback applies it, and HOOKS.md says so explicitly.
+	 * Hook names documented for integrators that may exist without a direct callback
+	 * (extension-only or third-party triggered).
 	 *
 	 * @var list<string>
 	 */
-	private const DOCUMENTED_BUT_UNWIRED = array(
-		'umc_convert_fee',
-	);
+	private const DOCUMENTED_BUT_UNWIRED = array();
 
 	/**
 	 * Hook names referenced through class constants rather than literals.

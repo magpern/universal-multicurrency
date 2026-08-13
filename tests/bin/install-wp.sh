@@ -135,6 +135,83 @@ if ( ! defined( 'ABSPATH' ) ) {
 PHP
 }
 
+umc_write_extension_test_fixtures() {
+    if [ "${UMC_TEST_EXTENSION_FIXTURES:-0}" != "1" ]; then
+        return 0
+    fi
+
+    local subs="$PLUGINS_DIR/umc-test-extension-subscriptions/umc-test-extension-subscriptions.php"
+    local addons="$PLUGINS_DIR/umc-test-extension-product-addons/umc-test-extension-product-addons.php"
+    local bundles="$PLUGINS_DIR/umc-test-extension-bundles/umc-test-extension-bundles.php"
+
+    mkdir -p "$(dirname "$subs")" "$(dirname "$addons")" "$(dirname "$bundles")"
+
+    cat >"$subs" <<'PHP'
+<?php
+/**
+ * Plugin Name: UMC Test Extension Subscriptions
+ * Description: UMC-owned hook double simulating subscription renewal context (E2). Not WooCommerce Subscriptions.
+ * Version: 0.0.0
+ */
+declare(strict_types=1);
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+if ( ! defined( 'UMC_TEST_EXTENSION_FIXTURES' ) ) {
+	define( 'UMC_TEST_EXTENSION_FIXTURES', true );
+}
+
+final class WC_Subscriptions {}
+
+define( 'WCS_INIT_PLUGIN_FILE', __FILE__ );
+PHP
+
+    cat >"$addons" <<'PHP'
+<?php
+/**
+ * Plugin Name: UMC Test Extension Product Add-Ons
+ * Description: UMC-owned hook double for add-on price seam (E2). Not Product Add-Ons.
+ * Version: 0.0.0
+ */
+declare(strict_types=1);
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+if ( ! defined( 'UMC_TEST_EXTENSION_FIXTURES' ) ) {
+	define( 'UMC_TEST_EXTENSION_FIXTURES', true );
+}
+
+final class WC_Product_Addons {}
+PHP
+
+    cat >"$bundles" <<'PHP'
+<?php
+/**
+ * Plugin Name: UMC Test Extension Bundles
+ * Description: UMC-owned hook double for bundled item price seam (E2). Not Product Bundles.
+ * Version: 0.0.0
+ */
+declare(strict_types=1);
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+if ( ! defined( 'UMC_TEST_EXTENSION_FIXTURES' ) ) {
+	define( 'UMC_TEST_EXTENSION_FIXTURES', true );
+}
+
+final class WC_Bundles {}
+
+define( 'WC_PB_VERSION', '0.0.0' );
+PHP
+}
+
 umc_write_test_fixtures
+umc_write_extension_test_fixtures
 
 echo "WordPress core ready: $CORE_DIR"
