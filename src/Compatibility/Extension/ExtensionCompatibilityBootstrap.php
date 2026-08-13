@@ -14,7 +14,6 @@ use UMC\Compatibility\Extension\Adapters\ProductAddonsAdapter;
 use UMC\Compatibility\Extension\Adapters\SubscriptionsAdapter;
 use UMC\CurrencyContext;
 use UMC\Integration\PriceConversionService;
-use UMC\Order\OrderCurrencyContext;
 
 /**
  * Wires M19 extension adapters with injected UMC services.
@@ -36,27 +35,17 @@ final class ExtensionCompatibilityBootstrap {
 	private CurrencyContext $context;
 
 	/**
-	 * Order currency context for renewal surfaces.
-	 *
-	 * @var OrderCurrencyContext|null
-	 */
-	private ?OrderCurrencyContext $order_context;
-
-	/**
 	 * Creates the bootstrap with injected UMC services.
 	 *
-	 * @param PriceConversionService    $service       Conversion seam.
-	 * @param CurrencyContext           $context       Request-scoped currency.
-	 * @param OrderCurrencyContext|null $order_context Order currency context.
+	 * @param PriceConversionService $service Conversion seam.
+	 * @param CurrencyContext        $context Request-scoped currency.
 	 */
 	public function __construct(
 		PriceConversionService $service,
-		CurrencyContext $context,
-		?OrderCurrencyContext $order_context = null
+		CurrencyContext $context
 	) {
-		$this->service       = $service;
-		$this->context       = $context;
-		$this->order_context = $order_context;
+		$this->service = $service;
+		$this->context = $context;
 	}
 
 	/**
@@ -103,11 +92,7 @@ final class ExtensionCompatibilityBootstrap {
 		}
 
 		return match ( $adapter_class ) {
-			SubscriptionsAdapter::class => new SubscriptionsAdapter(
-				$this->service,
-				$this->context,
-				$this->order_context
-			),
+			SubscriptionsAdapter::class => new SubscriptionsAdapter( $this->service, $this->context ),
 			ProductAddonsAdapter::class => new ProductAddonsAdapter( $this->service, $this->context ),
 			BundlesAdapter::class => new BundlesAdapter( $this->service, $this->context ),
 			default => null,

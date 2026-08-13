@@ -10,11 +10,12 @@ declare(strict_types=1);
 namespace UMC\Compatibility\Extension\Adapters;
 
 /**
- * Converts base-authored bundled item prices without double-converting parent totals.
+ * Converts base-authored bundled item prices through the UMC generic seam (E2).
  *
- * Public Product Bundles hooks:
- * - `woocommerce_bundled_item_price` — individually priced bundled items
- * - Parent bundle totals aggregate child lines; only child base-authored prices convert here.
+ * Official WooCommerce Product Bundles filters reference documents display and
+ * cart-configuration hooks (e.g. woocommerce_bundled_item_price_html) but no
+ * authoritative raw bundled-item price conversion filter. This adapter registers
+ * only the UMC-owned test seam until E3 validates parent/child price ownership.
  *
  * Composite Products deferred (Not evaluated) in M19.
  *
@@ -33,7 +34,6 @@ final class BundlesAdapter extends AbstractExtensionAdapter {
 	 * {@inheritDoc}
 	 */
 	public function register(): void {
-		add_filter( 'woocommerce_bundled_item_price', array( $this, 'convert_bundled_item_price' ), 10, 1 );
 		add_filter( 'umc_test_extension_bundled_item_price', array( $this, 'convert_bundled_item_price' ), 10, 1 );
 	}
 

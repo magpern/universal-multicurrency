@@ -298,7 +298,7 @@ final class Plugin {
 				$geo_applicator->register();
 				$geo_applicator->maybe_apply();
 
-				( new ExtensionCompatibilityBootstrap( $service, $context, $order_context ) )->register();
+				( new ExtensionCompatibilityBootstrap( $service, $context ) )->register();
 			}
 		);
 

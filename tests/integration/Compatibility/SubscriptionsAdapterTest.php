@@ -41,8 +41,7 @@ final class SubscriptionsAdapterTest extends WP_UnitTestCase {
 
 		$adapter = new SubscriptionsAdapter(
 			$this->service(),
-			$this->context(),
-			null
+			$this->context()
 		);
 		$adapter->register();
 
@@ -63,8 +62,7 @@ final class SubscriptionsAdapterTest extends WP_UnitTestCase {
 
 		$adapter = new SubscriptionsAdapter(
 			$this->service(),
-			$this->context(),
-			null
+			$this->context()
 		);
 		$adapter->register();
 

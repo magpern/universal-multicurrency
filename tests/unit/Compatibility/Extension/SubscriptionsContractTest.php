@@ -50,4 +50,19 @@ final class SubscriptionsContractTest extends TestCase {
 		$this->assertSame( ExtensionCompatibilityStatus::CHARACTERIZED, $definition['status'] );
 		$this->assertSame( ExtensionEvidenceTier::E2, $definition['evidence_tier'] );
 	}
+
+	public function test_e2_scope_documents_renewal_rate_policy_pending(): void {
+		$definition = null;
+		foreach ( ExtensionCompatibilityRegistry::definitions() as $item ) {
+			if ( 'woocommerce_subscriptions' === ( $item['id'] ?? '' ) ) {
+				$definition = $item;
+				break;
+			}
+		}
+
+		$this->assertNotNull( $definition );
+		$limitations = implode( ' ', (array) ( $definition['limitations'] ?? array() ) );
+		$this->assertStringContainsString( 'E3', $limitations );
+		$this->assertStringContainsString( 'browsing-currency isolation', $limitations );
+	}
 }

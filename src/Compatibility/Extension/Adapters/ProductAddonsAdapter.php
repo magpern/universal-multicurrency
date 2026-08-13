@@ -10,11 +10,13 @@ declare(strict_types=1);
 namespace UMC\Compatibility\Extension\Adapters;
 
 /**
- * Converts base-authored flat and quantity-based add-on prices.
+ * Converts base-authored add-on prices through the UMC generic seam (E2).
  *
- * Hook contract from public Product Add-Ons documentation:
- * `woocommerce_product_addons_option_price_raw` supplies base-authored option prices.
- * Percentage add-ons operate on already-converted totals and are not converted here.
+ * Official WooCommerce.com Product Add-Ons merchant documentation does not
+ * publish a developer filter reference for raw option-price conversion. A
+ * community-cited filter name exists in third-party sources but is unverified
+ * at E2. This adapter therefore registers only the UMC-owned test seam until
+ * E3 validates the real extension hook and monetary semantics.
  *
  * @see docs/adr/0024-third-party-extension-compatibility-contract.md
  */
@@ -31,7 +33,6 @@ final class ProductAddonsAdapter extends AbstractExtensionAdapter {
 	 * {@inheritDoc}
 	 */
 	public function register(): void {
-		add_filter( 'woocommerce_product_addons_option_price_raw', array( $this, 'convert_addon_price' ), 10, 1 );
 		add_filter( 'umc_test_extension_product_addons_price_raw', array( $this, 'convert_addon_price' ), 10, 1 );
 	}
 

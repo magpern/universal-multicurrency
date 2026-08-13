@@ -26,7 +26,6 @@ final class BundlesAdapterTest extends WP_UnitTestCase {
 
 	public function tear_down(): void {
 		remove_all_filters( 'umc_test_extension_bundled_item_price' );
-		remove_all_filters( 'woocommerce_bundled_item_price' );
 		unset( $_COOKIE[ CurrencyContext::COOKIE_NAME ] );
 		delete_option( Settings::OPTION );
 		parent::tear_down();

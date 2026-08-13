@@ -155,70 +155,96 @@ From WooCommerce Subscriptions public documentation and API surface:
 - **Renewal currency identity:** Renewal orders are created in the
   subscription's currency. WCS uses the subscription as the authoritative
   monetary context for renewals — not the current shopper browsing currency.
-- **Exchange-rate policy:** WCS stores line-item prices on the subscription.
-  Renewal totals derive from stored subscription amounts and WCS pricing logic,
-  not from UMC's current browsing rate. UMC must **not** re-convert renewal
-  amounts using the current session rate when the subscription already carries
-  active-currency amounts from its creation context. For **initial** subscription
-  purchase (including signup), UMC converts base-authored product/signup prices
-  through the normal seam at checkout time and snapshots on the order. For
-  **renewal** order generation, UMC enters `OrderCurrencyContext` from the
-  parent subscription/order snapshot and suppresses browsing-currency conversion
-  on subscription-owned recurring amounts.
-- **Rate identity (Phase B decision):** Renewals use the **subscription's stored
-  monetary context** (currency + rate identity from parent order snapshot when
-  present), not the merchant's current browsing rate or Visitor Location. UMC
-  does **not** freeze a historical FX rate independently of WCS — it respects
-  amounts WCS considers authoritative for the subscription and avoids applying
-  a fresh base→active conversion pass during renewal generation. If the parent
-  order lacks UMC snapshot meta (legacy), fall back to subscription currency
-  with current stored rate for that currency (same as order-pay historical path).
-  **This policy requires E3 validation before Integrated status; E2 evidence
-  covers browsing-currency isolation only.**
-- **Signup fee vs recurring:** Signup fees are converted at initial checkout
-  through product price hooks. Recurring amounts are subscription-persisted.
-- **Manual vs automatic renewal:** Same monetary context rules; execution path
-  differs only in payment timing.
+- **Exchange-rate policy:** **Not determined at E2.** Public WCS documentation
+  establishes that renewal orders copy subscription line-item amounts and that
+  renewals are created through `wcs_create_renewal_order()`, but it does not
+  publish a complete UMC-facing FX policy (original rate vs current stored rate
+  vs WCS-authoritative stored amounts). UMC must not invent renewal-rate
+  semantics without E3 real-extension validation.
+- **Signup fee vs recurring:** Signup fees surface at initial checkout through
+  normal product price hooks. Recurring amounts are subscription-persisted by WCS.
+- **Manual vs automatic renewal:** Public docs describe timing differences only;
+  monetary semantics require E3 validation before Integrated status.
 - **Historical renewal immutability:** Completed renewal orders are immutable
   (M4/M18 order context).
 
-### Phase B policy (implemented under E2)
+### E2 implementation scope (what production code does)
 
-1. **Initial subscription orders:** Normal UMC conversion at checkout; order
-   snapshot written (schema 4 unchanged).
-2. **Renewal generation:** When WCS creates a renewal order, UMC detects
-   renewal context and enters order/subscription currency context, preventing
-   browsing currency from altering renewal totals.
-3. **Rate on renewal:** Do not apply a new base→active conversion pass to
-   subscription-stored recurring amounts during renewal; use parent snapshot
-   rate identity when available.
+At Characterized E2, UMC implements **one safe invariant only**:
+
+> While renewal generation context is active, suppress browsing-currency product
+> price conversion via `umc_should_convert_product_price` so Visitor Location,
+> session state, cookies, and unrelated request context cannot alter amounts
+> that WCS already owns.
+
+Mechanism:
+
+1. `ExtensionCompatibilityContext` stores a request-scoped renewal flag + currency
+   code supplied by the adapter entry point.
+2. `SubscriptionsAdapter` sets that context from the UMC-owned E2 test-double
+   actions only (`umc_test_extension_subscriptions_renewal_start/end`).
+3. `SubscriptionsAdapter` does **not** enter `OrderCurrencyContext`, read order
+   snapshot meta, select exchange rates, or rewrite WCS subscription totals.
+
+Real WCS hook registration (`wcs_renewal_order_created` /
+`woocommerce_subscriptions_renewal_order_created`, etc.) is **deferred to E3**
+because public documentation does not establish a verified *before-creation*
+hook contract sufficient to bracket renewal generation for browsing isolation,
+and the documented post-creation filter is too late to suppress conversion during
+order assembly.
+
+### Renewal FX / rate policy (explicitly pending E3)
+
+UMC does **not** implement any of the following at E2:
+
+- Parent-order snapshot rate identity selection during renewal generation
+- Legacy-subscription fallback to current stored rate for subscription currency
+- Freezing an independent historical FX rate separate from WCS stored amounts
+- Re-converting subscription-stored recurring amounts with the current browsing rate
+
+These remain architectural questions requiring E3 real WCS validation. Until
+then, WCS/subscription monetary values remain authoritative; UMC only prevents
+accidental browsing-currency interference on product price hooks during the
+characterized renewal context window.
 
 Status: **Characterized — simulated extension hooks** until E3 real WCS validation.
 
 ## Product Add-Ons — hook contract
 
-Public WooCommerce Product Add-Ons documentation establishes:
+Official WooCommerce.com Product Add-Ons merchant documentation describes add-on
+price types (flat fee, quantity-based, percentage-based) and display filters
+(`woocommerce_addons_add_cart_price_to_value`, etc.) but **does not publish a
+developer filter reference** naming a raw option-price conversion hook.
 
-- Add-on prices are configured in store base currency on the product
-- Flat and quantity-based add-ons add to cart line totals via
-  `woocommerce_product_addons_option_price_raw` and cart item data
-- Percentage add-ons calculate against product/cart subtotals (already subject
-  to UMC product price conversion)
+Third-party/community sources cite `woocommerce_product_addons_option_price_raw`
+in plugin templates, but that hook is **unverified at E2** and is not registered
+by UMC production code.
 
-**Authoritative hook contract (public docs):**
+### E2 implementation scope
 
-- Flat / quantity add-ons: base-authored → convert via adapter on
-  `woocommerce_product_addons_option_price_raw` when amount is base-authored
-- Percentage add-ons: operate on converted product totals → **Native** (no
-  amount conversion on percentage itself)
+- UMC generic seam: `umc_test_extension_product_addons_price_raw` (test double)
+- Opt-in filter: `umc_convert_product_addon_price`
+- Percentage add-ons: if they operate on already-converted product totals, no
+  separate amount conversion is applied by this adapter (Native behaviour when
+  verified at E3)
 
 Without licensed-plugin E3 validation, status remains **Characterized — simulated
 extension hooks**.
 
 ## Product Bundles / Composite Products
 
-Investigation-first. Parent/child price ownership determines adapter shape.
-Implement at most one integration if single-conversion invariant holds.
+Official WooCommerce Product Bundles filters reference documents display and
+cart-configuration hooks (e.g. `woocommerce_bundled_item_price_html`) but **no
+authoritative raw bundled-item price conversion filter** suitable for a single
+base→active conversion seam.
+
+### E2 implementation scope
+
+- UMC generic seam: `umc_test_extension_bundled_item_price` (test double)
+- Opt-in filter: `umc_convert_bundled_item_price`
+- Parent/child price ownership and real extension hook timing require E3
+
+Composite Products: investigation deferred; **Not evaluated (E0)**.
 
 ## Bookings
 

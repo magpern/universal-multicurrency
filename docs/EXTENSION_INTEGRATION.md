@@ -11,6 +11,8 @@ ADR-0024.
 2. Adapters bridge extension-specific inputs into existing UMC services only.
 3. Do not implement a second converter, rate resolver, or checkout policy.
 4. Do not claim **Integrated** without E3 real-extension validation.
+5. Do not register real extension hooks without authoritative evidence; use UMC
+   generic seams at E2 and validate with licensed extensions at E3.
 
 ## Compatibility statuses
 
@@ -32,6 +34,8 @@ Merchant-visible sub-labels for Characterized/Integrated are defined in ADR-0024
 3. Use `PriceConversionService` through `AbstractExtensionAdapter::convert_amount()` for base-authored amounts.
 4. Add E1 contract tests and E2 hook-double tests before claiming Characterized.
 5. Promote to Integrated only after E3 tests against the real licensed extension.
+6. Register real third-party hooks only when documented authoritatively; otherwise
+   ship UMC-owned test seams and document the E3 blocker.
 
 ## Opt-in seams
 
@@ -39,9 +43,17 @@ Merchant-visible sub-labels for Characterized/Integrated are defined in ADR-0024
 |---|---|---|
 | `umc_convert_fee` | false | Fee amount is base-authored |
 | `umc_convert_shipping_rate` | false for third-party | Shipping rate cost is base-authored |
-| `umc_convert_product_addon_price` | true (adapter) | Product Add-Ons flat/quantity raw price |
-| `umc_convert_bundled_item_price` | true (adapter) | Product Bundles item price |
+| `umc_convert_product_addon_price` | true (adapter) | UMC add-on price seam invoked |
+| `umc_convert_bundled_item_price` | true (adapter) | UMC bundled-item price seam invoked |
 | `umc_should_convert_product_price` | true | Return false to suppress browsing-currency conversion (renewals) |
+
+### UMC E2 test-double seams (not real extension hooks)
+
+| Seam | Simulates |
+|---|---|
+| `umc_test_extension_subscriptions_renewal_start` / `_end` | Renewal generation context bracket |
+| `umc_test_extension_product_addons_price_raw` | Base-authored add-on raw price |
+| `umc_test_extension_bundled_item_price` | Base-authored bundled child price |
 
 ## Dynamic pricing boundary
 

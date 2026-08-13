@@ -226,9 +226,9 @@ validation only. E1/E2 cap at **Characterized** with explicit sub-labels.
 
 | Extension | Status line | Evidence | Surfaces |
 |---|---|---|---|
-| WooCommerce Subscriptions | Characterized — simulated extension hooks | E2 | Initial checkout conversion; renewal browsing-currency isolation |
-| Product Add-Ons | Characterized — simulated extension hooks | E2 | Flat/quantity add-on raw prices via documented hook contract |
-| Product Bundles | Characterized — simulated extension hooks | E2 | Bundled item base-authored prices |
+| WooCommerce Subscriptions | Characterized — simulated extension hooks | E2 | Initial checkout (normal UMC seam); renewal browsing-currency isolation only |
+| Product Add-Ons | Characterized — simulated extension hooks | E2 | UMC generic add-on price seam (real extension hook unverified at E2) |
+| Product Bundles | Characterized — simulated extension hooks | E2 | UMC generic bundled-item price seam (real extension hook unverified at E2) |
 | Composite Products | Not evaluated | E0 | Investigation deferred; Bundles chosen as bounded M19 integration |
 | WooCommerce Bookings | Not evaluated | E0 | M19 audit-only |
 

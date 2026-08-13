@@ -65,8 +65,9 @@ final class ExtensionCompatibilityRegistry {
 					'automatic_renewal',
 				),
 				'limitations'    => array(
+					'E2 implements browsing-currency isolation only via umc_should_convert_product_price.',
+					'Renewal FX/rate policy and real WCS hook timing pending E3 validation.',
 					'Integrated status requires E3 real-extension validation.',
-					'Rate policy on renewals characterized from public WCS docs; E3 pending.',
 				),
 				'evidence_tests' => array(
 					'UMC\\Tests\\Unit\\Compatibility\\Extension\\ExtensionEvidenceTest',
@@ -103,7 +104,8 @@ final class ExtensionCompatibilityRegistry {
 					'checkout',
 				),
 				'limitations'    => array(
-					'Hook contract from public Product Add-Ons documentation.',
+					'Real Product Add-Ons raw-price hook unverified in official WooCommerce.com developer docs.',
+					'E2 validates UMC generic seam (umc_test_extension_product_addons_price_raw) only.',
 					'Integrated status requires E3 real-extension validation.',
 				),
 				'evidence_tests' => array(
@@ -135,6 +137,8 @@ final class ExtensionCompatibilityRegistry {
 					'cart_line_total',
 				),
 				'limitations'    => array(
+					'No authoritative raw bundled-item price hook in official PB filters reference.',
+					'E2 validates UMC generic seam (umc_test_extension_bundled_item_price) only.',
 					'Composite Products not adapted in M19.',
 					'Integrated status requires E3 real-extension validation.',
 				),

@@ -26,7 +26,6 @@ final class ProductAddonsAdapterTest extends WP_UnitTestCase {
 
 	public function tear_down(): void {
 		remove_all_filters( 'umc_test_extension_product_addons_price_raw' );
-		remove_all_filters( 'woocommerce_product_addons_option_price_raw' );
 		unset( $_COOKIE[ CurrencyContext::COOKIE_NAME ] );
 		delete_option( Settings::OPTION );
 		parent::tear_down();
