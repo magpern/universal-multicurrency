@@ -28,6 +28,13 @@ final class SwitcherAssets {
 	private StorefrontRequestContext $context;
 
 	/**
+	 * Bounded switcher presence detection.
+	 *
+	 * @var SwitcherPresence
+	 */
+	private SwitcherPresence $presence;
+
+	/**
 	 * Display settings repository.
 	 *
 	 * @var SwitcherSettingsRepository
@@ -61,13 +68,16 @@ final class SwitcherAssets {
 	 * @param StorefrontRequestContext   $context             Request guards.
 	 * @param SwitcherSettingsRepository $settings_repository Display settings.
 	 * @param CurrencyContext            $currency_context    Currency facade.
+	 * @param SwitcherPresence|null      $presence            Presence detector.
 	 */
 	public function __construct(
 		StorefrontRequestContext $context,
 		SwitcherSettingsRepository $settings_repository,
-		CurrencyContext $currency_context
+		CurrencyContext $currency_context,
+		?SwitcherPresence $presence = null
 	) {
 		$this->context             = $context;
+		$this->presence            = $presence ?? new SwitcherPresence();
 		$this->settings_repository = $settings_repository;
 		$this->currency_context    = $currency_context;
 	}
@@ -77,8 +87,7 @@ final class SwitcherAssets {
 	 */
 	public function register(): void {
 		add_action( 'wp_enqueue_scripts', array( $this, 'register_assets' ), 5 );
-		add_action( 'wp_enqueue_scripts', array( $this, 'maybe_enqueue_automatic' ), 20 );
-		add_action( 'wp_enqueue_scripts', array( $this, 'maybe_enqueue_from_post_content' ), 15 );
+		add_action( 'wp_enqueue_scripts', array( $this, 'maybe_enqueue_when_present' ), 20 );
 		add_filter( 'language_attributes', array( $this, 'append_no_js_class' ) );
 	}
 
@@ -86,6 +95,10 @@ final class SwitcherAssets {
 	 * Registers stylesheet and script handles.
 	 */
 	public function register_assets(): void {
+		if ( ! function_exists( 'wp_register_style' ) || ! function_exists( 'wp_register_script' ) ) {
+			return;
+		}
+
 		if ( ! $this->context->allows_storefront_assets() ) {
 			return;
 		}
@@ -116,20 +129,16 @@ final class SwitcherAssets {
 	}
 
 	/**
-	 * Enqueues assets for automatic placement when knowable before output.
+	 * Enqueues assets when bounded presence detection finds a switcher surface.
 	 */
-	public function maybe_enqueue_automatic(): void {
+	public function maybe_enqueue_when_present(): void {
 		if ( ! $this->context->allows_storefront_assets() ) {
 			return;
 		}
 
 		$settings = $this->settings_repository->get();
 
-		if ( ! $settings->should_render_automatic() ) {
-			return;
-		}
-
-		if ( count( $this->currency_context->get_selectable_codes() ) < 2 ) {
+		if ( ! $this->presence->should_load_switcher_assets( $settings, count( $this->currency_context->get_selectable_codes() ) ) ) {
 			return;
 		}
 
@@ -137,38 +146,20 @@ final class SwitcherAssets {
 	}
 
 	/**
-	 * Enqueues assets when a supported shortcode appears in the main post content.
+	 * Exposes bounded presence detection for tests and guards.
 	 */
-	public function maybe_enqueue_from_post_content(): void {
-		if ( ! $this->context->allows_storefront_assets() ) {
-			return;
-		}
-
-		global $post;
-
-		if ( ! $post instanceof \WP_Post ) {
-			return;
-		}
-
-		if ( ! $this->post_contains_switcher_shortcode( $post->post_content ) ) {
-			return;
-		}
-
-		if ( ! $this->settings_repository->get()->is_enabled() ) {
-			return;
-		}
-
-		if ( count( $this->currency_context->get_selectable_codes() ) < 2 ) {
-			return;
-		}
-
-		$this->ensure_enqueued();
+	public function presence(): SwitcherPresence {
+		return $this->presence;
 	}
 
 	/**
 	 * Ensures switcher assets are queued for the current request.
 	 */
 	public function ensure_enqueued(): void {
+		if ( ! function_exists( 'wp_style_is' ) || ! function_exists( 'wp_enqueue_style' ) ) {
+			return;
+		}
+
 		$this->register_assets();
 
 		if ( ! wp_style_is( self::STYLE_HANDLE, 'enqueued' ) ) {
@@ -223,6 +214,10 @@ final class SwitcherAssets {
 			return;
 		}
 
+		if ( ! function_exists( 'wp_style_is' ) || ! function_exists( 'esc_url' ) ) {
+			return;
+		}
+
 		if ( ! defined( 'UMC_VERSION' ) || ! defined( 'UMC_PLUGIN_FILE' ) ) {
 			return;
 		}
@@ -269,15 +264,5 @@ final class SwitcherAssets {
 		}
 
 		return trim( $output ) . ' class="no-js"';
-	}
-
-	/**
-	 * Detects supported switcher shortcodes in post content.
-	 *
-	 * @param string $content Post content.
-	 */
-	private function post_contains_switcher_shortcode( string $content ): bool {
-		return has_shortcode( $content, SwitcherShortcode::TAG_PRIMARY )
-			|| has_shortcode( $content, SwitcherShortcode::TAG_LEGACY );
 	}
 }

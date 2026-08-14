@@ -18,7 +18,7 @@ final class StorefrontRequestContext {
 	 * Whether automatic switcher markup may render on this request.
 	 */
 	public function allows_automatic_render(): bool {
-		if ( is_admin() ) {
+		if ( function_exists( 'is_admin' ) && is_admin() ) {
 			return false;
 		}
 
@@ -61,6 +61,10 @@ final class StorefrontRequestContext {
 	 * Whether storefront switcher assets may load on this request.
 	 */
 	public function allows_storefront_assets(): bool {
-		return ! is_admin() && $this->allows_automatic_render();
+		if ( function_exists( 'is_admin' ) && is_admin() ) {
+			return false;
+		}
+
+		return $this->allows_automatic_render();
 	}
 }

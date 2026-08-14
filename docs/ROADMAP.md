@@ -472,9 +472,29 @@ migration. See
 | Integration, security, migration tests | **Complete** |
 | Release closure for **v0.21.0** | **Complete** — PR **#23**, tag `v0.21.0` |
 
+## Milestone 23 — Native Switcher Block & Rendering Surface Integration (**v0.22.0**) — in progress
+
+**Target:** v0.22.0 · ADR-0028 · branch `feature/m23-native-switcher-block`
+
+Dynamic Gutenberg block `universal-multicurrency/currency-switcher` as a new
+rendering surface on the existing M17/M22 switcher engine. Settings schema **7**
+unchanged; no OrderSnapshot, PersistedKeys, or DB migration changes. See
+[`docs/architecture/native-switcher-block.md`](architecture/native-switcher-block.md).
+
+| Work item | Status |
+|---|---|
+| ADR-0028 + architecture spec | **Complete** |
+| Bounded switcher presence detection | **Complete** |
+| Dynamic block registration + PHP render | **Complete** |
+| Editor ServerSideRender preview | **Complete** |
+| Multi-instance + Store API integration tests | **Complete** |
+| Release closure for **v0.22.0** | **Prepared** — PR boundary |
+
 ## Future milestones — not started, not implemented
 
 None of the following exists in the codebase today:
+- Custom switcher media / Media Library icons (deferred from M22/M23)
+- Additional exchange-rate providers and per-currency provider selection
 - Additional exchange-rate providers and per-currency provider selection
 - `country_change` geo detection mode and broader continent presets
 - Public APIs beyond the documented hooks in [`HOOKS.md`](HOOKS.md)

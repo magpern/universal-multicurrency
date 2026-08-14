@@ -32,6 +32,7 @@ cp -R "$ROOT/src" "$BUILD/src"
 cp -R "$ROOT/vendor" "$BUILD/vendor"
 [ -d "$ROOT/languages" ] && cp -R "$ROOT/languages" "$BUILD/languages"
 [ -d "$ROOT/assets" ] && cp -R "$ROOT/assets" "$BUILD/assets"
+[ -d "$ROOT/blocks" ] && cp -R "$ROOT/blocks" "$BUILD/blocks"
 
 ( cd "$DIST" && zip -rq "universal-multicurrency-${VERSION}.zip" universal-multicurrency )
 

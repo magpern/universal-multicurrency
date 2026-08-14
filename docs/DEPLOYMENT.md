@@ -26,8 +26,9 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Produces `dist/universal-multicurrency-0.21.0.zip`. The archive includes `readme.txt`,
-production `src/`, `vendor/`, bundled presentation assets, and `languages/universal-multicurrency.pot`.
+Produces `dist/universal-multicurrency-0.22.0.zip`. The archive includes `readme.txt`,
+production `src/`, `vendor/`, bundled presentation assets, block metadata, and
+`languages/universal-multicurrency.pot`.
 
 Performance subset:
 
@@ -36,8 +37,20 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release on `main`:** **v0.21.0** (tagged and published). PR **#23**;
-merge commit `86fa5da`. Deployment is a separate operation — not performed as part of release.
+**Current release on `main`:** **v0.21.0** (tagged and published). **v0.22.0** is
+prepared on `feature/m23-native-switcher-block` — not tagged or published.
+
+---
+
+## v0.22.0 — Native Switcher Block (prepared, not released)
+
+Ships Milestone 23 under version **0.22.0** (ADR-0028). Dynamic Gutenberg block
+`universal-multicurrency/currency-switcher` on the existing M17/M22 switcher
+engine. Settings schema **7** unchanged; PersistedKeys **10**; order snapshot **5**;
+no DB migration. Block attributes live in WordPress post/template content only.
+
+**Prepared as:** branch `feature/m23-native-switcher-block` — PR boundary; not
+tagged, not released, not deployed.
 
 ---
 

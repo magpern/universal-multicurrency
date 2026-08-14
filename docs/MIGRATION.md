@@ -367,6 +367,11 @@ not re-convert historical orders.
 **What happens to `_umc_*` meta if I uninstall UMC?**  
 Order and refund snapshot meta is **never** deleted on uninstall (ADR-0009).
 
+**What happens to the Currency Switcher block in my content?**  
+Block comment delimiters remain in posts and templates. After uninstall, WordPress
+shows the standard unknown/missing dynamic block behavior; UMC does not delete or
+migrate merchant content (M23 / ADR-0028).
+
 **Can I run UMC alongside WPML Multicurrency?**  
 No for production. WPML multicurrency is a built-in *Incompatible* detector
 (see [`COMPATIBILITY.md`](COMPATIBILITY.md)).

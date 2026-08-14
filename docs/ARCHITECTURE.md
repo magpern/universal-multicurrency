@@ -494,7 +494,9 @@ resort — their own stylesheet text.
 | `Display\SwitcherRenderer` | `SwitcherViewModel` | Emits the single semantic markup contract for both presentations; delegates the inline style attribute to `SwitcherPresentationCss`. |
 | `Display\SwitcherPresentationCss` | `SwitcherCustomCss` | Pure composer of the two CSS payloads: the per-instance custom-property attribute and the storefront Custom CSS string (banner + re-validated payload). |
 | `Display\SwitcherCustomCss` | — | Validation authority for merchant CSS: length and control-character limits, the breakout denylist, the `edit_css` capability probe, and `resolve_for_save()`, which decides what a save may persist. |
-| `Display\SwitcherAssets` | `StorefrontRequestContext`, `SwitcherSettingsRepository`, `CurrencyContext` | WordPress asset policy. Registers the stylesheet and script, enqueues them for automatic placement or a detected shortcode, and attaches Custom CSS with `wp_add_inline_style()` once per request. |
+| `Display\SwitcherAssets` | `StorefrontRequestContext`, `SwitcherSettingsRepository`, `CurrencyContext`, `SwitcherPresence` | WordPress asset policy. Registers the stylesheet and script, enqueues them when bounded presence detection finds a switcher surface, and attaches Custom CSS with `wp_add_inline_style()` once per request. Render callbacks remain the correctness backstop. |
+| `Display\SwitcherBlock` | `SwitcherViewModelFactory`, `SwitcherRenderer`, `SwitcherAssets` | Registers the dynamic block `universal-multicurrency/currency-switcher` and renders embedded/manual instances via the shared renderer (M23). |
+| `Display\SwitcherPresence` | — | Bounded proactive detection for shortcode/block/automatic surfaces without unbounded FSE template scans (M23). |
 | `Admin\DisplaySettingsField` | `Settings`, `SwitcherViewModelFactory`, `SwitcherRenderer`, `SwitcherSettingsRepository` | Renders the Display workspace (Placement / Content / Design / Advanced) and parses the POST payload, preserving inactive placement data and unauthorized Custom CSS. |
 
 Presentation precedence, from weakest to strongest: base stylesheet → preset →

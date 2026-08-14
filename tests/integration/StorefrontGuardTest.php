@@ -331,7 +331,7 @@ final class StorefrontGuardTest extends WP_UnitTestCase {
 
 	public function test_no_frontend_assets_are_registered(): void {
 		$this->assert_pattern_absent_from(
-			$this->umc_source_files_except( array( 'AdminAssets.php', 'SwitcherAssets.php', 'CheckoutBlocksNoticeAssets.php' ) ),
+			$this->umc_source_files_except( array( 'AdminAssets.php', 'SwitcherAssets.php', 'SwitcherBlockEditorAssets.php', 'CheckoutBlocksNoticeAssets.php' ) ),
 			'/wp_(register|enqueue)_script|IntegrationInterface|woocommerce_blocks_(cart|checkout|mini-cart)_block_registration/',
 			'Frontend assets must be registered only through SwitcherAssets (Display M1), CheckoutBlocksNoticeAssets (M11), or AdminAssets.'
 		);

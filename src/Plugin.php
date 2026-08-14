@@ -37,6 +37,8 @@ use UMC\Display\AutomaticRenderRegistry;
 use UMC\Display\AutomaticSwitcherPlacement;
 use UMC\Display\StorefrontRequestContext;
 use UMC\Display\SwitcherAssets;
+use UMC\Display\SwitcherBlock;
+use UMC\Display\SwitcherBlockEditorAssets;
 use UMC\Display\SwitcherRenderer;
 use UMC\Display\SwitcherSettingsRepository;
 use UMC\Display\SwitcherShortcode;
@@ -185,6 +187,10 @@ final class Plugin {
 		$context          = new CurrencyContext( $registry, $rates, new CurrencyResolver() );
 		$service          = new PriceConversionService( $context );
 		$version          = defined( 'UMC_VERSION' ) ? (string) UMC_VERSION : '';
+		$switcher_block   = new SwitcherBlock();
+
+		( new SwitcherBlockEditorAssets() )->register();
+		add_action( 'init', array( $switcher_block, 'register' ), 20 );
 
 		if ( is_admin() ) {
 			( new ProductFixedPricesPanel( $settings, $registry, $fixed_repository ) )->register();
@@ -202,7 +208,7 @@ final class Plugin {
 		// and refund metadata.
 		add_action(
 			'woocommerce_init',
-			static function () use ( $context, $service, $settings, $version, $registry, $fixed_repository ) {
+			static function () use ( $context, $service, $settings, $version, $registry, $fixed_repository, $switcher_block ) {
 				// One GatewayCompatibility instance is shared between the
 				// storefront callback and the order-pay lock so the lock can
 				// deregister the storefront callback (matched by instance) and
@@ -222,6 +228,7 @@ final class Plugin {
 				$assets            = new SwitcherAssets( $request_context, $display_settings, $context );
 
 				$assets->register();
+				$switcher_block->bind( $display_settings, $view_factory, $renderer, $assets );
 				( new SwitcherShortcode( $view_factory, $renderer, $assets ) )->register();
 				( new AutomaticSwitcherPlacement(
 					$display_settings,

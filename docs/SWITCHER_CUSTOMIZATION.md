@@ -12,7 +12,7 @@ ADR: [`docs/adr/0022-switcher-customization-css-contract.md`](adr/0022-switcher-
 
 In **WooCommerce → Settings → Multicurrency → Display**:
 
-1. **Placement** — manual shortcode, floating side, floating bottom
+1. **Placement** — manual shortcode, native block, floating side, floating bottom
 2. **Content** — trigger vs menu visibility (code / symbol / name / icon), order, chevron
 3. **Design** — preset, theme, size, shape, colors, spacing, motion, responsive bag
 4. **Currency presentation icons** — optional bundled flags, size, shape, per-currency overrides (M22)
@@ -140,6 +140,23 @@ Accessibility: Custom CSS can remove focus styles or shrink targets. Keep
 
 `[universal_multicurrency_switcher]` (alias `[umc_switcher]`). Presentation is
 global; shortcode attributes do not override design in M17.
+
+---
+
+## Native block (M23)
+
+Block name: `universal-multicurrency/currency-switcher` (Category: **Widgets**).
+
+Insert from the block inserter in pages, posts, or block-theme template parts.
+**All visual design** is configured under **WooCommerce → Settings → Multicurrency →
+Display** — the block has no local color/typography/icon designer.
+
+Embedded block instances always render as **manual/inline** surfaces even when
+global automatic floating/sticky placement is enabled, so a page may show both
+an inline block and the global floating/sticky switcher.
+
+Multiple switchers on one page (block + shortcode + automatic) share the same
+shopper currency state and use unique instance IDs for accessibility.
 
 ---
 
