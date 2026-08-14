@@ -452,7 +452,7 @@
 
     **Released as:** **v0.20.0**.
 
-## Milestone 22 — Switcher Currency Presentation (in progress)
+## Milestone 22 — Switcher Currency Presentation (**v0.21.0**) — implementation complete, PR pending
 
 **Target:** v0.21.0 · ADR-0027 · branch `feature/m22-switcher-currency-presentation`
 
@@ -464,13 +464,13 @@ migration. See
 
 | Work item | Status |
 |---|---|
-| ADR-0027 + architecture spec + asset license gate | **In progress** |
-| Settings schema 7 migration | Pending |
-| Asset registry + bundled SVGs | Pending |
-| SwitcherElementComposer + SwitcherRenderer icon support | Pending |
-| Admin Display UI + preview parity | Pending |
-| Integration, security, migration tests | Pending |
-| Release closure for **v0.21.0** | Pending |
+| ADR-0027 + architecture spec + asset license gate | **Complete** |
+| Settings schema 7 migration | **Complete** |
+| Asset registry + bundled SVGs | **Complete** |
+| SwitcherElementComposer + SwitcherRenderer icon support | **Complete** |
+| Admin Display UI + preview parity | **Complete** |
+| Integration, security, migration tests | **Complete** (unit); integration via CI |
+| Release closure for **v0.21.0** | **Prepared** — PR boundary; not tagged/released |
 
 ## Future milestones — not started, not implemented
 

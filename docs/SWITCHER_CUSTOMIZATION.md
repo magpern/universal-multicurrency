@@ -13,9 +13,10 @@ ADR: [`docs/adr/0022-switcher-customization-css-contract.md`](adr/0022-switcher-
 In **WooCommerce → Settings → Multicurrency → Display**:
 
 1. **Placement** — manual shortcode, floating side, floating bottom
-2. **Content** — trigger vs menu visibility (code / symbol / name), order, chevron
+2. **Content** — trigger vs menu visibility (code / symbol / name / icon), order, chevron
 3. **Design** — preset, theme, size, shape, colors, spacing, motion, responsive bag
-4. **Advanced** — Custom CSS (capability-gated)
+4. **Currency presentation icons** — optional bundled flags, size, shape, per-currency overrides (M22)
+5. **Advanced** — Custom CSS (capability-gated)
 
 Live admin preview updates **structured** controls only. Advanced Custom CSS
 applies on the **storefront after save** — verify there, not in wp-admin.
@@ -44,6 +45,9 @@ Changing preset does not silently clear overrides or Custom CSS.
 .umc-switcher__code
 .umc-switcher__symbol
 .umc-switcher__name
+.umc-switcher__icon
+.umc-switcher__icon img
+[data-umc-icon-type="flag"]
 .umc-switcher__chevron   /* only when enabled */
 .umc-switcher__menu
 .umc-switcher__list
@@ -55,7 +59,7 @@ Changing preset does not silently clear overrides or Custom CSS.
 
 Modifiers (settings-driven): `--dropdown`, `--horizontal-list`, `--manual`,
 `--floating-side`, `--floating-bottom`, `--side-*`, `--align-*`, `--theme-*`,
-`--size-*`, `--shape-*`, `--preset-*`, `--hide-mobile`, `--hide-desktop`,
+`--size-*`, `--shape-*`, `--preset-*`, `--icon-size-*`, `--icon-shape-*`, `--hide-mobile`, `--hide-desktop`,
 `--hide-name-on-mobile`, `--compact-on-mobile`.
 
 The two responsive modifiers take effect below 768px only.

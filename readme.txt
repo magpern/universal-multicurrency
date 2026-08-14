@@ -4,7 +4,7 @@ Tags: woocommerce, currency, multicurrency, exchange rates, money
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.20.0
+Stable tag: 0.21.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,6 +49,13 @@ Not for production traffic. Two runtime converters can double-convert prices. De
 The plugin ships a POT template (`languages/universal-multicurrency.pot`) for translators. Bundled locale `.mo` files are not included in this release.
 
 == Changelog ==
+
+= 0.21.0 =
+* Switcher Currency Presentation (Milestone 22, Phase 1)
+* Optional bundled presentation icons as a fourth content element (`icon`) on the existing M17 switcher
+* Settings schema 6→7 with `display.presentation.*` and per-context `show_icon` (default off); no PersistedKeys or OrderSnapshot change
+* Built-in presentation-region defaults (EUR→EU) with merchant overrides; registry-only bundled SVG assets
+* Public CSS hooks: `.umc-switcher__icon`, `[data-umc-icon-type="flag"]`, `--umc-switcher-icon-size|radius|gap`
 
 = 0.20.0 =
 * Multicurrency Reporting & Analytics Foundation (Milestone 21, Phase 1)
