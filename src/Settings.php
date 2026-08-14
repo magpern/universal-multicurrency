@@ -30,7 +30,7 @@ final class Settings {
 
 	public const OPTION = 'umc_settings';
 
-	public const SCHEMA_VERSION = 6;
+	public const SCHEMA_VERSION = 7;
 
 	public const RATE_MODE_MANUAL = 'manual';
 

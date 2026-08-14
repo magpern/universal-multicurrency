@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace UMC\Display;
 
 /**
- * Immutable, sanitized Display switcher configuration (settings schema 6).
+ * Immutable, sanitized Display switcher configuration (settings schema 7).
  *
  * Presentation is layered: base CSS → preset class → theme/size/shape →
  * sparse structured overrides → responsive bag → Custom CSS (ADR-0022).
@@ -79,6 +79,14 @@ final class SwitcherSettings {
 
 	public const ELEMENT_NAME = 'name';
 
+	public const ELEMENT_ICON = 'icon';
+
+	public const ICON_SHAPE_NATURAL = 'natural';
+
+	public const ICON_SHAPE_SQUARE = 'square';
+
+	public const ICON_SHAPE_CIRCLE = 'circle';
+
 	/**
 	 * Allowed theme values.
 	 *
@@ -120,6 +128,39 @@ final class SwitcherSettings {
 	 * @var array<int, string>
 	 */
 	public const MOTIONS = array( self::MOTION_NONE, self::MOTION_SUBTLE );
+
+	/**
+	 * Allowed presentation icon shape values.
+	 *
+	 * @var array<int, string>
+	 */
+	public const ICON_SHAPES = array(
+		self::ICON_SHAPE_NATURAL,
+		self::ICON_SHAPE_SQUARE,
+		self::ICON_SHAPE_CIRCLE,
+	);
+
+	/**
+	 * Icon size CSS custom property values keyed by size token.
+	 *
+	 * @var array<string, string>
+	 */
+	private const ICON_SIZE_VALUES = array(
+		self::SIZE_COMPACT  => '0.875rem',
+		self::SIZE_STANDARD => '1.125rem',
+		self::SIZE_LARGE    => '1.375rem',
+	);
+
+	/**
+	 * Icon radius CSS custom property values keyed by shape token.
+	 *
+	 * @var array<string, string>
+	 */
+	private const ICON_RADIUS_VALUES = array(
+		self::ICON_SHAPE_NATURAL => '2px',
+		self::ICON_SHAPE_SQUARE  => '2px',
+		self::ICON_SHAPE_CIRCLE  => '999px',
+	);
 
 	/**
 	 * Canonical label element sequence used to repair merchant ordering.
@@ -285,6 +326,13 @@ final class SwitcherSettings {
 	private string $custom_css;
 
 	/**
+	 * Presentation icon settings.
+	 *
+	 * @var array<string, mixed>
+	 */
+	private array $presentation;
+
+	/**
 	 * Whether style was coerced during normalization.
 	 *
 	 * @var bool
@@ -330,6 +378,10 @@ final class SwitcherSettings {
 			$vertical_alignment
 		);
 
+		$presentation_defaults = is_array( $merged['presentation'] ?? null )
+			? $merged['presentation']
+			: $defaults['presentation'];
+
 		return new self(
 			! empty( $merged['enabled'] ),
 			$placement,
@@ -365,6 +417,7 @@ final class SwitcherSettings {
 			),
 			self::sanitize_responsive( $raw['responsive'] ?? null ),
 			SwitcherCustomCss::sanitize( $raw['custom_css'] ?? '' ),
+			self::sanitize_presentation( $raw, $presentation_defaults ),
 			$style_coerced
 		);
 	}
@@ -376,32 +429,34 @@ final class SwitcherSettings {
 	 */
 	public static function default_array(): array {
 		return array(
-			'enabled'    => false,
-			'placement'  => self::PLACEMENT_MANUAL,
-			'style'      => self::STYLE_DROPDOWN,
-			'position'   => array(
+			'enabled'      => false,
+			'placement'    => self::PLACEMENT_MANUAL,
+			'style'        => self::STYLE_DROPDOWN,
+			'position'     => array(
 				'side'               => self::SIDE_RIGHT,
 				'vertical_alignment' => self::ALIGN_MIDDLE,
 				'vertical_offset'    => 0,
 				'edge_offset'        => 16,
 				'bottom_offset'      => 16,
 			),
-			'content'    => array(
+			'content'      => array(
 				'trigger'      => array(
 					'show_code'   => true,
 					'show_symbol' => true,
 					'show_name'   => false,
+					'show_icon'   => false,
 					'order'       => array( self::ELEMENT_CODE, self::ELEMENT_SYMBOL ),
 				),
 				'menu'         => array(
 					'show_code'   => true,
 					'show_symbol' => true,
 					'show_name'   => false,
+					'show_icon'   => false,
 					'order'       => array( self::ELEMENT_CODE, self::ELEMENT_SYMBOL ),
 				),
 				'show_chevron' => false,
 			),
-			'design'     => array(
+			'design'       => array(
 				'preset'    => self::PRESET_DEFAULT,
 				'theme'     => self::THEME_AUTOMATIC,
 				'size'      => self::SIZE_STANDARD,
@@ -409,19 +464,24 @@ final class SwitcherSettings {
 				'overrides' => array(),
 				'motion'    => self::MOTION_SUBTLE,
 			),
-			'behavior'   => array(
+			'behavior'     => array(
 				'remember_selection' => true,
 				'active_first'       => true,
 			),
-			'visibility' => array(
+			'visibility'   => array(
 				'desktop' => true,
 				'mobile'  => true,
 			),
-			'responsive' => array(
+			'responsive'   => array(
 				'hide_name_on_mobile' => false,
 				'compact_on_mobile'   => false,
 			),
-			'custom_css' => '',
+			'custom_css'   => '',
+			'presentation' => array(
+				'icon_overrides' => array(),
+				'icon_size'      => self::SIZE_STANDARD,
+				'icon_shape'     => self::ICON_SHAPE_NATURAL,
+			),
 		);
 	}
 
@@ -497,6 +557,7 @@ final class SwitcherSettings {
 	 * @param array<string, bool>  $visibility    Visibility toggles.
 	 * @param array<string, bool>  $responsive    Responsive overrides.
 	 * @param string               $custom_css    Validated Custom CSS.
+	 * @param array<string, mixed> $presentation  Presentation icon settings.
 	 * @param bool                 $style_coerced Whether style was coerced.
 	 */
 	private function __construct(
@@ -510,6 +571,7 @@ final class SwitcherSettings {
 		array $visibility,
 		array $responsive,
 		string $custom_css,
+		array $presentation,
 		bool $style_coerced
 	) {
 		$this->enabled       = $enabled;
@@ -522,6 +584,7 @@ final class SwitcherSettings {
 		$this->visibility    = $visibility;
 		$this->responsive    = $responsive;
 		$this->custom_css    = $custom_css;
+		$this->presentation  = $presentation;
 		$this->style_coerced = $style_coerced;
 	}
 
@@ -596,7 +659,7 @@ final class SwitcherSettings {
 	/**
 	 * Trigger label composition.
 	 *
-	 * @return array{show_code: bool, show_symbol: bool, show_name: bool, order: array<int, string>}
+	 * @return array{show_code: bool, show_symbol: bool, show_name: bool, show_icon: bool, order: array<int, string>}
 	 */
 	public function trigger_content(): array {
 		return $this->content['trigger'];
@@ -605,7 +668,7 @@ final class SwitcherSettings {
 	/**
 	 * Menu label composition.
 	 *
-	 * @return array{show_code: bool, show_symbol: bool, show_name: bool, order: array<int, string>}
+	 * @return array{show_code: bool, show_symbol: bool, show_name: bool, show_icon: bool, order: array<int, string>}
 	 */
 	public function menu_content(): array {
 		return $this->content['menu'];
@@ -692,22 +755,55 @@ final class SwitcherSettings {
 	}
 
 	/**
+	 * Presentation icon settings subtree.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function presentation(): array {
+		return $this->presentation;
+	}
+
+	/**
+	 * Merchant presentation-region overrides keyed by currency code.
+	 *
+	 * @return array<string, string>
+	 */
+	public function icon_overrides(): array {
+		return $this->presentation['icon_overrides'];
+	}
+
+	/**
+	 * Presentation icon size token.
+	 */
+	public function icon_size(): string {
+		return (string) $this->presentation['icon_size'];
+	}
+
+	/**
+	 * Presentation icon shape token.
+	 */
+	public function icon_shape(): string {
+		return (string) $this->presentation['icon_shape'];
+	}
+
+	/**
 	 * Exports the normalized settings array.
 	 *
 	 * @return array<string, mixed>
 	 */
 	public function to_array(): array {
 		return array(
-			'enabled'    => $this->enabled,
-			'placement'  => $this->placement,
-			'style'      => $this->style,
-			'position'   => $this->position,
-			'content'    => $this->content,
-			'design'     => $this->design,
-			'behavior'   => $this->behavior,
-			'visibility' => $this->visibility,
-			'responsive' => $this->responsive,
-			'custom_css' => $this->custom_css,
+			'enabled'      => $this->enabled,
+			'placement'    => $this->placement,
+			'style'        => $this->style,
+			'position'     => $this->position,
+			'content'      => $this->content,
+			'design'       => $this->design,
+			'behavior'     => $this->behavior,
+			'visibility'   => $this->visibility,
+			'responsive'   => $this->responsive,
+			'custom_css'   => $this->custom_css,
+			'presentation' => $this->presentation,
 		);
 	}
 
@@ -757,6 +853,9 @@ final class SwitcherSettings {
 			$classes[] = 'umc-switcher--preview';
 		}
 
+		$classes[] = 'umc-switcher--icon-size-' . $this->presentation['icon_size'];
+		$classes[] = 'umc-switcher--icon-shape-' . $this->presentation['icon_shape'];
+
 		return $classes;
 	}
 
@@ -790,6 +889,13 @@ final class SwitcherSettings {
 
 			$variables[ $token['property'] ] = self::format_override( $token['type'], $value );
 		}
+
+		$icon_size  = (string) $this->presentation['icon_size'];
+		$icon_shape = (string) $this->presentation['icon_shape'];
+
+		$variables['--umc-switcher-icon-size']   = self::ICON_SIZE_VALUES[ $icon_size ] ?? self::ICON_SIZE_VALUES[ self::SIZE_STANDARD ];
+		$variables['--umc-switcher-icon-radius'] = self::ICON_RADIUS_VALUES[ $icon_shape ] ?? self::ICON_RADIUS_VALUES[ self::ICON_SHAPE_NATURAL ];
+		$variables['--umc-switcher-icon-gap']    = '0.35em';
 
 		return $variables;
 	}
@@ -858,10 +964,14 @@ final class SwitcherSettings {
 	 *
 	 * @param mixed                $raw      Raw group values.
 	 * @param array<string, mixed> $defaults Default group values.
-	 * @return array{show_code: bool, show_symbol: bool, show_name: bool, order: array<int, string>}
+	 * @return array{show_code: bool, show_symbol: bool, show_name: bool, show_icon: bool, order: array<int, string>}
 	 */
 	private static function sanitize_content_group( mixed $raw, array $defaults ): array {
 		$source = is_array( $raw ) ? $raw : array();
+
+		$show_icon = array_key_exists( 'show_icon', $source )
+			? self::is_truthy( $source['show_icon'] )
+			: (bool) ( $defaults['show_icon'] ?? false );
 
 		$visible = array();
 
@@ -877,15 +987,32 @@ final class SwitcherSettings {
 			}
 		}
 
+		if ( $show_icon ) {
+			$visible[] = self::ELEMENT_ICON;
+		}
+
 		if ( array() === $visible ) {
 			$visible[] = self::ELEMENT_CODE;
+		}
+
+		// Icon-only compositions are inaccessible; require code or name identity.
+		if ( $show_icon && ! in_array( self::ELEMENT_CODE, $visible, true ) && ! in_array( self::ELEMENT_NAME, $visible, true ) ) {
+			$visible[] = self::ELEMENT_CODE;
+			$show_icon = false;
+		}
+
+		$order_source = $source['order'] ?? null;
+
+		if ( $show_icon && is_array( $order_source ) && ! in_array( self::ELEMENT_ICON, $order_source, true ) ) {
+			array_unshift( $order_source, self::ELEMENT_ICON );
 		}
 
 		return array(
 			'show_code'   => in_array( self::ELEMENT_CODE, $visible, true ),
 			'show_symbol' => in_array( self::ELEMENT_SYMBOL, $visible, true ),
 			'show_name'   => in_array( self::ELEMENT_NAME, $visible, true ),
-			'order'       => self::sanitize_order( $source['order'] ?? null, $visible ),
+			'show_icon'   => $show_icon && in_array( self::ELEMENT_ICON, $visible, true ),
+			'order'       => self::sanitize_order( $order_source, $visible ),
 		);
 	}
 
@@ -1156,5 +1283,89 @@ final class SwitcherSettings {
 	 */
 	private static function sanitize_enum( string $value, array $allowed, string $fallback ): string {
 		return in_array( $value, $allowed, true ) ? $value : $fallback;
+	}
+
+	/**
+	 * Normalizes the presentation icon subtree.
+	 *
+	 * @param array<string, mixed> $raw      Raw display settings.
+	 * @param array<string, mixed> $defaults Default presentation subtree.
+	 * @return array<string, mixed>
+	 */
+	private static function sanitize_presentation( array $raw, array $defaults ): array {
+		$presentation = is_array( $raw['presentation'] ?? null ) ? $raw['presentation'] : array();
+		$stored       = is_array( $defaults['icon_overrides'] ?? null ) ? $defaults['icon_overrides'] : array();
+
+		return array(
+			'icon_overrides' => self::sanitize_icon_overrides( $presentation['icon_overrides'] ?? null, $stored ),
+			'icon_size'      => self::sanitize_enum(
+				self::read_string( $presentation, 'icon_size', (string) $defaults['icon_size'] ),
+				self::SIZES,
+				(string) $defaults['icon_size']
+			),
+			'icon_shape'     => self::sanitize_enum(
+				self::read_string( $presentation, 'icon_shape', (string) $defaults['icon_shape'] ),
+				self::ICON_SHAPES,
+				(string) $defaults['icon_shape']
+			),
+		);
+	}
+
+	/**
+	 * Sanitizes merchant icon overrides and retains disabled-currency entries.
+	 *
+	 * @param mixed                 $raw     Posted or raw override map.
+	 * @param array<string, string> $retained Previously persisted overrides.
+	 * @return array<string, string>
+	 */
+	private static function sanitize_icon_overrides( mixed $raw, array $retained = array() ): array {
+		$clean  = array();
+		$source = is_array( $raw ) ? $raw : array();
+		$seen   = array();
+
+		foreach ( $source as $currency => $region ) {
+			if ( ! is_string( $currency ) || ! is_string( $region ) ) {
+				continue;
+			}
+
+			$currency = strtoupper( trim( $currency ) );
+			$region   = strtoupper( trim( $region ) );
+
+			if ( '' === $region ) {
+				continue;
+			}
+
+			if ( 1 !== preg_match( '/^[A-Z]{3}$/', $currency ) ) {
+				continue;
+			}
+
+			if ( ! CurrencyPresentationAssetRegistry::is_valid_region( $region ) ) {
+				continue;
+			}
+
+			$clean[ $currency ] = $region;
+			$seen[ $currency ]  = true;
+		}
+
+		foreach ( $retained as $currency => $region ) {
+			if ( ! is_string( $currency ) || ! is_string( $region ) || isset( $seen[ $currency ] ) ) {
+				continue;
+			}
+
+			$currency = strtoupper( trim( $currency ) );
+			$region   = strtoupper( trim( $region ) );
+
+			if ( 1 !== preg_match( '/^[A-Z]{3}$/', $currency ) ) {
+				continue;
+			}
+
+			if ( ! CurrencyPresentationAssetRegistry::is_valid_region( $region ) ) {
+				continue;
+			}
+
+			$clean[ $currency ] = $region;
+		}
+
+		return $clean;
 	}
 }
