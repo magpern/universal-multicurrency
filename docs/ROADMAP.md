@@ -452,11 +452,29 @@
 
     **Released as:** **v0.20.0**.
 
+## Milestone 22 — Switcher Currency Presentation (in progress)
+
+**Target:** v0.21.0 · ADR-0027 · branch `feature/m22-switcher-currency-presentation`
+
+Optional bundled presentation icons (`icon` content element) on the existing M17
+switcher. Settings schema **6 → 7**; `display.presentation.*` and
+`show_icon` per trigger/menu. No OrderSnapshot or PersistedKeys change; no DB
+migration. See
+[`docs/architecture/switcher-currency-presentation.md`](architecture/switcher-currency-presentation.md).
+
+| Work item | Status |
+|---|---|
+| ADR-0027 + architecture spec + asset license gate | **In progress** |
+| Settings schema 7 migration | Pending |
+| Asset registry + bundled SVGs | Pending |
+| SwitcherElementComposer + SwitcherRenderer icon support | Pending |
+| Admin Display UI + preview parity | Pending |
+| Integration, security, migration tests | Pending |
+| Release closure for **v0.21.0** | Pending |
+
 ## Future milestones — not started, not implemented
 
 None of the following exists in the codebase today:
-
-- Currency icon / flag presentation for the switcher (deferred from M17; planned M22)
 - Additional exchange-rate providers and per-currency provider selection
 - `country_change` geo detection mode and broader continent presets
 - Public APIs beyond the documented hooks in [`HOOKS.md`](HOOKS.md)
