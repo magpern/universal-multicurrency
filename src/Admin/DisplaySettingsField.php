@@ -9,7 +9,10 @@ declare(strict_types=1);
 
 namespace UMC\Admin;
 
+use UMC\Display\CurrencyPresentationAssetRegistry;
+use UMC\Display\CurrencyPresentationResolver;
 use UMC\Display\SwitcherCustomCss;
+use UMC\Display\SwitcherElementComposer;
 use UMC\Display\SwitcherRenderer;
 use UMC\Display\SwitcherSettings;
 use UMC\Display\SwitcherSettingsRepository;
@@ -140,6 +143,7 @@ final class DisplaySettingsField {
 						</div>
 						<div class="umc-display-tabpanel" data-umc-display-panel="content" role="group" aria-label="<?php esc_attr_e( 'Content settings', 'universal-multicurrency' ); ?>">
 							<?php $this->render_content_card( $settings ); ?>
+							<?php $this->render_presentation_card( $settings ); ?>
 							<?php $this->render_behavior_card( $settings ); ?>
 						</div>
 						<div class="umc-display-tabpanel" data-umc-display-panel="design" role="group" aria-label="<?php esc_attr_e( 'Design settings', 'universal-multicurrency' ); ?>">
@@ -207,16 +211,20 @@ final class DisplaySettingsField {
 			? $raw['placement']
 			: (string) ( $stored['placement'] ?? SwitcherSettings::PLACEMENT_MANUAL );
 
-		$merged              = array_replace_recursive( $stored, $raw );
-		$merged['position']  = $this->merge_position_preserving_inactive(
+		$merged                 = array_replace_recursive( $stored, $raw );
+		$merged['position']     = $this->merge_position_preserving_inactive(
 			is_array( $stored['position'] ?? null ) ? $stored['position'] : SwitcherSettings::default_array()['position'],
 			is_array( $raw['position'] ?? null ) ? $raw['position'] : array(),
 			$active_placement
 		);
-		$merged['placement'] = $active_placement;
-		$merged['content']   = $this->merge_content(
+		$merged['placement']    = $active_placement;
+		$merged['content']      = $this->merge_content(
 			is_array( $stored['content'] ?? null ) ? $stored['content'] : array(),
 			is_array( $raw['content'] ?? null ) ? $raw['content'] : array()
+		);
+		$merged['presentation'] = $this->merge_presentation(
+			is_array( $stored['presentation'] ?? null ) ? $stored['presentation'] : SwitcherSettings::default_array()['presentation'],
+			is_array( $raw['presentation'] ?? null ) ? $raw['presentation'] : array()
 		);
 
 		$can_edit_css         = SwitcherCustomCss::can_edit();
@@ -629,7 +637,119 @@ final class DisplaySettingsField {
 			SwitcherSettings::ELEMENT_CODE   => __( 'Show currency code', 'universal-multicurrency' ),
 			SwitcherSettings::ELEMENT_SYMBOL => __( 'Show currency symbol', 'universal-multicurrency' ),
 			SwitcherSettings::ELEMENT_NAME   => __( 'Show currency name', 'universal-multicurrency' ),
+			SwitcherSettings::ELEMENT_ICON   => __( 'Show presentation icon', 'universal-multicurrency' ),
 		);
+	}
+
+	/**
+	 * Renders presentation icon settings within the Content panel.
+	 *
+	 * @param SwitcherSettings $settings Current display settings.
+	 */
+	private function render_presentation_card( SwitcherSettings $settings ): void {
+		$presentation = $settings->presentation();
+		$overrides    = $settings->icon_overrides();
+		$regions      = CurrencyPresentationAssetRegistry::region_ids();
+		?>
+		<div class="umc-display-card">
+			<h3 class="umc-display-card__title"><?php esc_html_e( 'Currency presentation icons', 'universal-multicurrency' ); ?></h3>
+			<p class="description"><?php esc_html_e( 'Optional bundled flags are visual presentation only. A currency does not always correspond to one country. Built-in defaults are suggestions; you may override them per currency.', 'universal-multicurrency' ); ?></p>
+			<label class="umc-display-field">
+				<span><?php esc_html_e( 'Icon size', 'universal-multicurrency' ); ?></span>
+				<select name="umc_display[presentation][icon_size]" data-umc-display-field="icon_size">
+					<?php
+					foreach (
+						array(
+							SwitcherSettings::SIZE_COMPACT => __( 'Compact', 'universal-multicurrency' ),
+							SwitcherSettings::SIZE_STANDARD => __( 'Standard', 'universal-multicurrency' ),
+							SwitcherSettings::SIZE_LARGE   => __( 'Large', 'universal-multicurrency' ),
+						) as $value => $label
+					) :
+						?>
+						<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $value, $settings->icon_size() ); ?>><?php echo esc_html( $label ); ?></option>
+					<?php endforeach; ?>
+				</select>
+			</label>
+			<label class="umc-display-field">
+				<span><?php esc_html_e( 'Icon shape', 'universal-multicurrency' ); ?></span>
+				<select name="umc_display[presentation][icon_shape]" data-umc-display-field="icon_shape">
+					<?php
+					foreach (
+						array(
+							SwitcherSettings::ICON_SHAPE_NATURAL => __( 'Natural', 'universal-multicurrency' ),
+							SwitcherSettings::ICON_SHAPE_SQUARE  => __( 'Square', 'universal-multicurrency' ),
+							SwitcherSettings::ICON_SHAPE_CIRCLE  => __( 'Circle', 'universal-multicurrency' ),
+						) as $value => $label
+					) :
+						?>
+						<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $value, $settings->icon_shape() ); ?>><?php echo esc_html( $label ); ?></option>
+					<?php endforeach; ?>
+				</select>
+			</label>
+			<table class="widefat striped umc-display-icon-overrides">
+				<thead>
+					<tr>
+						<th scope="col"><?php esc_html_e( 'Currency', 'universal-multicurrency' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Presentation region', 'universal-multicurrency' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Default', 'universal-multicurrency' ); ?></th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach ( $this->presentation_override_rows() as $row ) : ?>
+						<tr>
+							<td><code><?php echo esc_html( $row['code'] ); ?></code></td>
+							<td>
+								<select name="<?php echo esc_attr( sprintf( 'umc_display[presentation][icon_overrides][%s]', $row['code'] ) ); ?>" data-umc-display-field="<?php echo esc_attr( 'icon_override_' . $row['code'] ); ?>">
+									<option value=""><?php esc_html_e( 'Use built-in default', 'universal-multicurrency' ); ?></option>
+									<?php foreach ( $regions as $region ) : ?>
+										<option value="<?php echo esc_attr( $region ); ?>" <?php selected( $region, $row['selected'] ); ?>><?php echo esc_html( CurrencyPresentationAssetRegistry::region_label( $region ) ); ?></option>
+									<?php endforeach; ?>
+								</select>
+							</td>
+							<td><?php echo esc_html( $row['default_label'] ); ?></td>
+						</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+			<?php if ( array() !== $overrides ) : ?>
+				<p class="description"><?php esc_html_e( 'Overrides for disabled currencies remain saved even when they are not listed here.', 'universal-multicurrency' ); ?></p>
+			<?php endif; ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Enabled currency rows for the presentation override table.
+	 *
+	 * @return array<int, array{code: string, selected: string, default_label: string}>
+	 */
+	private function presentation_override_rows(): array {
+		$settings  = $this->settings_repository->get();
+		$overrides = $settings->icon_overrides();
+		$rows      = array();
+
+		foreach ( $this->settings->get_currencies() as $code => $config ) {
+			if ( empty( $config['enabled'] ) ) {
+				continue;
+			}
+
+			if ( ! is_string( $code ) ) {
+				continue;
+			}
+
+			$default_region = CurrencyPresentationResolver::built_in_region_for_currency( $code );
+			$default_label  = null === $default_region
+				? __( 'None', 'universal-multicurrency' )
+				: CurrencyPresentationAssetRegistry::region_label( $default_region );
+
+			$rows[] = array(
+				'code'          => strtoupper( $code ),
+				'selected'      => $overrides[ strtoupper( $code ) ] ?? '',
+				'default_label' => $default_label,
+			);
+		}
+
+		return $rows;
 	}
 
 	/**
@@ -638,14 +758,63 @@ final class DisplaySettingsField {
 	 * @return array<string, string>
 	 */
 	private function order_choices(): array {
-		return array(
-			'code,symbol,name' => __( 'Code, symbol, name', 'universal-multicurrency' ),
-			'code,name,symbol' => __( 'Code, name, symbol', 'universal-multicurrency' ),
-			'symbol,code,name' => __( 'Symbol, code, name', 'universal-multicurrency' ),
-			'symbol,name,code' => __( 'Symbol, name, code', 'universal-multicurrency' ),
-			'name,code,symbol' => __( 'Name, code, symbol', 'universal-multicurrency' ),
-			'name,symbol,code' => __( 'Name, symbol, code', 'universal-multicurrency' ),
+		$choices = array();
+
+		foreach ( $this->permutations( SwitcherElementComposer::ORDERABLE_ELEMENTS ) as $order ) {
+			$value = implode( ',', $order );
+
+			$choices[ $value ] = $this->format_order_label( $order );
+		}
+
+		return $choices;
+	}
+
+	/**
+	 * Human-readable label for one element order permutation.
+	 *
+	 * @param array<int, string> $order Element order.
+	 */
+	private function format_order_label( array $order ): string {
+		$labels = array(
+			SwitcherSettings::ELEMENT_CODE   => __( 'Code', 'universal-multicurrency' ),
+			SwitcherSettings::ELEMENT_SYMBOL => __( 'Symbol', 'universal-multicurrency' ),
+			SwitcherSettings::ELEMENT_NAME   => __( 'Name', 'universal-multicurrency' ),
+			SwitcherSettings::ELEMENT_ICON   => __( 'Icon', 'universal-multicurrency' ),
 		);
+
+		$parts = array();
+
+		foreach ( $order as $element ) {
+			$parts[] = $labels[ $element ] ?? $element;
+		}
+
+		return implode( ', ', $parts );
+	}
+
+	/**
+	 * Generates all permutations of one element list.
+	 *
+	 * @param array<int, string> $items  Remaining items.
+	 * @param array<int, string> $prefix Accumulated prefix.
+	 * @return array<int, array<int, string>>
+	 */
+	private function permutations( array $items, array $prefix = array() ): array {
+		if ( array() === $items ) {
+			return array( $prefix );
+		}
+
+		$result = array();
+
+		foreach ( $items as $index => $item ) {
+			$remaining = $items;
+			unset( $remaining[ $index ] );
+
+			foreach ( $this->permutations( array_values( $remaining ), array_merge( $prefix, array( $item ) ) ) as $permutation ) {
+				$result[] = $permutation;
+			}
+		}
+
+		return $result;
 	}
 
 	/**
@@ -657,12 +826,12 @@ final class DisplaySettingsField {
 		$complete = array();
 
 		foreach ( $order as $element ) {
-			if ( is_string( $element ) && in_array( $element, SwitcherSettings::ELEMENT_SEQUENCE, true ) && ! in_array( $element, $complete, true ) ) {
+			if ( is_string( $element ) && in_array( $element, SwitcherElementComposer::ORDERABLE_ELEMENTS, true ) && ! in_array( $element, $complete, true ) ) {
 				$complete[] = $element;
 			}
 		}
 
-		foreach ( SwitcherSettings::ELEMENT_SEQUENCE as $element ) {
+		foreach ( SwitcherElementComposer::ORDERABLE_ELEMENTS as $element ) {
 			if ( ! in_array( $element, $complete, true ) ) {
 				$complete[] = $element;
 			}
@@ -1157,6 +1326,10 @@ final class DisplaySettingsField {
 			}
 		}
 
+		if ( array_key_exists( 'show_icon', $group ) ) {
+			$group['show_icon'] = ! empty( $group['show_icon'] );
+		}
+
 		if ( is_string( $group['order'] ?? null ) ) {
 			$group['order'] = array_values(
 				array_filter(
@@ -1167,6 +1340,65 @@ final class DisplaySettingsField {
 		}
 
 		return $group;
+	}
+
+	/**
+	 * Merges posted presentation settings over stored values.
+	 *
+	 * @param array<string, mixed> $stored Stored presentation subtree.
+	 * @param array<string, mixed> $posted Posted presentation payload.
+	 * @return array<string, mixed>
+	 */
+	private function merge_presentation( array $stored, array $posted ): array {
+		if ( array() === $posted ) {
+			return $stored;
+		}
+
+		$merged = $stored;
+
+		if ( array_key_exists( 'icon_size', $posted ) ) {
+			$merged['icon_size'] = $posted['icon_size'];
+		}
+
+		if ( array_key_exists( 'icon_shape', $posted ) ) {
+			$merged['icon_shape'] = $posted['icon_shape'];
+		}
+
+		$stored_overrides = is_array( $stored['icon_overrides'] ?? null ) ? $stored['icon_overrides'] : array();
+		$posted_overrides = is_array( $posted['icon_overrides'] ?? null ) ? $posted['icon_overrides'] : array();
+
+		$merged['icon_overrides'] = $this->merge_icon_overrides( $stored_overrides, $posted_overrides );
+
+		return $merged;
+	}
+
+	/**
+	 * Merges posted icon overrides and retains disabled-currency entries.
+	 *
+	 * @param array<string, string> $stored Stored overrides.
+	 * @param array<string, mixed>  $posted Posted overrides.
+	 * @return array<string, string>
+	 */
+	private function merge_icon_overrides( array $stored, array $posted ): array {
+		$merged = $stored;
+
+		foreach ( $posted as $currency => $region ) {
+			if ( ! is_string( $currency ) ) {
+				continue;
+			}
+
+			$currency = strtoupper( trim( $currency ) );
+			$region   = is_string( $region ) ? strtoupper( trim( $region ) ) : '';
+
+			if ( '' === $region ) {
+				unset( $merged[ $currency ] );
+				continue;
+			}
+
+			$merged[ $currency ] = $region;
+		}
+
+		return $merged;
 	}
 
 	/**

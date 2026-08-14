@@ -10,6 +10,8 @@ declare(strict_types=1);
 namespace UMC\Admin;
 
 use UMC\Admin\Geo\GeoPanelRegistry;
+use UMC\Display\CurrencyPresentationResolver;
+use UMC\Display\SwitcherElementComposer;
 use UMC\Display\SwitcherSettings;
 
 /**
@@ -87,22 +89,31 @@ final class AdminAssets {
 						SwitcherSettings::STYLE_HORIZONTAL_LIST,
 					),
 					'presets'     => SwitcherSettings::PRESETS,
-					'elements'    => SwitcherSettings::ELEMENT_SEQUENCE,
+					'elements'    => SwitcherElementComposer::ORDERABLE_ELEMENTS,
 					'samples'     => array(
 						array(
-							'code'   => 'EUR',
-							'symbol' => '€',
-							'name'   => 'Euro',
+							'code'    => 'EUR',
+							'symbol'  => '€',
+							'name'    => 'Euro',
+							'iconUrl' => (string) ( CurrencyPresentationResolver::from_settings(
+								SwitcherSettings::from_array( array() )
+							)->asset_url_for_currency( 'EUR' ) ?? '' ),
 						),
 						array(
-							'code'   => 'SEK',
-							'symbol' => 'kr',
-							'name'   => 'Swedish krona',
+							'code'    => 'SEK',
+							'symbol'  => 'kr',
+							'name'    => 'Swedish krona',
+							'iconUrl' => (string) ( CurrencyPresentationResolver::from_settings(
+								SwitcherSettings::from_array( array() )
+							)->asset_url_for_currency( 'SEK' ) ?? '' ),
 						),
 						array(
-							'code'   => 'USD',
-							'symbol' => '$',
-							'name'   => 'US Dollar',
+							'code'    => 'USD',
+							'symbol'  => '$',
+							'name'    => 'US Dollar',
+							'iconUrl' => (string) ( CurrencyPresentationResolver::from_settings(
+								SwitcherSettings::from_array( array() )
+							)->asset_url_for_currency( 'USD' ) ?? '' ),
 						),
 					),
 					'statusOn'    => __( 'On', 'universal-multicurrency' ),
