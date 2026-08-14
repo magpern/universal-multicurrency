@@ -94,4 +94,34 @@ final class ReportingArchitectureGuardTest extends TestCase {
 			'ReportingCache must continue to read cached payloads via get_transient().'
 		);
 	}
+
+	public function test_csv_renderer_does_not_load_orders_or_recompute_reports(): void {
+		$csv_source = (string) file_get_contents(
+			dirname( __DIR__, 2 ) . '/src/Reporting/ReportingCsvRenderer.php'
+		);
+
+		foreach (
+			array(
+				'OrderReportingRepository',
+				'ReportingService',
+				'wc_get_orders',
+				'wc_get_order',
+			) as $forbidden
+		) {
+			$this->assertStringNotContainsString(
+				$forbidden,
+				$csv_source,
+				'ReportingCsvRenderer must consume immutable ReportingResult only.'
+			);
+		}
+	}
+
+	public function test_export_controller_uses_reporting_cache_not_repository(): void {
+		$source = (string) file_get_contents(
+			dirname( __DIR__, 2 ) . '/src/Admin/ReportingExportController.php'
+		);
+
+		$this->assertStringContainsString( 'ReportingCache', $source );
+		$this->assertStringNotContainsString( 'OrderReportingRepository', $source );
+	}
 }

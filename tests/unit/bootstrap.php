@@ -224,6 +224,13 @@ if ( ! class_exists( 'WC_Order' ) ) {
 	 */
 	class WC_Order {
 		/**
+		 * @return int
+		 */
+		public function get_id() {
+			return 0;
+		}
+
+		/**
 		 * @return string
 		 */
 		public function get_currency() {
@@ -233,8 +240,33 @@ if ( ! class_exists( 'WC_Order' ) ) {
 		/**
 		 * @return float
 		 */
+		public function get_total() {
+			return 0.0;
+		}
+
+		/**
+		 * @return float
+		 */
 		public function get_total_refunded() {
 			return 0.0;
+		}
+
+		/**
+		 * @param string $key Meta key.
+		 * @return mixed
+		 */
+		public function get_meta( $key = '' ) {
+			unset( $key );
+			return '';
+		}
+
+		/**
+		 * @param string $type Item type.
+		 * @return array<int, mixed>
+		 */
+		public function get_items( $type = 'line_item' ) {
+			unset( $type );
+			return array();
 		}
 	}
 }
@@ -249,6 +281,38 @@ if ( ! function_exists( 'get_transient' ) ) {
 if ( ! function_exists( 'set_transient' ) ) {
 	function set_transient( $transient, $value, $expiration ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound, Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		return true;
+	}
+}
+
+if ( ! function_exists( 'wc_get_orders' ) ) {
+	/**
+	 * @param array<string, mixed> $args Query args.
+	 * @return object|array<int, mixed>
+	 */
+	function wc_get_orders( $args = array() ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound
+		if ( isset( $GLOBALS['umc_test_wc_get_orders_callback'] ) && is_callable( $GLOBALS['umc_test_wc_get_orders_callback'] ) ) {
+			return ( $GLOBALS['umc_test_wc_get_orders_callback'] )( $args );
+		}
+
+		return (object) array(
+			'orders'        => array(),
+			'max_num_pages' => 0,
+			'total'         => 0,
+		);
+	}
+}
+
+if ( ! function_exists( 'wc_get_order' ) ) {
+	/**
+	 * @param int $order_id Order ID.
+	 * @return WC_Order|null
+	 */
+	function wc_get_order( $order_id ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound
+		if ( isset( $GLOBALS['umc_test_wc_get_order_callback'] ) && is_callable( $GLOBALS['umc_test_wc_get_order_callback'] ) ) {
+			return ( $GLOBALS['umc_test_wc_get_order_callback'] )( (int) $order_id );
+		}
+
+		return null;
 	}
 }
 
