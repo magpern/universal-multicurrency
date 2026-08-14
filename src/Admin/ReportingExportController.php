@@ -44,7 +44,7 @@ final class ReportingExportController {
 	 * Handles an authenticated CSV export request.
 	 */
 	public function handle(): void {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- WooCommerce shop-manager capability.
 			wp_die( esc_html__( 'You do not have permission to export reporting data.', 'universal-multicurrency' ) );
 		}
 

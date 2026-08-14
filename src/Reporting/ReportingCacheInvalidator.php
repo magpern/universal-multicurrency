@@ -31,7 +31,8 @@ final class ReportingCacheInvalidator {
 		add_action( 'woocommerce_new_order', array( $this, 'invalidate' ), 10, 0 );
 		add_action( 'woocommerce_order_status_changed', array( $this, 'invalidate' ), 10, 0 );
 		add_action( 'woocommerce_create_refund', array( $this, 'invalidate' ), 10, 0 );
-		add_action( 'woocommerce_delete_refund', array( $this, 'invalidate' ), 10, 0 );
+		add_action( 'woocommerce_delete_order_refund', array( $this, 'invalidate' ), 10, 0 );
+		add_action( 'woocommerce_refund_deleted', array( $this, 'invalidate' ), 10, 0 );
 		add_action( 'woocommerce_payment_complete', array( $this, 'invalidate' ), 10, 0 );
 	}
 

@@ -39,7 +39,7 @@ final class ReportingSettingsField {
 	 * Renders the reporting settings section.
 	 */
 	public function render(): void {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- WooCommerce shop-manager capability.
 			echo '<p>' . esc_html__( 'You do not have permission to view reporting.', 'universal-multicurrency' ) . '</p>';
 			return;
 		}
@@ -53,7 +53,7 @@ final class ReportingSettingsField {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only reporting view.
 		if ( isset( $_GET['umc_report'] ) ) {
 			try {
-				$refresh = isset( $_GET['umc_refresh'] ) && '1' === sanitize_text_field( wp_unslash( (string) $_GET['umc_refresh'] ) );
+				$refresh = isset( $_GET['umc_refresh'] ) && '1' === sanitize_text_field( wp_unslash( (string) $_GET['umc_refresh'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only reporting view.
 				$result  = $this->cache->get( $query, $refresh );
 			} catch ( ReportingQueryTooLargeException $exception ) {
 				$error = $exception->getMessage();
