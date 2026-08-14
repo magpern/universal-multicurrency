@@ -32,7 +32,7 @@ final class SettingsSanitizeTest extends TestCase {
 			),
 			Settings::defaults()
 		);
-		$this->assertSame( 6, Settings::defaults()['schema_version'] );
+		$this->assertSame( Settings::SCHEMA_VERSION, Settings::defaults()['schema_version'] );
 	}
 
 	public function test_well_formed_input_is_preserved(): void {

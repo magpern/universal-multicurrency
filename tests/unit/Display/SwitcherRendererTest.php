@@ -21,6 +21,15 @@ use UMC\Display\SwitcherViewModel;
  */
 final class SwitcherRendererTest extends TestCase {
 
+	protected function setUp(): void {
+		if ( ! defined( 'UMC_PLUGIN_FILE' ) ) {
+			define( 'UMC_PLUGIN_FILE', dirname( __DIR__, 3 ) . '/universal-multicurrency.php' );
+		}
+
+		if ( ! defined( 'UMC_VERSION' ) ) {
+			define( 'UMC_VERSION', '0.21.0' );
+		}
+	}
 	public function test_dropdown_uses_disclosure_semantics_not_listbox(): void {
 		$html = ( new SwitcherRenderer() )->render( $this->view_model() );
 
@@ -150,6 +159,36 @@ final class SwitcherRendererTest extends TestCase {
 
 		$this->assertStringNotContainsString( '<script>', $html );
 		$this->assertStringContainsString( 'EUR &lt;script&gt;', $html );
+	}
+
+	public function test_presentation_icon_renders_when_enabled_and_ordered(): void {
+		$html = ( new SwitcherRenderer() )->render(
+			$this->view_model(
+				array(
+					'content' => array(
+						'trigger' => array(
+							'show_icon' => true,
+							'order'     => array( 'icon', 'code', 'symbol' ),
+						),
+						'menu'    => array(
+							'show_icon' => true,
+							'order'     => array( 'icon', 'code', 'symbol' ),
+						),
+					),
+				)
+			)
+		);
+
+		$this->assertStringContainsString( 'umc-switcher__icon', $html );
+		$this->assertStringContainsString( 'data-umc-icon-type="flag"', $html );
+		$this->assertStringContainsString( 'aria-hidden="true"', $html );
+		$this->assertStringContainsString( 'SE.svg', $html );
+	}
+
+	public function test_presentation_icon_is_omitted_when_disabled(): void {
+		$html = ( new SwitcherRenderer() )->render( $this->view_model() );
+
+		$this->assertStringNotContainsString( 'umc-switcher__icon', $html );
 	}
 
 	public function test_structured_elements_are_escaped(): void {

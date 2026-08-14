@@ -150,6 +150,11 @@ final class SwitcherElementComposerTest extends TestCase {
 			array( 'symbol', 'code', 'name' ),
 			SwitcherElementComposer::normalize_order( array( 'symbol', 'flag', 'symbol', 'code' ) )
 		);
+
+		$this->assertSame(
+			array( 'icon', 'code', 'symbol', 'name' ),
+			SwitcherElementComposer::normalize_order( array( 'icon', 'code' ) )
+		);
 	}
 
 	public function test_normalize_order_falls_back_to_default_sequence(): void {
