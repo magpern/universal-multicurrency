@@ -42,6 +42,8 @@ final class ReleaseZipInspector {
 		'universal-multicurrency/readme.txt',
 		'universal-multicurrency/languages/universal-multicurrency.pot',
 		'universal-multicurrency/vendor/autoload.php',
+		'universal-multicurrency/blocks/currency-switcher/block.json',
+		'universal-multicurrency/blocks/currency-switcher/editor.js',
 	);
 
 	/**

@@ -1,3 +1,33 @@
+# Release audit — v0.22.0 Native Switcher Block
+
+Executable release-preparation gate for Universal Multicurrency **v0.22.0**.
+This document records scope, criteria, commands, audit results, and the current
+release-preparation state.
+
+**Repository status:** **prepared on branch `feature/m23-native-switcher-block`**.
+Milestone 23 (Native Switcher Block & Rendering Surface Integration; ADR-0028)
+implementation is complete. **Not tagged, not released, not deployed** — PR
+boundary per M23 task.
+
+---
+
+## v0.22.0 release preparation record
+
+| Item | Value |
+|---|---|
+| Version | **0.22.0** |
+| Settings schema | **7** (unchanged) |
+| Order snapshot schema | **5** (unchanged) |
+| Persisted-data inventory version | **10** (unchanged) |
+| Production migrations | none |
+| Native block | `universal-multicurrency/currency-switcher` (dynamic PHP render) |
+| Unresolved release blockers | **0** (local gate pending CI) |
+| Git tag `v0.22.0` | **Not yet created** |
+| GitHub release `v0.22.0` | **Not yet published** |
+| Milestone 23 | **Prepared** — Native Switcher Block at v0.22.0 |
+
+---
+
 # Release audit — v0.21.0 Switcher Currency Presentation
 
 Executable release-preparation gate for Universal Multicurrency **v0.21.0**.

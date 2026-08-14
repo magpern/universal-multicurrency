@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Universal Multicurrency for WooCommerce 0.21.0\n"
+"Project-Id-Version: Universal Multicurrency for WooCommerce 0.22.0\n"
 "Report-Msgid-Bugs-To: https://github.com/magpern/universal-multicurrency/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3505,4 +3505,46 @@ msgstr ""
 
 #: universal-multicurrency.php:69
 msgid "Universal Multicurrency requires WooCommerce to be installed and active."
+msgstr ""
+
+#: blocks/currency-switcher/editor.js:43
+msgid "Switcher settings"
+msgstr ""
+
+#: blocks/currency-switcher/editor.js:47
+msgid "Switcher appearance is configured globally in WooCommerce → Settings → Multicurrency → Display."
+msgstr ""
+
+#: blocks/currency-switcher/editor.js:56
+msgid "Open Display settings"
+msgstr ""
+
+#: blocks/currency-switcher/block.json
+msgctxt "block title"
+msgid "Currency Switcher"
+msgstr ""
+
+#: blocks/currency-switcher/block.json
+msgctxt "block description"
+msgid "Display the Universal Multicurrency storefront switcher."
+msgstr ""
+
+#: blocks/currency-switcher/block.json
+msgctxt "block keyword"
+msgid "currency"
+msgstr ""
+
+#: blocks/currency-switcher/block.json
+msgctxt "block keyword"
+msgid "switcher"
+msgstr ""
+
+#: blocks/currency-switcher/block.json
+msgctxt "block keyword"
+msgid "multicurrency"
+msgstr ""
+
+#: blocks/currency-switcher/block.json
+msgctxt "block keyword"
+msgid "woocommerce"
 msgstr ""
