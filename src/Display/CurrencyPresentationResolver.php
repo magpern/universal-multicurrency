@@ -38,6 +38,8 @@ final class CurrencyPresentationResolver {
 	private array $overrides;
 
 	/**
+	 * Creates a resolver from sanitized merchant overrides.
+	 *
 	 * @param array<string, string> $overrides Sanitized merchant overrides.
 	 */
 	public function __construct( array $overrides = array() ) {
@@ -46,6 +48,8 @@ final class CurrencyPresentationResolver {
 
 	/**
 	 * Builds a resolver from normalized switcher settings.
+	 *
+	 * @param SwitcherSettings $settings Normalized switcher settings.
 	 */
 	public static function from_settings( SwitcherSettings $settings ): self {
 		return new self( $settings->icon_overrides() );
