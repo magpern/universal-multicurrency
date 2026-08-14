@@ -37,20 +37,28 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release on `main`:** **v0.21.0** (tagged and published). **v0.22.0** is
-prepared on `feature/m23-native-switcher-block` — not tagged or published.
+**Current release on `main`:** **v0.22.0** (tagged and published).
 
 ---
 
-## v0.22.0 — Native Switcher Block (prepared, not released)
+## v0.22.0 — Native Switcher Block (released)
 
 Ships Milestone 23 under version **0.22.0** (ADR-0028). Dynamic Gutenberg block
 `universal-multicurrency/currency-switcher` on the existing M17/M22 switcher
 engine. Settings schema **7** unchanged; PersistedKeys **10**; order snapshot **5**;
 no DB migration. Block attributes live in WordPress post/template content only.
 
-**Prepared as:** branch `feature/m23-native-switcher-block` — PR boundary; not
-tagged, not released, not deployed.
+**Released as:** **v0.22.0** — tag `v0.22.0`, GitHub release published, artifact
+`universal-multicurrency-0.22.0.zip` (SHA-256
+`159e743ae267cb5c20cbc6d3521e0e9998423a9a4086bfd2802483ee61433130`).
+
+### Deployment sequence (release verification completed)
+
+1. Run `composer release-audit` on the **0.22.0** tree.
+2. Build `dist/universal-multicurrency-0.22.0.zip` with `composer install --no-dev`
+   + `bin/build-zip.sh`.
+3. Deploy over **0.21.0** in place. No settings schema change; block appears in the
+   block inserter after upgrade. **Not performed as part of release closure.**
 
 ---
 

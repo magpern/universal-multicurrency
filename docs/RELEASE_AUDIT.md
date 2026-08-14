@@ -4,14 +4,15 @@ Executable release-preparation gate for Universal Multicurrency **v0.22.0**.
 This document records scope, criteria, commands, audit results, and the current
 release-preparation state.
 
-**Repository status:** **prepared on branch `feature/m23-native-switcher-block`**.
-Milestone 23 (Native Switcher Block & Rendering Surface Integration; ADR-0028)
-implementation is complete. **Not tagged, not released, not deployed** — PR
-boundary per M23 task.
+**Repository status:** **released as v0.22.0**. Milestone 23 (Native Switcher Block &
+Rendering Surface Integration; ADR-0028) is complete. Git tag **`v0.22.0`** and
+GitHub release are published. Release commit on `main`:
+`4edc0c33d49802e1af07c555696e44b16908e8d7`. Annotated tag object points at that
+merge commit. PR **#24**.
 
 ---
 
-## v0.22.0 release preparation record
+## v0.22.0 release closure record
 
 | Item | Value |
 |---|---|
@@ -21,10 +22,16 @@ boundary per M23 task.
 | Persisted-data inventory version | **10** (unchanged) |
 | Production migrations | none |
 | Native block | `universal-multicurrency/currency-switcher` (dynamic PHP render) |
-| Unresolved release blockers | **0** (local gate pending CI) |
-| Git tag `v0.22.0` | **Not yet created** |
-| GitHub release `v0.22.0` | **Not yet published** |
-| Milestone 23 | **Prepared** — Native Switcher Block at v0.22.0 |
+| Unresolved release blockers | **0** |
+| Git tag `v0.22.0` | **Created** |
+| GitHub release `v0.22.0` | **Published** |
+| Milestone 23 | **Complete** — Native Switcher Block at v0.22.0 |
+| PR CI run | **31802299230** (SHA `44d0705c75dfb20c01c0197dfe8623a04c8ffff7`) |
+| Main CI run | **31802429794** (SHA `4edc0c33d49802e1af07c555696e44b16908e8d7`) |
+| Release workflow | **31802649108** (success) |
+| Artifact | `universal-multicurrency-0.22.0.zip` (504789 bytes; SHA-256 `159e743a…`) |
+| Manual/editor acceptance | **Partial** — dev bind-mount: plugin 0.22.0 active, block registered via WP-CLI; full Site Editor checklist not authenticated |
+| Deployment | **Not performed** |
 
 ---
 

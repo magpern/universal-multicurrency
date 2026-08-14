@@ -472,9 +472,9 @@ migration. See
 | Integration, security, migration tests | **Complete** |
 | Release closure for **v0.21.0** | **Complete** — PR **#23**, tag `v0.21.0` |
 
-## Milestone 23 — Native Switcher Block & Rendering Surface Integration (**v0.22.0**) — in progress
+## Milestone 23 — Native Switcher Block & Rendering Surface Integration (**v0.22.0**) — complete and released
 
-**Target:** v0.22.0 · ADR-0028 · branch `feature/m23-native-switcher-block`
+**Released as:** v0.22.0 · ADR-0028 · PR **#24**
 
 Dynamic Gutenberg block `universal-multicurrency/currency-switcher` as a new
 rendering surface on the existing M17/M22 switcher engine. Settings schema **7**
@@ -488,7 +488,7 @@ unchanged; no OrderSnapshot, PersistedKeys, or DB migration changes. See
 | Dynamic block registration + PHP render | **Complete** |
 | Editor ServerSideRender preview | **Complete** |
 | Multi-instance + Store API integration tests | **Complete** |
-| Release closure for **v0.22.0** | **Prepared** — PR boundary |
+| Release closure for **v0.22.0** | **Complete** — PR **#24**, tag `v0.22.0` |
 
 ## Future milestones — not started, not implemented
 
