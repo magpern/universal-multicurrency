@@ -483,12 +483,12 @@ unchanged; no OrderSnapshot, PersistedKeys, or DB migration changes. See
 
 | Work item | Status |
 |---|---|
-| ADR-0028 + architecture spec | **Complete** (WP0) |
-| Bounded switcher presence detection | **Pending** |
-| Dynamic block registration + PHP render | **Pending** |
-| Editor ServerSideRender preview | **Pending** |
-| Multi-instance + Store API integration tests | **Pending** |
-| Release closure for **v0.22.0** | **Pending** — PR boundary |
+| ADR-0028 + architecture spec | **Complete** |
+| Bounded switcher presence detection | **Complete** |
+| Dynamic block registration + PHP render | **Complete** |
+| Editor ServerSideRender preview | **Complete** |
+| Multi-instance + Store API integration tests | **Complete** |
+| Release closure for **v0.22.0** | **Prepared** — PR boundary |
 
 ## Future milestones — not started, not implemented
 

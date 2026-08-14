@@ -25,6 +25,11 @@ no foreign import (ADR-0003, ADR-0007).
 | `umc_rate_state` | `RateUpdateState` (via `ExchangeRateStore`) | Operational fetch bookkeeping: versioned `provider_metadata`, per-currency fetch status, failure history, scheduler mirror, update lock | **Deleted** (ADR-0009) |
 | `umc_reporting_cache_gen` | `Reporting\ReportingCache` | Monotonic generation counter for reporting cache invalidation | **Deleted** (ephemeral plugin config) |
 
+**Not inventoried:** Gutenberg block comment delimiters and block attributes stored in
+WordPress post/template content (`universal-multicurrency/currency-switcher`) are
+**WordPress-owned content**, not UMC options or metadata. They are not counted in
+`PersistedKeys` inventory version **10** (M23).
+
 The store **base currency** lives in WooCommerce's `woocommerce_currency` option
 only. It is never duplicated into `umc_settings` (see ADR-0003).
 
