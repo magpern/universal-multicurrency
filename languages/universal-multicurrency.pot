@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Universal Multicurrency for WooCommerce 0.19.0\n"
+"Project-Id-Version: Universal Multicurrency for WooCommerce 0.20.0\n"
 "Report-Msgid-Bugs-To: https://github.com/magpern/universal-multicurrency/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -83,7 +83,7 @@ msgid "Hide technical evidence"
 msgstr ""
 
 #: src/Admin/AdminComponentRenderer.php:493
-#: src/Admin/SettingsPage.php:842
+#: src/Admin/SettingsPage.php:910
 msgid "Unsaved changes"
 msgstr ""
 
@@ -94,10 +94,10 @@ msgstr ""
 #: src/Admin/AdminComponentRenderer.php:495
 #: src/Admin/AdminPageShell.php:100
 #: src/Admin/AdminPageShell.php:101
-#: src/Admin/SettingsPage.php:829
-#: src/Admin/SettingsPage.php:830
-#: src/Admin/SettingsPage.php:843
-#: src/Admin/SettingsPage.php:844
+#: src/Admin/SettingsPage.php:897
+#: src/Admin/SettingsPage.php:898
+#: src/Admin/SettingsPage.php:911
+#: src/Admin/SettingsPage.php:912
 msgid "Save changes"
 msgstr ""
 
@@ -118,8 +118,8 @@ msgid "for WooCommerce"
 msgstr ""
 
 #: src/Admin/AdminPageShellViewModelFactory.php:67
-#: src/Admin/SettingsPage.php:141
-#: src/Admin/SettingsPage.php:885
+#: src/Admin/SettingsPage.php:159
+#: src/Admin/SettingsPage.php:953
 msgid "Multicurrency"
 msgstr ""
 
@@ -570,8 +570,8 @@ msgid "Automatic"
 msgstr ""
 
 #: src/Admin/CurrencyTableField.php:95
-#: src/Admin/SettingsPage.php:199
-#: src/Admin/SettingsPage.php:543
+#: src/Admin/SettingsPage.php:230
+#: src/Admin/SettingsPage.php:584
 msgid "Currencies"
 msgstr ""
 
@@ -610,8 +610,8 @@ msgid "You do not have permission to run Decision Inspector."
 msgstr ""
 
 #: src/Admin/DecisionInspectorSettingsField.php:83
-#: src/Admin/SettingsPage.php:204
-#: src/Admin/SettingsPage.php:651
+#: src/Admin/SettingsPage.php:235
+#: src/Admin/SettingsPage.php:692
 msgid "Decision Inspector"
 msgstr ""
 
@@ -639,8 +639,8 @@ msgstr ""
 #: src/Admin/DecisionInspectorSettingsField.php:98
 #: src/Admin/ExchangeRateSettingsField.php:233
 #: src/Admin/Geo/GeoPanelRenderer.php:334
-#: src/Admin/SettingsPage.php:205
-#: src/Admin/SettingsPage.php:701
+#: src/Admin/SettingsPage.php:237
+#: src/Admin/SettingsPage.php:769
 msgid "Compatibility"
 msgstr ""
 
@@ -700,8 +700,9 @@ msgstr ""
 #: src/Admin/DecisionInspectorSettingsField.php:364
 #: src/Admin/DecisionInspectorSettingsField.php:382
 #: src/Admin/Geo/GeoPanelRegistry.php:173
-#: src/Admin/SettingsPage.php:201
-#: src/Admin/SettingsPage.php:597
+#: src/Admin/ReportingSettingsField.php:156
+#: src/Admin/SettingsPage.php:232
+#: src/Admin/SettingsPage.php:638
 msgid "Visitor Location"
 msgstr ""
 
@@ -934,7 +935,7 @@ msgid "Design"
 msgstr ""
 
 #: src/Admin/DisplaySettingsField.php:331
-#: src/Admin/SettingsPage.php:206
+#: src/Admin/SettingsPage.php:238
 msgid "Advanced"
 msgstr ""
 
@@ -2329,34 +2330,217 @@ msgstr[1] ""
 msgid "Exchange rates updated successfully."
 msgstr ""
 
+#: src/Admin/ReportingExportController.php:48
+msgid "You do not have permission to export reporting data."
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:43
+msgid "You do not have permission to view reporting."
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:66
+#: src/Admin/SettingsPage.php:236
+#: src/Admin/SettingsPage.php:719
+msgid "Reporting"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:67
+msgid "Historical order facts in native transaction currency. Reports never use live exchange rates or reconstruct historical pricing from current product settings."
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:81
+msgid "Choose filters and select View report."
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:101
+msgid "Date preset"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:105
+msgid "Last 7 days"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:106
+msgid "Last 30 days"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:107
+msgid "Last 90 days"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:108
+msgid "Year to date"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:109
+msgid "Custom range"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:121
+msgid "Custom start (YYYY-MM-DD)"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:123
+msgid "Custom end (YYYY-MM-DD)"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:126
+msgid "Order statuses"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:138
+msgid "Transaction currency"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:139
+msgid "All currencies"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:150
+msgid "Currency origin"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:154
+msgid "All origins"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:155
+msgid "Customer selected"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:157
+#: src/Admin/ReportingSettingsField.php:194
+msgid "Unknown / legacy"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:169
+msgid "Checkout fallback"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:173
+msgid "Any"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:174
+msgid "Fallback occurred"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:175
+msgid "No fallback"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:187
+msgid "Pricing source (Pricing Source report only)"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:191
+msgid "All product-line sources"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:192
+msgid "Fixed"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:193
+msgid "Converted"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:206
+msgid "View report"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:208
+msgid "Refresh report"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:223
+msgid "This report includes legacy, partial, or unknown provenance data. Unknown buckets are shown explicitly and are not treated as zero."
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:243
+msgid "Orders"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:245
+msgid "Qualifying orders in range"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:248
+msgid "Net order value"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:250
+msgid "Sum of order value minus refunds (native transaction currencies)"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:253
+msgid "Active currencies"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:255
+msgid "Distinct transaction currencies"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:258
+msgid "Fixed-price share"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:260
+msgid "Fixed product-line value divided by classified product-line value"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:272
+msgid "Currency Performance"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:291
+msgid "Pricing Source (product lines only)"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:305
+msgid "Currency Origin"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:319
+msgid "Checkout Fallback Summary"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:334
+msgid "Rate Provenance"
+msgstr ""
+
+#: src/Admin/ReportingSettingsField.php:365
+msgid "Export CSV"
+msgstr ""
+
 #: src/Admin/SectionNavigation.php:27
 msgid "Multicurrency settings sections"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:200
-#: src/Admin/SettingsPage.php:678
+#: src/Admin/SettingsPage.php:231
+#: src/Admin/SettingsPage.php:746
 msgid "Exchange Rates"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:202
-#: src/Admin/SettingsPage.php:570
+#: src/Admin/SettingsPage.php:233
+#: src/Admin/SettingsPage.php:611
 msgid "Display"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:203
-#: src/Admin/SettingsPage.php:624
+#: src/Admin/SettingsPage.php:234
+#: src/Admin/SettingsPage.php:665
 msgid "Checkout"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:420
+#: src/Admin/SettingsPage.php:461
 msgid "When the switcher is enabled, at least one device visibility option must be selected."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:437
+#: src/Admin/SettingsPage.php:478
 msgid "Custom CSS was not saved because it contained disallowed constructs (for example @import, url(), escape sequences with backslashes, expression(), behavior:, -moz-binding, or angle brackets). Your previous Custom CSS was kept. Other Display settings were saved."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:445
+#: src/Admin/SettingsPage.php:486
 msgid "Horizontal list is only available with manual placement. Style was saved as Dropdown."
 msgstr ""
 
@@ -3219,6 +3403,18 @@ msgstr ""
 
 #: src/Rates/RateStatusEvaluator.php:95
 msgid "OK"
+msgstr ""
+
+#: src/Reporting/ReportingCsvRenderer.php:25
+msgid "Section"
+msgstr ""
+
+#: src/Reporting/ReportingCsvRenderer.php:25
+msgid "Key"
+msgstr ""
+
+#: src/Reporting/ReportingCsvRenderer.php:25
+msgid "Value"
 msgstr ""
 
 #. translators: 1: stored settings schema version, 2: highest schema version supported by this plugin release.

@@ -23,6 +23,7 @@ no foreign import (ADR-0003, ADR-0007).
 |---|---|---|---|
 | `umc_settings` | `Settings` | Plugin configuration: `schema_version`, global rate mode/provider/interval, per-currency formatting, `manual_rate`, co-located `provider_rate`, `merchant_adjustment`, `rate_mode` | **Deleted** (ADR-0009) |
 | `umc_rate_state` | `RateUpdateState` (via `ExchangeRateStore`) | Operational fetch bookkeeping: versioned `provider_metadata`, per-currency fetch status, failure history, scheduler mirror, update lock | **Deleted** (ADR-0009) |
+| `umc_reporting_cache_gen` | `Reporting\ReportingCache` | Monotonic generation counter for reporting cache invalidation | **Deleted** (ephemeral plugin config) |
 
 The store **base currency** lives in WooCommerce's `woocommerce_currency` option
 only. It is never duplicated into `umc_settings` (see ADR-0003).
@@ -63,6 +64,7 @@ ADR-0006). Permanent audit data — **never deleted on uninstall**.
 | `_umc_fallback_occurred` | `OrderSnapshot::META_FALLBACK_OCCURRED` | M11 |
 | `_umc_rate_provider` | `OrderSnapshot::META_RATE_PROVIDER` | M16 (schema 4; empty when manual) |
 | `_umc_rate_adjustment` | `OrderSnapshot::META_RATE_ADJUSTMENT` | M16 (schema 4; merchant adjustment %) |
+| `_umc_currency_origin` | `OrderSnapshot::META_CURRENCY_ORIGIN` | M21 (schema 5; `customer` \| `visitor_location` only; absent when unknown) |
 
 Writer: `Order\OrderSnapshot` (classic checkout and Store API checkout adapter).
 
@@ -168,8 +170,16 @@ when the session expires or the customer clears their session — **not touched 
 
 ## Transients
 
-**None.** Runtime code under `src/` does not call `set_transient()` or
-`get_transient()`.
+M21 reporting may cache immutable aggregate report payloads:
+
+| Pattern | Owner | TTL | Uninstall |
+|---|---|---|---|
+| `umc_report_*` | `Reporting\ReportingCache` | 15 minutes | Expires naturally |
+
+Generation invalidation uses option `umc_reporting_cache_gen` (deleted on uninstall).
+Cached payloads use transient keys matching `umc_report_*` (15-minute TTL;
+timeout rows are WordPress internals). No other runtime code under `src/` calls
+`set_transient()` or `get_transient()`.
 
 ---
 
@@ -192,6 +202,7 @@ that cache per currency. That value is not a standalone persisted key.
 |---|---|
 | `umc_settings` option | **Deleted** |
 | `umc_rate_state` option | **Deleted** |
+| `umc_reporting_cache_gen` option | **Deleted** |
 | `_umc_*` order meta | **Preserved forever** |
 | `_umc_parent_*` refund meta | **Preserved forever** |
 | `umc_dismissed_notices` user meta | **Preserved** |
@@ -213,10 +224,11 @@ with `PersistedKeys::inventory()` — never edit one without the other.
 
 ```umc:persisted-inventory
 {
-  "inventory_version": 9,
+  "inventory_version": 10,
   "options": [
     "umc_settings",
-    "umc_rate_state"
+    "umc_rate_state",
+    "umc_reporting_cache_gen"
   ],
   "order_meta": [
     "_umc_base_currency",
@@ -232,7 +244,8 @@ with `PersistedKeys::inventory()` — never edit one without the other.
     "_umc_shopper_currency",
     "_umc_fallback_occurred",
     "_umc_rate_provider",
-    "_umc_rate_adjustment"
+    "_umc_rate_adjustment",
+    "_umc_currency_origin"
   ],
   "refund_meta": [
     "_umc_parent_transaction_currency",
@@ -268,12 +281,15 @@ with `PersistedKeys::inventory()` — never edit one without the other.
   "store_api_extension_namespaces": [
     "umc"
   ],
-  "transients": [],
+  "transients": [
+    "umc_report_*"
+  ],
   "object_cache": [],
   "uninstall_policy": {
     "delete_options": [
       "umc_settings",
-      "umc_rate_state"
+      "umc_rate_state",
+      "umc_reporting_cache_gen"
     ],
     "preserve_order_meta": [
       "_umc_base_currency",
@@ -289,7 +305,8 @@ with `PersistedKeys::inventory()` — never edit one without the other.
       "_umc_shopper_currency",
       "_umc_fallback_occurred",
       "_umc_rate_provider",
-      "_umc_rate_adjustment"
+      "_umc_rate_adjustment",
+      "_umc_currency_origin"
     ],
     "preserve_refund_meta": [
       "_umc_parent_transaction_currency",

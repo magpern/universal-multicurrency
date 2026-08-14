@@ -4,7 +4,7 @@ Tags: woocommerce, currency, multicurrency, exchange rates, money
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.19.0
+Stable tag: 0.20.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,6 +49,14 @@ Not for production traffic. Two runtime converters can double-convert prices. De
 The plugin ships a POT template (`languages/universal-multicurrency.pot`) for translators. Bundled locale `.mo` files are not included in this release.
 
 == Changelog ==
+
+= 0.20.0 =
+* Multicurrency Reporting & Analytics Foundation (Milestone 21, Phase 1)
+* Admin Reporting section with date/status/currency filters, summary statistics, and read-only tables
+* Native transaction-currency reports: Currency Performance (incl. AOV), Pricing Source, Currency Origin, Checkout Fallback, and rate provenance (table-only)
+* Aggregate CSV export using the same immutable report models as the admin UI
+* OrderSnapshot schema 4→5 with factual `_umc_currency_origin` persistence (`customer` | `visitor_location` only)
+* PersistedKeys inventory 9→10; reporting cache transients (`umc_report_*`); no settings schema or DB migration
 
 = 0.19.0 =
 * Authoritative per-currency fixed product pricing (Milestone 20, Phase 1)

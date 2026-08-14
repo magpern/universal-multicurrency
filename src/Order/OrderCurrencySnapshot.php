@@ -136,24 +136,56 @@ final class OrderCurrencySnapshot {
 	private ?string $rate_adjustment;
 
 	/**
+	 * Checkout mode at order creation (schema 3+).
+	 *
+	 * @var string|null
+	 */
+	private ?string $checkout_mode;
+
+	/**
+	 * Shopper-selected currency at checkout (schema 3+).
+	 *
+	 * @var string|null
+	 */
+	private ?string $shopper_currency;
+
+	/**
+	 * Whether checkout fell back to store currency (schema 3+).
+	 *
+	 * @var bool|null
+	 */
+	private ?bool $fallback_occurred;
+
+	/**
+	 * Persisted currency origin when present and valid (schema 5+).
+	 *
+	 * @var string|null
+	 */
+	private ?string $currency_origin;
+
+	/**
 	 * Builds an immutable snapshot.
 	 *
-	 * @param int|null    $schema_version     Snapshot schema version (1, 2, or unknown).
-	 * @param string|null $base_currency      Base currency code.
+	 * @param int|null    $schema_version       Snapshot schema version (1, 2, or unknown).
+	 * @param string|null $base_currency        Base currency code.
 	 * @param string|null $transaction_currency Order currency code.
-	 * @param string|null $exchange_rate      Exchange rate string.
-	 * @param int|null    $rate_timestamp     Timestamp.
-	 * @param string|null $rate_source        Rate source identifier.
-	 * @param string|null $plugin_version     Plugin version.
-	 * @param string|null $rate_identity      Rate identity string.
-	 * @param int|null    $stored_decimals    Stored transaction decimals (M4+).
-	 * @param bool        $has_snapshot       Whether any snapshot data is present.
-	 * @param bool        $is_legacy          Whether this is a legacy order (no snapshot).
-	 * @param bool        $is_partial         Whether some snapshot keys are missing.
-	 * @param bool        $is_malformed       Whether the snapshot metadata is malformed.
-	 * @param bool        $is_future          Whether the schema version is an unknown future one.
-	 * @param string|null $rate_provider      Provider id (schema 4+, optional).
-	 * @param string|null $rate_adjustment    Merchant adjustment (schema 4+, optional).
+	 * @param string|null $exchange_rate        Exchange rate string.
+	 * @param int|null    $rate_timestamp       Timestamp.
+	 * @param string|null $rate_source          Rate source identifier.
+	 * @param string|null $plugin_version       Plugin version.
+	 * @param string|null $rate_identity        Rate identity string.
+	 * @param int|null    $stored_decimals      Stored transaction decimals (M4+).
+	 * @param bool        $has_snapshot         Whether any snapshot data is present.
+	 * @param bool        $is_legacy            Whether this is a legacy order (no snapshot).
+	 * @param bool        $is_partial           Whether some snapshot keys are missing.
+	 * @param bool        $is_malformed         Whether the snapshot metadata is malformed.
+	 * @param bool        $is_future            Whether the schema version is an unknown future one.
+	 * @param string|null $rate_provider        Provider id (schema 4+, optional).
+	 * @param string|null $rate_adjustment      Merchant adjustment (schema 4+, optional).
+	 * @param string|null $checkout_mode        Checkout mode (schema 3+, optional).
+	 * @param string|null $shopper_currency     Shopper currency (schema 3+, optional).
+	 * @param bool|null   $fallback_occurred    Checkout fallback flag (schema 3+, optional).
+	 * @param string|null $currency_origin      Currency origin (schema 5+, optional).
 	 */
 	public function __construct(
 		?int $schema_version,
@@ -171,7 +203,11 @@ final class OrderCurrencySnapshot {
 		bool $is_malformed,
 		bool $is_future,
 		?string $rate_provider = null,
-		?string $rate_adjustment = null
+		?string $rate_adjustment = null,
+		?string $checkout_mode = null,
+		?string $shopper_currency = null,
+		?bool $fallback_occurred = null,
+		?string $currency_origin = null
 	) {
 		$this->schema_version       = $schema_version;
 		$this->base_currency        = $base_currency;
@@ -189,6 +225,10 @@ final class OrderCurrencySnapshot {
 		$this->is_future            = $is_future;
 		$this->rate_provider        = $rate_provider;
 		$this->rate_adjustment      = $rate_adjustment;
+		$this->checkout_mode        = $checkout_mode;
+		$this->shopper_currency     = $shopper_currency;
+		$this->fallback_occurred    = $fallback_occurred;
+		$this->currency_origin      = $currency_origin;
 	}
 
 	/**
@@ -305,5 +345,33 @@ final class OrderCurrencySnapshot {
 	 */
 	public function rate_adjustment(): ?string {
 		return $this->rate_adjustment;
+	}
+
+	/**
+	 * Checkout mode at order creation, or null when absent.
+	 */
+	public function checkout_mode(): ?string {
+		return $this->checkout_mode;
+	}
+
+	/**
+	 * Shopper-selected currency at checkout, or null when absent.
+	 */
+	public function shopper_currency(): ?string {
+		return $this->shopper_currency;
+	}
+
+	/**
+	 * Whether checkout fell back to store currency, or null when absent.
+	 */
+	public function fallback_occurred(): ?bool {
+		return $this->fallback_occurred;
+	}
+
+	/**
+	 * Persisted currency origin when present and valid; null when absent.
+	 */
+	public function currency_origin(): ?string {
+		return $this->currency_origin;
 	}
 }

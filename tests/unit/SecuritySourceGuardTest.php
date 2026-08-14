@@ -44,6 +44,8 @@ final class SecuritySourceGuardTest extends TestCase {
 		'GeoSandboxController.php',
 		'DecisionInspectorController.php',
 		'DecisionInspectorSettingsField.php',
+		'ReportingSettingsField.php',
+		'ReportingExportController.php',
 		'OrderPayCurrencyLock.php',
 		'RateUpdateController.php',
 		'ProductFixedPricesPanel.php',
@@ -66,6 +68,7 @@ final class SecuritySourceGuardTest extends TestCase {
 		'CompatibilityInventory.php',
 		'ExtensionRuntimeInventory.php',
 		'SwitcherShortcodeScanner.php',
+		'ReportingCache.php',
 	);
 
 	private function root(): string {
@@ -211,6 +214,7 @@ final class SecuritySourceGuardTest extends TestCase {
 
 		$this->assertSame( 1, preg_match_all( "/delete_option\s*\(\s*['\"]umc_settings['\"]\s*\)/", $source ) );
 		$this->assertSame( 1, preg_match_all( "/delete_option\s*\(\s*['\"]umc_rate_state['\"]\s*\)/", $source ) );
+		$this->assertSame( 1, preg_match_all( "/delete_option\s*\(\s*['\"]umc_reporting_cache_gen['\"]\s*\)/", $source ) );
 		$this->assertStringNotContainsString( 'delete_user_meta', $source );
 		$this->assertStringNotContainsString( 'delete_post_meta', $source );
 	}

@@ -22,10 +22,18 @@ final class PerformanceGuardTest extends TestCase {
 	use SourceGuardTrait;
 
 	public function test_src_contains_no_transient_or_object_cache_calls(): void {
-		$this->assert_pattern_absent_from(
+		$allowed = \UMC\PersistedKeys::transient_writer_basenames();
+		$files   = array_filter(
 			$this->umc_source_files(),
+			static function ( string $file ) use ( $allowed ): bool {
+				return ! in_array( basename( $file ), $allowed, true );
+			}
+		);
+
+		$this->assert_pattern_absent_from(
+			array_values( $files ),
 			'/\b(set_transient|get_transient|delete_transient|wp_cache_(set|get|delete|add|replace|flush))\s*\(/',
-			'M7 forbids persistent caches and object-cache integration in runtime code.'
+			'M7 forbids persistent caches outside M21 ReportingCache.'
 		);
 	}
 

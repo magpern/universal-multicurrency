@@ -421,14 +421,45 @@
     and
     [`docs/architecture/authoritative-fixed-product-pricing.md`](architecture/authoritative-fixed-product-pricing.md).
 
+21. Multicurrency Reporting & Analytics Foundation (**v0.20.0**) — **prepared
+    for release** (implementation complete on feature branch; PR boundary).
+    UMC-owned admin reporting that reads immutable order facts in **native
+    transaction currency only** — no live FX, no inverse FX, no base-equivalent
+    normalization.
+
+    ### Scope for v0.20.0
+
+    | Work item | Status |
+    |---|---|
+    | Authoritative architecture spec + ADR-0026 | **Complete** |
+    | WC refund API characterization + frozen refund authority | **Complete** |
+    | OrderSnapshot schema 5 (`_umc_currency_origin`) | **Complete** |
+    | Reporting domain, repository, aggregators, cache | **Complete** |
+    | Admin Reporting section + CSV export (same models as UI) | **Complete** |
+    | Integration, architecture, and performance guards | **Complete** |
+    | Release closure for **v0.20.0** | **Prepared** — PR boundary |
+
+    Phase 1 reports: Currency Performance (incl. AOV), Pricing Source, Currency
+    Origin, Checkout Fallback; rate provenance table-only. Origin persistence:
+    `customer` \| `visitor_location` only — **never persist `unknown`**. Legacy
+    orders use `WC_Order::get_currency()` when no UMC snapshot.
+
+    No `Settings::SCHEMA_VERSION` bump. `PersistedKeys` **9 → 10**. Order
+    snapshot schema **4 → 5**. No DB migration. No WooCommerce Analytics
+    integration. See
+    [`docs/adr/0026-multicurrency-reporting-truth-contract.md`](adr/0026-multicurrency-reporting-truth-contract.md)
+    and
+    [`docs/architecture/multicurrency-reporting.md`](architecture/multicurrency-reporting.md).
+
+    **Target release:** **v0.20.0**.
+
 ## Future milestones — not started, not implemented
 
 None of the following exists in the codebase today:
 
-- Currency icon / flag presentation for the switcher (deferred from M17)
+- Currency icon / flag presentation for the switcher (deferred from M17; planned M22)
 - Additional exchange-rate providers and per-currency provider selection
 - `country_change` geo detection mode and broader continent presets
-- Multicurrency reporting and analytics
 - Public APIs beyond the documented hooks in [`HOOKS.md`](HOOKS.md)
 - Gift cards, memberships, and additional third-party extension adapters beyond
   M19 priority set (may follow in a future compatibility milestone)

@@ -11,6 +11,7 @@ namespace UMC\Order;
 
 use UMC\Checkout\CheckoutTransitionStateRepository;
 use UMC\CurrencyContext;
+use UMC\CurrencySwitcher;
 use UMC\Settings;
 use WC_Order;
 
@@ -45,11 +46,12 @@ final class OrderSnapshot {
 	public const META_FALLBACK_OCCURRED    = '_umc_fallback_occurred';
 	public const META_RATE_PROVIDER        = '_umc_rate_provider';
 	public const META_RATE_ADJUSTMENT      = '_umc_rate_adjustment';
+	public const META_CURRENCY_ORIGIN      = '_umc_currency_origin';
 
 	/**
 	 * Current order snapshot schema written for new orders.
 	 */
-	public const SCHEMA_VERSION = 4;
+	public const SCHEMA_VERSION = 5;
 
 	/**
 	 * Rate source identifier for the manual (admin-entered) provider.
@@ -203,8 +205,14 @@ final class OrderSnapshot {
 			return $this->refresh_snapshot( $order, $meta );
 		}
 
+		$origin = CurrencySwitcher::read_currency_origin();
+
 		foreach ( $meta as $key => $value ) {
 			$order->update_meta_data( (string) $key, $value );
+		}
+
+		if ( null !== $origin ) {
+			$order->update_meta_data( self::META_CURRENCY_ORIGIN, $origin );
 		}
 
 		/**

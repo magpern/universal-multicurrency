@@ -1,3 +1,37 @@
+# Release audit — v0.20.0 Multicurrency Reporting & Analytics Foundation
+
+Executable release-preparation gate for Universal Multicurrency **v0.20.0**.
+This document records scope, criteria, commands, audit results, and the current
+release-preparation state.
+
+**Governing question:** If we published this release tomorrow, is there anything
+left in the repository that clearly should not ship?
+
+**Repository status:** **prepared for v0.20.0** on branch
+`feature/m21-multicurrency-reporting`. Milestone 21 (Multicurrency Reporting &
+Analytics Foundation; ADR-0026) implementation is complete pending PR review.
+Git tag **`v0.20.0`** and GitHub release are **not yet created** (PR boundary).
+
+---
+
+## v0.20.0 release preparation record
+
+| Item | Value |
+|---|---|
+| Version | **0.20.0** |
+| Settings schema | **6** (unchanged) |
+| Order snapshot schema | **5** (`_umc_currency_origin`) |
+| Persisted-data inventory version | **10** (origin meta + reporting transients) |
+| Production migrations | none |
+| Reporting | Native transaction-currency admin reports + CSV; no FX normalization |
+| Unresolved release blockers | **0** (pre-PR) |
+| Git tag `v0.20.0` | **Not yet created** |
+| GitHub release `v0.20.0` | **Not yet published** |
+| Milestone 21 | **Prepared** — Multicurrency Reporting at v0.20.0 |
+| Deployment | **Not performed** |
+
+---
+
 # Release audit — v0.19.0 Authoritative Fixed Product Pricing (Phase 1)
 
 Executable release-preparation gate for Universal Multicurrency **v0.19.0**.

@@ -27,6 +27,16 @@ use UMC\Display\SwitcherViewModelFactory;
 use UMC\Rates\ExchangeRateStore;
 use UMC\Rates\ManualRateProvider;
 use UMC\Rates\RateHealthService;
+use UMC\Reporting\LineItemProvenanceAggregator;
+use UMC\Reporting\OrderReportingRepository;
+use UMC\Reporting\RefundValueResolver;
+use UMC\Reporting\ReportingCache;
+use UMC\Reporting\ReportingCacheInvalidator;
+use UMC\Reporting\ReportingCsvRenderer;
+use UMC\Reporting\ReportingOriginClassifier;
+use UMC\Reporting\ReportingService;
+use UMC\Reporting\TransactionCurrencyResolver;
+use UMC\Order\OrderSnapshotReader;
 use UMC\Settings;
 use WC_Settings_Page;
 
@@ -42,6 +52,7 @@ final class SettingsPage extends WC_Settings_Page {
 	public const SECTION_CHECKOUT           = 'checkout';
 	public const SECTION_DECISION_INSPECTOR = 'decision_inspector';
 	public const SECTION_COMPATIBILITY      = 'compatibility';
+	public const SECTION_REPORTING          = 'reporting';
 	public const SECTION_ADVANCED           = 'advanced';
 
 	/**
@@ -108,6 +119,13 @@ final class SettingsPage extends WC_Settings_Page {
 	private GeoDetectionSettingsField $geo_field;
 
 	/**
+	 * Reporting field renderer.
+	 *
+	 * @var ReportingSettingsField
+	 */
+	private ReportingSettingsField $reporting_field;
+
+	/**
 	 * Placeholder section renderer callback target.
 	 *
 	 * @var AdminPageShellViewModelFactory
@@ -155,17 +173,29 @@ final class SettingsPage extends WC_Settings_Page {
 		$this->checkout_field           = new CheckoutSettingsField( $settings, $base );
 		$this->geo_field                = new GeoDetectionSettingsField( $settings, $base, $registry );
 		$this->decision_inspector_field = new DecisionInspectorSettingsField( $settings, $base );
-		$conflict_detector              = new ConflictDetector(
+		$reader                         = new OrderSnapshotReader();
+		$repository                     = new OrderReportingRepository(
+			$reader,
+			new TransactionCurrencyResolver(),
+			new RefundValueResolver(),
+			new LineItemProvenanceAggregator(),
+			new ReportingOriginClassifier()
+		);
+		$reporting_cache                = new ReportingCache( new ReportingService( $repository ) );
+		$this->reporting_field          = new ReportingSettingsField( $reporting_cache, $registry );
+		( new ReportingCacheInvalidator( $reporting_cache ) )->register();
+		( new ReportingExportController( $reporting_cache, new ReportingCsvRenderer() ) )->register();
+		$conflict_detector         = new ConflictDetector(
 			new DetectorRegistry(),
 			new WordPressEnvironmentProbe(),
 			new ConflictScorer()
 		);
-		$this->compatibility_field      = new CompatibilitySettingsField(
+		$this->compatibility_field = new CompatibilitySettingsField(
 			CompatibilityServices::scanner( $settings, $store, $base, $conflict_detector )
 		);
-		$this->section_header           = new SectionHeader();
-		$this->shell                    = new AdminPageShell( new SectionNavigation() );
-		$this->overview_field           = new CurrencyOverviewField(
+		$this->section_header      = new SectionHeader();
+		$this->shell               = new AdminPageShell( new SectionNavigation() );
+		$this->overview_field      = new CurrencyOverviewField(
 			new CurrencyViewModelFactory(
 				$settings,
 				$base,
@@ -183,6 +213,7 @@ final class SettingsPage extends WC_Settings_Page {
 		add_action( 'woocommerce_admin_field_umc_checkout', array( $this->checkout_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_geo_detection', array( $this->geo_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_decision_inspector', array( $this->decision_inspector_field, 'render' ) );
+		add_action( 'woocommerce_admin_field_umc_reporting', array( $this->reporting_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_compatibility', array( $this->compatibility_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_currencies', array( $this->overview_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_placeholder', array( $this, 'render_placeholder_field' ) );
@@ -202,6 +233,7 @@ final class SettingsPage extends WC_Settings_Page {
 			self::SECTION_DISPLAY            => __( 'Display', 'universal-multicurrency' ),
 			self::SECTION_CHECKOUT           => __( 'Checkout', 'universal-multicurrency' ),
 			self::SECTION_DECISION_INSPECTOR => __( 'Decision Inspector', 'universal-multicurrency' ),
+			self::SECTION_REPORTING          => __( 'Reporting', 'universal-multicurrency' ),
 			self::SECTION_COMPATIBILITY      => __( 'Compatibility', 'universal-multicurrency' ),
 			self::SECTION_ADVANCED           => __( 'Advanced', 'universal-multicurrency' ),
 		);
@@ -380,6 +412,15 @@ final class SettingsPage extends WC_Settings_Page {
 	 */
 	protected function get_settings_for_decision_inspector_section() {
 		return $this->decision_inspector_settings();
+	}
+
+	/**
+	 * Returns field definitions for the Reporting section.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	protected function get_settings_for_reporting_section() {
+		return $this->reporting_settings();
 	}
 
 	/**
@@ -658,6 +699,33 @@ final class SettingsPage extends WC_Settings_Page {
 			array(
 				'type' => 'sectionend',
 				'id'   => 'umc_decision_inspector_end',
+			),
+		);
+	}
+
+	/**
+	 * Returns field definitions for the Reporting section.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function reporting_settings(): array {
+		return array(
+			array(
+				'type' => 'umc_conflict',
+				'id'   => 'umc_conflict_notice',
+			),
+			array(
+				'type' => 'title',
+				'name' => __( 'Reporting', 'universal-multicurrency' ),
+				'id'   => 'umc_reporting_title',
+			),
+			array(
+				'type' => 'umc_reporting',
+				'id'   => 'umc_reporting',
+			),
+			array(
+				'type' => 'sectionend',
+				'id'   => 'umc_reporting_end',
 			),
 		);
 	}
