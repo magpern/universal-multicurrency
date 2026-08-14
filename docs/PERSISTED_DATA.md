@@ -23,6 +23,7 @@ no foreign import (ADR-0003, ADR-0007).
 |---|---|---|---|
 | `umc_settings` | `Settings` | Plugin configuration: `schema_version`, global rate mode/provider/interval, per-currency formatting, `manual_rate`, co-located `provider_rate`, `merchant_adjustment`, `rate_mode` | **Deleted** (ADR-0009) |
 | `umc_rate_state` | `RateUpdateState` (via `ExchangeRateStore`) | Operational fetch bookkeeping: versioned `provider_metadata`, per-currency fetch status, failure history, scheduler mirror, update lock | **Deleted** (ADR-0009) |
+| `umc_reporting_cache_gen` | `Reporting\ReportingCache` | Monotonic generation counter for reporting cache invalidation | **Deleted** (ephemeral plugin config) |
 
 The store **base currency** lives in WooCommerce's `woocommerce_currency` option
 only. It is never duplicated into `umc_settings` (see ADR-0003).
@@ -175,8 +176,10 @@ M21 reporting may cache immutable aggregate report payloads:
 |---|---|---|---|
 | `umc_report_*` | `Reporting\ReportingCache` | 15 minutes | Expires naturally |
 
-Generation invalidation uses option `umc_reporting_cache_gen`. No other runtime
-code under `src/` calls `set_transient()` or `get_transient()`.
+Generation invalidation uses option `umc_reporting_cache_gen` (deleted on uninstall).
+Cached payloads use transient keys matching `umc_report_*` (15-minute TTL;
+timeout rows are WordPress internals). No other runtime code under `src/` calls
+`set_transient()` or `get_transient()`.
 
 ---
 
@@ -199,6 +202,7 @@ that cache per currency. That value is not a standalone persisted key.
 |---|---|
 | `umc_settings` option | **Deleted** |
 | `umc_rate_state` option | **Deleted** |
+| `umc_reporting_cache_gen` option | **Deleted** |
 | `_umc_*` order meta | **Preserved forever** |
 | `_umc_parent_*` refund meta | **Preserved forever** |
 | `umc_dismissed_notices` user meta | **Preserved** |
@@ -223,7 +227,8 @@ with `PersistedKeys::inventory()` — never edit one without the other.
   "inventory_version": 10,
   "options": [
     "umc_settings",
-    "umc_rate_state"
+    "umc_rate_state",
+    "umc_reporting_cache_gen"
   ],
   "order_meta": [
     "_umc_base_currency",
@@ -283,7 +288,8 @@ with `PersistedKeys::inventory()` — never edit one without the other.
   "uninstall_policy": {
     "delete_options": [
       "umc_settings",
-      "umc_rate_state"
+      "umc_rate_state",
+      "umc_reporting_cache_gen"
     ],
     "preserve_order_meta": [
       "_umc_base_currency",

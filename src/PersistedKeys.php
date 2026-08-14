@@ -45,6 +45,7 @@ final class PersistedKeys {
 		return array(
 			Settings::OPTION,
 			\UMC\Rates\RateUpdateState::OPTION,
+			ReportingCache::GENERATION_OPTION,
 		);
 	}
 

@@ -108,7 +108,11 @@ final class PersistedKeysInventoryTest extends TestCase {
 
 	public function test_option_keys_match_persisted_inventory(): void {
 		$this->assertSame(
-			array( Settings::OPTION, RateUpdateState::OPTION ),
+			array(
+				Settings::OPTION,
+				RateUpdateState::OPTION,
+				\UMC\Reporting\ReportingCache::GENERATION_OPTION,
+			),
 			PersistedKeys::option_keys()
 		);
 	}
@@ -198,5 +202,22 @@ final class PersistedKeysInventoryTest extends TestCase {
 		$source = (string) file_get_contents( $this->root() . '/docs/ARCHITECTURE.md' );
 
 		$this->assertStringContainsString( 'docs/PERSISTED_DATA.md', $source );
+	}
+
+	public function test_reporting_cache_surfaces_are_inventoryed(): void {
+		$inventory = PersistedKeys::inventory();
+
+		$this->assertContains( \UMC\Reporting\ReportingCache::GENERATION_OPTION, $inventory['options'] );
+		$this->assertContains( \UMC\Reporting\ReportingCache::TRANSIENT_PREFIX . '*', $inventory['transients'] );
+		$this->assertContains( OrderSnapshot::META_CURRENCY_ORIGIN, $inventory['order_meta'] );
+		$this->assertSame( 10, $inventory['inventory_version'] );
+	}
+
+	public function test_reporting_transient_pattern_matches_cache_key_prefix(): void {
+		$this->assertSame( 'umc_report_', \UMC\Reporting\ReportingCache::TRANSIENT_PREFIX );
+		$this->assertSame(
+			array( \UMC\Reporting\ReportingCache::TRANSIENT_PREFIX . '*' ),
+			PersistedKeys::transient_keys()
+		);
 	}
 }

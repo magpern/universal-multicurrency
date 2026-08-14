@@ -24,6 +24,7 @@ use UMC\Rates\Http\HttpResponse;
 use UMC\Rates\Providers\FrankfurterRateSource;
 use UMC\Rates\RateUpdateService;
 use UMC\Rates\RateUpdateState;
+use UMC\Reporting\ReportingCache;
 use UMC\Settings;
 use UMC\Tests\Support\FakeHttpTransport;
 use UMC\Tests\Support\PerformanceMetrics;
@@ -75,7 +76,7 @@ final class PerformanceBaselineTest extends WP_UnitTestCase {
 
 	public const CEILING_REFUND_SNAPSHOT_META_KEYS = 2;
 
-	public const CEILING_UNINSTALL_OPTION_DELETES = 2;
+	public const CEILING_UNINSTALL_OPTION_DELETES = 3;
 
 	public const CEILING_UNINSTALL_USER_META_DELETES = 0;
 
@@ -489,6 +490,7 @@ final class PerformanceBaselineTest extends WP_UnitTestCase {
 	public function test_uninstall_path_deletes_only_contracted_option(): void {
 		( new Settings() )->save( array( 'currencies' => self::CURRENCIES ) );
 		update_option( RateUpdateState::OPTION, array( 'schema_version' => 1 ) );
+		update_option( ReportingCache::GENERATION_OPTION, 1, false );
 
 		$user_id = self::factory()->user->create(
 			array(
