@@ -88,8 +88,12 @@ final class SwitcherLabelFormatter {
 	private static function join( array $parts ): string {
 		$label = '';
 
-		foreach ( $parts as $index => $part ) {
-			if ( 0 === $index ) {
+		foreach ( $parts as $part ) {
+			if ( SwitcherElementComposer::ELEMENT_ICON === $part['type'] ) {
+				continue;
+			}
+
+			if ( '' === $label ) {
 				$label = $part['value'];
 				continue;
 			}
