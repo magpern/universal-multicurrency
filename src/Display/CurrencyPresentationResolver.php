@@ -53,6 +53,8 @@ final class CurrencyPresentationResolver {
 
 	/**
 	 * Built-in default region for one currency, if any.
+	 *
+	 * @param string $code Currency code.
 	 */
 	public static function built_in_region_for_currency( string $code ): ?string {
 		$code = strtoupper( trim( $code ) );
@@ -62,6 +64,8 @@ final class CurrencyPresentationResolver {
 
 	/**
 	 * Effective presentation-region identifier for one currency.
+	 *
+	 * @param string $code Currency code.
 	 */
 	public function region_for_currency( string $code ): ?string {
 		$code   = strtoupper( trim( $code ) );
@@ -76,6 +80,8 @@ final class CurrencyPresentationResolver {
 
 	/**
 	 * Bundled asset URL for one currency, when resolvable.
+	 *
+	 * @param string $code Currency code.
 	 */
 	public function asset_url_for_currency( string $code ): ?string {
 		$region = $this->region_for_currency( $code );
