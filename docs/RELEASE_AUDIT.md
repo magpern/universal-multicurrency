@@ -7,27 +7,32 @@ release-preparation state.
 **Governing question:** If we published this release tomorrow, is there anything
 left in the repository that clearly should not ship?
 
-**Repository status:** **prepared for v0.20.0** on branch
-`feature/m21-multicurrency-reporting`. Milestone 21 (Multicurrency Reporting &
-Analytics Foundation; ADR-0026) implementation is complete pending PR review.
-Git tag **`v0.20.0`** and GitHub release are **not yet created** (PR boundary).
+**Repository status:** **released as v0.20.0**. Milestone 21 (Multicurrency
+Reporting & Analytics Foundation; ADR-0026) is complete. Git tag **`v0.20.0`**
+and GitHub release are published. Release commit on `main`:
+`b751b70d7babd7b81bf45c461897e2793c46c34b`. Annotated tag object points at that
+merge commit. PR **#22**.
 
 ---
 
-## v0.20.0 release preparation record
+## v0.20.0 release closure record
 
 | Item | Value |
 |---|---|
 | Version | **0.20.0** |
 | Settings schema | **6** (unchanged) |
 | Order snapshot schema | **5** (`_umc_currency_origin`) |
-| Persisted-data inventory version | **10** (origin meta + reporting transients) |
+| Persisted-data inventory version | **10** (origin meta + reporting cache option + `umc_report_*` transients) |
 | Production migrations | none |
 | Reporting | Native transaction-currency admin reports + CSV; no FX normalization |
-| Unresolved release blockers | **0** (pre-PR) |
-| Git tag `v0.20.0` | **Not yet created** |
-| GitHub release `v0.20.0` | **Not yet published** |
-| Milestone 21 | **Prepared** — Multicurrency Reporting at v0.20.0 |
+| Unresolved release blockers | **0** |
+| Git tag `v0.20.0` | **Created** |
+| GitHub release `v0.20.0` | **Published** |
+| Milestone 21 | **Complete** — Multicurrency Reporting at v0.20.0 |
+| PR CI run | **31783582632** (SHA `348a219c8c33de3c0408985c17da901a91e5ae58`) |
+| Main CI run | **31783729345** (SHA `b751b70d7babd7b81bf45c461897e2793c46c34b`) |
+| Release workflow | **31783955851** (success) |
+| Artifact | `universal-multicurrency-0.20.0.zip` (488136 bytes; SHA-256 `8fc04afa…`) |
 | Deployment | **Not performed** |
 
 ---

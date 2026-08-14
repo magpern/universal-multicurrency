@@ -36,24 +36,23 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release on `main`:** **v0.19.0** (tagged and published). **v0.20.0** is
-prepared on `feature/m21-multicurrency-reporting` (PR boundary — not yet tagged).
-Deployment is a separate operation — not performed as part of release.
+**Current release on `main`:** **v0.20.0** (tagged and published). PR **#22**;
+merge commit `b751b70`. Deployment is a separate operation — not performed as part of release.
 
 ---
 
-## v0.20.0 — Multicurrency Reporting & Analytics Foundation (prepared)
+## v0.20.0 — Multicurrency Reporting & Analytics Foundation (released)
 
 Ships Milestone 21 under version **0.20.0** (ADR-0026). Settings schema remains **6**; PersistedKeys inventory **10**; order snapshot schema **5** (`_umc_currency_origin`). Admin reporting in native transaction currency; aggregate CSV export; 15-minute report cache with lifecycle invalidation. No FX normalization, no WooCommerce Analytics integration, no DB migration.
 
-**Prepared as:** **v0.20.0** — tag and GitHub release **not yet created** (PR boundary). Build artifact: `dist/universal-multicurrency-0.20.0.zip`.
+**Released as:** **v0.20.0** — tag `v0.20.0`, GitHub release published, artifact `universal-multicurrency-0.20.0.zip` (SHA-256 `8fc04afa0dd00eb06e026d28872c96489bdf189910e2041b13a57a47c9da9e59`).
 
-### Deployment sequence (release preparation)
+### Deployment sequence (release verification completed)
 
 1. Run `composer release-audit` on the **0.20.0** tree.
 2. Build `dist/universal-multicurrency-0.20.0.zip` with `composer install --no-dev`
    + `bin/build-zip.sh`.
-3. Deploy over **0.19.0** in place. No migration step — legacy orders without origin meta classify as `unknown` in reporting only. **Not performed as part of release preparation.**
+3. Deploy over **0.19.0** in place. No migration step — legacy orders without origin meta classify as `unknown` in reporting only. **Not performed as part of release closure.**
 
 ---
 

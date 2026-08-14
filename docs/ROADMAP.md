@@ -421,13 +421,12 @@
     and
     [`docs/architecture/authoritative-fixed-product-pricing.md`](architecture/authoritative-fixed-product-pricing.md).
 
-21. Multicurrency Reporting & Analytics Foundation (**v0.20.0**) — **prepared
-    for release** (implementation complete on feature branch; PR boundary).
-    UMC-owned admin reporting that reads immutable order facts in **native
-    transaction currency only** — no live FX, no inverse FX, no base-equivalent
-    normalization.
+21. Multicurrency Reporting & Analytics Foundation (**v0.20.0**) — **complete
+    and released**. UMC-owned admin reporting that reads immutable order facts in
+    **native transaction currency only** — no live FX, no inverse FX, no
+    base-equivalent normalization.
 
-    ### Scope for v0.20.0
+    ### Shipped in v0.20.0
 
     | Work item | Status |
     |---|---|
@@ -437,7 +436,7 @@
     | Reporting domain, repository, aggregators, cache | **Complete** |
     | Admin Reporting section + CSV export (same models as UI) | **Complete** |
     | Integration, architecture, and performance guards | **Complete** |
-    | Release closure for **v0.20.0** | **Prepared** — PR boundary |
+    | Release closure for **v0.20.0** | **Complete** — PR **#22**, tag `v0.20.0` |
 
     Phase 1 reports: Currency Performance (incl. AOV), Pricing Source, Currency
     Origin, Checkout Fallback; rate provenance table-only. Origin persistence:
@@ -451,7 +450,7 @@
     and
     [`docs/architecture/multicurrency-reporting.md`](architecture/multicurrency-reporting.md).
 
-    **Target release:** **v0.20.0**.
+    **Released as:** **v0.20.0**.
 
 ## Future milestones — not started, not implemented
 
