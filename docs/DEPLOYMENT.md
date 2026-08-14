@@ -36,12 +36,12 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release on `main`:** **v0.20.0** (tagged and published). **v0.21.0** is
-prepared on `feature/m22-switcher-currency-presentation` — not tagged or published.
+**Current release on `main`:** **v0.21.0** (tagged and published). PR **#23**;
+merge commit `86fa5da`. Deployment is a separate operation — not performed as part of release.
 
 ---
 
-## v0.21.0 — Switcher Currency Presentation (prepared, not released)
+## v0.21.0 — Switcher Currency Presentation (released)
 
 Ships Milestone 22 under version **0.21.0** (ADR-0027). Settings schema **6 → 7**
 with optional bundled presentation icons (`display.presentation.*`,
@@ -49,8 +49,15 @@ with optional bundled presentation icons (`display.presentation.*`,
 no DB migration. Upgrade preserves existing switcher appearance when icons remain
 disabled.
 
-**Prepared as:** branch `feature/m22-switcher-currency-presentation` — PR boundary;
-not tagged, not released, not deployed.
+**Released as:** **v0.21.0** — tag `v0.21.0`, GitHub release published, artifact `universal-multicurrency-0.21.0.zip` (SHA-256 `cc9fef85d9bc9c14a9ee984aa24680ba89b0673a9f8b42c95d7ca444a98905b7`).
+
+### Deployment sequence (release verification completed)
+
+1. Run `composer release-audit` on the **0.21.0** tree.
+2. Build `dist/universal-multicurrency-0.21.0.zip` with `composer install --no-dev`
+   + `bin/build-zip.sh`.
+3. Deploy over **0.20.0** in place. Settings upgrade runs on load (`migrate_6_to_7`);
+   icons remain off until enabled. **Not performed as part of release closure.**
 
 ---
 

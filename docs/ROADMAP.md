@@ -452,9 +452,9 @@
 
     **Released as:** **v0.20.0**.
 
-## Milestone 22 — Switcher Currency Presentation (**v0.21.0**) — implementation complete, PR pending
+## Milestone 22 — Switcher Currency Presentation (**v0.21.0**) — complete and released
 
-**Target:** v0.21.0 · ADR-0027 · branch `feature/m22-switcher-currency-presentation`
+**Released as:** v0.21.0 · ADR-0027 · PR **#23**
 
 Optional bundled presentation icons (`icon` content element) on the existing M17
 switcher. Settings schema **6 → 7**; `display.presentation.*` and
@@ -469,8 +469,8 @@ migration. See
 | Asset registry + bundled SVGs | **Complete** |
 | SwitcherElementComposer + SwitcherRenderer icon support | **Complete** |
 | Admin Display UI + preview parity | **Complete** |
-| Integration, security, migration tests | **Complete** (unit); integration via CI |
-| Release closure for **v0.21.0** | **Prepared** — PR boundary; not tagged/released |
+| Integration, security, migration tests | **Complete** |
+| Release closure for **v0.21.0** | **Complete** — PR **#23**, tag `v0.21.0` |
 
 ## Future milestones — not started, not implemented
 

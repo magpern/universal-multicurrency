@@ -4,13 +4,15 @@ Executable release-preparation gate for Universal Multicurrency **v0.21.0**.
 This document records scope, criteria, commands, audit results, and the current
 release-preparation state.
 
-**Repository status:** **prepared on branch `feature/m22-switcher-currency-presentation`**.
-Milestone 22 (Switcher Currency Presentation; ADR-0027) implementation is
-complete. **Not tagged, not released, not deployed** — PR boundary per M22 task.
+**Repository status:** **released as v0.21.0**. Milestone 22 (Switcher Currency
+Presentation; ADR-0027) is complete. Git tag **`v0.21.0`** and GitHub release are
+published. Release commit on `main`:
+`86fa5da7c10cc00b7fec6f58599181dea3edbe37`. Annotated tag object points at that
+merge commit. PR **#23**.
 
 ---
 
-## v0.21.0 release preparation record
+## v0.21.0 release closure record
 
 | Item | Value |
 |---|---|
@@ -21,10 +23,15 @@ complete. **Not tagged, not released, not deployed** — PR boundary per M22 tas
 | Production migrations | `SettingsUpgrader::migrate_6_to_7` |
 | DB migration | none |
 | Presentation icons | Bundled registry SVGs; optional; default off |
-| Unresolved release blockers | **0** (local unit gate green) |
-| Git tag `v0.21.0` | **Not yet created** |
-| GitHub release `v0.21.0` | **Not yet published** |
-| Milestone 22 | **Implementation complete** — PR pending |
+| Unresolved release blockers | **0** |
+| Git tag `v0.21.0` | **Created** |
+| GitHub release `v0.21.0` | **Published** |
+| Milestone 22 | **Complete** — Switcher Currency Presentation at v0.21.0 |
+| PR CI run | **31794921435** (SHA `d21800ec117a76dfa21455a94b76ff1d22fbe903`) |
+| Main CI run | **31795051814** (SHA `86fa5da7c10cc00b7fec6f58599181dea3edbe37`) |
+| Release workflow | **31795177517** (success) |
+| Artifact | `universal-multicurrency-0.21.0.zip` (498699 bytes; SHA-256 `cc9fef85…`) |
+| Deployment | **Not performed** |
 
 ---
 
