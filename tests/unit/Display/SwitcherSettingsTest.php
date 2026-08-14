@@ -33,11 +33,21 @@ final class SwitcherSettingsTest extends TestCase {
 		$this->assertFalse( $defaults['content']['show_chevron'] );
 	}
 
-	public function test_default_array_matches_schema_six_top_level_keys(): void {
+	public function test_default_array_matches_schema_seven_top_level_keys(): void {
 		$this->assertSame(
-			array( 'enabled', 'placement', 'style', 'position', 'content', 'design', 'behavior', 'visibility', 'responsive', 'custom_css' ),
+			array( 'enabled', 'placement', 'style', 'position', 'content', 'design', 'behavior', 'visibility', 'responsive', 'custom_css', 'presentation' ),
 			array_keys( SwitcherSettings::default_array() )
 		);
+	}
+
+	public function test_default_presentation_icons_are_disabled(): void {
+		$defaults = SwitcherSettings::default_array();
+
+		$this->assertFalse( $defaults['content']['trigger']['show_icon'] );
+		$this->assertFalse( $defaults['content']['menu']['show_icon'] );
+		$this->assertSame( array(), $defaults['presentation']['icon_overrides'] );
+		$this->assertSame( SwitcherSettings::SIZE_STANDARD, $defaults['presentation']['icon_size'] );
+		$this->assertSame( SwitcherSettings::ICON_SHAPE_NATURAL, $defaults['presentation']['icon_shape'] );
 	}
 
 	public function test_default_design_is_default_preset_with_subtle_motion(): void {

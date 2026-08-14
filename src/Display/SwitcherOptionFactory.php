@@ -49,11 +49,12 @@ final class SwitcherOptionFactory {
 	 * @param array<string, true> $duplicate_symbols Duplicate symbol map.
 	 */
 	public function __construct( SwitcherSettings $settings, array $duplicate_symbols = array() ) {
-		$trigger = $settings->trigger_content();
-		$menu    = $settings->menu_content();
+		$trigger      = $settings->trigger_content();
+		$menu         = $settings->menu_content();
+		$presentation = CurrencyPresentationResolver::from_settings( $settings );
 
-		$this->trigger_composer  = new SwitcherElementComposer( $trigger, $duplicate_symbols );
-		$this->menu_composer     = new SwitcherElementComposer( $menu, $duplicate_symbols );
+		$this->trigger_composer  = new SwitcherElementComposer( $trigger, $duplicate_symbols, $presentation );
+		$this->menu_composer     = new SwitcherElementComposer( $menu, $duplicate_symbols, $presentation );
 		$this->trigger_formatter = new SwitcherLabelFormatter( $trigger, $duplicate_symbols );
 		$this->menu_formatter    = new SwitcherLabelFormatter( $menu, $duplicate_symbols );
 	}

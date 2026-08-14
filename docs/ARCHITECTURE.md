@@ -68,7 +68,7 @@ fitting SPL type (`InvalidArgumentException` / `RuntimeException`).
 
 ### Settings schema upgrade (Milestones 7–8)
 
-`Settings::SCHEMA_VERSION` is **6** and must not be bumped unless a genuine
+`Settings::SCHEMA_VERSION` is **7** and must not be bumped unless a genuine
 settings shape change requires it. Production migrations exist because the
 stored shape actually changed; none is an artificial bump.
 
@@ -103,6 +103,11 @@ shape` becomes first-class `design.*`, flat content toggles split into
 `design.motion`, `responsive`, and `custom_css` are initialized. The preset is
 always `default` and theme/size/shape are copied verbatim, so migrated stores
 render exactly as they did in v0.15.
+
+`SettingsUpgrader::migrate_6_to_7` adds optional switcher presentation icon
+settings (ADR-0027): `presentation.*`, per-context `show_icon` (default
+`false`), and leaves existing `order[]` arrays unchanged so upgraded stores
+render exactly as they did in v0.20.
 See [`MIGRATION.md`](MIGRATION.md) § Internal settings schema migrations.
 
 `SettingsUpgrader` responsibilities:
@@ -496,6 +501,14 @@ Presentation precedence, from weakest to strongest: base stylesheet → preset �
 theme / size / shape → structured overrides → responsive adjustments → Advanced
 Custom CSS. A named preset therefore never overrides an explicit theme, size, or
 shape choice, and `migrate_5_to_6` always writes `design.preset = default`.
+
+## Switcher currency presentation (Milestone 22)
+
+M22 adds optional bundled presentation icons as a fourth content element (`icon`)
+on the existing M17 switcher (ADR-0027). Authoritative spec:
+[`architecture/switcher-currency-presentation.md`](architecture/switcher-currency-presentation.md).
+Settings schema **7** adds `display.presentation.*` and per-context `show_icon`
+without changing OrderSnapshot or PersistedKeys.
 
 Custom CSS invariants:
 

@@ -66,6 +66,7 @@ final class SettingsUpgrader {
 			4 => self::MIGRATE_3_TO_4,
 			5 => self::MIGRATE_4_TO_5,
 			6 => self::MIGRATE_5_TO_6,
+			7 => self::MIGRATE_6_TO_7,
 		);
 	}
 
@@ -336,6 +337,70 @@ final class SettingsUpgrader {
 	 * @var callable(array<string, mixed>): array<string, mixed>
 	 */
 	public const MIGRATE_5_TO_6 = array( self::class, 'migrate_5_to_6' );
+
+	/**
+	 * Real v6 → v7 migration.
+	 *
+	 * Adds optional switcher presentation icon settings with safe defaults.
+	 * Existing content order and visibility remain unchanged; icons default off.
+	 *
+	 * @param array<string, mixed> $data Raw settings at schema version 6.
+	 * @return array<string, mixed>
+	 */
+	public static function migrate_6_to_7( array $data ): array {
+		return array(
+			'schema_version'       => 7,
+			'rate_mode'            => $data['rate_mode'] ?? Settings::RATE_MODE_MANUAL,
+			'rate_provider'        => $data['rate_provider'] ?? Settings::DEFAULT_RATE_PROVIDER,
+			'rate_update_interval' => $data['rate_update_interval'] ?? Settings::DEFAULT_RATE_INTERVAL,
+			'rate_max_age_hours'   => $data['rate_max_age_hours'] ?? Settings::DEFAULT_RATE_MAX_AGE_HOURS,
+			'currencies'           => is_array( $data['currencies'] ?? null ) ? $data['currencies'] : array(),
+			'display'              => self::migrate_display_6_to_7(
+				is_array( $data['display'] ?? null ) ? $data['display'] : array()
+			),
+			'checkout'             => is_array( $data['checkout'] ?? null ) ? $data['checkout'] : CheckoutSettings::default_array(),
+			'geo'                  => is_array( $data['geo'] ?? null ) ? $data['geo'] : GeoDetectionSettings::default_array(),
+		);
+	}
+
+	/**
+	 * Migration callable for v6 → v7.
+	 *
+	 * @var callable(array<string, mixed>): array<string, mixed>
+	 */
+	public const MIGRATE_6_TO_7 = array( self::class, 'migrate_6_to_7' );
+
+	/**
+	 * Rewrites one schema-6 Display block into the schema-7 shape.
+	 *
+	 * @param array<string, mixed> $display Schema-6 Display block.
+	 * @return array<string, mixed>
+	 */
+	private static function migrate_display_6_to_7( array $display ): array {
+		$defaults = SwitcherSettings::default_array();
+		$content  = is_array( $display['content'] ?? null ) ? $display['content'] : array();
+
+		$upgraded = array_replace_recursive(
+			$display,
+			array(
+				'content'      => array(
+					'trigger' => array( 'show_icon' => false ),
+					'menu'    => array( 'show_icon' => false ),
+				),
+				'presentation' => $defaults['presentation'],
+			)
+		);
+
+		if ( is_array( $content['trigger'] ?? null ) ) {
+			$upgraded['content']['trigger'] = array_merge( $content['trigger'], array( 'show_icon' => false ) );
+		}
+
+		if ( is_array( $content['menu'] ?? null ) ) {
+			$upgraded['content']['menu'] = array_merge( $content['menu'], array( 'show_icon' => false ) );
+		}
+
+		return SwitcherSettings::from_array( $upgraded )->to_array();
+	}
 
 	/**
 	 * Rewrites one schema-5 Display block into the schema-6 shape.

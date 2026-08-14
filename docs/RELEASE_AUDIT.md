@@ -1,3 +1,33 @@
+# Release audit — v0.21.0 Switcher Currency Presentation
+
+Executable release-preparation gate for Universal Multicurrency **v0.21.0**.
+This document records scope, criteria, commands, audit results, and the current
+release-preparation state.
+
+**Repository status:** **prepared on branch `feature/m22-switcher-currency-presentation`**.
+Milestone 22 (Switcher Currency Presentation; ADR-0027) implementation is
+complete. **Not tagged, not released, not deployed** — PR boundary per M22 task.
+
+---
+
+## v0.21.0 release preparation record
+
+| Item | Value |
+|---|---|
+| Version | **0.21.0** |
+| Settings schema | **7** (`display.presentation.*`, `show_icon`) |
+| Order snapshot schema | **5** (unchanged) |
+| Persisted-data inventory version | **10** (unchanged) |
+| Production migrations | `SettingsUpgrader::migrate_6_to_7` |
+| DB migration | none |
+| Presentation icons | Bundled registry SVGs; optional; default off |
+| Unresolved release blockers | **0** (local unit gate green) |
+| Git tag `v0.21.0` | **Not yet created** |
+| GitHub release `v0.21.0` | **Not yet published** |
+| Milestone 22 | **Implementation complete** — PR pending |
+
+---
+
 # Release audit — v0.20.0 Multicurrency Reporting & Analytics Foundation
 
 Executable release-preparation gate for Universal Multicurrency **v0.20.0**.

@@ -54,7 +54,7 @@ These run automatically inside UMC when it first reads `umc_settings` after an
 upgrade. They are **not** a foreign-switcher import: `SettingsUpgrader` only
 ever reads UMC's own option.
 
-`Settings::SCHEMA_VERSION` is **6**. Six production migrations exist, keyed by
+`Settings::SCHEMA_VERSION` is **7**. Seven production migrations exist, keyed by
 the version they produce, and are applied in ascending order:
 
 | From → To | Migration | Change |
@@ -65,6 +65,7 @@ the version they produce, and are applied in ascending order:
 | 3 → 4 | `SettingsUpgrader::migrate_3_to_4` | Adds checkout policy defaults (`checkout.mode`, `checkout.show_notice`) |
 | 4 → 5 | `SettingsUpgrader::migrate_4_to_5` | Adds Geo Detection defaults (`geo` subtree disabled, empty rules) |
 | 5 → 6 | `SettingsUpgrader::migrate_5_to_6` | Restructures the Display block for layered switcher presentation (below) |
+| 6 → 7 | `SettingsUpgrader::migrate_6_to_7` | Adds optional switcher presentation icons with safe defaults (below) |
 
 ### What v1 → v2 changes
 
@@ -122,6 +123,20 @@ through checkout).
 preserved unchanged. Because theme, size, and shape stay independent enums and
 `--preset-default` is a visual no-op, an upgraded switcher renders exactly as it
 did on v0.15 (ADR-0022).
+
+### What v6 → v7 changes
+
+| Field | Before (v6) | After (v7) |
+|---|---|---|
+| Presentation icons | *(absent)* | **`presentation.icon_overrides`**, **`presentation.icon_size`**, **`presentation.icon_shape`** initialized with defaults |
+| Trigger icon toggle | *(absent)* | **`content.trigger.show_icon`** initialized to `false` |
+| Menu icon toggle | *(absent)* | **`content.menu.show_icon`** initialized to `false` |
+| Element order | unchanged | **`icon` is not injected** into existing `order[]` arrays |
+| Schema marker | `schema_version: 6` | **`schema_version: 7`** |
+
+Existing code/symbol/name visibility, design tokens, placement, and Custom CSS
+are preserved unchanged. Because icons default off, an upgraded switcher renders
+the same as on v0.20 (ADR-0027).
 
 Defaults for the initialized display fields come from `Settings::sanitize()`,
 which every migration result passes through.

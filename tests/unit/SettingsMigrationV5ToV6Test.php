@@ -219,7 +219,7 @@ final class SettingsMigrationV5ToV6Test extends TestCase {
 		$this->assertArrayNotHasKey( 'appearance', $result->settings()['display'] );
 	}
 
-	public function test_upgrade_from_schema_zero_reaches_schema_six(): void {
+	public function test_upgrade_from_schema_zero_reaches_current_schema(): void {
 		$result = ( new SettingsUpgrader() )->upgrade(
 			array(
 				'currencies' => array(
@@ -229,7 +229,7 @@ final class SettingsMigrationV5ToV6Test extends TestCase {
 		);
 
 		$this->assertFalse( $result->is_failed() );
-		$this->assertSame( 6, $result->settings()['schema_version'] );
+		$this->assertSame( Settings::SCHEMA_VERSION, $result->settings()['schema_version'] );
 		$this->assertSame( SwitcherSettings::default_array(), $result->settings()['display'] );
 	}
 

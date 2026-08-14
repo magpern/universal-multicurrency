@@ -1,7 +1,7 @@
 ( function ( $ ) {
 	'use strict';
 
-	var CONTENT_ELEMENTS = [ 'code', 'symbol', 'name' ];
+	var CONTENT_ELEMENTS = [ 'code', 'symbol', 'name', 'icon' ];
 
 	var PRESETS = [ 'default', 'minimal', 'pill', 'compact', 'borderless', 'floating' ];
 
@@ -167,26 +167,79 @@
 			return visible.length ? visible : [ 'code' ];
 		}
 
-		function renderElements( $host, sample, context ) {
+		function syncElements( $host, sample, context ) {
+			var order = elementOrder( context );
+			var visible = visibleElements( context );
 			var rendered = 0;
 
-			$host.empty();
+			elements.forEach( function ( element ) {
+				var $part = $host.find( '.umc-switcher__' + element ).first();
+				var shouldShow = visible.indexOf( element ) !== -1;
 
-			visibleElements( context ).forEach( function ( element ) {
-				if ( ! sample[ element ] ) {
+				if ( 'icon' === element ) {
+					if ( ! $part.length && shouldShow && sample.iconUrl ) {
+						$part = $( '<span/>' )
+							.addClass( 'umc-switcher__icon' )
+							.attr( 'data-umc-icon-type', 'flag' )
+							.append(
+								$( '<img/>' ).attr( {
+									src: sample.iconUrl,
+									alt: '',
+									'aria-hidden': 'true',
+									decoding: 'async',
+								} )
+							)
+							.appendTo( $host );
+					}
+
+					if ( $part.length ) {
+						$part.toggle( shouldShow && !! sample.iconUrl );
+
+						if ( sample.iconUrl ) {
+							$part.find( 'img' ).attr( 'src', sample.iconUrl );
+						}
+					}
+
+					if ( shouldShow && sample.iconUrl ) {
+						rendered++;
+					}
+
 					return;
 				}
 
-				$( '<span/>' )
-					.addClass( 'umc-switcher__' + element )
-					.text( sample[ element ] )
-					.appendTo( $host );
+				if ( ! $part.length ) {
+					$part = $( '<span/>' ).addClass( 'umc-switcher__' + element ).appendTo( $host );
+				}
 
-				rendered++;
+				if ( sample[ element ] ) {
+					$part.text( sample[ element ] );
+				}
+
+				$part.toggle( shouldShow && !! sample[ element ] );
+
+				if ( shouldShow && sample[ element ] ) {
+					rendered++;
+				}
+			} );
+
+			order.filter( function ( element ) {
+				return visible.indexOf( element ) !== -1;
+			} ).forEach( function ( element ) {
+				var $part = $host.find( '.umc-switcher__' + element ).first();
+
+				if ( $part.length ) {
+					$host.append( $part );
+				}
 			} );
 
 			if ( ! rendered ) {
-				$( '<span/>' ).addClass( 'umc-switcher__code' ).text( sample.code ).appendTo( $host );
+				var $fallback = $host.find( '.umc-switcher__code' ).first();
+
+				if ( ! $fallback.length ) {
+					$fallback = $( '<span/>' ).addClass( 'umc-switcher__code' ).appendTo( $host );
+				}
+
+				$fallback.text( sample.code ).show();
 			}
 		}
 
@@ -313,14 +366,14 @@
 			var isDropdown = 'dropdown' === styleValue();
 
 			if ( $triggerContent.length && samples.length ) {
-				renderElements( $triggerContent, samples[ 0 ], 'trigger' );
+				syncElements( $triggerContent, samples[ 0 ], 'trigger' );
 			}
 
 			samples.forEach( function ( sample, index ) {
 				var $link = $links.eq( index );
 
 				if ( $link.length ) {
-					renderElements( $link, sample, 'menu' );
+					syncElements( $link, sample, 'menu' );
 				}
 			} );
 
@@ -480,6 +533,24 @@
 					rounded: 'umc-switcher--shape-rounded',
 					pill: 'umc-switcher--shape-pill',
 				}[ fieldValue( 'shape' ) || 'rounded' ] || 'umc-switcher--shape-rounded'
+			);
+
+			setExclusiveClass(
+				[ 'umc-switcher--icon-size-compact', 'umc-switcher--icon-size-standard', 'umc-switcher--icon-size-large' ],
+				{
+					compact: 'umc-switcher--icon-size-compact',
+					standard: 'umc-switcher--icon-size-standard',
+					large: 'umc-switcher--icon-size-large',
+				}[ fieldValue( 'icon_size' ) || 'standard' ] || 'umc-switcher--icon-size-standard'
+			);
+
+			setExclusiveClass(
+				[ 'umc-switcher--icon-shape-natural', 'umc-switcher--icon-shape-square', 'umc-switcher--icon-shape-circle' ],
+				{
+					natural: 'umc-switcher--icon-shape-natural',
+					square: 'umc-switcher--icon-shape-square',
+					circle: 'umc-switcher--icon-shape-circle',
+				}[ fieldValue( 'icon_shape' ) || 'natural' ] || 'umc-switcher--icon-shape-natural'
 			);
 
 			$switcher.toggleClass( 'umc-switcher--expanded', 'horizontal_list' === style );

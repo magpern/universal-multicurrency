@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace UMC\Display;
 
 /**
- * Builds ordered code/symbol/name elements for one switcher context.
+ * Builds ordered code/symbol/name/icon elements for one switcher context.
  *
  * A composer instance is bound to a single content context (trigger or menu),
  * so trigger and menu presentation are configured independently.
@@ -23,12 +23,26 @@ final class SwitcherElementComposer {
 
 	public const ELEMENT_NAME = 'name';
 
+	public const ELEMENT_ICON = 'icon';
+
 	/**
 	 * Element order applied when no valid merchant order is configured.
 	 *
 	 * @var array<int, string>
 	 */
 	public const DEFAULT_ORDER = array( self::ELEMENT_CODE, self::ELEMENT_SYMBOL, self::ELEMENT_NAME );
+
+	/**
+	 * Elements that may appear in a merchant order array.
+	 *
+	 * @var array<int, string>
+	 */
+	public const ORDERABLE_ELEMENTS = array(
+		self::ELEMENT_CODE,
+		self::ELEMENT_SYMBOL,
+		self::ELEMENT_NAME,
+		self::ELEMENT_ICON,
+	);
 
 	/**
 	 * Element visibility toggles.
@@ -52,27 +66,41 @@ final class SwitcherElementComposer {
 	private array $duplicate_symbols;
 
 	/**
+	 * Optional presentation resolver for bundled icons.
+	 *
+	 * @var CurrencyPresentationResolver|null
+	 */
+	private ?CurrencyPresentationResolver $presentation;
+
+	/**
 	 * Binds composition to one content context and symbol disambiguation.
 	 *
-	 * @param array<string, mixed> $content           Content context toggles and order.
-	 * @param array<string, true>  $duplicate_symbols Duplicate symbol map.
+	 * @param array<string, mixed>              $content           Content context toggles and order.
+	 * @param array<string, true>               $duplicate_symbols Duplicate symbol map.
+	 * @param CurrencyPresentationResolver|null $presentation      Presentation asset resolver.
 	 */
-	public function __construct( array $content, array $duplicate_symbols = array() ) {
+	public function __construct(
+		array $content,
+		array $duplicate_symbols = array(),
+		?CurrencyPresentationResolver $presentation = null
+	) {
 		$this->visible = array(
 			self::ELEMENT_CODE   => ! empty( $content['show_code'] ),
 			self::ELEMENT_SYMBOL => ! empty( $content['show_symbol'] ),
 			self::ELEMENT_NAME   => ! empty( $content['show_name'] ),
+			self::ELEMENT_ICON   => ! empty( $content['show_icon'] ),
 		);
 
 		$this->order             = self::normalize_order( $content['order'] ?? array() );
 		$this->duplicate_symbols = $duplicate_symbols;
+		$this->presentation      = $presentation;
 	}
 
 	/**
 	 * Normalizes a merchant element order to the known element set.
 	 *
-	 * Unknown entries are dropped and missing elements are appended in default
-	 * order, so the composer always knows a position for every element.
+	 * Unknown entries are dropped and missing default label elements are appended
+	 * in default order. `icon` is never auto-appended.
 	 *
 	 * @param mixed $raw Raw order value.
 	 * @return array<int, string>
@@ -86,7 +114,9 @@ final class SwitcherElementComposer {
 					continue;
 				}
 
-				if ( ! in_array( $element, self::DEFAULT_ORDER, true ) ) {
+				$element = strtolower( trim( $element ) );
+
+				if ( ! in_array( $element, self::ORDERABLE_ELEMENTS, true ) ) {
 					continue;
 				}
 
@@ -144,16 +174,20 @@ final class SwitcherElementComposer {
 	 * @return array<int, array<string, string>>
 	 */
 	public function parts( string $code, string $symbol, string $name ): array {
+		$icon_url = $this->presentation?->asset_url_for_currency( $code );
+
 		$values = array(
 			self::ELEMENT_CODE   => $code,
 			self::ELEMENT_SYMBOL => $symbol,
 			self::ELEMENT_NAME   => $name,
+			self::ELEMENT_ICON   => null === $icon_url ? '' : $icon_url,
 		);
 
 		$included = array(
 			self::ELEMENT_CODE   => $this->visible[ self::ELEMENT_CODE ],
 			self::ELEMENT_SYMBOL => $this->visible[ self::ELEMENT_SYMBOL ] && '' !== $symbol,
 			self::ELEMENT_NAME   => $this->visible[ self::ELEMENT_NAME ] && '' !== $name,
+			self::ELEMENT_ICON   => $this->visible[ self::ELEMENT_ICON ] && '' !== $values[ self::ELEMENT_ICON ],
 		);
 
 		$parts = array();
@@ -201,6 +235,14 @@ final class SwitcherElementComposer {
 		$html = '';
 
 		foreach ( $this->parts( $code, $symbol, $name ) as $part ) {
+			if ( self::ELEMENT_ICON === $part['type'] ) {
+				$html .= sprintf(
+					'<span class="umc-switcher__icon" data-umc-icon-type="flag"><img src="%1$s" alt="" aria-hidden="true" decoding="async" /></span>',
+					esc_url( $part['value'] )
+				);
+				continue;
+			}
+
 			$html .= sprintf(
 				'<span class="umc-switcher__%1$s">%2$s</span>',
 				esc_attr( $part['type'] ),

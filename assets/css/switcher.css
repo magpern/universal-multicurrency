@@ -36,6 +36,9 @@
 	--umc-switcher-vertical-offset: 0px;
 	--umc-switcher-bottom-offset: 16px;
 	--umc-switcher-z-index: 9990;
+	--umc-switcher-icon-size: 1.125rem;
+	--umc-switcher-icon-radius: 2px;
+	--umc-switcher-icon-gap: 0.35em;
 
 	/* Legacy v0.15 aliases; overriding either name keeps working. */
 	--umc-surface: var(--umc-switcher-surface);
@@ -103,8 +106,34 @@
 
 .umc-switcher__code,
 .umc-switcher__symbol,
-.umc-switcher__name {
+.umc-switcher__name,
+.umc-switcher__icon {
 	display: inline-block;
+}
+
+.umc-switcher__icon {
+	flex: none;
+	line-height: 0;
+}
+
+.umc-switcher__icon img {
+	block-size: var(--umc-switcher-icon-size);
+	border-radius: var(--umc-switcher-icon-radius);
+	display: block;
+	inline-size: var(--umc-switcher-icon-size);
+	object-fit: cover;
+}
+
+.umc-switcher--icon-shape-natural .umc-switcher__icon img {
+	inline-size: auto;
+	max-block-size: var(--umc-switcher-icon-size);
+	max-inline-size: calc(var(--umc-switcher-icon-size) * 1.6);
+	object-fit: contain;
+}
+
+.umc-switcher__trigger-content,
+.umc-switcher__link {
+	gap: var(--umc-switcher-icon-gap);
 }
 
 .umc-switcher__name {

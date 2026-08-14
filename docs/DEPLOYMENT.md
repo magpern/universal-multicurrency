@@ -26,8 +26,8 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Produces `dist/universal-multicurrency-0.20.0.zip`. The archive includes `readme.txt`,
-production `src/`, `vendor/`, and `languages/universal-multicurrency.pot`.
+Produces `dist/universal-multicurrency-0.21.0.zip`. The archive includes `readme.txt`,
+production `src/`, `vendor/`, bundled presentation assets, and `languages/universal-multicurrency.pot`.
 
 Performance subset:
 
@@ -36,8 +36,21 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release on `main`:** **v0.20.0** (tagged and published). PR **#22**;
-merge commit `b751b70`. Deployment is a separate operation — not performed as part of release.
+**Current release on `main`:** **v0.20.0** (tagged and published). **v0.21.0** is
+prepared on `feature/m22-switcher-currency-presentation` — not tagged or published.
+
+---
+
+## v0.21.0 — Switcher Currency Presentation (prepared, not released)
+
+Ships Milestone 22 under version **0.21.0** (ADR-0027). Settings schema **6 → 7**
+with optional bundled presentation icons (`display.presentation.*`,
+`content.*.show_icon`, default off). PersistedKeys **10**; order snapshot **5**;
+no DB migration. Upgrade preserves existing switcher appearance when icons remain
+disabled.
+
+**Prepared as:** branch `feature/m22-switcher-currency-presentation` — PR boundary;
+not tagged, not released, not deployed.
 
 ---
 
