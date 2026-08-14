@@ -84,39 +84,11 @@ final class SwitcherBlock {
 			return;
 		}
 
-		$script_handle = 'umc-switcher-block-editor';
-		$script_path   = plugin_dir_path( UMC_PLUGIN_FILE ) . 'blocks/currency-switcher/editor.js';
-		$script_url    = plugin_dir_url( UMC_PLUGIN_FILE ) . 'blocks/currency-switcher/editor.js';
-		$version       = defined( 'UMC_VERSION' ) ? UMC_VERSION : '0';
-
-		wp_register_script(
-			$script_handle,
-			$script_url,
-			array(
-				'wp-blocks',
-				'wp-i18n',
-				'wp-element',
-				'wp-block-editor',
-				'wp-components',
-				'wp-server-side-render',
-			),
-			is_readable( $script_path ) ? (string) filemtime( $script_path ) : $version,
-			true
-		);
-
-		wp_localize_script(
-			$script_handle,
-			'umcSwitcherBlock',
-			array(
-				'displaySettingsUrl' => admin_url( 'admin.php?page=wc-settings&tab=umc&section=display' ),
-			)
-		);
-
 		register_block_type(
 			plugin_dir_path( UMC_PLUGIN_FILE ) . 'blocks/currency-switcher',
 			array(
 				'render_callback' => array( $this, 'render' ),
-				'editor_script'   => $script_handle,
+				'editor_script'   => SwitcherBlockEditorAssets::SCRIPT_HANDLE,
 			)
 		);
 	}

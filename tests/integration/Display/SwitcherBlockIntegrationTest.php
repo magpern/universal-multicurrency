@@ -44,7 +44,7 @@ final class SwitcherBlockIntegrationTest extends WP_UnitTestCase {
 	public function test_block_is_registered(): void {
 		$this->boot_services();
 
-		$this->assertTrue( WP_Block_Type_Registry::get_instance()->is_registered( SwitcherBlock::BLOCK_NAME ) );
+		$this->assertTrue( \WP_Block_Type_Registry::get_instance()->is_registered( SwitcherBlock::BLOCK_NAME ) );
 	}
 
 	public function test_do_blocks_renders_switcher_markup(): void {
@@ -246,12 +246,24 @@ final class SwitcherBlockIntegrationTest extends WP_UnitTestCase {
 		);
 
 		$block->bind( $repo, $factory, $renderer, $assets );
-		$block->register();
+		$this->register_block_for_test( $block );
 
 		return array(
 			'block'     => $block,
 			'automatic' => $automatic,
 			'switcher'  => $switcher,
 		);
+	}
+
+	/**
+	 * Ensures the test block instance owns the registered render callback.
+	 */
+	private function register_block_for_test( SwitcherBlock $block ): void {
+		if ( function_exists( 'unregister_block_type' )
+			&& \WP_Block_Type_Registry::get_instance()->is_registered( SwitcherBlock::BLOCK_NAME ) ) {
+			unregister_block_type( SwitcherBlock::BLOCK_NAME );
+		}
+
+		$block->register();
 	}
 }

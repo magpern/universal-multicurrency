@@ -82,6 +82,12 @@ final class SwitcherBlockStoreApiTest extends StoreApiTestCase {
 				new SwitcherPresence()
 			)
 		);
+
+		if ( function_exists( 'unregister_block_type' )
+			&& \WP_Block_Type_Registry::get_instance()->is_registered( SwitcherBlock::BLOCK_NAME ) ) {
+			unregister_block_type( SwitcherBlock::BLOCK_NAME );
+		}
+
 		$block->register();
 
 		$html = do_blocks( '<!-- wp:universal-multicurrency/currency-switcher /-->' );

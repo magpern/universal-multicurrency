@@ -38,6 +38,7 @@ use UMC\Display\AutomaticSwitcherPlacement;
 use UMC\Display\StorefrontRequestContext;
 use UMC\Display\SwitcherAssets;
 use UMC\Display\SwitcherBlock;
+use UMC\Display\SwitcherBlockEditorAssets;
 use UMC\Display\SwitcherRenderer;
 use UMC\Display\SwitcherSettingsRepository;
 use UMC\Display\SwitcherShortcode;
@@ -188,6 +189,7 @@ final class Plugin {
 		$version          = defined( 'UMC_VERSION' ) ? (string) UMC_VERSION : '';
 		$switcher_block   = new SwitcherBlock();
 
+		( new SwitcherBlockEditorAssets() )->register();
 		add_action( 'init', array( $switcher_block, 'register' ), 20 );
 
 		if ( is_admin() ) {
