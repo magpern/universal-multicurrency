@@ -808,6 +808,25 @@ final class SwitcherSettings {
 	}
 
 	/**
+	 * Returns an immutable copy with a different placement value.
+	 *
+	 * @param string $placement One of the PLACEMENT_* constants.
+	 */
+	public function with_placement( string $placement ): self {
+		$array              = $this->to_array();
+		$array['placement'] = $placement;
+
+		return self::from_array( $array );
+	}
+
+	/**
+	 * Returns settings for an embedded block/shortcode surface.
+	 */
+	public function for_embedded_surface(): self {
+		return $this->with_placement( self::PLACEMENT_MANUAL );
+	}
+
+	/**
 	 * CSS modifier classes derived from settings.
 	 *
 	 * @param bool $preview Whether preview mode is active.

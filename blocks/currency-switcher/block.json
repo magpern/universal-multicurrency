@@ -1,0 +1,19 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "universal-multicurrency/currency-switcher",
+	"version": "0.22.0",
+	"title": "Currency Switcher",
+	"category": "widgets",
+	"icon": "money-alt",
+	"description": "Display the Universal Multicurrency storefront switcher.",
+	"keywords": [ "currency", "switcher", "multicurrency", "woocommerce" ],
+	"textdomain": "universal-multicurrency",
+	"supports": {
+		"anchor": true,
+		"className": true,
+		"align": [ "wide", "full" ],
+		"html": false
+	},
+	"editorScript": "umc-switcher-block-editor"
+}
