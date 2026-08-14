@@ -138,9 +138,7 @@ final class SwitcherBlockIntegrationTest extends WP_UnitTestCase {
 
 		$this->assertStringContainsString( 'currency=SEK', $html );
 
-		$_GET[ CurrencyContext::QUERY_VAR ] = 'SEK';
-		$services['switcher']->maybe_switch();
-		unset( $_GET[ CurrencyContext::QUERY_VAR ] );
+		$this->persist_without_cookie_notice( $services['switcher'], 'SEK' );
 
 		$this->assertSame( 'SEK', WC()->session->get( CurrencyContext::SESSION_KEY ) );
 	}
@@ -265,5 +263,29 @@ final class SwitcherBlockIntegrationTest extends WP_UnitTestCase {
 		}
 
 		$block->register();
+	}
+
+	/**
+	 * Persists a selection without failing when PHPUnit bootstrap already sent headers.
+	 */
+	private function persist_without_cookie_notice( CurrencySwitcher $switcher, string $code ): void {
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Suppresses wc_setcookie notices after PHPUnit bootstrap sends headers.
+		$previous = set_error_handler(
+			static function ( int $errno, string $errstr ): bool {
+				if ( E_USER_NOTICE === $errno && str_contains( $errstr, 'cookie cannot be set' ) ) {
+					return true;
+				}
+
+				return false;
+			}
+		);
+
+		try {
+			$switcher->persist( $code );
+		} finally {
+			if ( false !== $previous ) {
+				restore_error_handler();
+			}
+		}
 	}
 }

@@ -94,9 +94,10 @@ final class SwitcherBlockStoreApiTest extends StoreApiTestCase {
 
 		$this->assertStringContainsString( 'currency=USD', $html );
 
-		$_GET[ CurrencyContext::QUERY_VAR ] = 'USD';
-		( new CurrencySwitcher( $this->context, $repo ) )->maybe_switch();
-		unset( $_GET[ CurrencyContext::QUERY_VAR ] );
+		$this->persist_without_cookie_notice(
+			new CurrencySwitcher( $this->context, $repo ),
+			'USD'
+		);
 
 		$this->boot_plugin(
 			self::CURRENCIES,
@@ -115,5 +116,29 @@ final class SwitcherBlockStoreApiTest extends StoreApiTestCase {
 			$cart['extensions']['umc']['active_currency'],
 			'Store API must observe the currency selected through block output.'
 		);
+	}
+
+	/**
+	 * Persists a selection without failing when PHPUnit bootstrap already sent headers.
+	 */
+	private function persist_without_cookie_notice( CurrencySwitcher $switcher, string $code ): void {
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Suppresses wc_setcookie notices after PHPUnit bootstrap sends headers.
+		$previous = set_error_handler(
+			static function ( int $errno, string $errstr ): bool {
+				if ( E_USER_NOTICE === $errno && str_contains( $errstr, 'cookie cannot be set' ) ) {
+					return true;
+				}
+
+				return false;
+			}
+		);
+
+		try {
+			$switcher->persist( $code );
+		} finally {
+			if ( false !== $previous ) {
+				restore_error_handler();
+			}
+		}
 	}
 }
