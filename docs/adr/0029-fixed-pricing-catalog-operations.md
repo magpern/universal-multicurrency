@@ -26,25 +26,33 @@ change.
 ### Reused authorities — no parallel engine
 
 All writes flow through the **existing, unmodified** `FixedPriceRepository`,
-`FixedPriceValidator`, and `FixedPriceDocument` (M20). All arithmetic flows
-through the **existing, unmodified** `Converter::apply_rate()` /
-`Converter::round_to_string()` static methods — the single owner of monetary
-arithmetic in the plugin since M1/M2. No second write path, no reimplemented
-multiplication or rounding.
+`FixedPriceValidator`, and `FixedPriceDocument` (M20).
 
-`Converter::apply_rate()` is already the storefront's arithmetic authority:
-`PriceConversionService::convert_to()` (the seam `PriceHooks`/cart/checkout
-actually call) resolves a rate via `CurrencyContext` and then calls
-`Converter::apply_rate()` directly — it does not call `Converter::convert()`.
-M24's `FixedPriceCatalogOperationsService` follows the identical pattern:
-resolve a rate once (via `RateProvider::get_rate()`), then call
-`Converter::apply_rate()` for every amount. `Converter::convert()` (the
-instance method with its own injected `RateProvider`) remains available and
-correctly shaped for an explicit arbitrary target currency, but per-call rate
-resolution inside it is unsuitable for M24's single-rate-per-operation
-requirement (below), so M24 resolves the rate itself once and reuses the same
-static arithmetic `Converter::convert()` calls internally. **No change to
-`Converter.php` is made or required.**
+All arithmetic flows through **`DisplayPriceConverter::convert_to( $amount,
+$target, $rate )`**, bound to the existing `PriceConversionService` in
+production — the *only* seam through which any code outside `Converter.php`
+itself may reach monetary arithmetic. This codebase enforces that boundary as
+a hard architectural guard
+(`StorefrontGuardTest::test_converter_is_only_used_through_the_seam`): no
+file other than `Converter.php` and `PriceConversionService.php` may
+reference the `Converter` class at all. `FixedPriceCatalogOperationsService`
+therefore never references `Converter` directly — it depends on
+`DisplayPriceConverter` (the interface `PriceConversionService` implements)
+and calls `convert_to()`, exactly the method `PriceConversionService`
+already exposes for converting into an **explicit** target currency at an
+**explicit** rate (as opposed to `convert()`, which is scoped to the
+request's "active" shopper currency and is unsuitable here since admin/CLI
+operations target a merchant-chosen currency, not the active one).
+`convert_to()` internally calls `Converter::apply_rate()` — the same
+static arithmetic the storefront path already uses — so M24 reuses the
+identical arithmetic authority without ever touching `Converter.php` and
+without violating the seam boundary. **No change to `Converter.php` or
+`PriceConversionService.php` is made or required.**
+
+M24 separately depends on `RateProvider` (a different, unrestricted
+collaborator under `UMC\Rates\`) to resolve the single rate snapshot itself
+(below) — the seam restriction applies only to the `Converter` class, not to
+rate resolution.
 
 ### Coverage model
 
@@ -117,8 +125,8 @@ variation:
    set, `get_sale_price( 'edit' )`. Never `get_price()` (current effective
    price) or WooCommerce's "is currently on sale" state — both depend on the
    sale schedule, which M24 does not read or write.
-2. Convert each authored value via `Converter::apply_rate()` using the single
-   rate resolved for this operation (below) and the target currency's
+2. Convert each authored value via `DisplayPriceConverter::convert_to()` using
+   the single rate resolved for this operation (below) and the target currency's
    decimals (`CurrencyRegistry`).
 3. Persist the converted regular value as the fixed regular price. If an
    authored sale value existed, persist its converted value as the fixed sale

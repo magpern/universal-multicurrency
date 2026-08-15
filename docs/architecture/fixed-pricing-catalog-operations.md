@@ -27,8 +27,8 @@ No new pricing engine, no new conversion authority, no schema change.
               ┌──────────────────────────────────────────────────────────┐
               │         FixedPriceCatalogOperationsService (new)          │
               │  seed()/clear(): resolve scope → per-product/variation    │
-              │  compute → Converter::apply_rate() → validate → persist   │
-              │  → OperationResult (succeeded/skipped/failed, rate used)  │
+              │  compute → DisplayPriceConverter::convert_to() → persist  │
+              │  → FixedPriceOperationResult (succeeded/skipped, rate)    │
               └───────────┬─────────────────────────────┬────────────────┘
                           │                             │
              ┌────────────▼────────────┐    ┌───────────▼────────────┐
@@ -44,9 +44,15 @@ No new pricing engine, no new conversion authority, no schema change.
               │  Fixed / Partial / FX-fallback / no-priceable-variants │
               └─────────────────────────────────────────────────────┘
 
-   Converter::apply_rate() / round_to_string() (existing, unmodified) is the
-   only arithmetic called by the service — the same static methods
-   PriceConversionService::convert_to() already uses for the storefront path.
+   DisplayPriceConverter::convert_to( $amount, $target, $rate ) — bound to
+   the existing PriceConversionService — is the only conversion call the
+   service makes. `Converter` itself is a strict seam
+   (StorefrontGuardTest::test_converter_is_only_used_through_the_seam): only
+   Converter.php and PriceConversionService.php may reference it directly, so
+   FixedPriceCatalogOperationsService depends on the DisplayPriceConverter
+   interface, never on Converter. convert_to() internally still calls
+   Converter::apply_rate() — the same static arithmetic the storefront path
+   uses — so the underlying math is unchanged and unduplicated.
 
    ProductFixedPricesPanel (existing, unchanged) remains the correctness
    baseline every seed/clear write is parity-tested against.
@@ -107,9 +113,9 @@ for each simple product / eligible variation in scope:
 
     sale_native = product.get_sale_price('edit')   # '' if none authored
 
-    regular_target = Converter::apply_rate(regular_native, rate, target.decimals())
+    regular_target = DisplayPriceConverter::convert_to(regular_native, target, rate)
     sale_target    = sale_native !== ''
-        ? Converter::apply_rate(sale_native, rate, target.decimals())
+        ? DisplayPriceConverter::convert_to(sale_native, target, rate)
         : ''
 
     # Same merge algorithm as ProductFixedPricesPanel::persist_submission():
