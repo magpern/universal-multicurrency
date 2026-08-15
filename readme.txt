@@ -4,7 +4,7 @@ Tags: woocommerce, currency, multicurrency, exchange rates, money
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.22.0
+Stable tag: 0.23.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,6 +49,15 @@ Not for production traffic. Two runtime converters can double-convert prices. De
 The plugin ships a POT template (`languages/universal-multicurrency.pot`) for translators. Bundled locale `.mo` files are not included in this release.
 
 == Changelog ==
+
+= 0.23.0 =
+* Fixed Pricing Catalog Operations (Milestone 24)
+* Dedicated Fixed Pricing admin screen: catalog-wide coverage visibility and bounded bulk seed/clear of M20 fixed prices, with a preview -> confirm -> execute flow
+* Seeding converts each product's/variation's authored native price through the existing conversion engine using one FX rate resolved per operation; never a numeric copy of the base amount, never derived from the current sale-active state
+* Structural (stock-independent) coverage for variable products: Fixed / Partial / FX fallback / no priceable variations
+* Passive, read-only Products-list coverage column linking into the dedicated screen
+* `wp umc prices list|seed|clear` CLI with `--dry-run`, sharing the same orchestration service as the admin screen
+* Settings schema 7 unchanged; OrderSnapshot 5; PersistedKeys 10; no DB migration
 
 = 0.22.0 =
 * Native Switcher Block & Rendering Surface Integration (Milestone 23)

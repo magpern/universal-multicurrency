@@ -1,3 +1,33 @@
+# Release audit — v0.23.0 Fixed Pricing Catalog Operations
+
+Executable release-preparation gate for Universal Multicurrency **v0.23.0**.
+This document records scope, criteria, commands, audit results, and the current
+release-preparation state.
+
+**Repository status:** **prepared on branch `feature/m24-fixed-pricing-catalog-operations`**.
+Milestone 24 (Fixed Pricing Catalog Operations; ADR-0029) implementation is
+complete. **Not tagged, not released, not deployed** — PR boundary per M24 task.
+
+---
+
+## v0.23.0 release preparation record
+
+| Item | Value |
+|---|---|
+| Version | **0.23.0** |
+| Settings schema | **7** (unchanged) |
+| Order snapshot schema | **5** (unchanged) |
+| Persisted-data inventory version | **10** (unchanged) |
+| Production migrations | none |
+| New admin surface | Fixed Pricing screen (`SettingsPage::SECTION_FIXED_PRICING`), Products-list coverage column |
+| New CLI commands | `wp umc prices list\|seed\|clear` |
+| Unresolved release blockers | **0** (local gate pending CI) |
+| Git tag `v0.23.0` | **Not yet created** |
+| GitHub release `v0.23.0` | **Not yet published** |
+| Milestone 24 | **Prepared** — Fixed Pricing Catalog Operations at v0.23.0 |
+
+---
+
 # Release audit — v0.22.0 Native Switcher Block
 
 Executable release-preparation gate for Universal Multicurrency **v0.22.0**.

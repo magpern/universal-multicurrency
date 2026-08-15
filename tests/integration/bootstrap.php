@@ -63,3 +63,10 @@ require_once $umc_tests_dir . '/includes/bootstrap.php';
 // WP_UnitTestCase, which only exists once the bootstrap above has run, and
 // because PHPUnit only autoloads files matching the *Test.php suffix.
 require_once __DIR__ . '/StoreApi/StoreApiTestCase.php';
+
+// Global-namespace WP_CLI stub, so PricesCommand's `\WP_CLI::...` calls
+// resolve when tests exercise it directly (not via the WP-CLI runtime). Does
+// not define the WP_CLI constant, so Plugin::init()'s own CLI registration
+// block still correctly stays inactive in the test environment.
+require_once dirname( __DIR__ ) . '/Support/WpCliTestStub.php';
+require_once dirname( __DIR__ ) . '/Support/WpCliUtilsTestStub.php';

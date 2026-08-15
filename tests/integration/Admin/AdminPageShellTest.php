@@ -74,13 +74,13 @@ final class AdminPageShellTest extends WP_UnitTestCase {
 		return $manifest;
 	}
 
-	public function test_shell_navigation_renders_nine_items_with_active_state(): void {
+	public function test_shell_navigation_renders_ten_items_with_active_state(): void {
 		global $current_section;
 
 		$current_section = SettingsPage::SECTION_DISPLAY;
 		$output          = $this->render_shell_sections();
 
-		$this->assertSame( 9, preg_match_all( '/class="umc-shell-nav__item(?:\s|")/', $output ) );
+		$this->assertSame( 10, preg_match_all( '/class="umc-shell-nav__item(?:\s|")/', $output ) );
 		$this->assertStringContainsString( 'aria-current="page"', $output );
 		$this->assertStringContainsString( 'umc-shell-nav__item--active', $output );
 		$this->assertStringContainsString( 'Exchange Rates', $output );
