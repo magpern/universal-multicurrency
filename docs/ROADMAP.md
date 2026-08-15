@@ -490,11 +490,40 @@ unchanged; no OrderSnapshot, PersistedKeys, or DB migration changes. See
 | Multi-instance + Store API integration tests | **Complete** |
 | Release closure for **v0.22.0** | **Complete** — PR **#24**, tag `v0.22.0` |
 
+## Milestone 24 — Fixed Pricing Catalog Operations (**v0.23.0**) — in progress
+
+ADR-0029 · target v0.23.0
+
+Catalog-wide fixed-price coverage visibility and bounded bulk seed/clear
+operations over the unchanged M20 domain model: a dedicated Fixed Pricing
+admin screen (preview → confirm → execute), a passive Products-list coverage
+column, and a symmetric `wp umc prices list|seed|clear` CLI. Seeding converts
+each product's/variation's **authored** native regular/sale price through the
+existing `Converter` arithmetic authority using one FX rate snapshot per
+operation — never a numeric copy of the base amount, never derived from
+`get_price()` or the current sale-active state. Variable-product coverage
+uses a structural population (enabled variations with an authored regular
+price), independent of stock/`is_purchasable()` state. Settings schema **7**
+unchanged; no OrderSnapshot, PersistedKeys, or DB migration changes. See
+[`docs/architecture/fixed-pricing-catalog-operations.md`](architecture/fixed-pricing-catalog-operations.md).
+
+| Work item | Status |
+|---|---|
+| ADR-0029 + architecture spec | **Complete** |
+| WP1 characterization (manual authoring baseline + CLI authorization precedent) | Pending |
+| WP2 `FixedPriceCoverageReport` + `FixedPriceCatalogOperationsService` | Pending |
+| WP3 dedicated admin screen + coverage column | Pending |
+| WP4 `wp umc prices` CLI | Pending |
+| WP5 architecture/security/performance guards | Pending |
+| WP6 regression sweep + release closure for **v0.23.0** | Pending |
+
 ## Future milestones — not started, not implemented
 
 None of the following exists in the codebase today:
+- CSV import/export for fixed prices; a REST write API for fixed prices;
+  flat-markup bulk seeding; Quick Edit inline fixed-price fields (all
+  deferred from M24 — see ADR-0029 § Explicit non-goals)
 - Custom switcher media / Media Library icons (deferred from M22/M23)
-- Additional exchange-rate providers and per-currency provider selection
 - Additional exchange-rate providers and per-currency provider selection
 - `country_change` geo detection mode and broader continent presets
 - Public APIs beyond the documented hooks in [`HOOKS.md`](HOOKS.md)

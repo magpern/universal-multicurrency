@@ -86,7 +86,12 @@ meta).
 |---|---|---|
 | `_umc_fixed_prices` | `FixedPriceDocument::META_KEY` | M20 |
 
-Writer: `Pricing\FixedPriceRepository` via `Admin\ProductFixedPricesPanel`.
+Writer: `Pricing\FixedPriceRepository` via `Admin\ProductFixedPricesPanel`
+(single-product authoring) and, since M24, via
+`Pricing\FixedPriceCatalogOperationsService` (dedicated Fixed Pricing admin
+screen and `wp umc prices seed|clear`). **M24 introduces no new inventory
+key** — both surfaces write the same key through the same repository, and
+`PersistedKeys::INVENTORY_VERSION` remains **10**.
 
 ---
 
