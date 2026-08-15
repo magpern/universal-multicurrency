@@ -24,6 +24,11 @@ use UMC\Diagnostics\WordPressEnvironmentProbe;
 use UMC\Display\SwitcherRenderer;
 use UMC\Display\SwitcherSettingsRepository;
 use UMC\Display\SwitcherViewModelFactory;
+use UMC\Integration\PriceConversionService;
+use UMC\Pricing\FixedPriceCatalogOperationsService;
+use UMC\Pricing\FixedPriceCatalogQuery;
+use UMC\Pricing\FixedPriceCoverageReport;
+use UMC\Pricing\FixedPriceRepository;
 use UMC\Rates\ExchangeRateStore;
 use UMC\Rates\ManualRateProvider;
 use UMC\Rates\RateHealthService;
@@ -53,6 +58,7 @@ final class SettingsPage extends WC_Settings_Page {
 	public const SECTION_DECISION_INSPECTOR = 'decision_inspector';
 	public const SECTION_COMPATIBILITY      = 'compatibility';
 	public const SECTION_REPORTING          = 'reporting';
+	public const SECTION_FIXED_PRICING      = 'fixed_pricing';
 	public const SECTION_ADVANCED           = 'advanced';
 
 	/**
@@ -126,6 +132,13 @@ final class SettingsPage extends WC_Settings_Page {
 	private ReportingSettingsField $reporting_field;
 
 	/**
+	 * Fixed Pricing catalog operations field renderer.
+	 *
+	 * @var FixedPricingSettingsField
+	 */
+	private FixedPricingSettingsField $fixed_pricing_field;
+
+	/**
 	 * Placeholder section renderer callback target.
 	 *
 	 * @var AdminPageShellViewModelFactory
@@ -185,6 +198,20 @@ final class SettingsPage extends WC_Settings_Page {
 		$this->reporting_field          = new ReportingSettingsField( $reporting_cache, $registry );
 		( new ReportingCacheInvalidator( $reporting_cache ) )->register();
 		( new ReportingExportController( $reporting_cache, new ReportingCsvRenderer() ) )->register();
+
+		$fixed_price_repository    = new FixedPriceRepository( $base->code() );
+		$fixed_price_coverage      = new FixedPriceCoverageReport( $fixed_price_repository );
+		$fixed_price_query         = new FixedPriceCatalogQuery( $fixed_price_coverage );
+		$fixed_price_converter     = new PriceConversionService( $context );
+		$fixed_price_operations    = new FixedPriceCatalogOperationsService(
+			$fixed_price_repository,
+			$fixed_price_coverage,
+			$rates,
+			$fixed_price_converter,
+			$registry
+		);
+		$this->fixed_pricing_field = new FixedPricingSettingsField( $fixed_price_query, $registry );
+		( new FixedPricingOperationController( $fixed_price_operations, $fixed_price_query ) )->register();
 		$conflict_detector         = new ConflictDetector(
 			new DetectorRegistry(),
 			new WordPressEnvironmentProbe(),
@@ -214,6 +241,7 @@ final class SettingsPage extends WC_Settings_Page {
 		add_action( 'woocommerce_admin_field_umc_geo_detection', array( $this->geo_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_decision_inspector', array( $this->decision_inspector_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_reporting', array( $this->reporting_field, 'render' ) );
+		add_action( 'woocommerce_admin_field_umc_fixed_pricing', array( $this->fixed_pricing_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_compatibility', array( $this->compatibility_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_currencies', array( $this->overview_field, 'render' ) );
 		add_action( 'woocommerce_admin_field_umc_placeholder', array( $this, 'render_placeholder_field' ) );
@@ -234,6 +262,7 @@ final class SettingsPage extends WC_Settings_Page {
 			self::SECTION_CHECKOUT           => __( 'Checkout', 'universal-multicurrency' ),
 			self::SECTION_DECISION_INSPECTOR => __( 'Decision Inspector', 'universal-multicurrency' ),
 			self::SECTION_REPORTING          => __( 'Reporting', 'universal-multicurrency' ),
+			self::SECTION_FIXED_PRICING      => __( 'Fixed Pricing', 'universal-multicurrency' ),
 			self::SECTION_COMPATIBILITY      => __( 'Compatibility', 'universal-multicurrency' ),
 			self::SECTION_ADVANCED           => __( 'Advanced', 'universal-multicurrency' ),
 		);
@@ -421,6 +450,15 @@ final class SettingsPage extends WC_Settings_Page {
 	 */
 	protected function get_settings_for_reporting_section() {
 		return $this->reporting_settings();
+	}
+
+	/**
+	 * Returns field definitions for the Fixed Pricing section.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	protected function get_settings_for_fixed_pricing_section() {
+		return $this->fixed_pricing_settings();
 	}
 
 	/**
@@ -726,6 +764,29 @@ final class SettingsPage extends WC_Settings_Page {
 			array(
 				'type' => 'sectionend',
 				'id'   => 'umc_reporting_end',
+			),
+		);
+	}
+
+	/**
+	 * Returns field definitions for the Fixed Pricing section.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function fixed_pricing_settings(): array {
+		return array(
+			array(
+				'type' => 'title',
+				'name' => __( 'Fixed Pricing', 'universal-multicurrency' ),
+				'id'   => 'umc_fixed_pricing_title',
+			),
+			array(
+				'type' => 'umc_fixed_pricing',
+				'id'   => 'umc_fixed_pricing',
+			),
+			array(
+				'type' => 'sectionend',
+				'id'   => 'umc_fixed_pricing_end',
 			),
 		);
 	}

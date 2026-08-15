@@ -38,6 +38,7 @@ final class SettingsPageSectionsTest extends WP_UnitTestCase {
 				SettingsPage::SECTION_CHECKOUT,
 				SettingsPage::SECTION_DECISION_INSPECTOR,
 				SettingsPage::SECTION_REPORTING,
+				SettingsPage::SECTION_FIXED_PRICING,
 				SettingsPage::SECTION_COMPATIBILITY,
 				SettingsPage::SECTION_ADVANCED,
 			),
@@ -45,18 +46,30 @@ final class SettingsPageSectionsTest extends WP_UnitTestCase {
 		);
 	}
 
-	public function test_reporting_sits_between_decision_inspector_and_compatibility(): void {
+	public function test_reporting_sits_between_decision_inspector_and_fixed_pricing(): void {
 		$keys = array_keys( $this->page()->get_sections() );
 
-		$inspector_index = array_search( SettingsPage::SECTION_DECISION_INSPECTOR, $keys, true );
-		$reporting_index = array_search( SettingsPage::SECTION_REPORTING, $keys, true );
-		$compat_index    = array_search( SettingsPage::SECTION_COMPATIBILITY, $keys, true );
+		$inspector_index     = array_search( SettingsPage::SECTION_DECISION_INSPECTOR, $keys, true );
+		$reporting_index     = array_search( SettingsPage::SECTION_REPORTING, $keys, true );
+		$fixed_pricing_index = array_search( SettingsPage::SECTION_FIXED_PRICING, $keys, true );
+		$compat_index        = array_search( SettingsPage::SECTION_COMPATIBILITY, $keys, true );
 
 		$this->assertIsInt( $inspector_index );
 		$this->assertIsInt( $reporting_index );
+		$this->assertIsInt( $fixed_pricing_index );
 		$this->assertIsInt( $compat_index );
 		$this->assertSame( $inspector_index + 1, $reporting_index );
-		$this->assertSame( $reporting_index + 1, $compat_index );
+		$this->assertSame( $reporting_index + 1, $fixed_pricing_index );
+		$this->assertSame( $fixed_pricing_index + 1, $compat_index );
+	}
+
+	public function test_fixed_pricing_section_exposes_fixed_pricing_field(): void {
+		$page = $this->page();
+
+		$types = array_column( $page->get_settings_for_section( SettingsPage::SECTION_FIXED_PRICING ), 'type' );
+
+		$this->assertContains( 'umc_fixed_pricing', $types );
+		$this->assertNotContains( 'umc_currencies', $types );
 	}
 
 	public function test_decision_inspector_section_exposes_inspector_field_and_is_not_saveable(): void {

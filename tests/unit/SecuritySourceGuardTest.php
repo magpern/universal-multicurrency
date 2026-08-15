@@ -49,6 +49,8 @@ final class SecuritySourceGuardTest extends TestCase {
 		'OrderPayCurrencyLock.php',
 		'RateUpdateController.php',
 		'ProductFixedPricesPanel.php',
+		'FixedPricingSettingsField.php',
+		'FixedPricingOperationController.php',
 	);
 
 	/**

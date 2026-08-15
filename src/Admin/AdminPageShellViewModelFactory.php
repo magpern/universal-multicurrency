@@ -30,6 +30,7 @@ final class AdminPageShellViewModelFactory {
 		SettingsPage::SECTION_CHECKOUT           => 'dashicons-cart',
 		SettingsPage::SECTION_DECISION_INSPECTOR => 'dashicons-search',
 		SettingsPage::SECTION_COMPATIBILITY      => 'dashicons-admin-plugins',
+		SettingsPage::SECTION_FIXED_PRICING      => 'dashicons-tag',
 		SettingsPage::SECTION_ADVANCED           => 'dashicons-admin-generic',
 	);
 
@@ -94,6 +95,8 @@ final class AdminPageShellViewModelFactory {
 				return __( 'Explain why a shopper would use a given currency, including Visitor Location and checkout policy.', 'universal-multicurrency' );
 			case SettingsPage::SECTION_COMPATIBILITY:
 				return __( 'Review store compatibility, conflicts, cache interactions, and support diagnostics.', 'universal-multicurrency' );
+			case SettingsPage::SECTION_FIXED_PRICING:
+				return __( 'View fixed-price coverage across your catalog and seed or clear prices in bulk.', 'universal-multicurrency' );
 			case SettingsPage::SECTION_ADVANCED:
 				return __( 'Manage advanced behavior and diagnostic settings.', 'universal-multicurrency' );
 		}

@@ -17,6 +17,7 @@ use UMC\Admin\GeoRecommendedRulesController;
 use UMC\Admin\DecisionInspectorController;
 use UMC\Admin\GeoSandboxController;
 use UMC\Admin\OrderCurrencyMetaBox;
+use UMC\Admin\FixedPriceCoverageColumn;
 use UMC\Admin\ProductFixedPricesPanel;
 use UMC\Admin\PluginActionLinks;
 use UMC\Admin\RateFailureNotice;
@@ -76,6 +77,7 @@ use UMC\Rates\RateStatusEvaluator;
 use UMC\Rates\RateUpdateService;
 use UMC\Rates\RateUpdateState;
 use UMC\Rates\Scheduler;
+use UMC\Pricing\FixedPriceCoverageReport;
 use UMC\Pricing\FixedPriceRepository;
 use UMC\Pricing\ProductPriceProvenanceRegistry;
 use UMC\Pricing\ProductPriceResolutionService;
@@ -194,6 +196,7 @@ final class Plugin {
 
 		if ( is_admin() ) {
 			( new ProductFixedPricesPanel( $settings, $registry, $fixed_repository ) )->register();
+			( new FixedPriceCoverageColumn( new FixedPriceCoverageReport( $fixed_repository ), $registry ) )->register();
 		}
 
 		// Storefront: attach conversion filters, handle the switch, register the
