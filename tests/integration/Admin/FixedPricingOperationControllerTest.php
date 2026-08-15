@@ -139,6 +139,27 @@ final class FixedPricingOperationControllerTest extends M20PricingTestCase {
 	}
 
 	/**
+	 * A crafted POST submitting far more product IDs than any real page of
+	 * checkboxes could produce must be refused, not looped over unbounded.
+	 */
+	public function test_checked_scope_beyond_the_cap_is_refused(): void {
+		$this->activate( array( 'SEK' => array( 'rate' => '11.50' ) ), 'EUR' );
+		$product = $this->simple_product( '100' );
+		$this->boot_controller();
+		$this->authorize();
+
+		$_POST['umc_fp_action']   = FixedPricingOperationController::ACTION_SEED;
+		$_POST['umc_fp_currency'] = 'SEK';
+		$_POST['umc_fp_scope']    = FixedPricingOperationController::SCOPE_CHECKED;
+		$_POST['product_ids']     = array_map( 'strval', range( 1, FixedPricingOperationController::CHECKED_SCOPE_CAP + 1 ) );
+
+		$redirect = $this->dispatch();
+
+		$this->assertSame( 'error', $redirect->query_arg( 'umc_typ' ) );
+		$this->assertNull( $this->repository->get( $product->get_id() )->get_currency( 'SEK' ) );
+	}
+
+	/**
 	 * M24 falsification B: seed/clear must never target the base currency.
 	 */
 	public function test_base_currency_is_rejected_without_writing(): void {

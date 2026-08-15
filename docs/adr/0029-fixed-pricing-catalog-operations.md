@@ -180,18 +180,21 @@ currency-scoped operation. M24 instead adds a **dedicated admin screen**
 (new `SettingsPage` section, no new top-level WordPress menu), following the
 existing pattern used by Reporting/Compatibility/Decision Inspector.
 
-- **Preview** (`admin-post.php`, nonce-verified): resolves the same filter/
-  scope semantics execution will use, enforces the admin scope cap, evaluates
-  per-product `current_user_can( 'edit_post', $product_id )`, and renders an
+- **Preview** (plain GET render inside the settings screen itself, no
+  `admin-post.php` round trip — preview performs no write, so it needs no
+  nonce, consistent with how `ReportingSettingsField` already renders its
+  "view report" preview via GET): resolves the same filter/scope semantics
+  execution will use, enforces the scope caps, evaluates per-product
+  `current_user_can( 'edit_post', $product_id )`, and renders an
   affected-count + bounded product-name sample + currency + (for seed) an
   informational current rate.
-- **Confirm → execute** (separate `admin-post.php` request, independently
-  nonce-verified): recomputes scope from the submitted filter criteria (no
+- **Confirm → execute** (`admin-post.php`, nonce-verified): recomputes scope
+  from the submitted filter criteria for an "all matching filter" scope (no
   stored/transient ID list — see § Persistence), re-checks per-product
-  capability, re-enforces the scope cap, invokes
+  capability, re-enforces the scope caps, invokes
   `FixedPriceCatalogOperationsService`, and redirects with a deterministic
-  result notice (succeeded / skipped / failed counts, and for seed, the
-  actual execution rate).
+  result notice (succeeded / skipped counts, and for seed, the actual
+  execution rate).
 
 This mirrors `RateUpdateController`'s existing nonce + flash-notice pattern.
 

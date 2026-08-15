@@ -1529,67 +1529,73 @@ msgstr ""
 msgid "FX fallback"
 msgstr ""
 
-#: src/Admin/FixedPricingOperationController.php:65
+#: src/Admin/FixedPricingOperationController.php:75
 #: src/Admin/FixedPricingSettingsField.php:56
 msgid "You do not have permission to manage fixed prices."
 msgstr ""
 
-#: src/Admin/FixedPricingOperationController.php:78
+#: src/Admin/FixedPricingOperationController.php:88
 msgid "Invalid fixed pricing request."
 msgstr ""
 
-#: src/Admin/FixedPricingOperationController.php:118
+#: src/Admin/FixedPricingOperationController.php:128
 msgid "Invalid fixed pricing scope."
 msgstr ""
 
-#: src/Admin/FixedPricingOperationController.php:137
+#: src/Admin/FixedPricingOperationController.php:147
 #: src/Admin/FixedPricingSettingsField.php:463
 msgid "No products were selected."
 msgstr ""
 
+#. translators: %d: maximum number of products a single checked-scope operation may submit
+#: src/Admin/FixedPricingOperationController.php:157
+#, php-format
+msgid "Too many products were submitted at once (maximum %d). Use \"all matching filter\" or the CLI for larger operations."
+msgstr ""
+
 #. translators: %d: maximum number of products the admin screen can process in one operation
-#: src/Admin/FixedPricingOperationController.php:164
+#: src/Admin/FixedPricingOperationController.php:186
 #: src/Admin/FixedPricingSettingsField.php:445
 #, php-format
 msgid "This filter matches more than %d products. Use `wp umc prices` on the command line for catalogs this size."
 msgstr ""
 
-#: src/Admin/FixedPricingOperationController.php:217
+#: src/Admin/FixedPricingOperationController.php:239
 msgid "The base currency cannot have fixed prices."
 msgstr ""
 
-#: src/Admin/FixedPricingOperationController.php:218
+#: src/Admin/FixedPricingOperationController.php:240
 msgid "That currency is not configured."
 msgstr ""
 
-#: src/Admin/FixedPricingOperationController.php:219
+#: src/Admin/FixedPricingOperationController.php:241
 msgid "No exchange rate is available for that currency; nothing was seeded."
 msgstr ""
 
-#: src/Admin/FixedPricingOperationController.php:220
+#: src/Admin/FixedPricingOperationController.php:242
 msgid "The fixed pricing operation could not be completed."
 msgstr ""
 
 #. translators: 1: number of products/variations seeded, 2: exchange rate used
-#: src/Admin/FixedPricingOperationController.php:230
+#: src/Admin/FixedPricingOperationController.php:252
 #, php-format
 msgid "Seeded fixed prices for %1$d product(s)/variation(s) at rate %2$s."
 msgstr ""
 
 #. translators: %d: number of products/variations cleared
-#: src/Admin/FixedPricingOperationController.php:236
+#: src/Admin/FixedPricingOperationController.php:258
 #, php-format
 msgid "Cleared fixed prices for %d product(s)/variation(s)."
 msgstr ""
 
 #. translators: %d: number of products/variations skipped
-#: src/Admin/FixedPricingOperationController.php:243
+#: src/Admin/FixedPricingOperationController.php:265
 #, php-format
 msgid "%d were skipped (no authored source price, or nothing to clear)."
 msgstr ""
 
 #. translators: %d: number of products excluded from the operation
-#: src/Admin/FixedPricingOperationController.php:251
+#: src/Admin/FixedPricingOperationController.php:273
 #, php-format
 msgid "%d were excluded because you do not have permission to edit them."
 msgstr ""

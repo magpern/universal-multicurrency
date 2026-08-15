@@ -210,24 +210,31 @@ top-level WordPress admin menu.
 - Two actions: **Seed fixed price from current FX conversion**, **Clear
   fixed price**.
 
-**Preview → confirm → execute**, via `admin-post.php`
-(`FixedPricingOperationController`), mirroring `RateUpdateController`:
+**Preview → confirm → execute:**
 
-1. **Preview** (`action=umc_fixed_pricing_preview`): nonce-verified,
-   resolves scope from submitted filter criteria, enforces the admin scope
-   cap (`FixedPricingOperationController::ADMIN_SCOPE_CAP`, documented
-   constant), evaluates `current_user_can('edit_post', $id)` per product,
-   renders affected count + a bounded sample of product names + currency +
-   (seed only) the currently-resolved rate, labeled informational.
-2. **Confirm/execute** (`action=umc_fixed_pricing_execute`): independent
-   nonce, **recomputes** scope from the same submitted filter criteria
-   (never trusts a client-supplied ID list beyond the current page's
-   checkboxes), re-checks per-product capability, re-enforces the scope cap,
-   calls `FixedPriceCatalogOperationsService`, redirects with a result
-   notice: succeeded / skipped / failed counts and, for seed, the actual
-   execution rate (flagged if different from the preview rate).
+1. **Preview** — a plain GET render inside `FixedPricingSettingsField`
+   (same screen, same request cycle as browsing/filtering; no
+   `admin-post.php` round trip, since preview performs no write and
+   therefore needs no nonce, consistent with how `ReportingSettingsField`
+   already renders its "view report" preview via GET). Resolves scope from
+   the submitted filter/selection criteria, enforces the scope cap
+   (`FixedPricingOperationController::FILTERED_SCOPE_CAP` for "all matching
+   filter", `CHECKED_SCOPE_CAP` for a checked-ID list), evaluates
+   `current_user_can('edit_post', $id)` per product, and renders affected
+   count + a bounded sample of product names + currency + (seed only) the
+   currently-resolved rate, labeled informational and subject to change.
+2. **Confirm/execute** (`admin-post.php?action=umc_fixed_pricing_execute`,
+   handled by `FixedPricingOperationController`, mirroring
+   `RateUpdateController`): nonce-verified (`umc_fixed_pricing_execute`),
+   **recomputes** scope from the same submitted filter criteria for "all
+   matching filter" (never trusts a client-supplied ID list beyond what the
+   confirm form resubmits for a checked scope), re-checks per-product
+   capability, re-enforces both scope caps, calls
+   `FixedPriceCatalogOperationsService`, redirects with a result notice:
+   succeeded / skipped counts and, for seed, the actual execution rate
+   (flagged if different from the preview rate).
 
-A scope exceeding the admin cap is refused with guidance to use the CLI —
+A scope exceeding either cap is refused with guidance to use the CLI —
 never silently truncated.
 
 ---

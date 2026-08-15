@@ -32,6 +32,16 @@ final class FixedPricingOperationController {
 	 */
 	public const FILTERED_SCOPE_CAP = 500;
 
+	/**
+	 * Maximum product IDs a single "checked" execution may submit. The
+	 * browsing screen only ever checks boxes on one page
+	 * ({@see FixedPricingSettingsField::PER_PAGE}), but the POST body is
+	 * user-supplied input, not a value the server can trust to be small —
+	 * this bounds it explicitly rather than looping an unbounded submitted
+	 * array.
+	 */
+	public const CHECKED_SCOPE_CAP = 200;
+
 	public const SCOPE_CHECKED  = 'checked';
 	public const SCOPE_FILTERED = 'filtered';
 
@@ -135,6 +145,18 @@ final class FixedPricingOperationController {
 				'products' => array(),
 				'excluded' => 0,
 				'error'    => __( 'No products were selected.', 'universal-multicurrency' ),
+			);
+		}
+
+		if ( count( $ids ) > self::CHECKED_SCOPE_CAP ) {
+			return array(
+				'products' => array(),
+				'excluded' => 0,
+				'error'    => sprintf(
+					/* translators: %d: maximum number of products a single checked-scope operation may submit */
+					__( 'Too many products were submitted at once (maximum %d). Use "all matching filter" or the CLI for larger operations.', 'universal-multicurrency' ),
+					self::CHECKED_SCOPE_CAP
+				),
 			);
 		}
 
