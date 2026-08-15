@@ -352,7 +352,7 @@ final class DocumentationSyncTest extends TestCase {
 		$this->assertStringContainsString( 'Milestone 21 | **Complete**', $audit );
 		$this->assertStringContainsString( 'Milestone 22 | **Complete**', $audit );
 		$this->assertStringContainsString( 'Milestone 23 | **Complete**', $audit );
-		$this->assertStringContainsString( 'Milestone 24 | **Prepared**', $audit );
+		$this->assertStringContainsString( 'Milestone 24 | **Complete**', $audit );
 		$this->assertStringContainsString( '## Post-release review findings', $audit );
 	}
 

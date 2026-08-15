@@ -4,13 +4,15 @@ Executable release-preparation gate for Universal Multicurrency **v0.23.0**.
 This document records scope, criteria, commands, audit results, and the current
 release-preparation state.
 
-**Repository status:** **prepared on branch `feature/m24-fixed-pricing-catalog-operations`**.
-Milestone 24 (Fixed Pricing Catalog Operations; ADR-0029) implementation is
-complete. **Not tagged, not released, not deployed** — PR boundary per M24 task.
+**Repository status:** **released as v0.23.0**. Milestone 24 (Fixed Pricing
+Catalog Operations; ADR-0029) is complete. Git tag **`v0.23.0`** and GitHub
+release are published. Release commit on `main`:
+`27ca8f3eaf12b7fdb856685d81b4757d13ce6e76`. Annotated tag object points at
+that merge commit. PR **#25**.
 
 ---
 
-## v0.23.0 release preparation record
+## v0.23.0 release closure record
 
 | Item | Value |
 |---|---|
@@ -21,10 +23,16 @@ complete. **Not tagged, not released, not deployed** — PR boundary per M24 tas
 | Production migrations | none |
 | New admin surface | Fixed Pricing screen (`SettingsPage::SECTION_FIXED_PRICING`), Products-list coverage column |
 | New CLI commands | `wp umc prices list\|seed\|clear` |
-| Unresolved release blockers | **0** (local gate pending CI) |
-| Git tag `v0.23.0` | **Not yet created** |
-| GitHub release `v0.23.0` | **Not yet published** |
-| Milestone 24 | **Prepared** — Fixed Pricing Catalog Operations at v0.23.0 |
+| Unresolved release blockers | **0** |
+| Git tag `v0.23.0` | **Created** |
+| GitHub release `v0.23.0` | **Published** |
+| Milestone 24 | **Complete** — Fixed Pricing Catalog Operations at v0.23.0 |
+| PR CI run | **31904838959** (SHA `2bd4675e3a93e1eeb6d02e79459b4ca1454a0566`) |
+| Main CI run | **31904962061** (SHA `27ca8f3eaf12b7fdb856685d81b4757d13ce6e76`) |
+| Release workflow | **31905153345** (success) |
+| Artifact | `universal-multicurrency-0.23.0.zip` (529564 bytes; SHA-256 `819d62421b103cc411be313e9f58df43875a536f3bdb300cebfb3fa120711c0e`) |
+| Manual/editor acceptance | **Not performed** — full automated coverage only (1163 unit + 684 integration tests exercising the real admin screen render, real WordPress/WooCommerce hooks, and real product/variation fixtures); no human browser walkthrough was performed for this closure |
+| Deployment | **Not performed** |
 
 ---
 

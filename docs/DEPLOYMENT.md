@@ -37,7 +37,30 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release on `main`:** **v0.22.0** (tagged and published).
+**Current release on `main`:** **v0.23.0** (tagged and published).
+
+---
+
+## v0.23.0 — Fixed Pricing Catalog Operations (released)
+
+Ships Milestone 24 under version **0.23.0** (ADR-0029). Dedicated Fixed
+Pricing admin screen (catalog coverage visibility, bounded bulk seed/clear
+with preview -> confirm -> execute), a passive Products-list coverage
+column, and `wp umc prices list|seed|clear`. Settings schema **7** unchanged;
+PersistedKeys **10**; order snapshot **5**; no DB migration.
+
+**Released as:** **v0.23.0** — tag `v0.23.0`, GitHub release published,
+artifact `universal-multicurrency-0.23.0.zip` (SHA-256
+`819d62421b103cc411be313e9f58df43875a536f3bdb300cebfb3fa120711c0e`).
+
+### Deployment sequence (release verification completed)
+
+1. Run `composer release-audit` on the **0.23.0** tree.
+2. Build `dist/universal-multicurrency-0.23.0.zip` with `composer install --no-dev`
+   + `bin/build-zip.sh`.
+3. Deploy over **0.22.0** in place. No settings schema change; the Fixed
+   Pricing tab and Products-list coverage column appear after upgrade with
+   no merchant action required. **Not performed as part of release closure.**
 
 ---
 
