@@ -34,7 +34,7 @@ wp umc prices clear --currency=<code> [--product=<id>|--all] [--dry-run]
 
 | Command | Service | Exit code |
 |---|---|---|
-| `list` | `FixedPriceCoverageReport` | Always `0` |
+| `list` | `FixedPriceCatalogQuery` | `0` on success; `1` on invalid `--currency`/`--status` |
 | `seed` | `FixedPriceCatalogOperationsService` | `0` on completion (including partial skips); `1` on invalid arguments or no rate available for the target currency |
 | `clear` | `FixedPriceCatalogOperationsService` | `0` on completion; `1` on invalid arguments |
 

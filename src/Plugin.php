@@ -23,6 +23,7 @@ use UMC\Admin\PluginActionLinks;
 use UMC\Admin\RateFailureNotice;
 use UMC\Admin\RateUpdateController;
 use UMC\Admin\SettingsPage;
+use UMC\CLI\PricesCommand;
 use UMC\CLI\RatesCommand;
 use UMC\Diagnostics\Diagnostics;
 use UMC\Cart\CartRecalculation;
@@ -77,6 +78,8 @@ use UMC\Rates\RateStatusEvaluator;
 use UMC\Rates\RateUpdateService;
 use UMC\Rates\RateUpdateState;
 use UMC\Rates\Scheduler;
+use UMC\Pricing\FixedPriceCatalogOperationsService;
+use UMC\Pricing\FixedPriceCatalogQuery;
 use UMC\Pricing\FixedPriceCoverageReport;
 use UMC\Pricing\FixedPriceRepository;
 use UMC\Pricing\ProductPriceProvenanceRegistry;
@@ -197,6 +200,18 @@ final class Plugin {
 		if ( is_admin() ) {
 			( new ProductFixedPricesPanel( $settings, $registry, $fixed_repository ) )->register();
 			( new FixedPriceCoverageColumn( new FixedPriceCoverageReport( $fixed_repository ), $registry ) )->register();
+		}
+
+		if ( defined( 'WP_CLI' ) && WP_CLI && class_exists( 'WP_CLI' ) ) {
+			$fixed_price_coverage = new FixedPriceCoverageReport( $fixed_repository );
+			\WP_CLI::add_command(
+				'umc prices',
+				new PricesCommand(
+					new FixedPriceCatalogOperationsService( $fixed_repository, $fixed_price_coverage, $rates, $service, $registry ),
+					new FixedPriceCatalogQuery( $fixed_price_coverage ),
+					$registry
+				)
+			);
 		}
 
 		// Storefront: attach conversion filters, handle the switch, register the
