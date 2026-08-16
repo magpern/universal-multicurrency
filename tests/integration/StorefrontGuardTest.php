@@ -52,6 +52,23 @@ final class StorefrontGuardTest extends WP_UnitTestCase {
 		'RefundSnapshot.php',
 	);
 
+	/**
+	 * Audited exceptions to test_only_the_snapshot_writers_stage_order_metadata()
+	 * that call WC_Data::update_meta_data() on a non-order object — the method
+	 * itself is generic to any WC_Data subclass, so this guard's regex cannot
+	 * distinguish "order metadata" from other legitimate uses by pattern alone.
+	 *
+	 * - FixedPriceCsvIntegration.php (ADR-0030): the raw-meta
+	 *   resync-to-database-truth defense calls update_meta_data() on the
+	 *   *product* object being imported, to undo an in-memory mutation
+	 *   WooCommerce's own generic `meta:`-prefixed CSV importer may have made
+	 *   to `_umc_fixed_prices` — never an order, never a second snapshot
+	 *   writer.
+	 */
+	private const NON_ORDER_META_WRITER_FILES = array(
+		'FixedPriceCsvIntegration.php',
+	);
+
 	public function test_no_out_of_scope_hooks_have_plugin_callbacks(): void {
 		foreach ( self::FORBIDDEN_HOOKS as $hook ) {
 			$this->assertSame(
@@ -290,7 +307,7 @@ final class StorefrontGuardTest extends WP_UnitTestCase {
 		// Both checkout flows must converge on one writer. An adapter that wrote
 		// its own metadata would be the start of two snapshot formats.
 		$this->assert_pattern_absent_from(
-			$this->umc_source_files_except( self::SNAPSHOT_WRITER_FILES ),
+			$this->umc_source_files_except( array_merge( self::SNAPSHOT_WRITER_FILES, self::NON_ORDER_META_WRITER_FILES ) ),
 			'/->update_meta_data\s*\(/',
 			'Only the snapshot writers may stage order metadata; everything else delegates.'
 		);

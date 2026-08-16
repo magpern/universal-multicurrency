@@ -81,6 +81,7 @@ use UMC\Rates\Scheduler;
 use UMC\Pricing\FixedPriceCatalogOperationsService;
 use UMC\Pricing\FixedPriceCatalogQuery;
 use UMC\Pricing\FixedPriceCoverageReport;
+use UMC\Pricing\FixedPriceCsvIntegration;
 use UMC\Pricing\FixedPriceRepository;
 use UMC\Pricing\ProductPriceProvenanceRegistry;
 use UMC\Pricing\ProductPriceResolutionService;
@@ -200,6 +201,7 @@ final class Plugin {
 		if ( is_admin() ) {
 			( new ProductFixedPricesPanel( $settings, $registry, $fixed_repository ) )->register();
 			( new FixedPriceCoverageColumn( new FixedPriceCoverageReport( $fixed_repository ), $registry ) )->register();
+			( new FixedPriceCsvIntegration( $fixed_repository, $registry ) )->register();
 		}
 
 		if ( defined( 'WP_CLI' ) && WP_CLI && class_exists( 'WP_CLI' ) ) {
