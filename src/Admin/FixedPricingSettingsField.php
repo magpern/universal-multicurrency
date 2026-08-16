@@ -68,6 +68,8 @@ final class FixedPricingSettingsField {
 		);
 		// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 
+		$this->render_csv_discoverability( $ui );
+
 		$this->render_currency_form( $ui, $values );
 
 		if ( '' === $values['currency'] ) {
@@ -84,6 +86,43 @@ final class FixedPricingSettingsField {
 		$this->render_filters( $values );
 		$this->render_coverage_table( $ui, $values );
 		echo '</div>';
+	}
+
+	/**
+	 * Renders a restrained discoverability callout pointing to WooCommerce's
+	 * native Products → Export / Import screens (M25, ADR-0030) — bulk fixed-
+	 * price interchange lives there, as `UMC Fixed Regular/Sale Price (CODE)`
+	 * columns, not as a second CSV subsystem on this screen.
+	 *
+	 * @param AdminComponentRenderer $ui Design-system renderer.
+	 */
+	private function render_csv_discoverability( AdminComponentRenderer $ui ): void {
+		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- AdminComponentRenderer escapes quick-action markup.
+		echo $ui->quick_actions_panel(
+			__( 'Bulk import/export', 'universal-multicurrency' ),
+			$this->csv_discoverability_actions()
+		);
+		// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+
+	/**
+	 * Quick-action definitions for the CSV discoverability callout (M25).
+	 *
+	 * @return array<int, array<string, string>>
+	 */
+	private function csv_discoverability_actions(): array {
+		return array(
+			array(
+				'label'       => __( 'Export fixed prices via WooCommerce', 'universal-multicurrency' ),
+				'url'         => admin_url( 'edit.php?post_type=product&page=product_exporter' ),
+				'description' => __( 'Fixed prices appear as UMC Fixed Regular/Sale Price columns on the standard Products export screen.', 'universal-multicurrency' ),
+			),
+			array(
+				'label'       => __( 'Import fixed prices via WooCommerce', 'universal-multicurrency' ),
+				'url'         => admin_url( 'edit.php?post_type=product&page=product_importer' ),
+				'description' => __( 'Map the same columns when importing to author or update fixed prices in bulk.', 'universal-multicurrency' ),
+			),
+		);
 	}
 
 	/**
