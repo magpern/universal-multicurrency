@@ -1,3 +1,81 @@
+# Release audit — v1.0.0 Production Readiness & Roadmap Closure
+
+Executable release-preparation gate for Universal Multicurrency **v1.0.0**.
+This is Milestone 26 (WP1): a formalized, citable readiness audit — not yet a
+closure record, since no version bump, tag, or release exists at this point.
+Full detail, work-package definitions, and the falsification matrix live in
+[`M26_V1_READINESS_PLAN.md`](M26_V1_READINESS_PLAN.md); this section restates
+the audit's material findings with file/line citations so a third reviewer can
+verify each claim without re-deriving it. See ADR-0031 for the frozen contract.
+
+**Repository status:** **in progress** — Milestone 26, WP1 (audit formalization).
+No version bump, tag, or release exists yet.
+
+---
+
+## v1.0.0 readiness audit (WP1)
+
+### Roadmap completeness
+
+`docs/ROADMAP.md`'s "Future milestones — not started, not implemented" section
+lists only items explicitly declared out-of-scope in their originating
+milestone's ADR (ADR-0024 § Explicit non-goals, ADR-0029 § Explicit non-goals)
+— none is a broken promise. A repository-wide search for `TODO`, `FIXME`,
+`not implemented`, and `out of scope` inside `src/` returns **zero hits**
+(enforced release-blocking by RB14 in this document's audit gate below).
+**Verdict: no previously-promised core functionality is missing.**
+
+### Capability inventory (v0.24.0 baseline, reconstructed from source)
+
+Bootstrap: `universal-multicurrency.php` → `UMC\Plugin::instance()->init()`
+(`src/Plugin.php`). Admin: one WooCommerce Settings tab
+(`src/Admin/SettingsPage.php`) with 10 sections. Currencies/rates:
+`src/Currency`, `src/Rates` (Frankfurter provider, `RateHealthService`, `wp umc
+rates` CLI). Visitor Location/display: `src/Geo`, `src/Display`. Checkout
+policy: `src/Checkout`, `src/StoreApi`. Pricing: `src/Pricing`
+(`FixedPriceRepository`, `FixedPriceCsvIntegration`, `FixedPriceCatalogOperationsService`,
+`wp umc prices` CLI). Orders/reporting: `src/Order` (`OrderSnapshot` schema 5),
+`src/Reporting`. Compatibility: `src/Compatibility` (E0–E3 evidence model,
+Compatibility Center admin surface). Diagnostics: `src/Diagnostics`. Full
+narrative: `M26_V1_READINESS_PLAN.md` §2.
+
+### Known-limitations classification
+
+Full classification table: `M26_V1_READINESS_PLAN.md` §6. Summary: every
+identified gap is either **category B** (hardening/documentation work
+in-scope for M26 — stale `README.md`, stale `SECURITY_REVIEW.md` narrative,
+thin Playwright coverage, a hardcoded E2E hostname literal, an upgrade-fixture
+coverage gap) or **category C** (an already-honest, acceptable documented
+limitation — opt-in cart fees, base-currency-only price-filter block, no
+extension at E3/Integrated, Composite Products/Bookings at E0). **No
+category-A item was found.**
+
+### Third-party compatibility evidence-tier snapshot
+
+`docs/COMPATIBILITY.md` evidence tiers, quoted from source: **Untested (E0)**
+— no evidence; **Works with (E1/E2)** — verified once manually, or by a test
+in the repo not run on every PR; **Tested / Supported (E3)** — a named CI leg
+exercises the exact coordinate on every PR, green; **Incompatible
+(E-negative)** — a reproduced failure with a named cause. Third-party
+extensions can never be labelled *Supported*. Current tiers: WooCommerce
+Subscriptions/Product Add-Ons/Bundles = **Characterized (E2)**; Composite
+Products/Bookings = **Not evaluated (E0)**; no extension is **Integrated
+(E3)** — pending by design (ADR-0024 explicit non-goal). **This audit does
+not change any tier.**
+
+### Persistence/schema confirmation
+
+`Settings::SCHEMA_VERSION = 7` (`src/Settings.php:33`),
+`OrderSnapshot::SCHEMA_VERSION = 5` (`src/Order/OrderSnapshot.php:54`),
+`PersistedKeys::INVENTORY_VERSION = 10` (`src/PersistedKeys.php:37`), no DB
+migration mechanism anywhere in `src/` or `uninstall.php`. Every persistence
+write found in `src/` maps 1:1 to `PersistedKeys.php` and
+`docs/PERSISTED_DATA.md`'s machine-checked inventory (verified by
+`tests/unit/PersistedKeysInventoryTest.php`). **Zero undocumented persistence
+found.**
+
+---
+
 # Release audit — v0.24.0 Fixed Pricing CSV Interchange
 
 Executable release-preparation gate for Universal Multicurrency **v0.24.0**.
