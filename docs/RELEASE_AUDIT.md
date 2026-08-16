@@ -4,16 +4,15 @@ Executable release-preparation gate for Universal Multicurrency **v0.24.0**.
 This document records scope, criteria, commands, audit results, and the current
 release-preparation state.
 
-**Repository status:** **prepared on branch `feature/m25-fixed-pricing-csv`**.
-Milestone 25 (Fixed Pricing CSV Interchange; ADR-0030) implementation is
-complete, including a full browser acceptance pass (22/22 Playwright
-scenarios green against an authorized DEV WordPress + WooCommerce
-environment). **Not tagged, not released, not deployed** — PR boundary per
-M25 task.
+**Repository status:** **released as v0.24.0**. Milestone 25 (Fixed Pricing
+CSV Interchange; ADR-0030) is complete. Git tag **`v0.24.0`** and GitHub
+release are published. Release commit on `main`:
+`f1b718de70156cb2fd6370c259bcb7bb73d3f271`. Annotated tag object points at
+that merge commit. PR **#26**.
 
 ---
 
-## v0.24.0 release preparation record
+## v0.24.0 release closure record
 
 | Item | Value |
 |---|---|
@@ -24,11 +23,17 @@ M25 task.
 | Production migrations | none |
 | New admin surface | Fixed Pricing screen gains a discoverability callout linking to WooCommerce's native Products -> Export/Import; no new admin page |
 | New CSV columns | `umc_fixed_regular_{code}` / `umc_fixed_sale_{code}` on WooCommerce's native product export/import |
-| Browser acceptance | 22/22 Playwright scenarios green against DEV (dev.biopentra.eu, WordPress 7.0.4, WooCommerce 10.9.4) |
-| Unresolved release blockers | **0** (local gate pending CI) |
-| Git tag `v0.24.0` | **Not yet created** |
-| GitHub release `v0.24.0` | **Not yet published** |
-| Milestone 25 | **Prepared** — Fixed Pricing CSV Interchange at v0.24.0 |
+| Browser acceptance | **22/22 Playwright scenarios green** against DEV (dev.biopentra.eu, WordPress 7.0.4, WooCommerce 10.9.4) -- all 19 mandatory acceptance cases plus all four raw-meta defense scenarios (A-D) plus a dedicated new-product raw-meta case; satisfies the release-blocking browser acceptance gate in lieu of a separate human walkthrough |
+| Unresolved release blockers | **0** |
+| Git tag `v0.24.0` | **Created** |
+| GitHub release `v0.24.0` | **Published** |
+| Milestone 25 | **Complete** — Fixed Pricing CSV Interchange at v0.24.0 |
+| PR CI run | **31967134065** (SHA `fde8c4517994db1594af101ad843ba50104df54a`) -- 14/14 jobs green, including the WC 8.2.5 floor leg |
+| Main CI run | **31968672928** (SHA `f1b718de70156cb2fd6370c259bcb7bb73d3f271`) -- 14/14 jobs green (a first attempt failed instantly on every job due to an account billing/spending-limit block unrelated to the code; resolved externally, then a full re-run passed cleanly) |
+| Release workflow | **31969844441** (success) |
+| Artifact | `universal-multicurrency-0.24.0.zip` (539009 bytes; SHA-256 `afd64b3ef8ce8201fcb9c3616dc95099c82ff548ec582d7f4f74d6f13f39e953`) -- downloaded from the published GitHub release itself (not a local build) and independently inspected: correct version metadata throughout, `FixedPriceCsvIntegration`/`FixedPriceDocumentMerger`/the raw-meta defense/all six WC hook registrations present, no `tests/`, no `tests/e2e`, no `node_modules`, no `.git` |
+| Manual/editor acceptance | Automated via the Playwright browser acceptance suite above (real WooCommerce admin UI, real DEV environment) rather than a separate human walkthrough of the same steps |
+| Deployment | **Not performed** |
 
 ---
 

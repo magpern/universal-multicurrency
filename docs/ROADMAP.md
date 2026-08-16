@@ -518,9 +518,9 @@ unchanged; no OrderSnapshot, PersistedKeys, or DB migration changes. See
 | WP5 architecture/security/performance guards | **Complete** |
 | Release closure for **v0.23.0** | **Complete** — PR **#25**, tag `v0.23.0` |
 
-## Milestone 25 — Fixed Pricing CSV Interchange (**v0.24.0**) — in progress
+## Milestone 25 — Fixed Pricing CSV Interchange (**v0.24.0**) — complete and released
 
-**Target:** v0.24.0 · ADR-0030
+**Released as:** v0.24.0 · ADR-0030 · PR **#26**
 
 Bulk, explicitly-authored interchange of per-currency fixed prices through
 WooCommerce's own native product CSV export/import (structured
@@ -544,9 +544,9 @@ migration changes.
 | WP6 admin discoverability | **Complete** |
 | WP7 security/performance/architecture guards | **Complete** — `FixedPriceCsvIntegrationGuardTest` (FX/storefront/HTTP/order-reporting exclusion); performance/idempotency covered by WP3/WP4 tests |
 | WP8 documentation/compatibility/i18n | **Complete** — `COMPATIBILITY.md`, `PERSISTED_DATA.md`, POT regenerated |
-| WP9 independent corrective review | Not started |
-| Manual acceptance walkthrough (release-blocking) | Not started |
-| Release closure for **v0.24.0** | Not started |
+| WP9 independent corrective review | **Complete** |
+| Manual acceptance walkthrough (release-blocking) | **Complete** — automated via Playwright browser acceptance (22/22 scenarios green against DEV), not a separate human walkthrough |
+| Release closure for **v0.24.0** | **Complete** — PR **#26**, tag `v0.24.0` |
 
 ## Future milestones — not started, not implemented
 

@@ -37,7 +37,35 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release on `main`:** **v0.23.0** (tagged and published).
+**Current release on `main`:** **v0.24.0** (tagged and published).
+
+---
+
+## v0.24.0 — Fixed Pricing CSV Interchange (released)
+
+Ships Milestone 25 under version **0.24.0** (ADR-0030). Bulk import/export
+of per-currency fixed prices through WooCommerce's native product CSV
+Export/Import: structured `umc_fixed_regular_{code}`/`umc_fixed_sale_{code}`
+columns, field-level patch/clear semantics, atomic `sale <= regular`
+validation, and a resync-to-database-truth defense against WooCommerce's own
+generic custom-meta CSV import mechanism. `FixedPriceDocumentMerger` is now
+the shared mutation authority for the product editor, M24's catalog seed/
+clear operations, and CSV import. Settings schema **7** unchanged;
+PersistedKeys **10**; order snapshot **5**; no DB migration.
+
+**Released as:** **v0.24.0** — tag `v0.24.0`, GitHub release published,
+artifact `universal-multicurrency-0.24.0.zip` (539009 bytes; SHA-256
+`afd64b3ef8ce8201fcb9c3616dc95099c82ff548ec582d7f4f74d6f13f39e953`).
+
+### Deployment sequence (release verification completed)
+
+1. Run `composer release-audit` on the **0.24.0** tree.
+2. Build `dist/universal-multicurrency-0.24.0.zip` with `composer install --no-dev`
+   + `bin/build-zip.sh`.
+3. Deploy over **0.23.0** in place. No settings schema change; the new UMC
+   CSV columns appear on WooCommerce's native Products -> Export/Import
+   screens with no merchant action required. **Not performed as part of
+   release closure.**
 
 ---
 
