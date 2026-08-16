@@ -246,11 +246,14 @@ Existing migration tests: per-step unit coverage (`SettingsUpgraderTest`,
 (byte-identical v1→v2 output), integration test (`SettingsUpgradeIntegrationTest`
 — v0 option upgrade, idempotent re-load, unsupported-future-version fallback,
 failed-migration non-overwrite), and a doc/impl drift guard
-(`MigrationDocumentationTest`). **Gap**: no fixture test exercises starting an
-upgrade *from* schema 2, 3, or 5 directly (only 0/1 fixtures plus the full
-chain and the 4→5/5→6/6→7 dedicated files) — WP2 closes this at the
-deterministic PHP-fixture level; WP8 separately proves the same boundaries
-operationally using real historical release artifacts (§8).
+(`MigrationDocumentationTest`). **Corrected during WP2 implementation**:
+schema-2/3/5-origin coverage already existed (`SettingsUpgraderTest`,
+`SettingsMigrationV5ToV6Test` each already ran the full `upgrade()` starting
+from that schema and asserted it reached `Settings::SCHEMA_VERSION`); the
+actual gap was narrower — idempotency-on-re-entry from those origins, closed
+by WP2 with three small additions (see WP2's correction note in §9). WP8
+separately proves the same schema boundaries operationally using real
+historical release artifacts (§8).
 `OrderSnapshotReader.php` defines `SCHEMA_VERSION_1..5` read-branches; no
 migration is needed for order snapshots (write-once per order) but read-path
 branch coverage should be confirmed.
@@ -351,38 +354,49 @@ work while a real blocker is unresolved.
 **Dependencies**: WP0.
 
 ### WP2 — Persistence / schema-boundary migration fixture validation (deterministic)
-**Objective**: Close the fixture-coverage gap for schema-2/3/5 starting states
-with deterministic, CI-enforced PHP tests. This package is PHP-fixture-level
-only — it does **not** install historical plugin builds; that operational
-concern is WP8's (see below), kept deliberately separate so this package stays
-fast, deterministic, and CI-native rather than becoming a large, brittle
-harness that boots six historical WordPress/WooCommerce environments inside
-PHPUnit.
-**Rationale**: Every existing schema-step migration (0→1 … 6→7) already has a
-unit fixture proving it in isolation, following the same pattern
-`SettingsUpgraderTest`/`SettingsMigrationV4ToV5Test`/etc. already use —
-constructed option-array payloads shaped like the historical schema, not real
-installs. What's missing is starting the *chain* from schema 2, 3, or 5
-directly (today only 0/1-origin and the full 0→7 chain are covered), so a
-store frozen mid-history for several versions is untested as a *starting
-point*.
-**Files**: `tests/unit/SettingsMigrationV2OriginTest.php`,
-`tests/unit/SettingsMigrationV3OriginTest.php`,
-`tests/unit/SettingsMigrationV5OriginTest.php` (new — one per gap, following
-the existing `SettingsMigrationV4ToV5Test`-style naming/shape), each using a
-hand-constructed settings array matching that schema version's documented
-shape (from §7's schema-history table and the originating ADRs), not a copied
-merchant payload.
-**Tasks**: For each of schema 2, 3, and 5: construct a representative
-options payload at that schema version, run it through `SettingsUpgrader` to
-the current schema (7), assert the resulting shape matches what the existing
-0→7 chain produces for equivalent data, and assert idempotency on a second
-load (reusing the existing `should_persist()` pattern already proven for every
-other step). Confirm `OrderSnapshotReader`'s `SCHEMA_VERSION_1..5` read
-branches each have an explicit unit test exercising that branch (not just
-incidental coverage via integration tests).
-**Tests**: The three new fixture tests above; confirm (don't necessarily add)
-`OrderSnapshotReader` branch coverage.
+
+> **Correction recorded during implementation (M26 WP2, commit-time
+> discovery):** this package's original premise — "no fixture test exercises
+> starting an upgrade from schema 2, 3, or 5 directly" — was **wrong**.
+> `tests/unit/SettingsUpgraderTest.php::test_v2_to_v3_migration_preserves_existing_settings_and_adds_display_defaults`
+> and `::test_v3_to_v4_migration_preserves_settings_and_adds_checkout_defaults`
+> already call the full `SettingsUpgrader::upgrade()` starting at schema 2 and
+> 3 respectively and assert the result reaches `Settings::SCHEMA_VERSION`
+> (7). `tests/unit/SettingsMigrationV5ToV6Test.php::test_v5_to_v6_upgrade_produces_canonical_settings`
+> does the same starting at schema 5. Origin coverage for all three already
+> existed. Per this milestone's own "correctness over plan compliance" rule
+> (do not fake compliance, do not conceal a discrepancy), the actual gap is
+> narrower: none of those three tests asserted **idempotency on re-entry**
+> (upgrading the already-migrated-to-7 result a second time), and
+> `OrderSnapshotReader`'s `SCHEMA_VERSION_1..5` read branches had explicit
+> synthetic fixtures for versions 1, 2 (via
+> `OrderCurrencySnapshotClassificationTest`), and 5 (via real order round-trip
+> in `M21OrderSnapshotOriginTest`) — but not 3 or 4. **Revised scope actually
+> implemented**: three small idempotency assertions added to the existing
+> schema-2/3/5-origin tests (no new files), plus two new schema-3/4
+> classification fixtures added to `OrderCurrencySnapshotClassificationTest.php`
+> following its existing pattern. This is smaller than originally planned and
+> touches zero production code — confirmed a correctness gap, not a defect.
+
+**Objective**: Close the narrow idempotency- and read-branch-coverage gap
+identified above with deterministic, CI-enforced PHP tests. This package is
+PHP-fixture-level only — it does **not** install historical plugin builds;
+that operational concern is WP8's (see below).
+**Rationale**: See the correction note above.
+**Files**: `tests/unit/SettingsUpgraderTest.php` (two new idempotency tests:
+schema-2 and schema-3 origin re-entry), `tests/unit/SettingsMigrationV5ToV6Test.php`
+(one new idempotency test: schema-5 origin re-entry),
+`tests/integration/OrderCurrencySnapshotClassificationTest.php` (two new
+classification fixtures: schema versions 3 and 4).
+**Tasks**: For each of schema 2, 3, and 5: upgrade the existing origin
+fixture to current schema, then upgrade the result a second time, and assert
+the second result is identical and does not report `should_persist()`. For
+`OrderSnapshotReader`: add a synthetic order-meta fixture at
+`_umc_snapshot_version` 3 (asserting `checkout_mode()`/`shopper_currency()`/
+`fallback_occurred()` populate, `rate_provider()`/`rate_adjustment()` stay
+null) and at version 4 (asserting `rate_provider()`/`rate_adjustment()` also
+populate), mirroring the existing version-1/2 fixtures in the same file.
+**Tests**: The five new test methods above.
 **Acceptance criteria**: All three schema-origin fixtures upgrade cleanly and
 idempotently to schema 7; falsification items B–D, X (§11, PHP-fixture half)
 close green.
@@ -886,13 +900,15 @@ record is preserved per task §18. `docs/RELEASE_AUDIT.md` and
 
 ## 18. Risks
 
-- **Schema-2/3/5 fixture construction (WP2)** requires care to make the
-  hand-constructed payloads genuinely representative of what those historical
-  schema versions actually persisted, not a convenient approximation. Mitigate
-  by deriving each fixture directly from the originating ADR (§7's schema-
-  history table) and cross-checking shape against WP8's operational rehearsal
-  results for the same version once available, rather than inventing the
-  shape independently in both places.
+- **Schema-2/3/5 fixture construction (WP2) — resolved, smaller than
+  planned**: implementation found the origin fixtures already existed
+  (reusing them directly, not re-inventing shapes), so the actual WP2 work was
+  three idempotency assertions plus two `OrderSnapshotReader` classification
+  fixtures — see WP2's correction note in §9. The residual risk this item
+  originally flagged (hand-constructed payloads not matching real historical
+  shape) is now moot for the fixture line; it still applies to WP8's
+  operational rehearsal, which uses real published artifacts rather than
+  constructed payloads specifically to avoid it.
 - **Environment policy for WP4/WP8 — resolved, not left ambiguous**: WP8's
   clean-install, historical-upgrade, and rollback rehearsals run on an
   isolated, disposable environment provisioned fresh for that purpose, never

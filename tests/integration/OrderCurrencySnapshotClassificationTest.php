@@ -94,6 +94,73 @@ final class OrderCurrencySnapshotClassificationTest extends TestCase {
 	}
 
 	/**
+	 * An M11 snapshot with version 3 exposes checkout-policy fields (schema-3
+	 * origin fixture; M26 WP2 -- the >= SCHEMA_VERSION_3 read branch had only
+	 * incidental coverage via real current-schema orders before this).
+	 */
+	public function test_snapshot_with_version_3_exposes_checkout_policy_fields(): void {
+		$order = $this->create_order_with_meta(
+			array(
+				'_umc_snapshot_version'     => '3',
+				'_umc_base_currency'        => 'EUR',
+				'_umc_transaction_currency' => 'SEK',
+				'_umc_exchange_rate'        => '11.50',
+				'_umc_rate_timestamp'       => '1700000000',
+				'_umc_rate_source'          => 'manual',
+				'_umc_plugin_version'       => '0.10.0',
+				'_umc_rate_identity'        => 'SEK:11.50',
+				'_umc_checkout_mode'        => 'selected_currency',
+				'_umc_shopper_currency'     => 'SEK',
+				'_umc_fallback_occurred'    => 'no',
+			)
+		);
+
+		$snapshot = ( new OrderSnapshotReader() )->read( $order );
+
+		$this->assertSame( 3, $snapshot->schema_version() );
+		$this->assertSame( 'selected_currency', $snapshot->checkout_mode() );
+		$this->assertSame( 'SEK', $snapshot->shopper_currency() );
+		$this->assertFalse( $snapshot->fallback_occurred() );
+		$this->assertNull( $snapshot->rate_provider() );
+		$this->assertNull( $snapshot->rate_adjustment() );
+	}
+
+	/**
+	 * An M16 snapshot with version 4 exposes rate provider/adjustment fields
+	 * in addition to the version-3 checkout-policy fields (schema-4 origin
+	 * fixture; M26 WP2 -- the >= SCHEMA_VERSION_4 read branch had only
+	 * incidental coverage via real current-schema orders before this).
+	 */
+	public function test_snapshot_with_version_4_exposes_rate_provider_and_adjustment(): void {
+		$order = $this->create_order_with_meta(
+			array(
+				'_umc_snapshot_version'     => '4',
+				'_umc_base_currency'        => 'EUR',
+				'_umc_transaction_currency' => 'SEK',
+				'_umc_exchange_rate'        => '11.50',
+				'_umc_rate_timestamp'       => '1700000000',
+				'_umc_rate_source'          => 'automatic',
+				'_umc_plugin_version'       => '0.15.0',
+				'_umc_rate_identity'        => 'SEK:11.50',
+				'_umc_checkout_mode'        => 'store_currency',
+				'_umc_shopper_currency'     => 'SEK',
+				'_umc_fallback_occurred'    => 'yes',
+				'_umc_rate_provider'        => 'frankfurter',
+				'_umc_rate_adjustment'      => '0.50',
+			)
+		);
+
+		$snapshot = ( new OrderSnapshotReader() )->read( $order );
+
+		$this->assertSame( 4, $snapshot->schema_version() );
+		$this->assertSame( 'frankfurter', $snapshot->rate_provider() );
+		$this->assertSame( '0.50', $snapshot->rate_adjustment() );
+		$this->assertSame( 'store_currency', $snapshot->checkout_mode() );
+		$this->assertTrue( $snapshot->fallback_occurred() );
+		$this->assertNull( $snapshot->currency_origin() );
+	}
+
+	/**
 	 * A legacy order (no snapshot) is classified correctly.
 	 */
 	public function test_legacy_order_without_snapshot(): void {
