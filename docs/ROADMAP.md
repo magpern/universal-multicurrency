@@ -548,12 +548,46 @@ migration changes.
 | Manual acceptance walkthrough (release-blocking) | **Complete** — automated via Playwright browser acceptance (22/22 scenarios green against DEV), not a separate human walkthrough |
 | Release closure for **v0.24.0** | **Complete** — PR **#26**, tag `v0.24.0` |
 
+## Milestone 26 — v1.0 Production Readiness & Roadmap Closure (**v1.0.0**) — release pending
+
+**Target:** v1.0.0 · ADR-0031 · full audit, work-package definitions, and
+falsification matrix: [`docs/M26_V1_READINESS_PLAN.md`](M26_V1_READINESS_PLAN.md)
+
+The terminal milestone. Not a feature milestone — audits whether the plugin is
+ready to leave the 0.x series, then hardens, proves, documents, releases, and
+closes. Audit verdict: no category-A release blocker found; Settings schema 7,
+OrderSnapshot schema 5, PersistedKeys 10, and no DB migration are expected to
+remain unchanged unless a genuine defect is found during implementation. See
+ADR-0031 for the frozen v1.0 contract.
+
+| Work item | Status |
+|---|---|
+| WP0 ADR-0031 + v1.0 contract freeze | **Complete** |
+| WP1 Roadmap/repository completeness audit (formalized) | Not started |
+| WP2 Schema-2/3/5 migration fixture validation | Not started |
+| WP3 Full-system PHP acceptance (cross-feature) | Not started |
+| WP4 Playwright v1.0 smoke acceptance | Not started |
+| WP5 Security/performance/compatibility hardening | Not started |
+| WP6 Admin/storefront operational acceptance | Not started |
+| WP7 Documentation completion (README, GETTING_STARTED.md) | Not started |
+| WP8 Clean-install/historical-upgrade/rollback rehearsal | Not started |
+| WP9 Corrective review and falsification | Not started |
+| WP10 v1.0.0 release preparation | Not started |
+| WP11 PR/CI/merge/tag/release/artifact verification | Not started |
+| WP12 Roadmap closure documentation | Not started |
+
+No `Settings::SCHEMA_VERSION`, `OrderSnapshot::SCHEMA_VERSION`, or
+`PersistedKeys::INVENTORY_VERSION` change is planned. No DB migration planned.
+**Milestone 26 is release pending — not complete** until the `v1.0.0` tag
+exists, the GitHub Release is published, and the artifact is independently
+verified (WP12 marks completion, never earlier).
+
 ## Future milestones — not started, not implemented
 
 None of the following exists in the codebase today:
 - A REST write API for fixed prices; flat-markup bulk seeding; Quick Edit
   inline fixed-price fields (deferred from M24 — see ADR-0029 § Explicit
-  non-goals; CSV import/export itself is now M25, in progress above)
+  non-goals; CSV import/export shipped as M25/v0.24.0)
 - Custom switcher media / Media Library icons (deferred from M22/M23)
 - Additional exchange-rate providers and per-currency provider selection
 - `country_change` geo detection mode and broader continent presets
