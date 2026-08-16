@@ -33,8 +33,25 @@ here. See [`TEST_STRATEGY.md`](TEST_STRATEGY.md) § Milestone 7 security.
 | Rate persistence boundary | `Rates/ExchangeRateStore.php`, `Rates/RateUpdateState.php` | Single-writer guard; `ExchangeRateStoreTest`, `RatesPersistenceGuardTest` |
 | Scheduled updates | `Rates/Scheduler.php` | Action Scheduler only; `SchedulerIntegrationTest` |
 | Rate diagnostics | `Diagnostics/SiteHealthReport.php`, `Admin/RateFailureNotice.php` | Counter-only output; `SiteHealthRateIntegrationTest` |
+| Geo Detection / Visitor Location admin | `Admin/Geo/*`, `Admin/GeoDetectionSettingsField.php` | `current_user_can( 'manage_options' )` gates on every panel render; `SecuritySourceGuardTest` whole-tree checks |
+| Currency Decision Inspector (M15) | `Admin/DecisionInspector*` (under `SettingsPage.php`'s `decision_inspector` section) | Stateless, side-effect-free simulation; same admin-settings nonce/capability boundary as the rest of `SettingsPage.php` |
+| Switcher Advanced Custom CSS (M17) | `Display/SwitcherCustomCss.php` | Pure, WordPress-free `sanitize()` seam invoked from `Settings::sanitize()`; storefront-only injection, gated `edit_css` admin field |
+| WooCommerce transaction integrity (M18) | `Cart/*`, `Checkout/*`, `Integration/*` | `StorefrontGuardTest` structural invariants (no fee/stock/refund/order-status/Store-API callbacks outside the sanctioned seam) |
+| Extension compatibility framework (M19) | `Compatibility/*` | Invariant I1 — only `src/Diagnostics/` may know a third-party plugin exists, only `DetectorManifest.php` may name one; `DiagnosticsBoundaryGuardTest` |
+| Authoritative fixed pricing (M20) | `Pricing/FixedPriceRepository.php`, `Pricing/ProductPriceResolutionService.php` | Product-meta-only persistence via `update_post_meta`; `manage_woocommerce` product-editor capability boundary (WooCommerce-owned) |
+| Multicurrency reporting (M21) | `Reporting/*` | Read-only over historical order facts; `ReportingArchitectureGuardTest`, `ReportingPerformanceGuardTest`; CSV formula-injection defense in `ReportingCsvRenderer::escape_csv_cell()` |
+| Switcher presentation icons (M22) | `Display/CurrencyPresentationAssetRegistry.php` | Bundled SVGs only, registry-resolved (no arbitrary file/URL rendering); `CurrencyPresentationAssetRegistryTest` |
+| Native switcher block (M23) | `blocks/`, block registration in `Display/*` | `M23ArchitectureGuardTest` — bounded presence detection, no duplicate registration |
+| Fixed-pricing catalog operations (M24) | `Pricing/FixedPriceCatalogOperationsService.php`, `CLI/PricesCommand.php` | `manage_woocommerce` admin-screen capability + CSV/CLI authorization precedent; `FixedPricingCatalogOperationsGuardTest` |
+| Fixed-pricing CSV interchange (M25) | `Pricing/FixedPriceCsvIntegration.php` | Rides WooCommerce's own authorized Products → Export/Import boundary (no separate auth surface); raw-meta resync-to-database-truth defense against WooCommerce's generic custom-meta import mechanism; `FixedPriceCsvIntegrationGuardTest` |
 
 No custom REST routes, AJAX handlers, or runtime filesystem writes exist in `src/`.
+`SecuritySourceGuardTest`'s checks (no direct SQL, no dangerous functions, no
+debug output, request-superglobal confinement, no wildcard meta deletion, no
+AJAX/REST registration) run over the **whole current `src/` tree** on every
+CI run, not per-milestone — so every surface added since M8 (including all
+rows above) is continuously covered by those invariants even where no
+milestone-specific guard test exists.
 
 ---
 
@@ -300,6 +317,6 @@ documentation above.
 
 | Item | Value |
 |---|---|
-| Milestone | 7 Release Candidate — Commit 6; re-audited for Milestone 8 (v0.8.0) |
-| Related ADRs | 0003, 0007, 0009, 0010, 0011, 0012, 0013 |
+| Milestone | 7 Release Candidate — Commit 6; re-audited for Milestone 8 (v0.8.0); narrative re-audited through Milestone 25 (v0.24.0) for Milestone 26 (v1.0.0) — audited-surfaces table extended, no new finding, no change to the Milestone 8 findings below |
+| Related ADRs | 0003, 0007, 0009, 0010–0013, 0019, 0022, 0024, 0026, 0030, 0031 |
 | Next audit trigger | Any new admin mutation, request handler, persistence surface, or an authenticated rate provider |

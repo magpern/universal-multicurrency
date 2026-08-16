@@ -4,6 +4,15 @@ Deterministic performance invariants for Universal Multicurrency, established at
 Milestone 7 Commit 7 and extended by the Milestone 8 automatic-rate work.
 **Wall-clock timing is informational only** and is never a release-blocking metric.
 
+**Milestone 26 (v1.0.0) re-check:** all unit- and integration-level
+`@group performance` suites re-run clean against every ceiling below (no
+breach, no new material risk identified in the M20–M25 surfaces added since
+this document's last update — fixed-pricing catalog operations and CSV
+interchange already carry their own dedicated performance guards,
+`FixedPriceCoveragePerformanceTest` and the idempotency/performance assertions
+in `FixedPriceCsvIntegrationGuardTest`). No new ceiling constants were added;
+none were found to be genuinely uncovered.
+
 Executable enforcement lives in:
 
 - `tests/integration/PerformanceBaselineTest.php` — WordPress/WooCommerce query and write ceilings

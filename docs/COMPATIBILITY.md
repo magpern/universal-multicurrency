@@ -16,6 +16,10 @@ Third-party currency-switcher detection is advisory only: the plugin observes
 passive presence evidence and never deactivates, modifies, or calls into
 another plugin. See § Detection and § Known incompatible.
 
+Reaching **v1.0.0** does not change this evidence model or promote any tier:
+third-party extension compatibility, the CI matrix, and every label below are
+carried forward exactly as earned through Milestone 25.
+
 ## How to read this document
 
 ### Labels
