@@ -1,3 +1,37 @@
+# Release audit — v0.24.0 Fixed Pricing CSV Interchange
+
+Executable release-preparation gate for Universal Multicurrency **v0.24.0**.
+This document records scope, criteria, commands, audit results, and the current
+release-preparation state.
+
+**Repository status:** **prepared on branch `feature/m25-fixed-pricing-csv`**.
+Milestone 25 (Fixed Pricing CSV Interchange; ADR-0030) implementation is
+complete, including a full browser acceptance pass (22/22 Playwright
+scenarios green against an authorized DEV WordPress + WooCommerce
+environment). **Not tagged, not released, not deployed** — PR boundary per
+M25 task.
+
+---
+
+## v0.24.0 release preparation record
+
+| Item | Value |
+|---|---|
+| Version | **0.24.0** |
+| Settings schema | **7** (unchanged) |
+| Order snapshot schema | **5** (unchanged) |
+| Persisted-data inventory version | **10** (unchanged) |
+| Production migrations | none |
+| New admin surface | Fixed Pricing screen gains a discoverability callout linking to WooCommerce's native Products -> Export/Import; no new admin page |
+| New CSV columns | `umc_fixed_regular_{code}` / `umc_fixed_sale_{code}` on WooCommerce's native product export/import |
+| Browser acceptance | 22/22 Playwright scenarios green against DEV (dev.biopentra.eu, WordPress 7.0.4, WooCommerce 10.9.4) |
+| Unresolved release blockers | **0** (local gate pending CI) |
+| Git tag `v0.24.0` | **Not yet created** |
+| GitHub release `v0.24.0` | **Not yet published** |
+| Milestone 25 | **Prepared** — Fixed Pricing CSV Interchange at v0.24.0 |
+
+---
+
 # Release audit — v0.23.0 Fixed Pricing Catalog Operations
 
 Executable release-preparation gate for Universal Multicurrency **v0.23.0**.

@@ -25,7 +25,7 @@ use ZipArchive;
  */
 final class DocumentationSyncTest extends TestCase {
 
-	private const CURRENT_VERSION = '0.23.0';
+	private const CURRENT_VERSION = '0.24.0';
 
 	/**
 	 * Tracked documentation sources that must exist and stay internally consistent.
@@ -353,6 +353,7 @@ final class DocumentationSyncTest extends TestCase {
 		$this->assertStringContainsString( 'Milestone 22 | **Complete**', $audit );
 		$this->assertStringContainsString( 'Milestone 23 | **Complete**', $audit );
 		$this->assertStringContainsString( 'Milestone 24 | **Complete**', $audit );
+		$this->assertStringContainsString( 'Milestone 25 | **Prepared**', $audit );
 		$this->assertStringContainsString( '## Post-release review findings', $audit );
 	}
 
