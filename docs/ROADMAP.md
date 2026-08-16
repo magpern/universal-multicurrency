@@ -563,9 +563,9 @@ ADR-0031 for the frozen v1.0 contract.
 | Work item | Status |
 |---|---|
 | WP0 ADR-0031 + v1.0 contract freeze | **Complete** |
-| WP1 Roadmap/repository completeness audit (formalized) | Not started |
-| WP2 Schema-2/3/5 migration fixture validation | Not started |
-| WP3 Full-system PHP acceptance (cross-feature) | Not started |
+| WP1 Roadmap/repository completeness audit (formalized) | **Complete** |
+| WP2 Schema-2/3/5 migration fixture validation | **Complete** — corrected during implementation; see `M26_V1_READINESS_PLAN.md` WP2 |
+| WP3 Full-system PHP acceptance (cross-feature) | **Complete** — 3 new integration tests in `tests/integration/CrossFeature/` |
 | WP4 Playwright v1.0 smoke acceptance | Not started |
 | WP5 Security/performance/compatibility hardening | Not started |
 | WP6 Admin/storefront operational acceptance | Not started |
