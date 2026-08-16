@@ -93,6 +93,15 @@ screen and `wp umc prices seed|clear`). **M24 introduces no new inventory
 key** — both surfaces write the same key through the same repository, and
 `PersistedKeys::INVENTORY_VERSION` remains **10**.
 
+Since M25, also written via `Pricing\FixedPriceDocumentMerger` (shared by all
+three authoring surfaces above) from WooCommerce's native product CSV import,
+through `Pricing\FixedPriceCsvIntegration`. **M25 introduces no new inventory
+key** — CSV import/export reads and writes the same `_umc_fixed_prices` key
+through the same repository; `PersistedKeys::INVENTORY_VERSION` remains
+**10**. M25 additionally guards this key against WooCommerce's own generic
+`meta:`-prefixed CSV import mechanism, which can otherwise write to it
+directly — see ADR-0030 § Raw-meta resync-to-database-truth defense.
+
 ---
 
 ## Order line-item metadata (HPOS CRUD)

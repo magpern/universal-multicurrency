@@ -10,15 +10,22 @@ declare(strict_types=1);
 namespace UMC\Admin;
 
 use UMC\CurrencyRegistry;
-use UMC\Pricing\FixedPriceDocument;
+use UMC\Pricing\FixedPriceDocumentMerger;
 use UMC\Pricing\FixedPriceRepository;
-use UMC\Pricing\FixedPriceValidator;
 use UMC\Settings;
 
 /**
  * Renders and saves non-base fixed prices on simple products and variations.
  */
 final class ProductFixedPricesPanel {
+
+	/**
+	 * Shared mutation authority (ADR-0030), built from the same repository
+	 * this panel already receives.
+	 *
+	 * @var FixedPriceDocumentMerger
+	 */
+	private FixedPriceDocumentMerger $merger;
 
 	/**
 	 * Binds admin dependencies for fixed-price editing.
@@ -32,6 +39,7 @@ final class ProductFixedPricesPanel {
 		private CurrencyRegistry $registry,
 		private FixedPriceRepository $repository
 	) {
+		$this->merger = new FixedPriceDocumentMerger( $repository );
 	}
 
 	/**
@@ -189,44 +197,7 @@ final class ProductFixedPricesPanel {
 			return;
 		}
 
-		$existing = $this->repository->get( $product_id );
-		$merged   = array();
-
-		foreach ( $existing->currencies() as $code => $price ) {
-			$merged[ $code ] = $price->to_array();
-		}
-
-		foreach ( $submitted as $code => $entry ) {
-			if ( ! is_array( $entry ) ) {
-				continue;
-			}
-
-			$currency_code = strtoupper( sanitize_text_field( (string) $code ) );
-
-			if ( $this->registry->is_base( $currency_code ) ) {
-				continue;
-			}
-
-			$regular = FixedPriceValidator::normalize_price( $entry['regular'] ?? '' );
-			$sale    = FixedPriceValidator::normalize_price( $entry['sale'] ?? '' );
-
-			if ( '' === $regular && '' === $sale ) {
-				unset( $merged[ $currency_code ] );
-				continue;
-			}
-
-			if ( ! FixedPriceValidator::sale_less_than_regular( $regular, $sale ) ) {
-				continue;
-			}
-
-			$merged[ $currency_code ] = array(
-				'regular' => $regular,
-				'sale'    => $sale,
-			);
-		}
-
-		$document = FixedPriceDocument::from_array( $merged, $this->registry->get_base_code() );
-		$this->repository->save( $product_id, $document );
+		$document = $this->merger->merge_and_save( $product_id, $submitted, $this->registry->get_base_code() );
 
 		/**
 		 * Fires after fixed product prices are saved.

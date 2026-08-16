@@ -4,7 +4,7 @@ Tags: woocommerce, currency, multicurrency, exchange rates, money
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.23.0
+Stable tag: 0.24.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,6 +49,15 @@ Not for production traffic. Two runtime converters can double-convert prices. De
 The plugin ships a POT template (`languages/universal-multicurrency.pot`) for translators. Bundled locale `.mo` files are not included in this release.
 
 == Changelog ==
+
+= 0.24.0 =
+* Fixed Pricing CSV Interchange (Milestone 25)
+* Bulk import/export of per-currency fixed prices through WooCommerce's native Products -> Export/Import screens: structured `UMC Fixed Regular/Sale Price (CODE)` columns, no second CSV format, no new admin page
+* Field-level patch semantics on import: unmapped fields stay untouched, a genuinely blank mapped cell clears that one value, a malformed non-blank cell is skipped and logged rather than clearing or defaulting to zero
+* Atomic per-currency validation: an import that would make an authored sale price exceed its regular price is rejected as a whole, reverting to the previous stored state, never a half-applied write
+* Hardened defense against WooCommerce's own generic custom-meta CSV import mechanism writing directly to fixed-price data, without deleting any legitimate existing document
+* `FixedPriceDocumentMerger` is now the single shared mutation authority for the product editor, catalog seed/clear operations, and CSV import
+* Settings schema 7 unchanged; OrderSnapshot 5; PersistedKeys 10; no DB migration
 
 = 0.23.0 =
 * Fixed Pricing Catalog Operations (Milestone 24)

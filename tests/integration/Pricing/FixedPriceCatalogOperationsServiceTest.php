@@ -17,6 +17,7 @@ use UMC\Pricing\FixedPriceDocument;
 use UMC\Pricing\FixedPriceOperationResult;
 use UMC\Rates\ManualRateProvider;
 use UMC\Settings;
+use UMC\Tests\Support\InvertingDisplayPriceConverter;
 use UMC\Tests\Support\M20PricingTestCase;
 use UMC\Tests\Support\SequentialRateProvider;
 
@@ -237,6 +238,50 @@ final class FixedPriceCatalogOperationsServiceTest extends M20PricingTestCase {
 		$manual_json = (string) get_post_meta( $product->get_id() + 1000000, FixedPriceDocument::META_KEY, true );
 
 		$this->assertSame( $manual_json, $seeded_json );
+	}
+
+	/**
+	 * ADR-0030 M24 hardening regression: prior to
+	 * {@see \UMC\Pricing\FixedPriceDocumentMerger}'s extraction, seed()
+	 * never validated the final converted pair via
+	 * {@see \UMC\Pricing\FixedPriceValidator::sale_less_than_regular()} —
+	 * an FX conversion that happened to invert sale/regular at the target
+	 * currency's precision (a decimal-rounding edge case `seed()` never
+	 * produces in practice, and no pre-existing M24 test exercises) would
+	 * have been silently persisted as an invalid fixed price. Engineered
+	 * here via {@see InvertingDisplayPriceConverter}, a test double that
+	 * deterministically inverts the converted pair regardless of the real
+	 * native amounts, since a real rounding edge case is not practical to
+	 * reproduce on demand.
+	 */
+	public function test_seed_rejects_and_does_not_persist_an_inverted_pair_produced_by_fx_conversion(): void {
+		$this->activate( array( 'SEK' => array( 'rate' => '11.50' ) ), 'EUR' );
+		$settings = new Settings();
+		$registry = new CurrencyRegistry( $settings, new Currency( 'EUR', 2 ) );
+		$rates    = new ManualRateProvider( $settings, 'EUR' );
+
+		$service = new FixedPriceCatalogOperationsService(
+			$this->repository,
+			$this->coverage,
+			$rates,
+			new InvertingDisplayPriceConverter(),
+			$registry
+		);
+
+		// A perfectly ordinary, valid native pair (sale < regular) — the
+		// inversion below comes entirely from the engineered converter, not
+		// from bad input.
+		$product = $this->simple_product( '100', '80' );
+
+		$result = $service->seed( array( $product ), 'SEK' );
+
+		$this->assertFalse( $result->is_aborted() );
+		$this->assertNull(
+			$this->repository->get( $product->get_id() )->get_currency( 'SEK' ),
+			'A converted pair that inverts sale/regular at the target currency\'s precision must be rejected ' .
+			'and reverted — never silently persisted — per ADR-0030\'s deliberate M24 hardening via ' .
+			'FixedPriceDocumentMerger.'
+		);
 	}
 
 	public function test_clear_removes_only_target_currency_and_preserves_others(): void {
