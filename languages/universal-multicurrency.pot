@@ -405,7 +405,7 @@ msgstr ""
 
 #: src/Admin/CurrencyOverviewField.php:52
 #: src/Admin/DisplaySettingsField.php:692
-#: src/Admin/FixedPricingSettingsField.php:104
+#: src/Admin/FixedPricingSettingsField.php:143
 msgid "Currency"
 msgstr ""
 
@@ -424,8 +424,8 @@ msgstr ""
 
 #: src/Admin/CurrencyOverviewField.php:56
 #: src/Admin/CurrencyTableField.php:112
-#: src/Admin/FixedPricingSettingsField.php:140
-#: src/Admin/FixedPricingSettingsField.php:219
+#: src/Admin/FixedPricingSettingsField.php:179
+#: src/Admin/FixedPricingSettingsField.php:258
 msgid "Status"
 msgstr ""
 
@@ -1505,27 +1505,27 @@ msgid "Fixed Pricing"
 msgstr ""
 
 #: src/Admin/FixedPriceCoverageColumn.php:135
-#: src/Admin/FixedPricingSettingsField.php:145
-#: src/Admin/FixedPricingSettingsField.php:521
+#: src/Admin/FixedPricingSettingsField.php:184
+#: src/Admin/FixedPricingSettingsField.php:560
 #: src/Admin/ReportingSettingsField.php:192
 msgid "Fixed"
 msgstr ""
 
 #: src/Admin/FixedPriceCoverageColumn.php:136
-#: src/Admin/FixedPricingSettingsField.php:146
-#: src/Admin/FixedPricingSettingsField.php:522
+#: src/Admin/FixedPricingSettingsField.php:185
+#: src/Admin/FixedPricingSettingsField.php:561
 msgid "Partial"
 msgstr ""
 
 #: src/Admin/FixedPriceCoverageColumn.php:137
-#: src/Admin/FixedPricingSettingsField.php:148
-#: src/Admin/FixedPricingSettingsField.php:524
+#: src/Admin/FixedPricingSettingsField.php:187
+#: src/Admin/FixedPricingSettingsField.php:563
 msgid "No priceable variations"
 msgstr ""
 
 #: src/Admin/FixedPriceCoverageColumn.php:138
-#: src/Admin/FixedPricingSettingsField.php:147
-#: src/Admin/FixedPricingSettingsField.php:523
+#: src/Admin/FixedPricingSettingsField.php:186
+#: src/Admin/FixedPricingSettingsField.php:562
 msgid "FX fallback"
 msgstr ""
 
@@ -1543,7 +1543,7 @@ msgid "Invalid fixed pricing scope."
 msgstr ""
 
 #: src/Admin/FixedPricingOperationController.php:147
-#: src/Admin/FixedPricingSettingsField.php:463
+#: src/Admin/FixedPricingSettingsField.php:502
 msgid "No products were selected."
 msgstr ""
 
@@ -1555,7 +1555,7 @@ msgstr ""
 
 #. translators: %d: maximum number of products the admin screen can process in one operation
 #: src/Admin/FixedPricingOperationController.php:186
-#: src/Admin/FixedPricingSettingsField.php:445
+#: src/Admin/FixedPricingSettingsField.php:484
 #, php-format
 msgid "This filter matches more than %d products. Use `wp umc prices` on the command line for catalogs this size."
 msgstr ""
@@ -1604,119 +1604,139 @@ msgstr ""
 msgid "Catalog-wide coverage for per-currency fixed prices (M20). Seed fixed prices from the current exchange rate, or clear them, without editing every product by hand."
 msgstr ""
 
-#: src/Admin/FixedPricingSettingsField.php:106
+#: src/Admin/FixedPricingSettingsField.php:102
+msgid "Bulk import/export"
+msgstr ""
+
+#: src/Admin/FixedPricingSettingsField.php:116
+msgid "Export fixed prices via WooCommerce"
+msgstr ""
+
+#: src/Admin/FixedPricingSettingsField.php:118
+msgid "Fixed prices appear as UMC Fixed Regular/Sale Price columns on the standard Products export screen."
+msgstr ""
+
+#: src/Admin/FixedPricingSettingsField.php:121
+msgid "Import fixed prices via WooCommerce"
+msgstr ""
+
+#: src/Admin/FixedPricingSettingsField.php:123
+msgid "Map the same columns when importing to author or update fixed prices in bulk."
+msgstr ""
+
+#: src/Admin/FixedPricingSettingsField.php:145
 msgid "Choose a currency…"
 msgstr ""
 
-#: src/Admin/FixedPricingSettingsField.php:122
+#: src/Admin/FixedPricingSettingsField.php:161
 msgid "View coverage"
 msgstr ""
 
-#: src/Admin/FixedPricingSettingsField.php:144
+#: src/Admin/FixedPricingSettingsField.php:183
 msgid "All statuses"
 msgstr ""
 
-#: src/Admin/FixedPricingSettingsField.php:160
+#: src/Admin/FixedPricingSettingsField.php:199
 msgid "Search"
 msgstr ""
 
-#: src/Admin/FixedPricingSettingsField.php:163
+#: src/Admin/FixedPricingSettingsField.php:202
 msgid "Apply filters"
 msgstr ""
 
-#: src/Admin/FixedPricingSettingsField.php:181
+#: src/Admin/FixedPricingSettingsField.php:220
 msgid "No products match this filter."
 msgstr ""
 
 #. translators: %d: display limit
-#: src/Admin/FixedPricingSettingsField.php:189
+#: src/Admin/FixedPricingSettingsField.php:228
 #, php-format
 msgid "Showing the first %d matching products. Use the search or status filter to narrow the list, or use the CLI for whole-catalog operations."
 msgstr ""
 
-#: src/Admin/FixedPricingSettingsField.php:219
+#: src/Admin/FixedPricingSettingsField.php:258
 msgid "Product"
 msgstr ""
 
-#: src/Admin/FixedPricingSettingsField.php:239
+#: src/Admin/FixedPricingSettingsField.php:278
 msgid "Preview: seed fixed prices for checked"
 msgstr ""
 
-#: src/Admin/FixedPricingSettingsField.php:244
+#: src/Admin/FixedPricingSettingsField.php:283
 msgid "Preview: clear fixed prices for checked"
 msgstr ""
 
 #. translators: %d: total number of products matching the current filter
-#: src/Admin/FixedPricingSettingsField.php:252
+#: src/Admin/FixedPricingSettingsField.php:291
 #, php-format
 msgid "%d product matches the current filter."
 msgid_plural "%d products match the current filter."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Admin/FixedPricingSettingsField.php:273
+#: src/Admin/FixedPricingSettingsField.php:312
 msgid "Preview: seed fixed prices for all matching products"
 msgstr ""
 
-#: src/Admin/FixedPricingSettingsField.php:283
+#: src/Admin/FixedPricingSettingsField.php:322
 msgid "Preview: clear fixed prices for all matching products"
 msgstr ""
 
-#: src/Admin/FixedPricingSettingsField.php:304
+#: src/Admin/FixedPricingSettingsField.php:343
 msgid "« Previous"
 msgstr ""
 
 #. translators: 1: current page number, 2: last page number
-#: src/Admin/FixedPricingSettingsField.php:308
+#: src/Admin/FixedPricingSettingsField.php:347
 #, php-format
 msgid "Page %1$d of %2$d"
 msgstr ""
 
-#: src/Admin/FixedPricingSettingsField.php:311
+#: src/Admin/FixedPricingSettingsField.php:350
 msgid "Next »"
 msgstr ""
 
-#: src/Admin/FixedPricingSettingsField.php:328
+#: src/Admin/FixedPricingSettingsField.php:367
 msgid "Cannot preview this operation"
 msgstr ""
 
 #. translators: 1: number of products, 2: currency code, 3: current exchange rate
-#: src/Admin/FixedPricingSettingsField.php:338
+#: src/Admin/FixedPricingSettingsField.php:377
 #, php-format
 msgid "This will seed fixed %2$s prices for %1$d product(s)/variation(s) from the current exchange rate (%3$s — subject to change; the rate actually used is resolved again at execution and reported in the result)."
 msgstr ""
 
 #. translators: 1: number of products, 2: currency code
-#: src/Admin/FixedPricingSettingsField.php:345
+#: src/Admin/FixedPricingSettingsField.php:384
 #, php-format
 msgid "This will clear fixed %2$s prices for %1$d product(s)/variation(s). Other currencies are unaffected."
 msgstr ""
 
 #. translators: %d: number of products excluded
-#: src/Admin/FixedPricingSettingsField.php:353
+#: src/Admin/FixedPricingSettingsField.php:392
 #, php-format
 msgid "%d matching product(s) will be excluded because you do not have permission to edit them."
 msgstr ""
 
-#: src/Admin/FixedPricingSettingsField.php:359
+#: src/Admin/FixedPricingSettingsField.php:398
 msgid "Preview"
 msgstr ""
 
 #. translators: %d: number of additional products not shown in the sample
-#: src/Admin/FixedPricingSettingsField.php:371
+#: src/Admin/FixedPricingSettingsField.php:410
 #, php-format
 msgid "… and %d more."
 msgstr ""
 
-#: src/Admin/FixedPricingSettingsField.php:396
+#: src/Admin/FixedPricingSettingsField.php:435
 msgid "Confirm"
 msgstr ""
 
-#: src/Admin/FixedPricingSettingsField.php:413
+#: src/Admin/FixedPricingSettingsField.php:452
 msgid "Cancel"
 msgstr ""
 
-#: src/Admin/FixedPricingSettingsField.php:502
+#: src/Admin/FixedPricingSettingsField.php:541
 msgid "resolved at confirm time"
 msgstr ""
 
@@ -2539,22 +2559,22 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-#: src/Admin/ProductFixedPricesPanel.php:95
+#: src/Admin/ProductFixedPricesPanel.php:103
 msgid "Multicurrency fixed prices"
 msgstr ""
 
 #. translators: %s: store base currency code
-#: src/Admin/ProductFixedPricesPanel.php:99
+#: src/Admin/ProductFixedPricesPanel.php:107
 #, php-format
 msgid "Base prices remain in WooCommerce (%s). Leave blank to use automatic conversion. Fixed sale amounts follow the product's WooCommerce sale schedule."
 msgstr ""
 
-#: src/Admin/ProductFixedPricesPanel.php:122
+#: src/Admin/ProductFixedPricesPanel.php:130
 msgid "currency disabled"
 msgstr ""
 
-#: src/Admin/ProductFixedPricesPanel.php:128
-#: src/Admin/ProductFixedPricesPanel.php:135
+#: src/Admin/ProductFixedPricesPanel.php:136
+#: src/Admin/ProductFixedPricesPanel.php:143
 msgid "Auto convert"
 msgstr ""
 
@@ -3657,6 +3677,18 @@ msgstr ""
 #: src/Integration/GatewayCompatibility.php:250
 #, php-format
 msgid "No payment method is available for %s. Please choose a different currency to continue."
+msgstr ""
+
+#. translators: %s: currency code, e.g. SEK
+#: src/Pricing/FixedPriceCsvIntegration.php:502
+#, php-format
+msgid "UMC Fixed Regular Price (%s)"
+msgstr ""
+
+#. translators: %s: currency code, e.g. SEK
+#: src/Pricing/FixedPriceCsvIntegration.php:509
+#, php-format
+msgid "UMC Fixed Sale Price (%s)"
 msgstr ""
 
 #: src/Rates/RateStatusEvaluator.php:93
