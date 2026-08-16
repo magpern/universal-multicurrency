@@ -62,15 +62,19 @@ final class FixedPriceCsvExportTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Runs the real exporter for a fixed set of product IDs and returns the
-	 * prepared row data.
+	 * Runs the real exporter, unscoped, and returns the prepared row data.
 	 *
-	 * @param array<int, int> $product_ids Product IDs to export.
+	 * Deliberately does not narrow via `set_product_ids_to_export()` --
+	 * that method does not exist at this plugin's WC 8.2.5 floor (confirmed
+	 * by the `floor` CI leg; added to WooCommerce after 8.2). Each test's
+	 * PHPUnit database is isolated and contains only the handful of
+	 * products that test itself created, so an unscoped export is safe and
+	 * fast; callers filter the result by product id via `row_for()`.
+	 *
 	 * @return array<int, array<string, mixed>>
 	 */
-	private function export_rows( array $product_ids ): array {
+	private function export_rows(): array {
 		$exporter = new \WC_Product_CSV_Exporter();
-		$exporter->set_product_ids_to_export( $product_ids );
 		$exporter->prepare_data_to_export();
 
 		$reflection = new \ReflectionProperty( $exporter, 'row_data' );
@@ -115,7 +119,7 @@ final class FixedPriceCsvExportTest extends WP_UnitTestCase {
 			)
 		);
 
-		$rows = $this->export_rows( array( $product->get_id() ) );
+		$rows = $this->export_rows();
 		$row  = $this->row_for( $rows, $product->get_id() );
 
 		$this->assertSame( '1150.00', $row['umc_fixed_regular_sek'] );
@@ -130,7 +134,7 @@ final class FixedPriceCsvExportTest extends WP_UnitTestCase {
 		$product->set_regular_price( '10' );
 		$product->save();
 
-		$rows = $this->export_rows( array( $product->get_id() ) );
+		$rows = $this->export_rows();
 		$row  = $this->row_for( $rows, $product->get_id() );
 
 		$this->assertSame( '', $row['umc_fixed_regular_sek'] );
@@ -155,7 +159,7 @@ final class FixedPriceCsvExportTest extends WP_UnitTestCase {
 			FixedPriceDocument::from_array( array( 'SEK' => array( 'regular' => '999' ) ), 'EUR' )
 		);
 
-		$rows = $this->export_rows( array( $parent->get_id() ) );
+		$rows = $this->export_rows();
 		$row  = $this->row_for( $rows, $parent->get_id() );
 
 		$this->assertSame( '', $row['umc_fixed_regular_sek'] );
@@ -186,12 +190,12 @@ final class FixedPriceCsvExportTest extends WP_UnitTestCase {
 			FixedPriceDocument::from_array( array( 'SEK' => array( 'regular' => '575' ) ), 'EUR' )
 		);
 
-		// Export by the parent's ID: WooCommerce's own exporter only runs the
-		// variations sub-query when the parent is reached via an include or
-		// category filter (WooCommerceCsvExportStatusFilterTest already
-		// characterizes this), so this is the real path a merchant's "export
-		// everything" or "export this product" run takes.
-		$rows     = $this->export_rows( array( $parent->get_id() ) );
+		// Unscoped "export everything" run: WooCommerce's own exporter
+		// includes the variation pseudo-type directly in its default,
+		// unfiltered product-type query (WooCommerceCsvExportStatusFilterTest
+		// characterizes the filtered-export variant), so both variations
+		// appear as their own rows without any explicit scoping.
+		$rows     = $this->export_rows();
 		$low_row  = $this->row_for( $rows, $low->get_id() );
 		$high_row = $this->row_for( $rows, $high->get_id() );
 
@@ -210,7 +214,7 @@ final class FixedPriceCsvExportTest extends WP_UnitTestCase {
 			FixedPriceDocument::from_array( array( 'GBP' => array( 'regular' => '79' ) ), 'EUR' )
 		);
 
-		$rows = $this->export_rows( array( $product->get_id() ) );
+		$rows = $this->export_rows();
 		$row  = $this->row_for( $rows, $product->get_id() );
 
 		$this->assertSame( '79.00', $row['umc_fixed_regular_gbp'], 'A disabled-but-configured currency must still export.' );
@@ -267,7 +271,7 @@ final class FixedPriceCsvExportTest extends WP_UnitTestCase {
 			)
 		);
 
-		$rows = $this->export_rows( array( $product->get_id() ) );
+		$rows = $this->export_rows();
 		$row  = $this->row_for( $rows, $product->get_id() );
 
 		$this->assertSame( '1150.00', $row['umc_fixed_regular_sek'] );

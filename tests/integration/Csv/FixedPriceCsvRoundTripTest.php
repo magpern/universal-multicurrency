@@ -79,42 +79,78 @@ final class FixedPriceCsvRoundTripTest extends WP_UnitTestCase {
 
 	/**
 	 * Runs the real exporter for a single top-level product ID and returns
-	 * its row.
+	 * its row. Scopes via the woocommerce_product_export_product_query_args
+	 * filter (`include`), not `set_product_ids_to_export()` -- that method
+	 * does not exist at this plugin's WC 8.2.5 floor (confirmed by the
+	 * `floor` CI leg; added to WooCommerce after 8.2).
 	 *
 	 * @param int $product_id Top-level (simple or variable-parent) product ID.
 	 * @return array<string, mixed>
 	 */
 	private function export_row( int $product_id ): array {
-		return $this->find_exported_row( $product_id, $product_id );
+		$scope = static function ( array $args ) use ( $product_id ): array {
+			$args['include'] = array( $product_id );
+			return $args;
+		};
+
+		add_filter( 'woocommerce_product_export_product_query_args', $scope );
+		$row = $this->find_exported_row( $product_id );
+		remove_filter( 'woocommerce_product_export_product_query_args', $scope );
+
+		return $row;
 	}
 
 	/**
-	 * Runs the real exporter for a variation and returns its own row. The
-	 * exporter's ID-filtered query only resolves top-level products directly;
-	 * a variation's row is pulled in by its second-pass "variations of
-	 * matched parents" fetch, so the parent ID must be the one passed to
-	 * set_product_ids_to_export() (WP1 characterization,
-	 * tests/integration/Csv/WooCommerceCsvExportStatusFilterTest.php).
+	 * Runs the real exporter for a variation and returns its own row.
+	 *
+	 * The variations-of-matched-parents second-pass query is only
+	 * triggered by `!empty( $args['category'] )` at this plugin's WC 8.2.5
+	 * floor -- `!empty( $args['include'] )` alone does not trigger it there
+	 * (a real cross-version WooCommerce behavior difference; see
+	 * WooCommerceCsvExportStatusFilterTest::exported_ids_via_category()'s
+	 * docblock for the full characterization). A real category assignment
+	 * is therefore the only scoping mechanism that reliably exercises the
+	 * variation row on both the floor and current WooCommerce versions.
 	 *
 	 * @param int $variation_id Variation ID.
 	 * @param int $parent_id    Its variable parent's ID.
 	 * @return array<string, mixed>
 	 */
 	private function export_variation_row( int $variation_id, int $parent_id ): array {
-		return $this->find_exported_row( $parent_id, $variation_id );
+		$slug = 'umc-e2e-round-trip-' . $parent_id;
+		$term = wp_insert_term( $slug, 'product_cat' );
+		self::assertIsArray( $term, 'Failed to create the characterization category term.' );
+		wp_set_object_terms( $parent_id, array( (int) $term['term_id'] ), 'product_cat' );
+
+		// set_product_category_to_export() expects category SLUGS
+		// (it runs sanitize_title_with_dashes() on each entry), not term
+		// IDs -- passing the numeric term_id here silently matches nothing.
+		$exporter = new \WC_Product_CSV_Exporter();
+		$exporter->set_product_category_to_export( array( $slug ) );
+		$exporter->prepare_data_to_export();
+
+		$reflection = new \ReflectionProperty( $exporter, 'row_data' );
+		$reflection->setAccessible( true );
+
+		foreach ( $reflection->getValue( $exporter ) as $row ) {
+			if ( (int) $row['id'] === $variation_id ) {
+				return $row;
+			}
+		}
+
+		$this->fail( "No exported row found for variation #{$variation_id}." );
 	}
 
 	/**
-	 * Runs the real exporter filtered to $export_id and returns the row whose
-	 * own id column equals $find_id.
+	 * Runs the real exporter (assumed already scoped by a caller-installed
+	 * query-args filter) and returns the row whose own id column equals
+	 * $find_id.
 	 *
-	 * @param int $export_id ID passed to set_product_ids_to_export().
-	 * @param int $find_id   ID to locate among the resulting rows.
+	 * @param int $find_id ID to locate among the resulting rows.
 	 * @return array<string, mixed>
 	 */
-	private function find_exported_row( int $export_id, int $find_id ): array {
+	private function find_exported_row( int $find_id ): array {
 		$exporter = new \WC_Product_CSV_Exporter();
-		$exporter->set_product_ids_to_export( array( $export_id ) );
 		$exporter->prepare_data_to_export();
 
 		$reflection = new \ReflectionProperty( $exporter, 'row_data' );

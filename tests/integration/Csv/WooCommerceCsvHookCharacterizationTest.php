@@ -114,9 +114,21 @@ final class WooCommerceCsvHookCharacterizationTest extends WP_UnitTestCase {
 			3
 		);
 
+		// set_product_ids_to_export() does not exist at this plugin's WC
+		// 8.2.5 floor (confirmed by the `floor` CI leg); scope via the
+		// long-standing woocommerce_product_export_product_query_args filter
+		// instead, which exists at both the floor and current.
+		$product_id = $product->get_id();
+		$scope      = static function ( array $args ) use ( $product_id ): array {
+			$args['include'] = array( $product_id );
+			return $args;
+		};
+		add_filter( 'woocommerce_product_export_product_query_args', $scope );
+
 		$exporter = new \WC_Product_CSV_Exporter();
-		$exporter->set_product_ids_to_export( array( $product->get_id() ) );
 		$exporter->prepare_data_to_export();
+
+		remove_filter( 'woocommerce_product_export_product_query_args', $scope );
 
 		$this->assertNotEmpty( $captured, 'The row_data hook must fire for the exported product.' );
 		$this->assertIsArray( $captured[0][0] );

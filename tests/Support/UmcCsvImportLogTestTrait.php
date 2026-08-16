@@ -10,15 +10,21 @@ declare( strict_types=1 );
 
 namespace UMC\Tests\Support;
 
-use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\File;
-use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\FileController;
-
 /**
- * Reads WooCommerce's real on-disk log files (the FileV2 logging system,
- * WooCommerce's own default handler) rather than mocking `wc_get_logger()` —
- * `wc_get_logger()` caches a process-wide singleton on first use, so swapping
- * its underlying class in one test would leak into every later test in the
- * same PHPUnit process.
+ * Reads WooCommerce's real on-disk log files (WC_Log_Handler_File,
+ * WooCommerce's default handler since long before this plugin's WC 8.2.5
+ * floor) rather than mocking `wc_get_logger()` -- `wc_get_logger()` caches a
+ * process-wide singleton on first use, so swapping its underlying class in
+ * one test would leak into every later test in the same PHPUnit process.
+ *
+ * Reads the log directory directly via the `WC_LOG_DIR` constant rather than
+ * through `Automattic\WooCommerce\Internal\Admin\Logging\FileV2\FileController`
+ * (WooCommerce's newer internal admin log-browsing API): that class is not
+ * registered in WooCommerce's dependency-injection container at this
+ * plugin's WC 8.2.5 floor (`wc_get_container()->get(FileController::class)`
+ * throws `NotFoundException` there, confirmed by the `floor` CI leg), while
+ * `WC_LOG_DIR` and the plain-text `{source}-{date}-{hash}.log` file naming
+ * convention are both part of `WC_Log_Handler_File`, present at the floor.
  */
 trait UmcCsvImportLogTestTrait {
 
@@ -26,15 +32,17 @@ trait UmcCsvImportLogTestTrait {
 	 * Concatenated content of every current `umc-csv-import` log file.
 	 */
 	private function umc_csv_import_log_snapshot(): string {
-		$controller = wc_get_container()->get( FileController::class );
-		$files      = $controller->get_files( array( 'source' => 'umc-csv-import' ) );
-		$contents   = '';
+		$dir = defined( 'WC_LOG_DIR' ) ? WC_LOG_DIR : '';
 
-		if ( is_iterable( $files ) ) {
-			foreach ( $files as $file ) {
-				if ( $file instanceof File && is_readable( $file->get_path() ) ) {
-					$contents .= (string) file_get_contents( $file->get_path() ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents -- Test-only read of WooCommerce's own real log file.
-				}
+		if ( '' === $dir || ! is_dir( $dir ) ) {
+			return '';
+		}
+
+		$contents = '';
+
+		foreach ( (array) glob( trailingslashit( $dir ) . 'umc-csv-import-*.log' ) as $path ) {
+			if ( is_string( $path ) && is_readable( $path ) ) {
+				$contents .= (string) file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents -- Test-only read of WooCommerce's own real log file.
 			}
 		}
 
