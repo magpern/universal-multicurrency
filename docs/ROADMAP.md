@@ -518,12 +518,40 @@ unchanged; no OrderSnapshot, PersistedKeys, or DB migration changes. See
 | WP5 architecture/security/performance guards | **Complete** |
 | Release closure for **v0.23.0** | **Complete** — PR **#25**, tag `v0.23.0` |
 
+## Milestone 25 — Fixed Pricing CSV Interchange (**v0.24.0**) — in progress
+
+**Target:** v0.24.0 · ADR-0030
+
+Bulk, explicitly-authored interchange of per-currency fixed prices through
+WooCommerce's own native product CSV export/import (structured
+`umc_fixed_regular_{code}`/`umc_fixed_sale_{code}` columns, no second CSV
+format, no new admin page), over the unchanged M20 domain model, with a
+shared `FixedPriceDocumentMerger` mutation authority (also adopted by the
+product editor and M24's catalog service) and a resync-to-database-truth
+defense against WooCommerce's own generic custom-meta import mechanism. See
+[`docs/architecture/fixed-pricing-csv-interchange.md`](architecture/fixed-pricing-csv-interchange.md).
+Settings schema **7** unchanged; no OrderSnapshot, PersistedKeys, or DB
+migration changes.
+
+| Work item | Status |
+|---|---|
+| ADR-0030 + architecture spec | **Complete** |
+| WP1 WooCommerce CSV characterization (hooks, ID timing, raw-meta bypass evidence) | Not started |
+| WP2 `FixedPriceDocumentMerger` extraction + M24 hardening | Not started |
+| WP3 `FixedPriceCsvIntegration` export integration | Not started |
+| WP4 `FixedPriceCsvIntegration` import integration + raw-meta defense | Not started |
+| WP5 round-trip + variation acceptance | Not started |
+| WP6 admin discoverability | Not started |
+| WP7 security/performance/architecture guards | Not started |
+| WP8 documentation/compatibility/i18n | Not started |
+| Release closure for **v0.24.0** | Not started |
+
 ## Future milestones — not started, not implemented
 
 None of the following exists in the codebase today:
-- CSV import/export for fixed prices; a REST write API for fixed prices;
-  flat-markup bulk seeding; Quick Edit inline fixed-price fields (all
-  deferred from M24 — see ADR-0029 § Explicit non-goals)
+- A REST write API for fixed prices; flat-markup bulk seeding; Quick Edit
+  inline fixed-price fields (deferred from M24 — see ADR-0029 § Explicit
+  non-goals; CSV import/export itself is now M25, in progress above)
 - Custom switcher media / Media Library icons (deferred from M22/M23)
 - Additional exchange-rate providers and per-currency provider selection
 - `country_change` geo detection mode and broader continent presets
