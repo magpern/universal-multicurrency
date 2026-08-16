@@ -22,9 +22,11 @@ use WC_Product;
  * All reads/writes flow through {@see FixedPriceRepository} and
  * {@see FixedPriceDocumentMerger} — this class owns only the WC-hook plumbing
  * and CSV-specific validation (raw-cell blank/invalid distinction, live
- * currency-registry gating). It never references `RateProvider`,
- * `PriceConversionService`, or `DisplayPriceConverter` — CSV import/export is
- * authoring and presentation of already-authored data, never conversion.
+ * currency-registry gating). It has no dependency on any FX rate-resolution
+ * or currency-conversion authority (guarded by
+ * {@see \UMC\Tests\Unit\Pricing\FixedPriceCsvIntegrationGuardTest}) — CSV
+ * import/export is authoring and presentation of already-authored data,
+ * never conversion.
  */
 final class FixedPriceCsvIntegration {
 
