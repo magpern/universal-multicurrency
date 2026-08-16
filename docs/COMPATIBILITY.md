@@ -249,6 +249,53 @@ fallback when no applicable fixed price exists.
 
 Authoritative spec: [`docs/architecture/authoritative-fixed-product-pricing.md`](architecture/authoritative-fixed-product-pricing.md), ADR-0025.
 
+### Milestone 25 — fixed pricing CSV interchange (v0.24.0)
+
+M25 extends WooCommerce's native product CSV export/import with structured
+per-currency fixed-price columns via six WooCommerce extension hooks:
+`woocommerce_product_export_column_names`,
+`woocommerce_product_export_product_default_columns`,
+`woocommerce_product_export_row_data`,
+`woocommerce_csv_product_import_mapping_options`,
+`woocommerce_csv_product_import_mapping_default_columns`,
+`woocommerce_product_import_pre_insert_product_object`, and
+`woocommerce_product_import_inserted_product_object`. Confirmed present with
+identical signatures at both this plugin's declared WooCommerce floor
+(sourced from the WC 8.2.3 tag — one patch below the pinned 8.2.5 floor
+coordinate) and the pinned `current` leg (10.9.4).
+
+| Topic | M25 posture |
+|---|---|
+| WooCommerce native product CSV export/import | Supported — the sole interchange mechanism; no second UMC CSV format or admin page |
+| Six extension hooks above | Supported at floor and current; confirmed present, unchanged in signature, at both coordinates |
+| WooCommerce's generic `meta:`-prefixed custom-meta import mechanism | Defended against, not relied upon — see § Raw-meta resync-to-database-truth defense below |
+| Third-party CSV/import tools (WP All Import, Product CSV Import Suite, or similar) | Not evaluated — no compatibility claim |
+
+**Raw-meta resync-to-database-truth defense**: WooCommerce's own generic
+`meta:`-prefixed CSV import column mechanism writes directly to arbitrary
+post meta, including underscore-prefixed keys, with no `is_protected_meta()`
+check anywhere in the product-import write path — confirmed by direct source
+read and by a real, passing integration test
+(`tests/integration/Csv/WooCommerceCsvImporterNativeBehaviorTest.php`) that a
+hand-authored `meta:_umc_fixed_prices` CSV column can otherwise write
+arbitrary, unvalidated content to that key, and that WooCommerce's own
+mapping auto-selector pre-selects this route by default. M25 registers an
+unconditional guard on `woocommerce_product_import_pre_insert_product_object`
+that resyncs the importing object's in-memory fixed-price meta entry to an
+independently, freshly read database value — never an unconditional delete,
+since WooCommerce's generic importer mutates an *existing* meta entry's value
+in place rather than adding a duplicate, and a blind delete would destroy a
+legitimate existing document exactly as destructively as the attack it
+defends against. See ADR-0030 § Raw-meta resync-to-database-truth defense and
+[`docs/architecture/fixed-pricing-csv-interchange.md`](architecture/fixed-pricing-csv-interchange.md)
+§5 for the full algorithm and evidence.
+
+No `Settings::SCHEMA_VERSION`, `OrderSnapshot::SCHEMA_VERSION`, or
+`PersistedKeys::INVENTORY_VERSION` change. No new persisted option,
+transient, or meta key.
+
+Authoritative spec: [`docs/architecture/fixed-pricing-csv-interchange.md`](architecture/fixed-pricing-csv-interchange.md), ADR-0030.
+
 ## The floor's Store API order-route exclusion
 
 At the WooCommerce floor (8.2.x), WooCommerce's own Store API `RoutesController`

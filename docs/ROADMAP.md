@@ -536,14 +536,16 @@ migration changes.
 | Work item | Status |
 |---|---|
 | ADR-0030 + architecture spec | **Complete** |
-| WP1 WooCommerce CSV characterization (hooks, ID timing, raw-meta bypass evidence) | Not started |
-| WP2 `FixedPriceDocumentMerger` extraction + M24 hardening | Not started |
-| WP3 `FixedPriceCsvIntegration` export integration | Not started |
-| WP4 `FixedPriceCsvIntegration` import integration + raw-meta defense | Not started |
-| WP5 round-trip + variation acceptance | Not started |
-| WP6 admin discoverability | Not started |
-| WP7 security/performance/architecture guards | Not started |
-| WP8 documentation/compatibility/i18n | Not started |
+| WP1 WooCommerce CSV characterization (hooks, ID timing, raw-meta bypass evidence) | **Complete** |
+| WP2 `FixedPriceDocumentMerger` extraction + M24 hardening | **Complete** |
+| WP3 `FixedPriceCsvIntegration` export integration | **Complete** |
+| WP4 `FixedPriceCsvIntegration` import integration + raw-meta defense | **Complete** |
+| WP5 round-trip + variation acceptance | Substantially covered by WP3/WP4's 29 integration tests; dedicated persistence/projection round-trip pass pending |
+| WP6 admin discoverability | **Complete** |
+| WP7 security/performance/architecture guards | **Complete** — `FixedPriceCsvIntegrationGuardTest` (FX/storefront/HTTP/order-reporting exclusion); performance/idempotency covered by WP3/WP4 tests |
+| WP8 documentation/compatibility/i18n | **Complete** — `COMPATIBILITY.md`, `PERSISTED_DATA.md`, POT regenerated |
+| WP9 independent corrective review | Not started |
+| Manual acceptance walkthrough (release-blocking) | Not started |
 | Release closure for **v0.24.0** | Not started |
 
 ## Future milestones — not started, not implemented
