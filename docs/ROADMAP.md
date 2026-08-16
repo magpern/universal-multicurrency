@@ -540,7 +540,7 @@ migration changes.
 | WP2 `FixedPriceDocumentMerger` extraction + M24 hardening | **Complete** |
 | WP3 `FixedPriceCsvIntegration` export integration | **Complete** |
 | WP4 `FixedPriceCsvIntegration` import integration + raw-meta defense | **Complete** |
-| WP5 round-trip + variation acceptance | Substantially covered by WP3/WP4's 29 integration tests; dedicated persistence/projection round-trip pass pending |
+| WP5 round-trip + variation acceptance | **Complete** — `FixedPriceCsvRoundTripTest` (persistence + projection round trip, architecture doc §8) on top of WP3/WP4's 29 behavioral tests |
 | WP6 admin discoverability | **Complete** |
 | WP7 security/performance/architecture guards | **Complete** — `FixedPriceCsvIntegrationGuardTest` (FX/storefront/HTTP/order-reporting exclusion); performance/idempotency covered by WP3/WP4 tests |
 | WP8 documentation/compatibility/i18n | **Complete** — `COMPATIBILITY.md`, `PERSISTED_DATA.md`, POT regenerated |
