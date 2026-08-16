@@ -70,3 +70,9 @@ require_once __DIR__ . '/StoreApi/StoreApiTestCase.php';
 // block still correctly stays inactive in the test environment.
 require_once dirname( __DIR__ ) . '/Support/WpCliTestStub.php';
 require_once dirname( __DIR__ ) . '/Support/WpCliUtilsTestStub.php';
+
+// WooCommerce's product CSV export/import classes are only autoloaded by WC
+// itself inside admin request contexts, not on every request. M25's WP1 CSV
+// characterization suite (tests/integration/Csv/) talks to these classes
+// directly, so they are required explicitly here, once, for the whole suite.
+require_once dirname( __DIR__ ) . '/Support/wc-csv-classes.php';
