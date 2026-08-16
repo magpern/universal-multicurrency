@@ -568,7 +568,7 @@ ADR-0031 for the frozen v1.0 contract.
 | WP3 Full-system PHP acceptance (cross-feature) | **Complete** — 3 new integration tests in `tests/integration/CrossFeature/` |
 | WP4 Playwright v1.0 smoke acceptance | Not started |
 | WP5 Security/performance/compatibility hardening | **Complete** — SECURITY_REVIEW.md audited-surfaces table extended through M25, no new finding |
-| WP6 Admin/storefront operational acceptance | Not started |
+| WP6 Admin/storefront operational acceptance | **In progress** — stale ARCHITECTURE.md/SWITCHER_CUSTOMIZATION.md milestone references fixed; live spot-check pending with WP4 |
 | WP7 Documentation completion (README, GETTING_STARTED.md) | Not started |
 | WP8 Clean-install/historical-upgrade/rollback rehearsal | Not started |
 | WP9 Corrective review and falsification | Not started |

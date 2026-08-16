@@ -526,7 +526,7 @@ Custom CSS invariants:
 4. **Never previewed.** The admin preview reflects structured settings only; the
    Advanced card states that Custom CSS applies on the storefront after saving.
 
-Plugin version is prepared as **0.17.0** (Milestone 18). Milestone 17 shipped at
-**0.16.0**. Milestone 16 shipped at
-v0.15.0; Milestone 15 at v0.14.0. See [`RELEASE_AUDIT.md`](RELEASE_AUDIT.md) and
-[`ROADMAP.md`](ROADMAP.md).
+Current plugin version and milestone-by-release history are tracked
+authoritatively in [`RELEASE_AUDIT.md`](RELEASE_AUDIT.md) and
+[`ROADMAP.md`](ROADMAP.md) — not repeated here, so this section cannot drift
+out of date at each release.
