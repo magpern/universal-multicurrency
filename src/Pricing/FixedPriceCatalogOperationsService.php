@@ -23,11 +23,11 @@ use WC_Product;
  *
  * Reuses, never reimplements:
  *
- * - {@see FixedPriceRepository} / {@see FixedPriceValidator} /
- *   {@see FixedPriceDocument} for all persistence, via the exact merge
- *   algorithm {@see \UMC\Admin\ProductFixedPricesPanel::persist_submission()}
- *   already uses, so output is byte-identical to manual single-product
- *   authoring for equivalent input.
+ * - {@see FixedPriceDocumentMerger} (ADR-0030) for the merge/persist
+ *   algorithm itself — the same shared mutation authority
+ *   {@see \UMC\Admin\ProductFixedPricesPanel::persist_submission()} and
+ *   M25's CSV importer use, so output is byte-identical to manual
+ *   single-product authoring for equivalent input.
  * - {@see DisplayPriceConverter}'s `convert_to()` method (bound to
  *   {@see \UMC\Integration\PriceConversionService} in production) for all
  *   arithmetic. The underlying conversion class itself is a strict seam:
@@ -63,6 +63,18 @@ final class FixedPriceCatalogOperationsService {
 	public const DEFAULT_BATCH_SIZE = 200;
 
 	/**
+	 * Shared mutation authority (ADR-0030), built from the same repository
+	 * this service already receives. Closes a validation gap this service
+	 * shipped with in M24: {@see FixedPriceDocumentMerger::merge()} enforces
+	 * {@see FixedPriceValidator::sale_less_than_regular()} on the final
+	 * merged pair, which this service's own prior inline merge algorithm did
+	 * not.
+	 *
+	 * @var FixedPriceDocumentMerger
+	 */
+	private FixedPriceDocumentMerger $merger;
+
+	/**
 	 * Binds the orchestration service to its collaborators.
 	 *
 	 * @param FixedPriceRepository     $repository Fixed-price persistence.
@@ -78,6 +90,7 @@ final class FixedPriceCatalogOperationsService {
 		private DisplayPriceConverter $converter,
 		private CurrencyRegistry $registry
 	) {
+		$this->merger = new FixedPriceDocumentMerger( $repository );
 	}
 
 	/**
@@ -240,32 +253,24 @@ final class FixedPriceCatalogOperationsService {
 
 	/**
 	 * Merges one currency entry into a product's existing document and
-	 * saves — the identical merge algorithm
-	 * {@see \UMC\Admin\ProductFixedPricesPanel::persist_submission()} uses:
-	 * read existing currencies, overlay or remove the target entry, rebuild
-	 * via {@see FixedPriceDocument::from_array()} (which re-validates every
-	 * entry through {@see FixedPriceValidator}), save.
+	 * saves, via {@see FixedPriceDocumentMerger} — the same shared mutation
+	 * authority {@see \UMC\Admin\ProductFixedPricesPanel::persist_submission()}
+	 * delegates to (ADR-0030), so output is byte-identical to manual
+	 * single-product authoring for equivalent input. Since ADR-0030, this
+	 * also enforces {@see FixedPriceValidator::sale_less_than_regular()} on
+	 * the final merged pair — a deliberate M24 hardening this service did
+	 * not previously perform.
 	 *
 	 * @param int                                    $product_id    Product or variation ID.
 	 * @param string                                 $currency_code Uppercase currency code.
 	 * @param array{regular:string,sale:string}|null $entry          New entry, or null to remove.
 	 */
 	private function merge_and_save( int $product_id, string $currency_code, ?array $entry ): void {
-		$existing = $this->repository->get( $product_id );
-		$merged   = array();
-
-		foreach ( $existing->currencies() as $code => $price ) {
-			$merged[ $code ] = $price->to_array();
-		}
-
-		if ( null === $entry ) {
-			unset( $merged[ $currency_code ] );
-		} else {
-			$merged[ $currency_code ] = $entry;
-		}
-
-		$document = FixedPriceDocument::from_array( $merged, $this->registry->get_base_code() );
-		$this->repository->save( $product_id, $document );
+		$document = $this->merger->merge_and_save(
+			$product_id,
+			array( $currency_code => $entry ),
+			$this->registry->get_base_code()
+		);
 
 		/**
 		 * Fires after fixed prices are saved. Also fired by
