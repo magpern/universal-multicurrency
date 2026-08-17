@@ -76,6 +76,37 @@ found.**
 
 ---
 
+## v1.0.0 release closure record
+
+Prepared (WP10a version bump) — not yet released. Milestone 25 through
+Milestone 24 remain **Complete** as recorded in their own closure records
+below; this table tracks v1.0.0/Milestone 26 specifically and is finalized
+(tag/release rows, PR #, merge SHA, CI run IDs, artifact hash) as part of
+WP12 roadmap closure, after WP11's PR/CI/merge/tag/release/artifact
+verification actually succeeds.
+
+| Item | Value |
+|---|---|
+| Version | **1.0.0** |
+| Settings schema | **7** (unchanged) |
+| Order snapshot schema | **5** (unchanged) |
+| Persisted-data inventory version | **10** (unchanged) |
+| Production migrations | none |
+| New admin surface | none — hardening/documentation milestone, no product feature |
+| Third-party compatibility evidence | unchanged from Milestone 19 (E0/E2; no tier promoted) |
+| Browser acceptance | 26/26 Playwright scenarios green against DEV (dev.biopentra.eu) — existing M25 CSV suite (22/22, re-verified unmodified) plus 4 new v1.0 journey scenarios (core purchase, Blocks, fixed-pricing x2) |
+| Unresolved release blockers | **0** |
+| Git tag `v1.0.0` | **Not yet created** |
+| GitHub release `v1.0.0` | **Not yet published** |
+| Milestone 26 | **In progress** — release pending |
+| PR CI run | pending |
+| Main CI run | pending |
+| Release workflow | pending |
+| Artifact | pending |
+| Deployment | **Not performed** |
+
+---
+
 # Release audit — v0.24.0 Fixed Pricing CSV Interchange
 
 Executable release-preparation gate for Universal Multicurrency **v0.24.0**.

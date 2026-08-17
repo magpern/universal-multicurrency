@@ -26,7 +26,7 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Produces `dist/universal-multicurrency-0.24.0.zip`. The archive includes `readme.txt`,
+Produces `dist/universal-multicurrency-1.0.0.zip`. The archive includes `readme.txt`,
 production `src/`, `vendor/`, bundled presentation assets, block metadata, and
 `languages/universal-multicurrency.pot`.
 
@@ -37,9 +37,35 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release on `main`:** **v0.24.0** (tagged and published).
+**Current release on `main`:** **v0.24.0** (tagged and published). **v1.0.0
+prepared on `feature/m26-v1.0-readiness`** — release pending (Milestone 26,
+WP10a version bump; tag/publish deferred to WP11).
 
 ---
+
+## v1.0.0 — v1.0 Production Readiness & Roadmap Closure (prepared, release pending)
+
+Ships Milestone 26 (ADR-0031). Not a feature milestone — audits, hardens,
+proves, and documents that the plugin is ready to leave the 0.x series;
+Settings schema **7**, order snapshot schema **5**, and PersistedKeys **10**
+are all unchanged; no DB migration. Third-party extension compatibility
+evidence is unchanged from Milestone 19 (no tier promoted). Full detail:
+[`M26_V1_READINESS_PLAN.md`](M26_V1_READINESS_PLAN.md), ADR-0031.
+
+### Upgrade rehearsal
+
+Operational rehearsal (WP8), on an isolated disposable WordPress +
+WooCommerce environment, never `dev.biopentra.eu`: install each of six
+representative historical published releases (`v0.5.0`, `v0.8.1`, `v0.16.0`,
+`v0.19.0`, `v0.23.0`, `v0.24.0` — selected on schema/migration boundaries,
+see `M26_V1_READINESS_PLAN.md` §8), exercise it briefly, upgrade in place to
+the v1.0.0 candidate, and verify settings/currencies/rates/display/
+fixed-price/disabled-currency data and historical orders all survive
+unchanged. Results recorded below once the rehearsal completes.
+
+### Rollback
+
+<!-- Filled in after the WP8 rehearsal executes; see the section below this table. -->
 
 ## v0.24.0 — Fixed Pricing CSV Interchange (released)
 
