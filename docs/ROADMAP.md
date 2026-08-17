@@ -570,7 +570,7 @@ ADR-0031 for the frozen v1.0 contract.
 | WP5 Security/performance/compatibility hardening | **Complete** — SECURITY_REVIEW.md audited-surfaces table extended through M25, no new finding |
 | WP6 Admin/storefront operational acceptance | **Complete** — stale milestone references fixed; storefront/admin walked incidentally via WP4's Playwright specs (switcher, checkout, fixed pricing, Cart/Checkout Blocks, order admin screen) with no defect found |
 | WP7 Documentation completion (README, GETTING_STARTED.md) | **Complete** — README.md rewritten for v0.24.0 accuracy, GETTING_STARTED.md added, TEST_STRATEGY.md closing pointer added, CLAUDE.md uninstall cross-doc gap fixed |
-| WP8 Clean-install/historical-upgrade/rollback rehearsal | Not started |
+| WP8 Clean-install/historical-upgrade/rollback rehearsal | **Complete** — 6/6 upgrade legs (v0.5.0, v0.8.1, v0.16.0, v0.19.0, v0.23.0, v0.24.0 -> v1.0.0) on an isolated disposable environment using published GitHub release artifacts; clean install and rollback both verified; zero warnings/data loss across every leg -- see DEPLOYMENT.md |
 | WP9 Corrective review and falsification | Not started |
 | WP10 v1.0.0 release preparation | Not started |
 | WP11 PR/CI/merge/tag/release/artifact verification | Not started |
