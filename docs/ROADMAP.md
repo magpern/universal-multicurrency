@@ -566,10 +566,10 @@ ADR-0031 for the frozen v1.0 contract.
 | WP1 Roadmap/repository completeness audit (formalized) | **Complete** |
 | WP2 Schema-2/3/5 migration fixture validation | **Complete** — corrected during implementation; see `M26_V1_READINESS_PLAN.md` WP2 |
 | WP3 Full-system PHP acceptance (cross-feature) | **Complete** — 3 new integration tests in `tests/integration/CrossFeature/` |
-| WP4 Playwright v1.0 smoke acceptance | Not started |
+| WP4 Playwright v1.0 smoke acceptance | **Complete** — 3 new specs (core purchase, Blocks, fixed-pricing) green against DEV; hostname hardcoding removed from production-guard.ts; existing M25 spec re-verified unchanged (22/22 green) |
 | WP5 Security/performance/compatibility hardening | **Complete** — SECURITY_REVIEW.md audited-surfaces table extended through M25, no new finding |
-| WP6 Admin/storefront operational acceptance | **In progress** — stale ARCHITECTURE.md/SWITCHER_CUSTOMIZATION.md milestone references fixed; live spot-check pending with WP4 |
-| WP7 Documentation completion (README, GETTING_STARTED.md) | Not started |
+| WP6 Admin/storefront operational acceptance | **Complete** — stale milestone references fixed; storefront/admin walked incidentally via WP4's Playwright specs (switcher, checkout, fixed pricing, Cart/Checkout Blocks, order admin screen) with no defect found |
+| WP7 Documentation completion (README, GETTING_STARTED.md) | **Complete** — README.md rewritten for v0.24.0 accuracy, GETTING_STARTED.md added, TEST_STRATEGY.md closing pointer added, CLAUDE.md uninstall cross-doc gap fixed |
 | WP8 Clean-install/historical-upgrade/rollback rehearsal | Not started |
 | WP9 Corrective review and falsification | Not started |
 | WP10 v1.0.0 release preparation | Not started |
