@@ -25,7 +25,7 @@ use ZipArchive;
  */
 final class DocumentationSyncTest extends TestCase {
 
-	private const CURRENT_VERSION = '0.24.0';
+	private const CURRENT_VERSION = '1.0.0';
 
 	/**
 	 * Tracked documentation sources that must exist and stay internally consistent.

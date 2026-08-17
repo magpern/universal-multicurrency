@@ -1,10 +1,15 @@
 # Switcher customization guide
 
 Merchant and developer reference for Universal Multicurrency storefront switcher
-presentation (Milestone 17 / v0.16.0).
+presentation: structured design and layout (M17), presentation icons (M22),
+and the native Gutenberg block (M23).
 
-Authoritative architecture: [`docs/architecture/switcher-customization.md`](architecture/switcher-customization.md)
-ADR: [`docs/adr/0022-switcher-customization-css-contract.md`](adr/0022-switcher-customization-css-contract.md)
+Authoritative architecture: [`docs/architecture/switcher-customization.md`](architecture/switcher-customization.md),
+[`docs/architecture/switcher-currency-presentation.md`](architecture/switcher-currency-presentation.md),
+[`docs/architecture/native-switcher-block.md`](architecture/native-switcher-block.md)
+ADRs: [`0022`](adr/0022-switcher-customization-css-contract.md),
+[`0027`](adr/0027-switcher-currency-presentation.md),
+[`0028`](adr/0028-native-switcher-block-rendering-surface.md)
 
 ---
 

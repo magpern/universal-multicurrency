@@ -219,6 +219,17 @@ final class SettingsMigrationV5ToV6Test extends TestCase {
 		$this->assertArrayNotHasKey( 'appearance', $result->settings()['display'] );
 	}
 
+	public function test_v5_origin_upgrade_to_current_schema_is_idempotent(): void {
+		$upgrader = new SettingsUpgrader();
+
+		$first  = $upgrader->upgrade( $this->v5_fixture() );
+		$second = $upgrader->upgrade( $first->settings() );
+
+		$this->assertSame( Settings::SCHEMA_VERSION, $first->settings()['schema_version'] );
+		$this->assertSame( $first->settings(), $second->settings() );
+		$this->assertFalse( $second->should_persist() );
+	}
+
 	public function test_upgrade_from_schema_zero_reaches_current_schema(): void {
 		$result = ( new SettingsUpgrader() )->upgrade(
 			array(

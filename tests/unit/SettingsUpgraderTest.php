@@ -278,6 +278,28 @@ final class SettingsUpgraderTest extends TestCase {
 		$this->assertSame( \UMC\Display\SwitcherSettings::default_array()['placement'], $result->settings()['display']['placement'] );
 	}
 
+	public function test_v2_origin_upgrade_to_current_schema_is_idempotent(): void {
+		$upgrader = new SettingsUpgrader();
+		$raw_v2   = array(
+			'schema_version'       => 2,
+			'rate_mode'            => Settings::RATE_MODE_AUTOMATIC,
+			'rate_update_interval' => 'P3D',
+			'currencies'           => array(
+				'EUR' => array(
+					'manual_rate' => '0.92',
+					'enabled'     => true,
+				),
+			),
+		);
+
+		$first  = $upgrader->upgrade( $raw_v2 );
+		$second = $upgrader->upgrade( $first->settings() );
+
+		$this->assertSame( Settings::SCHEMA_VERSION, $first->settings()['schema_version'] );
+		$this->assertSame( $first->settings(), $second->settings() );
+		$this->assertFalse( $second->should_persist() );
+	}
+
 	public function test_v3_to_v4_migration_preserves_settings_and_adds_checkout_defaults(): void {
 		$result = ( new SettingsUpgrader() )->upgrade(
 			array(
@@ -306,6 +328,32 @@ final class SettingsUpgraderTest extends TestCase {
 			\UMC\Checkout\CheckoutSettings::default_array(),
 			$result->settings()['checkout']
 		);
+	}
+
+	public function test_v3_origin_upgrade_to_current_schema_is_idempotent(): void {
+		$upgrader = new SettingsUpgrader();
+		$raw_v3   = array(
+			'schema_version'       => 3,
+			'rate_mode'            => Settings::RATE_MODE_AUTOMATIC,
+			'rate_update_interval' => 'P3D',
+			'currencies'           => array(
+				'USD' => array(
+					'manual_rate' => '1.08',
+					'enabled'     => true,
+				),
+			),
+			'display'              => array(
+				'enabled'   => true,
+				'placement' => \UMC\Display\SwitcherSettings::PLACEMENT_FLOATING_SIDE,
+			),
+		);
+
+		$first  = $upgrader->upgrade( $raw_v3 );
+		$second = $upgrader->upgrade( $first->settings() );
+
+		$this->assertSame( Settings::SCHEMA_VERSION, $first->settings()['schema_version'] );
+		$this->assertSame( $first->settings(), $second->settings() );
+		$this->assertFalse( $second->should_persist() );
 	}
 
 	public function test_migrate_0_to_1_strips_unknown_root_keys(): void {

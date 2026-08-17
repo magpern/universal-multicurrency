@@ -26,7 +26,7 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Produces `dist/universal-multicurrency-0.24.0.zip`. The archive includes `readme.txt`,
+Produces `dist/universal-multicurrency-1.0.0.zip`. The archive includes `readme.txt`,
 production `src/`, `vendor/`, bundled presentation assets, block metadata, and
 `languages/universal-multicurrency.pot`.
 
@@ -37,9 +37,85 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release on `main`:** **v0.24.0** (tagged and published).
+**Current release on `main`:** **v0.24.0** (tagged and published). **v1.0.0
+prepared on `feature/m26-v1.0-readiness`** — release pending (Milestone 26,
+WP10a version bump; tag/publish deferred to WP11).
 
 ---
+
+## v1.0.0 — v1.0 Production Readiness & Roadmap Closure (prepared, release pending)
+
+Ships Milestone 26 (ADR-0031). Not a feature milestone — audits, hardens,
+proves, and documents that the plugin is ready to leave the 0.x series;
+Settings schema **7**, order snapshot schema **5**, and PersistedKeys **10**
+are all unchanged; no DB migration. Third-party extension compatibility
+evidence is unchanged from Milestone 19 (no tier promoted). Full detail:
+[`M26_V1_READINESS_PLAN.md`](M26_V1_READINESS_PLAN.md), ADR-0031.
+
+### Upgrade rehearsal (WP8 — completed)
+
+Operational rehearsal on an isolated, disposable WordPress 7.0.4 +
+WooCommerce 11.0.1 environment (fresh Docker + WP-CLI, MariaDB 11.4) —
+never `dev.biopentra.eu`. All six artifacts were the **published GitHub
+release ZIPs** (`gh release download`), not reconstructed builds — priority
+tier 1 throughout, no substitution needed.
+
+For each of `v0.5.0`, `v0.8.1`, `v0.16.0`, `v0.19.0`, `v0.23.0`, `v0.24.0`
+(selected on schema/migration boundaries — see `M26_V1_READINESS_PLAN.md`
+§8): installed and activated the historical release, configured a
+representative state through the plugin's own code (an enabled SEK
+currency + a disabled-but-configured DKK currency via `Settings::save()`;
+for `v0.19.0`/`v0.23.0`/`v0.24.0`, also an authoritative fixed SEK price on
+a product via `FixedPriceRepository`; a WC order carrying that version's
+real `_umc_*` snapshot meta shape), captured the exact settings option and
+order/product meta, then force-upgraded in place to the `v1.0.0` candidate
+build and re-captured the same state.
+
+| From | Settings schema before → after | Order meta | Fixed-price meta | Disabled currency (DKK) | Warnings |
+|---|---|---|---|---|---|
+| v0.5.0 | 1 → 7 (`rate` correctly renamed to `manual_rate`) | byte-identical | n/a (pre-M20) | preserved | none |
+| v0.8.1 | 2 → 7 | byte-identical | n/a (pre-M20) | preserved | none |
+| v0.16.0 | 6 → 7 (Advanced Custom CSS `.umc-switcher{color:red}` preserved verbatim) | byte-identical | n/a (pre-M20) | preserved | none |
+| v0.19.0 | 6 → 7 | n/a | byte-identical (`{"SEK":{"regular":"799.00"}}`) | preserved | none |
+| v0.23.0 | 7 → 7 (no-op) | byte-identical, including `_umc_currency_origin` | byte-identical | preserved | none |
+| v0.24.0 | 7 → 7 (no-op sanity leg) | byte-identical | byte-identical | preserved | none |
+
+Every leg: `Settings::get()` called twice post-upgrade produced identical
+output (idempotent re-load, no second write); `wp-content/debug.log`
+(WP_DEBUG_LOG enabled for the rehearsal) contained zero entries at every
+step — no PHP warning, notice, or fatal at install, activation,
+configuration, or upgrade on any leg. Falsification items B–D and X
+(§11 operational half) close green.
+
+Clean-install (same environment, before the upgrade legs): fresh
+`v1.0.0`-candidate install and activation produced zero warnings; a
+brand-new site correctly has **no** `umc_settings` DB row until a merchant
+actually saves something (`Settings::get()` returns full schema-7 defaults
+in memory without writing — deliberate lazy-write behavior, not a defect);
+a simulated merchant save (`Settings::save()`) persisted correctly with
+schema 7 and the expected shape. Falsification item A closes green.
+
+### Rollback (WP8 — completed)
+
+From the `v0.24.0` → `v1.0.0` leg above: downgraded the plugin **code**
+back to the published `v0.24.0` ZIP in place (no data operation). Result:
+plugin reactivated cleanly at `0.24.0`; `umc_settings` (schema 7, both
+currencies including disabled DKK) remained fully readable; the historical
+order's `_umc_currency_origin` meta remained readable
+(`visitor_location`); the fixed-price product's `_umc_fixed_prices` meta
+remained readable; WooCommerce and Universal Multicurrency both reported
+active; zero warnings in `debug.log`. Re-upgraded to the `v1.0.0`
+candidate afterward to leave the environment in a known-good end state
+(clean re-upgrade, zero warnings).
+
+**Rollback guarantee, precisely stated:** this rehearsal proves **code
+rollback** — downgrading the plugin files leaves a functional site with
+all existing data intact and readable, because v1.0.0 introduced no schema
+change for v0.24.0-era data to depend on. It does **not** prove, and this
+plugin does not claim, **data rollback** — if a future schema had changed
+and new-shape data had been written under v1.0.0, downgrading code would
+not revert that data to the old shape. Falsification item AD closes green
+for the guarantee actually made.
 
 ## v0.24.0 — Fixed Pricing CSV Interchange (released)
 

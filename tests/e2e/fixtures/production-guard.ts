@@ -1,5 +1,5 @@
 /**
- * Hard production-host guard for the M25 browser acceptance suite.
+ * Hard production-host guard for the browser acceptance suite.
  *
  * This is an allowlist, not a blocklist: the suite refuses to run against
  * ANY hostname that is not explicitly authorized for DEV acceptance,
@@ -7,17 +7,20 @@
  * this repository -- deliberately generic, per CLAUDE.md -- has no reason to
  * know). Unknown host => refuse, never "unknown host => assume safe".
  *
+ * No hostname is hardcoded here (this repository must work on any
+ * WooCommerce site, not just one deployment's DEV instance -- CLAUDE.md
+ * § Code rules): the allowlist comes only from UMC_E2E_ALLOWED_HOSTS, which
+ * every caller must set explicitly. There is no shipped default host.
+ *
  * This guard must be imported and invoked before ANY mutating action
  * (fixture creation, CSV import, product deletion). It throws, terminating
  * the test run before mutation, rather than merely warning.
  */
 
-const DEFAULT_ALLOWED_HOSTS = ['dev.biopentra.eu'];
-
 export function assertDevHostOnly(baseUrl: string | undefined): void {
 	if (!baseUrl) {
 		throw new Error(
-			'UMC_E2E_BASE_URL is not set. Refusing to run: the M25 acceptance suite ' +
+			'UMC_E2E_BASE_URL is not set. Refusing to run: the acceptance suite ' +
 				'must never fall back to a default/implicit target.'
 		);
 	}
@@ -29,8 +32,15 @@ export function assertDevHostOnly(baseUrl: string | undefined): void {
 		throw new Error(`UMC_E2E_BASE_URL ("${baseUrl}") is not a valid URL. Refusing to run.`);
 	}
 
-	const allowlist = (process.env.UMC_E2E_ALLOWED_HOSTS ?? DEFAULT_ALLOWED_HOSTS.join(','))
-		.split(',')
+	if (!process.env.UMC_E2E_ALLOWED_HOSTS) {
+		throw new Error(
+			'UMC_E2E_ALLOWED_HOSTS is not set. Refusing to run: there is no default ' +
+				'allowlist -- every caller must explicitly name the DEV host(s) authorized ' +
+				'for this run.'
+		);
+	}
+
+	const allowlist = process.env.UMC_E2E_ALLOWED_HOSTS.split(',')
 		.map((h) => h.trim().toLowerCase())
 		.filter((h) => h.length > 0);
 

@@ -4,7 +4,7 @@ Tags: woocommerce, currency, multicurrency, exchange rates, money
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.24.0
+Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -22,7 +22,7 @@ Universal Multicurrency for WooCommerce lets merchants offer unlimited currencie
 
 **Migration from another currency switcher:** manual cut-over only. This plugin does not import settings from FOX/WOOCS, WPML Multicurrency, or other switchers. Configure currencies and rates manually in WooCommerce → Settings → Multicurrency.
 
-**Uninstall:** removes plugin settings (`umc_settings`, `umc_rate_state`) only. Order and refund snapshot metadata is preserved permanently.
+**Uninstall:** removes plugin settings (`umc_settings`, `umc_rate_state`, `umc_reporting_cache_gen`) only. Order and refund snapshot metadata is preserved permanently.
 
 == Installation ==
 
@@ -49,6 +49,17 @@ Not for production traffic. Two runtime converters can double-convert prices. De
 The plugin ships a POT template (`languages/universal-multicurrency.pot`) for translators. Bundled locale `.mo` files are not included in this release.
 
 == Changelog ==
+
+= 1.0.0 =
+* v1.0 Production Readiness & Roadmap Closure (Milestone 26)
+* No new product feature: a hardening, proof, and documentation milestone confirming the plugin is ready to leave the 0.x series
+* Migration/upgrade fixture and historical-artifact coverage extended across the full settings-schema history
+* Full-system cross-feature acceptance added (Visitor Location + fixed pricing + reporting; fixed pricing + currency switch; CSV interchange + catalog operations)
+* Browser release-acceptance suite extended with core purchase, Cart/Checkout Blocks, and fixed-pricing journeys
+* Security, performance, and compatibility posture re-audited through Milestone 25; no new finding
+* Merchant/developer documentation brought to current accuracy (README, new merchant getting-started guide)
+* Settings schema 7 unchanged; OrderSnapshot 5; PersistedKeys 10; no DB migration
+* Third-party extension compatibility evidence unchanged from Milestone 19 -- no tier promoted
 
 = 0.24.0 =
 * Fixed Pricing CSV Interchange (Milestone 25)

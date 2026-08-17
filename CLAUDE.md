@@ -36,8 +36,8 @@
   direct SQL. Never hook stock filters or write stock meta, not even as
   pass-throughs.
 - `uninstall.php` removes configuration options (`umc_settings`,
-  `umc_rate_state`) only; order snapshot meta (`_umc_*`) is permanent order
-  data and is never deleted.
+  `umc_rate_state`, `umc_reporting_cache_gen`) only; order snapshot meta
+  (`_umc_*`) is permanent order data and is never deleted.
 - No secrets in this repo, ever.
 
 ## Workflow

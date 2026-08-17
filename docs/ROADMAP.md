@@ -548,12 +548,46 @@ migration changes.
 | Manual acceptance walkthrough (release-blocking) | **Complete** — automated via Playwright browser acceptance (22/22 scenarios green against DEV), not a separate human walkthrough |
 | Release closure for **v0.24.0** | **Complete** — PR **#26**, tag `v0.24.0` |
 
+## Milestone 26 — v1.0 Production Readiness & Roadmap Closure (**v1.0.0**) — release pending
+
+**Target:** v1.0.0 · ADR-0031 · full audit, work-package definitions, and
+falsification matrix: [`docs/M26_V1_READINESS_PLAN.md`](M26_V1_READINESS_PLAN.md)
+
+The terminal milestone. Not a feature milestone — audits whether the plugin is
+ready to leave the 0.x series, then hardens, proves, documents, releases, and
+closes. Audit verdict: no category-A release blocker found; Settings schema 7,
+OrderSnapshot schema 5, PersistedKeys 10, and no DB migration are expected to
+remain unchanged unless a genuine defect is found during implementation. See
+ADR-0031 for the frozen v1.0 contract.
+
+| Work item | Status |
+|---|---|
+| WP0 ADR-0031 + v1.0 contract freeze | **Complete** |
+| WP1 Roadmap/repository completeness audit (formalized) | **Complete** |
+| WP2 Schema-2/3/5 migration fixture validation | **Complete** — corrected during implementation; see `M26_V1_READINESS_PLAN.md` WP2 |
+| WP3 Full-system PHP acceptance (cross-feature) | **Complete** — 3 new integration tests in `tests/integration/CrossFeature/` |
+| WP4 Playwright v1.0 smoke acceptance | **Complete** — 3 new specs (core purchase, Blocks, fixed-pricing) green against DEV; hostname hardcoding removed from production-guard.ts; existing M25 spec re-verified unchanged (22/22 green) |
+| WP5 Security/performance/compatibility hardening | **Complete** — SECURITY_REVIEW.md audited-surfaces table extended through M25, no new finding |
+| WP6 Admin/storefront operational acceptance | **Complete** — stale milestone references fixed; storefront/admin walked incidentally via WP4's Playwright specs (switcher, checkout, fixed pricing, Cart/Checkout Blocks, order admin screen) with no defect found |
+| WP7 Documentation completion (README, GETTING_STARTED.md) | **Complete** — README.md rewritten for v0.24.0 accuracy, GETTING_STARTED.md added, TEST_STRATEGY.md closing pointer added, CLAUDE.md uninstall cross-doc gap fixed |
+| WP8 Clean-install/historical-upgrade/rollback rehearsal | **Complete** — 6/6 upgrade legs (v0.5.0, v0.8.1, v0.16.0, v0.19.0, v0.23.0, v0.24.0 -> v1.0.0) on an isolated disposable environment using published GitHub release artifacts; clean install and rollback both verified; zero warnings/data loss across every leg -- see DEPLOYMENT.md |
+| WP9 Corrective review and falsification | **Complete** — 29/32 falsification items closed green with cited evidence, 0 corrective fixes needed; items Y/AA/AB pending WP11 (require the actual CI/release pipeline) -- see RELEASE_AUDIT.md |
+| WP10 v1.0.0 release preparation | **Complete** — full `bin/release-audit.sh` gate green (PHPCS, unit guards, security/performance/persisted-keys guards, POT check, composer audit, ZIP build + inspection); POT regenerated (version string only, 1 line); dist ZIP: 316 entries, no dev artifacts |
+| WP11 PR/CI/merge/tag/release/artifact verification | Not started |
+| WP12 Roadmap closure documentation | Not started |
+
+No `Settings::SCHEMA_VERSION`, `OrderSnapshot::SCHEMA_VERSION`, or
+`PersistedKeys::INVENTORY_VERSION` change is planned. No DB migration planned.
+**Milestone 26 is release pending — not complete** until the `v1.0.0` tag
+exists, the GitHub Release is published, and the artifact is independently
+verified (WP12 marks completion, never earlier).
+
 ## Future milestones — not started, not implemented
 
 None of the following exists in the codebase today:
 - A REST write API for fixed prices; flat-markup bulk seeding; Quick Edit
   inline fixed-price fields (deferred from M24 — see ADR-0029 § Explicit
-  non-goals; CSV import/export itself is now M25, in progress above)
+  non-goals; CSV import/export shipped as M25/v0.24.0)
 - Custom switcher media / Media Library icons (deferred from M22/M23)
 - Additional exchange-rate providers and per-currency provider selection
 - `country_change` geo detection mode and broader continent presets

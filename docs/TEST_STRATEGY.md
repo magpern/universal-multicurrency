@@ -386,3 +386,23 @@ Key integration tests:
 
 Authoritative spec: `docs/architecture/extension-compatibility.md`, ADR-0024,
 `docs/EXTENSION_INTEGRATION.md`.
+
+## Milestones 9–18, 20–26 — where their test evidence lives
+
+This narrative catalog's per-milestone sections stop at M19 by historical
+accident, not because later milestones lack coverage — each one shipped
+with its own extensive unit/integration suite, reviewed and closed the same
+way M7–M19 were. Rather than back-filling a parallel narrative here (which
+would duplicate, and risk drifting from, the authoritative source), find
+each milestone's test evidence via:
+
+- `docs/architecture/*.md` — one authoritative spec per milestone, each with
+  its own "Testing" or equivalent section describing what's covered and why.
+- The corresponding ADR (`docs/adr/00NN-*.md`) — records the milestone's
+  test/guard strategy at the point it was designed.
+- `docs/ROADMAP.md` — each milestone's closed work-item table names its key
+  test files directly (e.g. M21's `FixedPriceCsvRoundTripTest`, M25's
+  `FixedPriceCsvIntegrationGuardTest`).
+- `docs/M26_V1_READINESS_PLAN.md` §10 — the M26 (v1.0 readiness) test matrix,
+  covering what M26 itself reused vs. added, including the browser
+  release-acceptance suite (`tests/e2e/`).

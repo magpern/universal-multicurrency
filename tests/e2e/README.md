@@ -1,17 +1,29 @@
-# M25 Fixed Pricing CSV Interchange — browser acceptance suite
+# Release acceptance — browser suite
 
-Exercises WooCommerce's real Products → Export/Import admin UI (never a PHP
-shortcut) against disposable, uniquely-prefixed fixture products on an
-**authorized DEV WordPress + WooCommerce environment only**. Written to
-satisfy the frozen M25 specification's release-blocking manual/browser
-acceptance gate (ADR-0030) without requiring a human to click through the
-same steps for every future regression check.
+Exercises real WooCommerce admin/storefront UI (never a PHP-level shortcut)
+against disposable, uniquely-prefixed fixture products on an **authorized DEV
+WordPress + WooCommerce environment only**. Two generations of specs live
+here, both release-blocking for their respective milestone:
+
+- `specs/m25-fixed-pricing-csv.spec.ts` (M25, ADR-0030) — the Products →
+  Export/Import admin UI, fixed-price CSV interchange.
+- `specs/v1-core-purchase-journey.spec.ts`, `specs/v1-blocks-journey.spec.ts`,
+  `specs/v1-fixed-pricing-journey.spec.ts` (M26 v1.0 readiness) — three small,
+  bounded smoke journeys proving what PHP integration tests structurally
+  cannot: manual currency selection through a real Classic checkout and a
+  real order (journey A); the same shopping flow through the WooCommerce
+  Cart/Checkout **Blocks** (journey F); and an authoritative fixed price
+  displaying and settling at its exact authored amount through simple and
+  variable products (journeys C+D). See each spec file's header comment for
+  what it proves and — for the Blocks journey — an explicit, documented scope
+  boundary (order *placement* is deliberately not asserted there; see that
+  file).
 
 This is a minimal, self-contained, plugin-specific suite — not a general
 frontend/E2E testing platform for the repository. It never bundles into the
 production plugin ZIP (`bin/build-zip.sh` does not include `tests/`).
 
-## What it proves
+## What the M25 suite proves
 
 All 19 mandatory scenarios from the frozen acceptance matrix, plus the raw
 protected-meta bypass defense (the single highest-risk item) in all four
@@ -34,9 +46,10 @@ required scenarios, plus a dedicated new-product raw-meta case:
 
 - **Production-host guard** (`fixtures/production-guard.ts`): the suite
   refuses to run against any hostname not on an explicit allowlist
-  (`UMC_E2E_ALLOWED_HOSTS`, defaults to `dev.biopentra.eu` only). This is a
-  hard stop that throws before any mutation, not a warning — there is no way
-  to disable it, and an unset/invalid target URL also refuses to run rather
+  (`UMC_E2E_ALLOWED_HOSTS`, required — there is no shipped default host, so
+  every caller must name their own DEV site). This is a hard stop that throws
+  before any mutation, not a warning — there is no way to disable it, and an
+  unset/invalid target URL, or an unset allowlist, also refuses to run rather
   than falling back to any default.
 - **Disposable fixtures only**: every fixture product's SKU is prefixed
   `m25e2e-<run-id>-`. `fixtures/cleanup-fixtures.php` deletes only products
@@ -67,17 +80,27 @@ patched Playwright — see "Dependency note" below). You do need:
 
 ```bash
 cd tests/e2e
-UMC_E2E_BASE_URL=https://dev.biopentra.eu \
+UMC_E2E_BASE_URL=https://your-dev-site.example \
 UMC_E2E_ADMIN_USER=... \
 UMC_E2E_ADMIN_PASSWORD=... \
+UMC_E2E_ALLOWED_HOSTS=your-dev-site.example \
 WP_COMPOSE_DIR=/path/to/wordpress-compose-project \
   bash run-acceptance.sh
 ```
 
-This creates fixtures (WP-CLI, via `fixtures/setup-fixtures.php`), runs the
-full suite (Docker Playwright), then removes the fixtures (WP-CLI, via
-`fixtures/cleanup-fixtures.php`) — always, even on failure (`trap ... EXIT`).
-Pass `--keep-fixtures` to skip cleanup for post-mortem debugging.
+With no extra arguments this creates **both** fixture sets (WP-CLI, via
+`fixtures/setup-fixtures.php` for M25 and `fixtures/setup-v1-fixtures.php`
+for the v1.0 journeys — the latter also provisions two disposable pages
+carrying WooCommerce's own canonical Cart/Checkout block scaffold, never the
+merchant's real cart/checkout pages), runs all four release-blocking specs
+(Docker Playwright), then removes every fixture (WP-CLI, via the matching
+`cleanup-*.php` scripts) — always, even on failure (`trap ... EXIT`). Pass
+`--keep-fixtures` to skip cleanup for post-mortem debugging, or one or more
+spec paths (relative to `specs/`) to run a subset, e.g.:
+
+```bash
+bash run-acceptance.sh specs/v1-core-purchase-journey.spec.ts
+```
 
 `run-single.sh "<grep pattern>"` runs a filtered subset against fresh
 fixtures and always keeps them afterward — useful for debugging one
@@ -106,6 +129,40 @@ exchange rate, so a storefront assertion that the displayed price equals the
 authored figure is unambiguous proof the fixed value was used — a
 coincidentally-matching FX-converted figure could not produce false
 confidence.
+
+`fixtures/setup-v1-fixtures.php` additionally creates, for the three v1.0
+journey specs: a converted-price simple product (SKU `v1e2e-<run>-converted`,
+no authored fixed price); a fixed-price simple product (SKU
+`v1e2e-<run>-fixed-simple`, authored SEK regular); a variable product (SKU
+`v1e2e-<run>-variable`) with one fixed-priced variation and one
+FX-converted variation; and two **disposable pages** carrying WooCommerce's
+own canonical Cart/Checkout block scaffold (`WC_Install::get_cart_block_content()`/
+`get_checkout_block_content()` via reflection — a bare
+`<!-- wp:woocommerce/checkout /-->` server-renders to nothing; the block
+requires its full inner-block scaffold to mount). `fixtures/cleanup-v1-fixtures.php`
+removes all of it, scoped the same way `cleanup-fixtures.php` is.
+
+## Known site-specific quirks (do not mistake for UMC defects)
+
+- **Coming-soon gate**: this DEV site hides the storefront behind a
+  coming-soon page for anonymous visitors, so every spec authenticates first
+  (`loginAsAdmin`) even for what would otherwise be a guest journey — same
+  reason every test empties the shopper's (admin) cart at the start
+  (`emptyCart()` in `fixtures/checkout.ts`): a logged-in WooCommerce cart is
+  tied to user meta, not just cookies, and persists across runs.
+- **Sticky theme header**: this theme's Elementor header overlaps
+  checkout/cart controls on scroll. Every interaction with a field below the
+  fold uses `{ force: true }` or `toBeAttached()` rather than a plain click/
+  `toBeVisible()` — a deliberate, documented choice, not a missed wait.
+- **Third-party payment-gateway JS race**: this site runs several crypto
+  payment gateways whose own JS re-renders the payment-method list on every
+  checkout totals refresh, silently reverting a selected gateway back to the
+  first one in the list. Classic checkout (journeys A, C+D) works around it
+  by clicking the desired gateway's label twice, bracketing the AJAX settle
+  window. The Blocks checkout (journey F) did not yield to the same
+  workaround within a reasonable investigation budget, so that spec
+  deliberately stops short of completing order placement — see its own file
+  header for the full reasoning and what it asserts instead.
 
 ## Dependency note
 
