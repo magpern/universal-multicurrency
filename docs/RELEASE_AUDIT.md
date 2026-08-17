@@ -108,29 +108,28 @@ none required a corrective fix.
 | V | Uninstall deletes data contrary to policy — **disproven** | `uninstall.php` re-read: exactly 3 `delete_option()` calls (`umc_settings`, `umc_rate_state`, `umc_reporting_cache_gen`), no other statement; matches ADR-0009 and its own docblock verbatim |
 | W | Persisted-data inventory misses a write — **disproven** | Full `src/` persistence-primitive grep (options/meta/transients/cookies/session), zero undocumented writes found, confirmed twice (original audit + WP1) |
 | X | Migration non-idempotent — **disproven** | WP2's 3 new idempotency assertions + WP8's explicit "IDEMPOTENT: identical" check at every one of the 6 upgrade legs |
-| Y | Release ZIP ships tests/E2E/secrets — **pending WP11** | Cannot close until the actual published artifact is downloaded and inspected; `bin/build-zip.sh`'s allowlist-copy mechanism and the local candidate ZIP (358 entries, no `tests/`, no `node_modules`, no `.git` — confirmed by direct inspection) give strong preliminary confidence |
+| Y | Release ZIP ships tests/E2E/secrets — **disproven** | WP11: published `v1.0.0` artifact downloaded independently from GitHub and inspected — 358 entries, no `tests/`, no `node_modules`, no `.git`, no `.github`, no `.env`, no `CLAUDE.local.md` |
 | Z | Version metadata diverges — **disproven** | `CompatibilityMatrixTest`/`DocumentationSyncTest`, re-run green post-bump (plugin header, `UMC_VERSION`, readme.txt Stable tag all `1.0.0`) |
-| AA | WooCommerce floor fails — **pending WP11** | Requires a fresh CI run on the actual PR; the floor leg (WC 8.2.5) is unchanged in `.github/workflows/ci.yml` on this branch |
-| AB | PHP ceiling fails — **pending WP11** | Same — requires a fresh CI run; PHP 8.4 ceiling leg unchanged |
+| AA | WooCommerce floor fails — **disproven** | WP11: PR CI run 32006273943 and main CI run 32006445302 both green on the WC 8.2.5 floor leg |
+| AB | PHP ceiling fails — **disproven** | WP11: PR CI run 32006273943 and main CI run 32006445302 both green on the PHP 8.4 ceiling leg |
 | AC | Playwright can target production — **disproven** | `production-guard.ts` re-verified throughout WP4's real runs: refuses without `UMC_E2E_ALLOWED_HOSTS` explicitly set (no default), refuses on any host not in that explicit list; the hardcoded `dev.biopentra.eu` default was removed |
 | AD | Rollback procedure corrupts data — **disproven** | WP8's explicit rollback rehearsal: all data intact and readable after code downgrade; guarantee scope (code rollback, not data rollback) stated precisely |
 | AE | Documentation claims unsupported functionality — **disproven** | WP6/WP7: README.md/ARCHITECTURE.md/SWITCHER_CUSTOMIZATION.md corrected to actual v0.24.0+ capability set; no remaining overclaim found in the sweep |
 | AF | M27/future-feature scope leaks into v1.0 — **disproven** | `git diff main...feature/m26-v1.0-readiness --stat`: **zero files changed under `src/`** across the entire milestone — every change is documentation, tests, or version/readme metadata. Structurally impossible for this diff to have added a feature, changed a schema, or promoted a compatibility tier |
 
-**Items Y, AA, AB remain open pending WP11** (they require the actual PR/CI/release
-pipeline to exist) — every other item closes green. No item required a
-corrective fix.
+**All 32/32 falsification items now close green** — items Y, AA, and AB
+closed during WP11 once the actual PR/CI/release pipeline ran. No item
+required a corrective fix.
 
 ---
 
 ## v1.0.0 release closure record
 
-Prepared (WP10a version bump) — not yet released. Milestone 25 through
-Milestone 24 remain **Complete** as recorded in their own closure records
-below; this table tracks v1.0.0/Milestone 26 specifically and is finalized
-(tag/release rows, PR #, merge SHA, CI run IDs, artifact hash) as part of
-WP12 roadmap closure, after WP11's PR/CI/merge/tag/release/artifact
-verification actually succeeds.
+**Repository status:** **released as v1.0.0**. Milestone 26 (v1.0 Production
+Readiness & Roadmap Closure; ADR-0031) is complete. Git tag **`v1.0.0`** and
+GitHub release are published. Release commit on `main`:
+`6eda199106d548fd4d51981649beb00e03df7d45`. Annotated tag object points at
+that merge commit. PR **#27**.
 
 | Item | Value |
 |---|---|
@@ -139,17 +138,20 @@ verification actually succeeds.
 | Order snapshot schema | **5** (unchanged) |
 | Persisted-data inventory version | **10** (unchanged) |
 | Production migrations | none |
-| New admin surface | none — hardening/documentation milestone, no product feature |
+| New admin surface | none — hardening/documentation milestone, no product feature (zero files under `src/` changed by this milestone) |
 | Third-party compatibility evidence | unchanged from Milestone 19 (E0/E2; no tier promoted) |
 | Browser acceptance | 26/26 Playwright scenarios green against DEV (dev.biopentra.eu) — existing M25 CSV suite (22/22, re-verified unmodified) plus 4 new v1.0 journey scenarios (core purchase, Blocks, fixed-pricing x2) |
+| Upgrade/rollback rehearsal | 6/6 historical-upgrade legs + clean install + rollback, all green, zero data loss (WP8; isolated disposable environment, never DEV or production) |
+| Falsification matrix | 32/32 items closed green (29 at WP9; Y/AA/AB closed by this release's own CI/artifact) |
 | Unresolved release blockers | **0** |
-| Git tag `v1.0.0` | **Not yet created** |
-| GitHub release `v1.0.0` | **Not yet published** |
-| Milestone 26 | **In progress** — release pending |
-| PR CI run | pending |
-| Main CI run | pending |
-| Release workflow | pending |
-| Artifact | pending |
+| Git tag `v1.0.0` | **Created** |
+| GitHub release `v1.0.0` | **Published** |
+| Milestone 26 | **Complete** — v1.0 Production Readiness & Roadmap Closure at v1.0.0 |
+| PR CI run | **32006273943** — 14/14 jobs green, including the WC 8.2.5 floor leg and PHP 8.4 ceiling leg |
+| Main CI run | **32006445302** — 14/14 jobs green on the actual merge commit `6eda199106d548fd4d51981649beb00e03df7d45` |
+| Release workflow | **32006600411** (success) |
+| Artifact | `universal-multicurrency-1.0.0.zip` (539358 bytes; SHA-256 `b119a23a93a5b9edd84c4fdc702ec861278ff27d4bf7c179e59e1ec875be39b3`) — downloaded from the published GitHub release itself (not a local build) and independently inspected: 358 entries, correct version metadata throughout (plugin header, `UMC_VERSION`, readme.txt Stable tag all `1.0.0`), all key v1.0-era classes present, no `tests/`, no `node_modules`, no `.git`, no `.github`, no `.env`, no `CLAUDE.local.md` |
+| Manual/editor acceptance | Automated via the Playwright browser acceptance suite (real WooCommerce admin UI, real DEV environment) rather than a separate human walkthrough |
 | Deployment | **Not performed** |
 
 ---

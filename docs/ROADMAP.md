@@ -548,17 +548,21 @@ migration changes.
 | Manual acceptance walkthrough (release-blocking) | **Complete** — automated via Playwright browser acceptance (22/22 scenarios green against DEV), not a separate human walkthrough |
 | Release closure for **v0.24.0** | **Complete** — PR **#26**, tag `v0.24.0` |
 
-## Milestone 26 — v1.0 Production Readiness & Roadmap Closure (**v1.0.0**) — release pending
+## Milestone 26 — v1.0 Production Readiness & Roadmap Closure (**v1.0.0**) — complete and released
 
-**Target:** v1.0.0 · ADR-0031 · full audit, work-package definitions, and
-falsification matrix: [`docs/M26_V1_READINESS_PLAN.md`](M26_V1_READINESS_PLAN.md)
+**Released as:** v1.0.0 · ADR-0031 · PR **#27** · full audit, work-package
+record, and falsification matrix:
+[`docs/M26_V1_READINESS_PLAN.md`](M26_V1_READINESS_PLAN.md),
+[`docs/RELEASE_AUDIT.md`](RELEASE_AUDIT.md)
 
-The terminal milestone. Not a feature milestone — audits whether the plugin is
-ready to leave the 0.x series, then hardens, proves, documents, releases, and
-closes. Audit verdict: no category-A release blocker found; Settings schema 7,
-OrderSnapshot schema 5, PersistedKeys 10, and no DB migration are expected to
-remain unchanged unless a genuine defect is found during implementation. See
-ADR-0031 for the frozen v1.0 contract.
+The terminal milestone. Not a feature milestone — audited whether the plugin
+was ready to leave the 0.x series, then hardened, proved, documented,
+released, and closed it. Audit verdict: no category-A release blocker found.
+**Zero files under `src/` changed by this milestone** — Settings schema 7,
+OrderSnapshot schema 5, PersistedKeys 10, and no DB migration all remain
+exactly as they were at v0.24.0. Third-party extension compatibility evidence
+unchanged from Milestone 19 — no tier promoted. See ADR-0031 for the frozen
+v1.0 contract.
 
 | Work item | Status |
 |---|---|
@@ -571,20 +575,30 @@ ADR-0031 for the frozen v1.0 contract.
 | WP6 Admin/storefront operational acceptance | **Complete** — stale milestone references fixed; storefront/admin walked incidentally via WP4's Playwright specs (switcher, checkout, fixed pricing, Cart/Checkout Blocks, order admin screen) with no defect found |
 | WP7 Documentation completion (README, GETTING_STARTED.md) | **Complete** — README.md rewritten for v0.24.0 accuracy, GETTING_STARTED.md added, TEST_STRATEGY.md closing pointer added, CLAUDE.md uninstall cross-doc gap fixed |
 | WP8 Clean-install/historical-upgrade/rollback rehearsal | **Complete** — 6/6 upgrade legs (v0.5.0, v0.8.1, v0.16.0, v0.19.0, v0.23.0, v0.24.0 -> v1.0.0) on an isolated disposable environment using published GitHub release artifacts; clean install and rollback both verified; zero warnings/data loss across every leg -- see DEPLOYMENT.md |
-| WP9 Corrective review and falsification | **Complete** — 29/32 falsification items closed green with cited evidence, 0 corrective fixes needed; items Y/AA/AB pending WP11 (require the actual CI/release pipeline) -- see RELEASE_AUDIT.md |
-| WP10 v1.0.0 release preparation | **Complete** — full `bin/release-audit.sh` gate green (PHPCS, unit guards, security/performance/persisted-keys guards, POT check, composer audit, ZIP build + inspection); POT regenerated (version string only, 1 line); dist ZIP: 316 entries, no dev artifacts |
-| WP11 PR/CI/merge/tag/release/artifact verification | Not started |
-| WP12 Roadmap closure documentation | Not started |
+| WP9 Corrective review and falsification | **Complete** — 29/32 falsification items closed green with cited evidence at WP9, 0 corrective fixes needed; remaining 3 closed by WP11 -- see RELEASE_AUDIT.md |
+| WP10 v1.0.0 release preparation | **Complete** — full `bin/release-audit.sh` gate green (PHPCS, unit guards, security/performance/persisted-keys guards, POT check, composer audit, ZIP build + inspection) |
+| WP11 PR/CI/merge/tag/release/artifact verification | **Complete** — PR #27, 14/14 PR CI jobs green (run 32006273943, incl. WC 8.2.5 floor + PHP 8.4 ceiling), merged to `main` (`6eda199106d548fd4d51981649beb00e03df7d45`), 14/14 main CI jobs green (run 32006445302), tag `v1.0.0` created and pushed, GitHub release published (run 32006600411), published artifact independently downloaded and inspected (358 entries, correct version metadata, no dev artifacts) — all 32/32 falsification items now close green |
+| WP12 Roadmap closure documentation | **Complete** — this commit |
 
-No `Settings::SCHEMA_VERSION`, `OrderSnapshot::SCHEMA_VERSION`, or
-`PersistedKeys::INVENTORY_VERSION` change is planned. No DB migration planned.
-**Milestone 26 is release pending — not complete** until the `v1.0.0` tag
-exists, the GitHub Release is published, and the artifact is independently
-verified (WP12 marks completion, never earlier).
+`Settings::SCHEMA_VERSION` **7**, `OrderSnapshot::SCHEMA_VERSION` **5**,
+`PersistedKeys::INVENTORY_VERSION` **10** — all unchanged. No DB migration.
+Production deployment: **not performed** — a separate, later,
+explicitly-authorized operation.
 
-## Future milestones — not started, not implemented
+# Milestones M0–M26 complete
 
-None of the following exists in the codebase today:
+Universal Multicurrency's numbered development roadmap is closed as of
+**v1.0.0**. Every milestone from M0 (tooling & bootstrap) through M26 (v1.0
+production readiness) shipped, was reviewed, and is recorded above with its
+release tag and closure evidence. Future work moves to the backlog below —
+not another mandatory numbered milestone.
+
+## Backlog / Future enhancements
+
+None of the following exists in the codebase today. These are legitimately
+deferred future enhancements, not broken promises — each was explicitly
+declared out of scope by its nearest milestone's ADR (primarily ADR-0024,
+ADR-0029), and none blocks the v1.0.0 product contract:
 - A REST write API for fixed prices; flat-markup bulk seeding; Quick Edit
   inline fixed-price fields (deferred from M24 — see ADR-0029 § Explicit
   non-goals; CSV import/export shipped as M25/v0.24.0)

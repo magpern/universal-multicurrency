@@ -37,20 +37,25 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release on `main`:** **v0.24.0** (tagged and published). **v1.0.0
-prepared on `feature/m26-v1.0-readiness`** — release pending (Milestone 26,
-WP10a version bump; tag/publish deferred to WP11).
+**Current release on `main`:** **v1.0.0** (tagged and published).
 
 ---
 
-## v1.0.0 — v1.0 Production Readiness & Roadmap Closure (prepared, release pending)
+## v1.0.0 — v1.0 Production Readiness & Roadmap Closure (released)
 
 Ships Milestone 26 (ADR-0031). Not a feature milestone — audits, hardens,
 proves, and documents that the plugin is ready to leave the 0.x series;
 Settings schema **7**, order snapshot schema **5**, and PersistedKeys **10**
 are all unchanged; no DB migration. Third-party extension compatibility
-evidence is unchanged from Milestone 19 (no tier promoted). Full detail:
-[`M26_V1_READINESS_PLAN.md`](M26_V1_READINESS_PLAN.md), ADR-0031.
+evidence is unchanged from Milestone 19 (no tier promoted). Zero files
+under `src/` changed by this milestone. Full detail:
+[`M26_V1_READINESS_PLAN.md`](M26_V1_READINESS_PLAN.md), ADR-0031,
+[`RELEASE_AUDIT.md`](RELEASE_AUDIT.md).
+
+**Released as:** **v1.0.0** — tag `v1.0.0`, GitHub release published,
+artifact `universal-multicurrency-1.0.0.zip` (539358 bytes; SHA-256
+`b119a23a93a5b9edd84c4fdc702ec861278ff27d4bf7c179e59e1ec875be39b3`). PR
+**#27**, merge commit `6eda199106d548fd4d51981649beb00e03df7d45`.
 
 ### Upgrade rehearsal (WP8 — completed)
 
@@ -116,6 +121,22 @@ plugin does not claim, **data rollback** — if a future schema had changed
 and new-shape data had been written under v1.0.0, downgrading code would
 not revert that data to the old shape. Falsification item AD closes green
 for the guarantee actually made.
+
+### Deployment sequence (release verification completed)
+
+1. Ran `composer release-audit` on the **1.0.0** tree (WP10b) — all
+   release-blocking checks passed.
+2. Built `dist/universal-multicurrency-1.0.0.zip` with
+   `composer install --no-dev` + `bin/build-zip.sh`.
+3. PR #27 merged after 14/14 PR CI jobs green (run `32006273943`,
+   including the WC 8.2.5 floor and PHP 8.4 ceiling legs); 14/14 main CI
+   jobs green on the merge commit itself (run `32006445302`).
+4. Tag `v1.0.0` created on the verified merge commit and pushed; the
+   `release.yml` workflow built and published the GitHub release (run
+   `32006600411`).
+5. Deploy over **0.24.0** in place. No settings schema change; no product
+   feature. **Not performed as part of release closure** — production
+   deployment is a separate, later, explicitly-authorized operation.
 
 ## v0.24.0 — Fixed Pricing CSV Interchange (released)
 
