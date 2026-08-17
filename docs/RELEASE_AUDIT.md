@@ -76,6 +76,53 @@ found.**
 
 ---
 
+## v1.0.0 falsification matrix (WP9)
+
+Independent corrective/falsification review, per `M26_V1_READINESS_PLAN.md`
+§11, executed after WP2–WP8. Every item closes green with cited evidence;
+none required a corrective fix.
+
+| # | Claim disproven? | Evidence |
+|---|---|---|
+| A | Clean install fails — **disproven** | WP8: zero warnings on a fresh disposable-environment install; correct in-memory defaults; correct lazy DB write only on first merchant save |
+| B | Historical upgrade loses settings — **disproven** | WP2 fixture tests (schema 2/3/5 origins) + WP8's 6/6 real upgrade legs, every settings field preserved |
+| C | Historical upgrade loses fixed pricing — **disproven** | WP8: `_umc_fixed_prices` byte-identical across the v0.19.0/v0.23.0/v0.24.0 legs |
+| D | Disabled-currency data lost on upgrade — **disproven** | WP8: DKK (disabled) `manual_rate`/`enabled` preserved across all 6 legs |
+| E | Historical orders change after upgrade — **disproven** | WP8: every leg's full order meta list byte-identical before/after |
+| F | Reporting misreconstructs historical monetary state — **disproven** | Existing `OrderReportingRepository`/`TransactionCurrencyResolver` suite (753/753 integration) + WP3#1 cross-feature test |
+| G | Current FX leaks into historical reporting — **disproven** | `ReportingArchitectureGuardTest` (read-only-over-historical-facts guard), re-run green |
+| H | Fixed prices converted twice — **disproven** | WP3#2 `FixedPricingCurrencySwitchTest`: fixed price stable across repeated recalculation, converter never invoked |
+| I | Store API differs from Classic — **disproven** | Existing `StoreApiTestCase` reconciliation suite (753/753) + WP4 Blocks journey (Cart/Checkout block render + gateway parity) |
+| J | Refund accounting diverges — **disproven** | `RefundConversionTest` suite, part of the 753/753 integration pass |
+| K | Visitor Location overrides manual choice — **disproven** | `GeoDetectionApplicator` gating tests, part of the 753/753 integration pass; WP3#1 additionally proves correct origin classification for both manual and Visitor-Location selection |
+| L | Base currency acquires fixed-price metadata — **disproven** | WP3#3 `CsvImportCatalogOperationsInteractionTest` + existing M20 base-currency-exclusion guards |
+| M | Stale rates silently look healthy — **disproven** | `RateHealthService`/`RateStatusEvaluator` suite, re-run green (42/42 targeted guard tests including this) |
+| N | Live FX HTTP occurs on transaction path — **disproven** | `RatesPersistenceGuardTest` (HTTP confined to `WordPressHttpTransport`), re-run green |
+| O | Reporting becomes unbounded — **disproven** | `ReportingPerformanceGuardTest`/`ReportingArchitectureGuardTest`, re-run green; WP5's `--group performance` re-run, all ceilings held |
+| P | CSV raw-meta bypass returns — **disproven** | M25 Playwright TEST 11a–11d re-run unmodified, 22/22 green (WP4's full `run-acceptance.sh` pass) + `FixedPriceCsvIntegrationGuardTest` |
+| Q | CSV formula injection returns — **disproven** | `ReportingCsvRenderer::escape_csv_cell()` guard test, re-run green |
+| R | Extension compatibility overstated — **disproven** | WP5: `COMPATIBILITY.md` wording audit, E0/E2 tiers and "no Integrated" language confirmed unchanged |
+| S | Admin action lacks capability/nonce protection — **disproven** | `SecuritySourceGuardTest` (whole-tree), re-run green; WP5 extended the narrative audited-surfaces table with no new gap found |
+| T | REST exposes unauthorized mutation — **disproven** | `/wc/v3` vs `/wc/store/` boundary tests, part of the 753/753 integration pass |
+| U | Bundled SVG/assets unsafe — **disproven** | `CurrencyPresentationAssetRegistryTest`, re-run green (registry-resolved bundled SVGs only) |
+| V | Uninstall deletes data contrary to policy — **disproven** | `uninstall.php` re-read: exactly 3 `delete_option()` calls (`umc_settings`, `umc_rate_state`, `umc_reporting_cache_gen`), no other statement; matches ADR-0009 and its own docblock verbatim |
+| W | Persisted-data inventory misses a write — **disproven** | Full `src/` persistence-primitive grep (options/meta/transients/cookies/session), zero undocumented writes found, confirmed twice (original audit + WP1) |
+| X | Migration non-idempotent — **disproven** | WP2's 3 new idempotency assertions + WP8's explicit "IDEMPOTENT: identical" check at every one of the 6 upgrade legs |
+| Y | Release ZIP ships tests/E2E/secrets — **pending WP11** | Cannot close until the actual published artifact is downloaded and inspected; `bin/build-zip.sh`'s allowlist-copy mechanism and the local candidate ZIP (358 entries, no `tests/`, no `node_modules`, no `.git` — confirmed by direct inspection) give strong preliminary confidence |
+| Z | Version metadata diverges — **disproven** | `CompatibilityMatrixTest`/`DocumentationSyncTest`, re-run green post-bump (plugin header, `UMC_VERSION`, readme.txt Stable tag all `1.0.0`) |
+| AA | WooCommerce floor fails — **pending WP11** | Requires a fresh CI run on the actual PR; the floor leg (WC 8.2.5) is unchanged in `.github/workflows/ci.yml` on this branch |
+| AB | PHP ceiling fails — **pending WP11** | Same — requires a fresh CI run; PHP 8.4 ceiling leg unchanged |
+| AC | Playwright can target production — **disproven** | `production-guard.ts` re-verified throughout WP4's real runs: refuses without `UMC_E2E_ALLOWED_HOSTS` explicitly set (no default), refuses on any host not in that explicit list; the hardcoded `dev.biopentra.eu` default was removed |
+| AD | Rollback procedure corrupts data — **disproven** | WP8's explicit rollback rehearsal: all data intact and readable after code downgrade; guarantee scope (code rollback, not data rollback) stated precisely |
+| AE | Documentation claims unsupported functionality — **disproven** | WP6/WP7: README.md/ARCHITECTURE.md/SWITCHER_CUSTOMIZATION.md corrected to actual v0.24.0+ capability set; no remaining overclaim found in the sweep |
+| AF | M27/future-feature scope leaks into v1.0 — **disproven** | `git diff main...feature/m26-v1.0-readiness --stat`: **zero files changed under `src/`** across the entire milestone — every change is documentation, tests, or version/readme metadata. Structurally impossible for this diff to have added a feature, changed a schema, or promoted a compatibility tier |
+
+**Items Y, AA, AB remain open pending WP11** (they require the actual PR/CI/release
+pipeline to exist) — every other item closes green. No item required a
+corrective fix.
+
+---
+
 ## v1.0.0 release closure record
 
 Prepared (WP10a version bump) — not yet released. Milestone 25 through
