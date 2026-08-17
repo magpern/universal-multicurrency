@@ -3,5 +3,6 @@ test-results/
 playwright-report/
 .env
 .fixtures.json
+.v1-fixtures.json
 *.png
 *.zip
