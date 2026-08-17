@@ -572,7 +572,7 @@ ADR-0031 for the frozen v1.0 contract.
 | WP7 Documentation completion (README, GETTING_STARTED.md) | **Complete** — README.md rewritten for v0.24.0 accuracy, GETTING_STARTED.md added, TEST_STRATEGY.md closing pointer added, CLAUDE.md uninstall cross-doc gap fixed |
 | WP8 Clean-install/historical-upgrade/rollback rehearsal | **Complete** — 6/6 upgrade legs (v0.5.0, v0.8.1, v0.16.0, v0.19.0, v0.23.0, v0.24.0 -> v1.0.0) on an isolated disposable environment using published GitHub release artifacts; clean install and rollback both verified; zero warnings/data loss across every leg -- see DEPLOYMENT.md |
 | WP9 Corrective review and falsification | **Complete** — 29/32 falsification items closed green with cited evidence, 0 corrective fixes needed; items Y/AA/AB pending WP11 (require the actual CI/release pipeline) -- see RELEASE_AUDIT.md |
-| WP10 v1.0.0 release preparation | Not started |
+| WP10 v1.0.0 release preparation | **Complete** — full `bin/release-audit.sh` gate green (PHPCS, unit guards, security/performance/persisted-keys guards, POT check, composer audit, ZIP build + inspection); POT regenerated (version string only, 1 line); dist ZIP: 316 entries, no dev artifacts |
 | WP11 PR/CI/merge/tag/release/artifact verification | Not started |
 | WP12 Roadmap closure documentation | Not started |
 
