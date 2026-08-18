@@ -284,9 +284,8 @@ whole-tree guards (`SecuritySourceGuardTest`, `RatesPersistenceGuardTest`,
 No SSH, no nginx/Varnish/CDN client, no config writer, no reload/purge
 trigger, no webhook, no daemon, no scheduled job, no outbound HTTP, no
 credential storage, no REST/AJAX route, no new WordPress hook, no
-BioPentra-specific or any other site-specific path, no redesign of currency
-or geo resolution, no change to Universal Geo Context or any external cache
-infrastructure.
+site-specific path, no redesign of currency or geo resolution, no change to
+Universal Geo Context or any external cache infrastructure.
 
 ## 12. Related
 

@@ -223,8 +223,8 @@ general policy, if wanted, is a separate future decision.
 
 No SSH client, no nginx/Varnish/CDN client, no config writer, no reload or
 purge trigger, no webhook, no daemon, no scheduled job, no outbound HTTP, no
-cache-server credential storage, no BioPentra-specific (or any other
-site-specific) path or hostname anywhere in this generic plugin, no redesign
+cache-server credential storage, no site-specific path or hostname anywhere
+in this generic plugin, no redesign
 of currency or geo resolution, no change to Universal Geo Context, no change
 to any external cache infrastructure. Every direction of control flows from
 infrastructure to the plugin (`acknowledge`), never the reverse.
