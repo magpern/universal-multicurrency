@@ -612,3 +612,31 @@ ADR-0029), and none blocks the v1.0.0 product contract:
 
 The plugin is standalone and replaces FOX/WOOCS and the old MP helper; only
 WooCommerce is a dependency (see docs/adr/0003).
+
+# Post-1.0 releases
+
+Feature work after v1.0.0 ships as a numbered release, not a numbered
+milestone (ADR-0031 §6 — no `M27` is ever created). Each entry below follows
+the same "release pending" → "complete and released" convention the closed
+milestones above used, with its own ADR and, where warranted, its own
+`docs/architecture/*.md` specification.
+
+## v1.1.0 — External Cache State Readiness — release pending
+
+**ADR:** [ADR-0032](adr/0032-external-cache-state-readiness.md)
+**Architecture spec:** [`docs/architecture/external-cache-state-readiness.md`](architecture/external-cache-state-readiness.md)
+**Branch:** `feature/v1.1.0-external-cache-state`
+
+Adds a UMC-owned, read-only readiness signal for external full-page caches
+(nginx, Varnish, CDN edges) that key their configuration on the plugin's
+cache-critical state — base currency, the enabled-∧-rated currency set, and
+geo-routing enablement. A deterministic `state_hash` is published via
+`wp umc cache-state status` and Site Health / Compatibility → Cache; an
+external operator or automation acknowledges reconciliation via
+`wp umc cache-state acknowledge <hash>`. The plugin gains no ability to
+control, purge, reload, or hold credentials for any external cache — see
+ADR-0032 for the full boundary.
+
+`Settings::SCHEMA_VERSION` stays **7** (no settings migration).
+`PersistedKeys::INVENTORY_VERSION` moves 10 → **11** (new option
+`umc_cache_state`, additive).
