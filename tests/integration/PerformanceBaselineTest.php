@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace UMC\Tests\Integration;
 
+use UMC\CacheState\CacheStateStore;
 use UMC\CurrencyContext;
 use UMC\Diagnostics\ConflictDetector;
 use UMC\Diagnostics\ConflictScorer;
@@ -76,7 +77,7 @@ final class PerformanceBaselineTest extends WP_UnitTestCase {
 
 	public const CEILING_REFUND_SNAPSHOT_META_KEYS = 2;
 
-	public const CEILING_UNINSTALL_OPTION_DELETES = 3;
+	public const CEILING_UNINSTALL_OPTION_DELETES = 4;
 
 	public const CEILING_UNINSTALL_USER_META_DELETES = 0;
 
@@ -491,6 +492,7 @@ final class PerformanceBaselineTest extends WP_UnitTestCase {
 		( new Settings() )->save( array( 'currencies' => self::CURRENCIES ) );
 		update_option( RateUpdateState::OPTION, array( 'schema_version' => 1 ) );
 		update_option( ReportingCache::GENERATION_OPTION, 1, false );
+		( new CacheStateStore() )->record( 'a1b2c3d4e5f60718', time() );
 
 		$user_id = self::factory()->user->create(
 			array(

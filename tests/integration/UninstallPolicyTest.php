@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace UMC\Tests\Integration;
 
+use UMC\CacheState\CacheStateStore;
 use UMC\Diagnostics\NoticeDismissal;
 use UMC\Order\OrderSnapshot;
 use UMC\Order\OrderSnapshotReader;
@@ -55,6 +56,25 @@ final class UninstallPolicyTest extends WP_UnitTestCase {
 		$this->run_plugin_uninstall();
 
 		$this->assertFalse( get_option( Settings::OPTION, false ) );
+	}
+
+	public function test_uninstall_removes_cache_state_acknowledgement(): void {
+		update_option(
+			CacheStateStore::OPTION,
+			array(
+				'schema_version'    => 1,
+				'acknowledged_hash' => 'a1b2c3d4e5f60718',
+				'acknowledged_at'   => time(),
+			),
+			false
+		);
+
+		$this->assertNotFalse( get_option( CacheStateStore::OPTION, false ) );
+
+		( new Settings() )->save( array( 'currencies' => array() ) );
+		$this->run_plugin_uninstall();
+
+		$this->assertFalse( get_option( CacheStateStore::OPTION, false ) );
 	}
 
 	public function test_uninstall_preserves_order_snapshot_metadata(): void {
