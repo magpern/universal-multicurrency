@@ -12,6 +12,9 @@ namespace UMC\Tests\Unit\CacheState;
 use PHPUnit\Framework\TestCase;
 use UMC\CacheState\CacheStateFactors;
 
+/**
+ * Tests the cache-state hash factors.
+ */
 final class CacheStateFactorsTest extends TestCase {
 
 	public function test_hash_is_deterministic_across_repeated_construction(): void {

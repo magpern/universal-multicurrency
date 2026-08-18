@@ -12,6 +12,9 @@ namespace UMC\Tests\Unit\CacheState;
 use PHPUnit\Framework\TestCase;
 use UMC\CacheState\CacheStateStore;
 
+/**
+ * Tests the cache-state acknowledgement store.
+ */
 final class CacheStateStoreTest extends TestCase {
 
 	public function test_defaults_shape(): void {
@@ -57,7 +60,12 @@ final class CacheStateStoreTest extends TestCase {
 	}
 
 	public function test_sanitize_is_stable_under_re_sanitization(): void {
-		$once  = CacheStateStore::sanitize( array( 'acknowledged_hash' => 'a1b2c3d4e5f60718', 'acknowledged_at' => 5 ) );
+		$once  = CacheStateStore::sanitize(
+			array(
+				'acknowledged_hash' => 'a1b2c3d4e5f60718',
+				'acknowledged_at'   => 5,
+			)
+		);
 		$twice = CacheStateStore::sanitize( $once );
 
 		$this->assertSame( $once, $twice );

@@ -13,6 +13,9 @@ use PHPUnit\Framework\TestCase;
 use UMC\CacheState\CacheStateFactors;
 use UMC\CacheState\CacheStateReport;
 
+/**
+ * Tests the cache-state report contract.
+ */
 final class CacheStateReportTest extends TestCase {
 
 	private function factors(): CacheStateFactors {

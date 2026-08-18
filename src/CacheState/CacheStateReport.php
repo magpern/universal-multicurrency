@@ -77,15 +77,15 @@ final class CacheStateReport {
 	public function to_array(): array {
 		return array(
 			'contract_version'        => CacheStateFactors::CONTRACT_VERSION,
-			'state_hash'               => $this->state_hash(),
-			'acknowledged_hash'        => $this->acknowledged_hash,
-			'monitoring_enrolled'      => $this->monitoring_enrolled(),
-			'reconciliation_required'  => $this->reconciliation_required(),
-			'base_currency'            => $this->factors->base_currency(),
-			'currencies'               => $this->factors->currencies(),
-			'geo_enabled'              => $this->factors->geo_enabled(),
-			'acknowledged_at'          => $this->acknowledged_at > 0 ? gmdate( 'c', $this->acknowledged_at ) : '',
-			'rates_last_updated_at'    => $this->rates_last_updated_at > 0 ? gmdate( 'c', $this->rates_last_updated_at ) : '',
+			'state_hash'              => $this->state_hash(),
+			'acknowledged_hash'       => $this->acknowledged_hash,
+			'monitoring_enrolled'     => $this->monitoring_enrolled(),
+			'reconciliation_required' => $this->reconciliation_required(),
+			'base_currency'           => $this->factors->base_currency(),
+			'currencies'              => $this->factors->currencies(),
+			'geo_enabled'             => $this->factors->geo_enabled(),
+			'acknowledged_at'         => $this->acknowledged_at > 0 ? gmdate( 'c', $this->acknowledged_at ) : '',
+			'rates_last_updated_at'   => $this->rates_last_updated_at > 0 ? gmdate( 'c', $this->rates_last_updated_at ) : '',
 		);
 	}
 }

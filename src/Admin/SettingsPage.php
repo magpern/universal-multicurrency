@@ -11,6 +11,8 @@ namespace UMC\Admin;
 
 use UMC\Admin\Geo\GeoPanelRegistry;
 use UMC\Admin\ViewModel\CurrencyViewModelFactory;
+use UMC\CacheState\CacheStateService;
+use UMC\CacheState\CacheStateStore;
 use UMC\Compatibility\CompatibilityServices;
 use UMC\Currency;
 use UMC\CurrencyRegistry;
@@ -21,6 +23,7 @@ use UMC\Diagnostics\ConflictDetector;
 use UMC\Diagnostics\ConflictScorer;
 use UMC\Diagnostics\DetectorRegistry;
 use UMC\Diagnostics\WordPressEnvironmentProbe;
+use UMC\Geo\GeoDetectionSettingsRepository;
 use UMC\Display\SwitcherRenderer;
 use UMC\Display\SwitcherSettingsRepository;
 use UMC\Display\SwitcherViewModelFactory;
@@ -162,18 +165,31 @@ final class SettingsPage extends WC_Settings_Page {
 	/**
 	 * Builds the settings tab and its custom field renderers.
 	 *
-	 * @param Settings               $settings Merchant settings store.
-	 * @param Currency               $base     Store base currency.
-	 * @param ExchangeRateStore      $store    Rate persistence boundary.
-	 * @param RateHealthService|null $health   Optional shared rate health service.
+	 * @param Settings               $settings    Merchant settings store.
+	 * @param Currency               $base        Store base currency.
+	 * @param ExchangeRateStore      $store       Rate persistence boundary.
+	 * @param RateHealthService|null $health      Optional shared rate health service.
+	 * @param CacheStateService|null $cache_state Optional shared cache-state service.
 	 */
-	public function __construct( Settings $settings, Currency $base, ExchangeRateStore $store, ?RateHealthService $health = null ) {
+	public function __construct(
+		Settings $settings,
+		Currency $base,
+		ExchangeRateStore $store,
+		?RateHealthService $health = null,
+		?CacheStateService $cache_state = null
+	) {
 		$this->id                       = 'umc';
 		$this->label                    = __( 'Multicurrency', 'universal-multicurrency' );
 		$this->settings                 = $settings;
 		$this->parser                   = new CurrencySettingsParser( $settings, $base );
 		$this->exchange_field           = new ExchangeRateSettingsField( $settings, $store, $health );
 		$registry                       = new CurrencyRegistry( $settings, $base );
+		$cache_state                    = $cache_state ?? new CacheStateService(
+			$registry,
+			new GeoDetectionSettingsRepository( $settings ),
+			$settings,
+			new CacheStateStore()
+		);
 		$rates                          = new ManualRateProvider( $settings, $base->code() );
 		$context                        = new CurrencyContext( $registry, $rates, new CurrencyResolver() );
 		$display_repository             = new SwitcherSettingsRepository( $settings );
@@ -218,7 +234,7 @@ final class SettingsPage extends WC_Settings_Page {
 			new ConflictScorer()
 		);
 		$this->compatibility_field = new CompatibilitySettingsField(
-			CompatibilityServices::scanner( $settings, $store, $base, $conflict_detector )
+			CompatibilityServices::scanner( $settings, $store, $base, $conflict_detector, $cache_state )
 		);
 		$this->section_header      = new SectionHeader();
 		$this->shell               = new AdminPageShell( new SectionNavigation() );

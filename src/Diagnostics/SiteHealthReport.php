@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace UMC\Diagnostics;
 
+use UMC\CacheState\CacheStateService;
 use UMC\Geo\GeoDetectionSettings;
 use UMC\Geo\UgcIntegrationStatus;
 use UMC\Rates\ExchangeRateStore;
@@ -32,6 +33,8 @@ final class SiteHealthReport {
 	public const TEST_RATE_HEALTH = 'umc_rate_health';
 
 	public const TEST_GEO_CONFIGURATION = 'umc_geo_configuration';
+
+	public const TEST_CACHE_STATE = 'umc_cache_state';
 
 	/**
 	 * Tested-up-to ceilings for PHP and WordPress, mirroring
@@ -86,6 +89,13 @@ final class SiteHealthReport {
 	private ?RateHealthService $rate_health;
 
 	/**
+	 * Shared cache-state service for external cache readiness diagnostics.
+	 *
+	 * @var CacheStateService|null
+	 */
+	private ?CacheStateService $cache_state;
+
+	/**
 	 * Binds the report to a shared conflict detector.
 	 *
 	 * @param ConflictDetector       $detector    Memoized conflict detector.
@@ -93,19 +103,22 @@ final class SiteHealthReport {
 	 * @param Settings|null          $settings    Optional settings for rate health.
 	 * @param ExchangeRateStore|null $rate_store  Optional rate store for rate health.
 	 * @param RateHealthService|null $rate_health Optional shared health service.
+	 * @param CacheStateService|null $cache_state Optional shared cache-state service.
 	 */
 	public function __construct(
 		ConflictDetector $detector,
 		?VersionPolicy $policy = null,
 		?Settings $settings = null,
 		?ExchangeRateStore $rate_store = null,
-		?RateHealthService $rate_health = null
+		?RateHealthService $rate_health = null,
+		?CacheStateService $cache_state = null
 	) {
 		$this->detector    = $detector;
 		$this->policy      = $policy ?? new VersionPolicy();
 		$this->settings    = $settings;
 		$this->rate_store  = $rate_store;
 		$this->rate_health = $rate_health;
+		$this->cache_state = $cache_state;
 	}
 
 	/**
@@ -143,6 +156,10 @@ final class SiteHealthReport {
 		$tests['direct'][ self::TEST_GEO_CONFIGURATION ] = array(
 			'label' => \__( 'Geo Detection configuration', 'universal-multicurrency' ),
 			'test'  => array( $this, 'run_geo_configuration_test' ),
+		);
+		$tests['direct'][ self::TEST_CACHE_STATE ]       = array(
+			'label' => \__( 'External cache state readiness', 'universal-multicurrency' ),
+			'test'  => array( $this, 'run_cache_state_test' ),
 		);
 
 		return $tests;
@@ -345,6 +362,60 @@ final class SiteHealthReport {
 			\__( 'Geo Detection configuration looks good', 'universal-multicurrency' ),
 			'good',
 			'<p>' . \esc_html__( 'Geo Detection is enabled with routing rules configured.', 'universal-multicurrency' ) . '</p>'
+		);
+	}
+
+	/**
+	 * Executes the external cache-state readiness Site Health test.
+	 *
+	 * A never-enrolled installation reports `good`/"not enrolled" rather than
+	 * `recommended` — enrollment gates merchant-facing severity only. The raw
+	 * `reconciliation_required` value is never suppressed from the JSON/CLI
+	 * contract or the debug section (ADR-0032).
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function run_cache_state_test(): array {
+		if ( null === $this->cache_state ) {
+			return self::format_test_result(
+				self::TEST_CACHE_STATE,
+				\__( 'External cache state diagnostics are unavailable', 'universal-multicurrency' ),
+				'critical',
+				'<p>' . \esc_html__( 'The cache-state service was not initialized. This indicates a wiring problem, not a configuration choice.', 'universal-multicurrency' ) . '</p>'
+			);
+		}
+
+		$report = $this->cache_state->report();
+
+		if ( ! $report->monitoring_enrolled() ) {
+			return self::format_test_result(
+				self::TEST_CACHE_STATE,
+				\__( 'External cache state monitoring is not enrolled', 'universal-multicurrency' ),
+				'good',
+				'<p>' . \esc_html__( 'This installation has not enrolled in the external cache-state contract. This does not mean no external cache exists — only that Universal Multicurrency has no evidence this installation has enrolled. Run `wp umc cache-state status` to see the current state, and `wp umc cache-state acknowledge <hash>` after reconciling an external cache to enroll.', 'universal-multicurrency' ) . '</p>'
+			);
+		}
+
+		if ( ! $report->reconciliation_required() ) {
+			return self::format_test_result(
+				self::TEST_CACHE_STATE,
+				\__( 'External cache state is reconciled', 'universal-multicurrency' ),
+				'good',
+				'<p>' . \esc_html__( 'The current cache-critical configuration matches the last acknowledged external cache reconciliation.', 'universal-multicurrency' ) . '</p>'
+			);
+		}
+
+		return self::format_test_result(
+			self::TEST_CACHE_STATE,
+			\__( 'External full-page cache reconciliation required', 'universal-multicurrency' ),
+			'recommended',
+			'<p>' . \esc_html(
+				sprintf(
+					/* translators: %s: current 16-character cache state hash */
+					__( 'Universal Multicurrency\'s cache-critical configuration has changed since the external cache was last reconciled (current state hash: %s). Update the external cache state before relying on shared full-page caching, then run `wp umc cache-state acknowledge <hash>`.', 'universal-multicurrency' ),
+					$report->state_hash()
+				)
+			) . '</p>'
 		);
 	}
 
@@ -684,72 +755,110 @@ final class SiteHealthReport {
 			'label'       => \__( 'Universal Multicurrency', 'universal-multicurrency' ),
 			'description' => \__( 'Passive compatibility and environment diagnostics for support requests.', 'universal-multicurrency' ),
 			'fields'      => array(
-				'plugin_version'               => array(
+				'plugin_version'                      => array(
 					'label' => \__( 'Plugin version', 'universal-multicurrency' ),
 					'value' => (string) UMC_VERSION,
 				),
-				'base_currency'                => array(
+				'base_currency'                       => array(
 					'label' => \__( 'Base currency', 'universal-multicurrency' ),
 					'value' => $base_code,
 				),
-				'currencies_configured'        => array(
+				'currencies_configured'               => array(
 					'label' => \__( 'Currencies configured', 'universal-multicurrency' ),
 					'value' => (string) $counts['configured'],
 				),
-				'currencies_enabled_and_rated' => array(
+				'currencies_enabled_and_rated'        => array(
 					'label' => \__( 'Currencies enabled with a rate', 'universal-multicurrency' ),
 					'value' => (string) $counts['enabled_and_rated'],
 				),
-				'hpos_enabled'                 => array(
+				'hpos_enabled'                        => array(
 					'label' => \__( 'HPOS enabled', 'universal-multicurrency' ),
 					'value' => self::is_hpos_enabled() ? \__( 'Yes', 'universal-multicurrency' ) : \__( 'No', 'universal-multicurrency' ),
 				),
-				'snapshot_schema_version'      => array(
+				'snapshot_schema_version'             => array(
 					'label' => \__( 'Settings schema version', 'universal-multicurrency' ),
 					'value' => (string) Settings::SCHEMA_VERSION,
 				),
-				'declared_min_php'             => array(
+				'declared_min_php'                    => array(
 					'label' => \__( 'Declared minimum PHP', 'universal-multicurrency' ),
 					'value' => $declared['php'],
 				),
-				'declared_min_wp'              => array(
+				'declared_min_wp'                     => array(
 					'label' => \__( 'Declared minimum WordPress', 'universal-multicurrency' ),
 					'value' => $declared['wp'],
 				),
-				'declared_min_wc'              => array(
+				'declared_min_wc'                     => array(
 					'label' => \__( 'Declared minimum WooCommerce', 'universal-multicurrency' ),
 					'value' => $declared['wc'],
 				),
-				'running_php'                  => array(
+				'running_php'                         => array(
 					'label' => \__( 'Running PHP', 'universal-multicurrency' ),
 					'value' => $running['php'],
 				),
-				'running_wp'                   => array(
+				'running_wp'                          => array(
 					'label' => \__( 'Running WordPress', 'universal-multicurrency' ),
 					'value' => $running['wp'],
 				),
-				'running_wc'                   => array(
+				'running_wc'                          => array(
 					'label' => \__( 'Running WooCommerce', 'universal-multicurrency' ),
 					'value' => $running['wc'],
 				),
-				'conflicts_detected'           => array(
+				'conflicts_detected'                  => array(
 					'label' => \__( 'Conflicts detected', 'universal-multicurrency' ),
 					'value' => self::format_conflicts_debug_value( $findings ),
 				),
-				'store_api_conversion'         => array(
+				'store_api_conversion'                => array(
 					'label' => \__( 'Store API conversion', 'universal-multicurrency' ),
 					'value' => \__( 'Active', 'universal-multicurrency' ),
 				),
-				'stale_automatic_rates'        => array(
+				'stale_automatic_rates'               => array(
 					'label' => \__( 'Stale automatic rates', 'universal-multicurrency' ),
 					'value' => (string) $this->stale_automatic_count(),
 				),
-				'oldest_automatic_rate_age'    => array(
+				'oldest_automatic_rate_age'           => array(
 					'label' => \__( 'Oldest automatic rate age (hours)', 'universal-multicurrency' ),
 					'value' => (string) $this->oldest_automatic_rate_age_hours(),
 				),
+				'cache_state_hash'                    => array(
+					'label' => \__( 'Cache state hash', 'universal-multicurrency' ),
+					'value' => $this->cache_state_debug_field( static fn( $report ) => $report->state_hash() ),
+				),
+				'cache_state_acknowledged_hash'       => array(
+					'label' => \__( 'Cache state acknowledged hash', 'universal-multicurrency' ),
+					'value' => $this->cache_state_debug_field( static fn( $report ) => $report->acknowledged_hash() ),
+				),
+				'cache_state_monitoring_enrolled'     => array(
+					'label' => \__( 'Cache state monitoring enrolled', 'universal-multicurrency' ),
+					'value' => $this->cache_state_debug_field(
+						static fn( $report ) => $report->monitoring_enrolled() ? \__( 'Yes', 'universal-multicurrency' ) : \__( 'No', 'universal-multicurrency' )
+					),
+				),
+				'cache_state_reconciliation_required' => array(
+					'label' => \__( 'Cache state reconciliation required', 'universal-multicurrency' ),
+					'value' => $this->cache_state_debug_field(
+						static fn( $report ) => $report->reconciliation_required() ? \__( 'Yes', 'universal-multicurrency' ) : \__( 'No', 'universal-multicurrency' )
+					),
+				),
+				'cache_state_contract_version'        => array(
+					'label' => \__( 'Cache state contract version', 'universal-multicurrency' ),
+					'value' => $this->cache_state_debug_field( static fn( $report ) => (string) $report->to_array()['contract_version'] ),
+				),
 			),
 		);
+	}
+
+	/**
+	 * Reads one field from the cache-state report, or 'unavailable' when the
+	 * service was not initialized.
+	 *
+	 * @param callable(\UMC\CacheState\CacheStateReport):string $reader Field reader.
+	 */
+	private function cache_state_debug_field( callable $reader ): string {
+		if ( null === $this->cache_state ) {
+			return \__( 'unavailable', 'universal-multicurrency' );
+		}
+
+		return (string) $reader( $this->cache_state->report() );
 	}
 
 	/**
