@@ -71,6 +71,7 @@ final class SecuritySourceGuardTest extends TestCase {
 		'ExtensionRuntimeInventory.php',
 		'SwitcherShortcodeScanner.php',
 		'ReportingCache.php',
+		'CacheStateStore.php',
 	);
 
 	private function root(): string {
@@ -217,6 +218,7 @@ final class SecuritySourceGuardTest extends TestCase {
 		$this->assertSame( 1, preg_match_all( "/delete_option\s*\(\s*['\"]umc_settings['\"]\s*\)/", $source ) );
 		$this->assertSame( 1, preg_match_all( "/delete_option\s*\(\s*['\"]umc_rate_state['\"]\s*\)/", $source ) );
 		$this->assertSame( 1, preg_match_all( "/delete_option\s*\(\s*['\"]umc_reporting_cache_gen['\"]\s*\)/", $source ) );
+		$this->assertSame( 1, preg_match_all( "/delete_option\s*\(\s*['\"]umc_cache_state['\"]\s*\)/", $source ) );
 		$this->assertStringNotContainsString( 'delete_user_meta', $source );
 		$this->assertStringNotContainsString( 'delete_post_meta', $source );
 	}

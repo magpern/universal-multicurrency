@@ -15,3 +15,4 @@ defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 delete_option( 'umc_settings' );
 delete_option( 'umc_rate_state' );
 delete_option( 'umc_reporting_cache_gen' );
+delete_option( 'umc_cache_state' );

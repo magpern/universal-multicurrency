@@ -20,6 +20,7 @@ use UMC\CurrencyContext;
 use UMC\CurrencySwitcher;
 use UMC\Geo\GeoCurrencyDecisionService;
 use UMC\Diagnostics\NoticeDismissal;
+use UMC\CacheState\CacheStateStore;
 use UMC\Order\OrderSnapshot;
 use UMC\Order\RefundSnapshot;
 use UMC\PersistedKeys;
@@ -112,6 +113,7 @@ final class PersistedKeysInventoryTest extends TestCase {
 				Settings::OPTION,
 				RateUpdateState::OPTION,
 				\UMC\Reporting\ReportingCache::GENERATION_OPTION,
+				CacheStateStore::OPTION,
 			),
 			PersistedKeys::option_keys()
 		);
@@ -210,7 +212,7 @@ final class PersistedKeysInventoryTest extends TestCase {
 		$this->assertContains( \UMC\Reporting\ReportingCache::GENERATION_OPTION, $inventory['options'] );
 		$this->assertContains( \UMC\Reporting\ReportingCache::TRANSIENT_PREFIX . '*', $inventory['transients'] );
 		$this->assertContains( OrderSnapshot::META_CURRENCY_ORIGIN, $inventory['order_meta'] );
-		$this->assertSame( 10, $inventory['inventory_version'] );
+		$this->assertSame( 11, $inventory['inventory_version'] );
 	}
 
 	public function test_reporting_transient_pattern_matches_cache_key_prefix(): void {
