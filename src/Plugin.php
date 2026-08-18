@@ -23,6 +23,9 @@ use UMC\Admin\PluginActionLinks;
 use UMC\Admin\RateFailureNotice;
 use UMC\Admin\RateUpdateController;
 use UMC\Admin\SettingsPage;
+use UMC\CacheState\CacheStateService;
+use UMC\CacheState\CacheStateStore;
+use UMC\CLI\CacheStateCommand;
 use UMC\CLI\PricesCommand;
 use UMC\CLI\RatesCommand;
 use UMC\Diagnostics\Diagnostics;
@@ -187,13 +190,19 @@ final class Plugin {
 			( new GeoLegacyPanelRedirect() )->register();
 		}
 
-		$registry         = new CurrencyRegistry( $settings, $base );
-		$fixed_repository = new FixedPriceRepository( $base->code() );
-		$rates            = new ManualRateProvider( $settings, $base->code() );
-		$context          = new CurrencyContext( $registry, $rates, new CurrencyResolver() );
-		$service          = new PriceConversionService( $context );
-		$version          = defined( 'UMC_VERSION' ) ? (string) UMC_VERSION : '';
-		$switcher_block   = new SwitcherBlock();
+		$registry            = new CurrencyRegistry( $settings, $base );
+		$fixed_repository    = new FixedPriceRepository( $base->code() );
+		$rates               = new ManualRateProvider( $settings, $base->code() );
+		$context             = new CurrencyContext( $registry, $rates, new CurrencyResolver() );
+		$service             = new PriceConversionService( $context );
+		$version             = defined( 'UMC_VERSION' ) ? (string) UMC_VERSION : '';
+		$switcher_block      = new SwitcherBlock();
+		$cache_state_service = new CacheStateService(
+			$registry,
+			new GeoDetectionSettingsRepository( $settings ),
+			$settings,
+			new CacheStateStore()
+		);
 
 		( new SwitcherBlockEditorAssets() )->register();
 		add_action( 'init', array( $switcher_block, 'register' ), 20 );
@@ -214,6 +223,7 @@ final class Plugin {
 					$registry
 				)
 			);
+			\WP_CLI::add_command( 'umc cache-state', new CacheStateCommand( $cache_state_service ) );
 		}
 
 		// Storefront: attach conversion filters, handle the switch, register the
@@ -354,8 +364,8 @@ final class Plugin {
 		// Admin settings tab (instantiated lazily, only when WC builds settings).
 		add_filter(
 			'woocommerce_get_settings_pages',
-			static function ( array $pages ) use ( $settings, $base, $rate_store, $rate_health ): array {
-				$pages[] = new SettingsPage( $settings, $base, $rate_store, $rate_health );
+			static function ( array $pages ) use ( $settings, $base, $rate_store, $rate_health, $cache_state_service ): array {
+				$pages[] = new SettingsPage( $settings, $base, $rate_store, $rate_health, $cache_state_service );
 
 				return $pages;
 			}
@@ -375,7 +385,7 @@ final class Plugin {
 		// registration cannot perturb the variation-price cache key because
 		// Diagnostics attaches no WooCommerce filters.
 		if ( is_admin() && ! wp_doing_ajax() && ! wp_doing_cron() && ! ( defined( 'WP_CLI' ) && WP_CLI ) ) {
-			( new Diagnostics( null, $settings, $rate_store, $rate_health ) )->register();
+			( new Diagnostics( null, $settings, $rate_store, $rate_health, $cache_state_service ) )->register();
 		}
 	}
 

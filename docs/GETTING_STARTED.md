@@ -157,7 +157,8 @@ Two places to look first:
   historical orders all carry forward automatically. No manual migration
   step is ever required for an in-place version upgrade.
 - **Uninstall**: deleting the plugin removes only its configuration options
-  (`umc_settings`, `umc_rate_state`, `umc_reporting_cache_gen`). Order
+  (`umc_settings`, `umc_rate_state`, `umc_reporting_cache_gen`,
+  `umc_cache_state`). Order
   currency/rate history, refund audit data, and fixed-price product data
   are permanent commerce records and are **never** deleted by uninstall —
   see [ADR-0009](adr/0009-uninstall-retention-policy.md) and

@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace UMC\Diagnostics;
 
+use UMC\CacheState\CacheStateService;
 use UMC\Rates\ExchangeRateStore;
 use UMC\Rates\RateHealthService;
 use UMC\Settings;
@@ -48,18 +49,27 @@ final class Diagnostics {
 	private ?RateHealthService $rate_health;
 
 	/**
+	 * Shared cache-state service for external cache readiness diagnostics.
+	 *
+	 * @var CacheStateService|null
+	 */
+	private ?CacheStateService $cache_state;
+
+	/**
 	 * Builds the diagnostics service and its detector stack.
 	 *
 	 * @param ConflictDetector|null  $detector    Optional detector for tests.
 	 * @param Settings|null          $settings    Settings store for rate health.
 	 * @param ExchangeRateStore|null $rate_store  Rate operational store.
 	 * @param RateHealthService|null $rate_health Optional shared health service.
+	 * @param CacheStateService|null $cache_state Optional shared cache-state service.
 	 */
 	public function __construct(
 		?ConflictDetector $detector = null,
 		?Settings $settings = null,
 		?ExchangeRateStore $rate_store = null,
-		?RateHealthService $rate_health = null
+		?RateHealthService $rate_health = null,
+		?CacheStateService $cache_state = null
 	) {
 		$this->detector    = $detector ?? new ConflictDetector(
 			new DetectorRegistry(),
@@ -69,6 +79,7 @@ final class Diagnostics {
 		$this->settings    = $settings;
 		$this->rate_store  = $rate_store;
 		$this->rate_health = $rate_health;
+		$this->cache_state = $cache_state;
 	}
 
 	/**
@@ -79,7 +90,7 @@ final class Diagnostics {
 		$dismissal->register();
 
 		( new ConflictNotice( $this->detector, $dismissal ) )->register();
-		( new SiteHealthReport( $this->detector, null, $this->settings, $this->rate_store, $this->rate_health ) )->register();
+		( new SiteHealthReport( $this->detector, null, $this->settings, $this->rate_store, $this->rate_health, $this->cache_state ) )->register();
 	}
 
 	/**

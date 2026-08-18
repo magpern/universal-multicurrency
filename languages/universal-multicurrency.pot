@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Universal Multicurrency for WooCommerce 1.0.0\n"
+"Project-Id-Version: Universal Multicurrency for WooCommerce 1.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/magpern/universal-multicurrency/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -83,7 +83,7 @@ msgid "Hide technical evidence"
 msgstr ""
 
 #: src/Admin/AdminComponentRenderer.php:493
-#: src/Admin/SettingsPage.php:971
+#: src/Admin/SettingsPage.php:987
 msgid "Unsaved changes"
 msgstr ""
 
@@ -94,10 +94,10 @@ msgstr ""
 #: src/Admin/AdminComponentRenderer.php:495
 #: src/Admin/AdminPageShell.php:100
 #: src/Admin/AdminPageShell.php:101
-#: src/Admin/SettingsPage.php:958
-#: src/Admin/SettingsPage.php:959
-#: src/Admin/SettingsPage.php:972
-#: src/Admin/SettingsPage.php:973
+#: src/Admin/SettingsPage.php:974
+#: src/Admin/SettingsPage.php:975
+#: src/Admin/SettingsPage.php:988
+#: src/Admin/SettingsPage.php:989
 msgid "Save changes"
 msgstr ""
 
@@ -108,8 +108,8 @@ msgstr ""
 
 #: src/Admin/AdminPageShellViewModelFactory.php:64
 #: src/Compatibility/Checks/EnvironmentCheck.php:37
-#: src/Diagnostics/SiteHealthReport.php:684
-#: src/Diagnostics/SiteHealthReport.php:934
+#: src/Diagnostics/SiteHealthReport.php:755
+#: src/Diagnostics/SiteHealthReport.php:1043
 msgid "Universal Multicurrency"
 msgstr ""
 
@@ -118,8 +118,8 @@ msgid "for WooCommerce"
 msgstr ""
 
 #: src/Admin/AdminPageShellViewModelFactory.php:68
-#: src/Admin/SettingsPage.php:172
-#: src/Admin/SettingsPage.php:1014
+#: src/Admin/SettingsPage.php:182
+#: src/Admin/SettingsPage.php:1030
 msgid "Multicurrency"
 msgstr ""
 
@@ -453,12 +453,16 @@ msgid "Always"
 msgstr ""
 
 #: src/Admin/CurrencyOverviewField.php:128
-#: src/Diagnostics/SiteHealthReport.php:705
+#: src/Diagnostics/SiteHealthReport.php:776
+#: src/Diagnostics/SiteHealthReport.php:833
+#: src/Diagnostics/SiteHealthReport.php:839
 msgid "Yes"
 msgstr ""
 
 #: src/Admin/CurrencyOverviewField.php:128
-#: src/Diagnostics/SiteHealthReport.php:705
+#: src/Diagnostics/SiteHealthReport.php:776
+#: src/Diagnostics/SiteHealthReport.php:833
+#: src/Diagnostics/SiteHealthReport.php:839
 msgid "No"
 msgstr ""
 
@@ -466,7 +470,7 @@ msgstr ""
 #: src/Admin/ViewModel/CurrencyViewModelFactory.php:85
 #: src/Admin/ViewModel/CurrencyViewModelFactory.php:89
 #: src/Compatibility/Checks/EnvironmentCheck.php:51
-#: src/Diagnostics/SiteHealthReport.php:692
+#: src/Diagnostics/SiteHealthReport.php:763
 msgid "Base currency"
 msgstr ""
 
@@ -578,8 +582,8 @@ msgid "Automatic"
 msgstr ""
 
 #: src/Admin/CurrencyTableField.php:95
-#: src/Admin/SettingsPage.php:258
-#: src/Admin/SettingsPage.php:622
+#: src/Admin/SettingsPage.php:274
+#: src/Admin/SettingsPage.php:638
 msgid "Currencies"
 msgstr ""
 
@@ -620,8 +624,8 @@ msgid "You do not have permission to run Decision Inspector."
 msgstr ""
 
 #: src/Admin/DecisionInspectorSettingsField.php:83
-#: src/Admin/SettingsPage.php:263
-#: src/Admin/SettingsPage.php:730
+#: src/Admin/SettingsPage.php:279
+#: src/Admin/SettingsPage.php:746
 msgid "Decision Inspector"
 msgstr ""
 
@@ -649,8 +653,8 @@ msgstr ""
 #: src/Admin/DecisionInspectorSettingsField.php:98
 #: src/Admin/ExchangeRateSettingsField.php:233
 #: src/Admin/Geo/GeoPanelRenderer.php:334
-#: src/Admin/SettingsPage.php:266
-#: src/Admin/SettingsPage.php:830
+#: src/Admin/SettingsPage.php:282
+#: src/Admin/SettingsPage.php:846
 msgid "Compatibility"
 msgstr ""
 
@@ -711,8 +715,8 @@ msgstr ""
 #: src/Admin/DecisionInspectorSettingsField.php:382
 #: src/Admin/Geo/GeoPanelRegistry.php:173
 #: src/Admin/ReportingSettingsField.php:156
-#: src/Admin/SettingsPage.php:260
-#: src/Admin/SettingsPage.php:676
+#: src/Admin/SettingsPage.php:276
+#: src/Admin/SettingsPage.php:692
 msgid "Visitor Location"
 msgstr ""
 
@@ -945,7 +949,7 @@ msgid "Design"
 msgstr ""
 
 #: src/Admin/DisplaySettingsField.php:339
-#: src/Admin/SettingsPage.php:267
+#: src/Admin/SettingsPage.php:283
 msgid "Advanced"
 msgstr ""
 
@@ -1173,7 +1177,7 @@ msgstr ""
 
 #: src/Admin/DisplaySettingsField.php:742
 #: src/Admin/DisplaySettingsField.php:933
-#: src/Diagnostics/SiteHealthReport.php:762
+#: src/Diagnostics/SiteHealthReport.php:871
 msgid "None"
 msgstr ""
 
@@ -1499,8 +1503,8 @@ msgstr ""
 
 #: src/Admin/FixedPriceCoverageColumn.php:58
 #: src/Admin/FixedPricingSettingsField.php:66
-#: src/Admin/SettingsPage.php:265
-#: src/Admin/SettingsPage.php:780
+#: src/Admin/SettingsPage.php:281
+#: src/Admin/SettingsPage.php:796
 msgid "Fixed Pricing"
 msgstr ""
 
@@ -2625,8 +2629,8 @@ msgid "You do not have permission to view reporting."
 msgstr ""
 
 #: src/Admin/ReportingSettingsField.php:66
-#: src/Admin/SettingsPage.php:264
-#: src/Admin/SettingsPage.php:757
+#: src/Admin/SettingsPage.php:280
+#: src/Admin/SettingsPage.php:773
 msgid "Reporting"
 msgstr ""
 
@@ -2799,30 +2803,30 @@ msgstr ""
 msgid "Multicurrency settings sections"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:259
-#: src/Admin/SettingsPage.php:807
+#: src/Admin/SettingsPage.php:275
+#: src/Admin/SettingsPage.php:823
 msgid "Exchange Rates"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:261
-#: src/Admin/SettingsPage.php:649
+#: src/Admin/SettingsPage.php:277
+#: src/Admin/SettingsPage.php:665
 msgid "Display"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:262
-#: src/Admin/SettingsPage.php:703
+#: src/Admin/SettingsPage.php:278
+#: src/Admin/SettingsPage.php:719
 msgid "Checkout"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:499
+#: src/Admin/SettingsPage.php:515
 msgid "When the switcher is enabled, at least one device visibility option must be selected."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:516
+#: src/Admin/SettingsPage.php:532
 msgid "Custom CSS was not saved because it contained disallowed constructs (for example @import, url(), escape sequences with backslashes, expression(), behavior:, -moz-binding, or angle brackets). Your previous Custom CSS was kept. Other Display settings were saved."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:524
+#: src/Admin/SettingsPage.php:540
 msgid "Horizontal list is only available with manual placement. Style was saved as Dropdown."
 msgstr ""
 
@@ -2924,6 +2928,34 @@ msgstr ""
 
 #: src/Compatibility/Checks/CacheCheck.php:145
 msgid "Confirm AJAX or fragment behavior for the currency switcher under cache."
+msgstr ""
+
+#: src/Compatibility/Checks/CacheStateCheck.php:59
+#: src/Diagnostics/SiteHealthReport.php:393
+msgid "External cache state monitoring is not enrolled"
+msgstr ""
+
+#: src/Compatibility/Checks/CacheStateCheck.php:60
+msgid "This installation has not enrolled in the external cache-state contract. If an external full-page cache reads this configuration, run `wp umc cache-state acknowledge <hash>` after reconciling it."
+msgstr ""
+
+#: src/Compatibility/Checks/CacheStateCheck.php:73
+#: src/Diagnostics/SiteHealthReport.php:402
+msgid "External cache state is reconciled"
+msgstr ""
+
+#: src/Compatibility/Checks/CacheStateCheck.php:74
+#: src/Diagnostics/SiteHealthReport.php:404
+msgid "The current cache-critical configuration matches the last acknowledged external cache reconciliation."
+msgstr ""
+
+#: src/Compatibility/Checks/CacheStateCheck.php:86
+#: src/Diagnostics/SiteHealthReport.php:410
+msgid "External full-page cache reconciliation required"
+msgstr ""
+
+#: src/Compatibility/Checks/CacheStateCheck.php:87
+msgid "Cache-critical configuration has changed since the external cache was last reconciled. Reconcile the external cache, then run `wp umc cache-state acknowledge <hash>` with the freshly re-read hash."
 msgstr ""
 
 #: src/Compatibility/Checks/CheckoutConfigurationCheck.php:41
@@ -3197,7 +3229,7 @@ msgid "Stored schema version %1$d is older than the current schema %2$d."
 msgstr ""
 
 #: src/Compatibility/Validation/SettingsConfigurationValidator.php:175
-#: src/Diagnostics/SiteHealthReport.php:215
+#: src/Diagnostics/SiteHealthReport.php:232
 msgid "Automatic rate updates are not scheduled"
 msgstr ""
 
@@ -3206,13 +3238,13 @@ msgid "Automatic currencies require a refresh schedule, but no recurring update 
 msgstr ""
 
 #: src/Compatibility/Validation/SettingsConfigurationValidator.php:193
-#: src/Diagnostics/SiteHealthReport.php:224
+#: src/Diagnostics/SiteHealthReport.php:241
 msgid "Enabled automatic currencies are missing usable rates"
 msgstr ""
 
 #. translators: %d: number of unavailable automatic currencies
 #: src/Compatibility/Validation/SettingsConfigurationValidator.php:196
-#: src/Diagnostics/SiteHealthReport.php:229
+#: src/Diagnostics/SiteHealthReport.php:246
 #, php-format
 msgid "%d enabled automatic currency has no usable exchange rate."
 msgid_plural "%d enabled automatic currencies have no usable exchange rate."
@@ -3308,8 +3340,8 @@ msgstr ""
 #: src/Diagnostics/ConflictNotice.php:444
 #: src/Diagnostics/ConflictNotice.php:733
 #: src/Diagnostics/ConflictNotice.php:738
-#: src/Diagnostics/SiteHealthReport.php:855
-#: src/Diagnostics/SiteHealthReport.php:860
+#: src/Diagnostics/SiteHealthReport.php:964
+#: src/Diagnostics/SiteHealthReport.php:969
 msgid "and"
 msgstr ""
 
@@ -3367,259 +3399,305 @@ msgstr ""
 msgid "Detected because:"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:132
+#: src/Diagnostics/SiteHealthReport.php:145
 msgid "Currency switcher conflicts"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:136
+#: src/Diagnostics/SiteHealthReport.php:149
 msgid "Universal Multicurrency environment"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:140
+#: src/Diagnostics/SiteHealthReport.php:153
 msgid "Exchange rate provider health"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:144
+#: src/Diagnostics/SiteHealthReport.php:157
 msgid "Geo Detection configuration"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:204
+#: src/Diagnostics/SiteHealthReport.php:161
+msgid "External cache state readiness"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:221
 msgid "Exchange rate health unavailable"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:206
+#: src/Diagnostics/SiteHealthReport.php:223
 msgid "Rate health diagnostics were not initialized."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:217
+#: src/Diagnostics/SiteHealthReport.php:234
 msgid "Automatic currencies require a refresh schedule, but no recurring Action Scheduler update is queued."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:244
+#: src/Diagnostics/SiteHealthReport.php:261
 msgid "Some automatic exchange rates are stale"
 msgstr ""
 
 #. translators: %d: stale currency count
-#: src/Diagnostics/SiteHealthReport.php:249
+#: src/Diagnostics/SiteHealthReport.php:266
 #, php-format
 msgid "%d automatic currency exceeds the configured maximum age. Conversion still uses the last known rate."
 msgid_plural "%d automatic currencies exceed the configured maximum age. Conversion still uses the last known rates."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Diagnostics/SiteHealthReport.php:263
+#: src/Diagnostics/SiteHealthReport.php:280
 msgid "Exchange rate provider health looks good"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:265
+#: src/Diagnostics/SiteHealthReport.php:282
 msgid "Automatic rates are fresh or aging within the configured maximum age, and the refresh schedule looks healthy."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:297
+#: src/Diagnostics/SiteHealthReport.php:314
 msgid "Geo Detection status unavailable"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:299
+#: src/Diagnostics/SiteHealthReport.php:316
 msgid "Geo diagnostics were not initialized."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:308
+#: src/Diagnostics/SiteHealthReport.php:325
 msgid "Geo Detection is disabled"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:310
+#: src/Diagnostics/SiteHealthReport.php:327
 msgid "Automatic country-based currency routing is not active."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:317
+#: src/Diagnostics/SiteHealthReport.php:334
 msgid "Geo Detection is enabled without routing rules"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:319
+#: src/Diagnostics/SiteHealthReport.php:336
 msgid "Add geographic routing rules or disable Geo Detection."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:328
+#: src/Diagnostics/SiteHealthReport.php:345
 msgid "Geo Detection has no country provider"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:330
+#: src/Diagnostics/SiteHealthReport.php:347
 msgid "Universal Geo Context is unavailable and WooCommerce geolocation fallback is disabled."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:337
+#: src/Diagnostics/SiteHealthReport.php:354
 msgid "Geo Detection is using the WooCommerce fallback provider"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:339
+#: src/Diagnostics/SiteHealthReport.php:356
 msgid "Install Universal Geo Context for higher-accuracy country detection. WooCommerce geolocation fallback is currently handling detection."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:345
+#: src/Diagnostics/SiteHealthReport.php:362
 msgid "Geo Detection configuration looks good"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:347
+#: src/Diagnostics/SiteHealthReport.php:364
 msgid "Geo Detection is enabled with routing rules configured."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:379
+#: src/Diagnostics/SiteHealthReport.php:382
+msgid "External cache state diagnostics are unavailable"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:384
+msgid "The cache-state service was not initialized. This indicates a wiring problem, not a configuration choice."
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:395
+msgid "This installation has not enrolled in the external cache-state contract. This does not mean no external cache exists — only that Universal Multicurrency has no evidence this installation has enrolled. Run `wp umc cache-state status` to see the current state, and `wp umc cache-state acknowledge <hash>` after reconciling an external cache to enroll."
+msgstr ""
+
+#. translators: %s: current 16-character cache state hash
+#: src/Diagnostics/SiteHealthReport.php:415
+#, php-format
+msgid "Universal Multicurrency's cache-critical configuration has changed since the external cache was last reconciled (current state hash: %s). Update the external cache state before relying on shared full-page caching, then run `wp umc cache-state acknowledge <hash>`."
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:450
 msgid "No conflicting currency switchers detected"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:381
+#: src/Diagnostics/SiteHealthReport.php:452
 msgid "Universal Multicurrency did not detect another currency switcher on this site."
 msgstr ""
 
 #. translators: %s: comma-separated list of detected switcher labels
-#: src/Diagnostics/SiteHealthReport.php:399
+#: src/Diagnostics/SiteHealthReport.php:470
 #, php-format
 msgid "Universal Multicurrency detected a conflicting currency switcher: %s."
 msgid_plural "Universal Multicurrency detected conflicting currency switchers: %s."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Diagnostics/SiteHealthReport.php:409
+#: src/Diagnostics/SiteHealthReport.php:480
 msgid "The evidence is weak and may be a false positive. Review the Multicurrency settings tab if prices look wrong."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:414
+#: src/Diagnostics/SiteHealthReport.php:485
 msgid "Deactivate the other switcher to avoid multiplied exchange rates. Universal Multicurrency will not deactivate it for you."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:419
+#: src/Diagnostics/SiteHealthReport.php:490
 msgid "Running two currency switchers can multiply exchange rates and corrupt cart and order totals. Deactivate the other switcher immediately."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:426
+#: src/Diagnostics/SiteHealthReport.php:497
 msgid "Conflicting currency switcher detected"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:428
+#: src/Diagnostics/SiteHealthReport.php:499
 msgid "Possible currency switcher conflict"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:429
+#: src/Diagnostics/SiteHealthReport.php:500
 msgid "Weak currency switcher signal detected"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:498
+#: src/Diagnostics/SiteHealthReport.php:569
 msgid "Environment meets Universal Multicurrency requirements"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:500
+#: src/Diagnostics/SiteHealthReport.php:571
 msgid "PHP, WordPress, WooCommerce, and High-Performance Order Storage meet the supported range for this plugin."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:515
+#: src/Diagnostics/SiteHealthReport.php:586
 msgid "Environment is below the supported minimum"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:516
+#: src/Diagnostics/SiteHealthReport.php:587
 msgid "Environment should be reviewed"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:685
+#: src/Diagnostics/SiteHealthReport.php:756
 msgid "Passive compatibility and environment diagnostics for support requests."
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:688
+#: src/Diagnostics/SiteHealthReport.php:759
 msgid "Plugin version"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:696
+#: src/Diagnostics/SiteHealthReport.php:767
 msgid "Currencies configured"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:700
+#: src/Diagnostics/SiteHealthReport.php:771
 msgid "Currencies enabled with a rate"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:704
+#: src/Diagnostics/SiteHealthReport.php:775
 msgid "HPOS enabled"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:708
+#: src/Diagnostics/SiteHealthReport.php:779
 msgid "Settings schema version"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:712
+#: src/Diagnostics/SiteHealthReport.php:783
 msgid "Declared minimum PHP"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:716
+#: src/Diagnostics/SiteHealthReport.php:787
 msgid "Declared minimum WordPress"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:720
+#: src/Diagnostics/SiteHealthReport.php:791
 msgid "Declared minimum WooCommerce"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:724
+#: src/Diagnostics/SiteHealthReport.php:795
 msgid "Running PHP"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:728
+#: src/Diagnostics/SiteHealthReport.php:799
 msgid "Running WordPress"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:732
+#: src/Diagnostics/SiteHealthReport.php:803
 msgid "Running WooCommerce"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:736
+#: src/Diagnostics/SiteHealthReport.php:807
 msgid "Conflicts detected"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:740
+#: src/Diagnostics/SiteHealthReport.php:811
 msgid "Store API conversion"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:741
+#: src/Diagnostics/SiteHealthReport.php:812
 msgid "Active"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:744
+#: src/Diagnostics/SiteHealthReport.php:815
 msgid "Stale automatic rates"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:748
+#: src/Diagnostics/SiteHealthReport.php:819
 msgid "Oldest automatic rate age (hours)"
 msgstr ""
 
-#: src/Diagnostics/SiteHealthReport.php:797
-msgid "PHP is below the minimum version required by Universal Multicurrency."
-msgstr ""
-
-#: src/Diagnostics/SiteHealthReport.php:801
-msgid "WordPress is below the minimum version required by Universal Multicurrency."
-msgstr ""
-
-#: src/Diagnostics/SiteHealthReport.php:805
-msgid "WooCommerce is below the minimum version required by Universal Multicurrency."
-msgstr ""
-
-#: src/Diagnostics/SiteHealthReport.php:809
-msgid "PHP is newer than the version Universal Multicurrency has tested up to."
-msgstr ""
-
-#: src/Diagnostics/SiteHealthReport.php:813
-msgid "WordPress is newer than the version Universal Multicurrency has tested up to."
-msgstr ""
-
-#: src/Diagnostics/SiteHealthReport.php:817
-msgid "WooCommerce is newer than the version Universal Multicurrency has tested up to."
-msgstr ""
-
 #: src/Diagnostics/SiteHealthReport.php:823
-msgid "One or more environment version strings could not be parsed."
+msgid "Cache state hash"
 msgstr ""
 
 #: src/Diagnostics/SiteHealthReport.php:827
-msgid "This store is below a future minimum version announced in the compatibility documentation."
+msgid "Cache state acknowledged hash"
 msgstr ""
 
 #: src/Diagnostics/SiteHealthReport.php:831
+msgid "Cache state monitoring enrolled"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:837
+msgid "Cache state reconciliation required"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:843
+msgid "Cache state contract version"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:858
+msgid "unavailable"
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:906
+msgid "PHP is below the minimum version required by Universal Multicurrency."
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:910
+msgid "WordPress is below the minimum version required by Universal Multicurrency."
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:914
+msgid "WooCommerce is below the minimum version required by Universal Multicurrency."
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:918
+msgid "PHP is newer than the version Universal Multicurrency has tested up to."
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:922
+msgid "WordPress is newer than the version Universal Multicurrency has tested up to."
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:926
+msgid "WooCommerce is newer than the version Universal Multicurrency has tested up to."
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:932
+msgid "One or more environment version strings could not be parsed."
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:936
+msgid "This store is below a future minimum version announced in the compatibility documentation."
+msgstr ""
+
+#: src/Diagnostics/SiteHealthReport.php:940
 msgid "High-Performance Order Storage (HPOS) is not enabled. Universal Multicurrency supports legacy order storage, but HPOS is recommended."
 msgstr ""
 

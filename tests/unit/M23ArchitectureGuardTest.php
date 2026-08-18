@@ -27,7 +27,7 @@ final class M23ArchitectureGuardTest extends TestCase {
 	public function test_persistence_baselines_unchanged(): void {
 		$this->assertSame( 7, Settings::SCHEMA_VERSION );
 		$this->assertSame( 5, OrderSnapshot::SCHEMA_VERSION );
-		$this->assertSame( 10, PersistedKeys::INVENTORY_VERSION );
+		$this->assertSame( 11, PersistedKeys::INVENTORY_VERSION );
 	}
 
 	public function test_no_node_toolchain_artifacts(): void {

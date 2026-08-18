@@ -10,6 +10,7 @@ declare( strict_types=1 );
 require_once dirname( __DIR__, 2 ) . '/vendor/autoload.php';
 require_once dirname( __DIR__ ) . '/Support/OptionWriteMetrics.php';
 
+use UMC\CacheState\CacheStateStore;
 use UMC\Rates\RateUpdateState;
 use UMC\Settings;
 use UMC\Tests\Support\OptionWriteMetrics;
@@ -79,6 +80,10 @@ if ( ! function_exists( 'update_option' ) ) {
 
 		if ( RateUpdateState::OPTION === $option ) {
 			OptionWriteMetrics::record_rate_state_write();
+		}
+
+		if ( CacheStateStore::OPTION === $option ) {
+			OptionWriteMetrics::record_cache_state_write();
 		}
 
 		return true;

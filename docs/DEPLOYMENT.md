@@ -26,7 +26,7 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Produces `dist/universal-multicurrency-1.0.0.zip`. The archive includes `readme.txt`,
+Produces `dist/universal-multicurrency-1.1.0.zip`. The archive includes `readme.txt`,
 production `src/`, `vendor/`, bundled presentation assets, block metadata, and
 `languages/universal-multicurrency.pot`.
 
@@ -38,6 +38,65 @@ vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
 **Current release on `main`:** **v1.0.0** (tagged and published).
+
+---
+
+## v1.1.0 — External Cache State Readiness (release pending)
+
+Post-1.0 release, not a numbered milestone (ADR-0031 §6 — no `M27` is ever
+created). Adds a UMC-owned, read-only readiness signal for external
+full-page caches that key their configuration on the plugin's cache-critical
+state: base currency, the enabled-∧-rated currency set, and geo-routing
+enablement. A deterministic sha256-derived `state_hash` is published via
+`wp umc cache-state status` and Site Health / Compatibility → Cache; an
+external operator or automation acknowledges reconciliation via
+`wp umc cache-state acknowledge <hash>`. Full detail: ADR-0032,
+[`docs/architecture/external-cache-state-readiness.md`](architecture/external-cache-state-readiness.md),
+[`docs/CLI.md`](CLI.md).
+
+**Persistence:** new standalone option `umc_cache_state`
+(`schema_version`, `acknowledged_hash`, `acknowledged_at`), autoload
+`false`, deleted on uninstall (ADR-0009). `Settings::SCHEMA_VERSION` stays
+**7** — no settings migration. `PersistedKeys::INVENTORY_VERSION` moves
+**10 → 11** because this is a new persistence surface, not a changed one.
+`OrderSnapshot::SCHEMA_VERSION` is unchanged.
+
+**Boundary (unchanged by this release, mechanically enforced):** the plugin
+gains no ability to SSH, write nginx/Varnish/CDN configuration, reload or
+purge an external cache, hold cache-server credentials, or perform outbound
+cache-management HTTP. Acknowledgement is a CLI-only claim, never a runtime
+verification — see the documented ABA limitation in ADR-0032 §5.
+
+### Operator procedure
+
+For a site running behind an external full-page cache that keys on this
+plugin's configuration:
+
+1. `wp umc cache-state status --format=json` — read the current state hash.
+2. Reconcile the external cache to that state (infrastructure-specific;
+   this plugin has no part in this step).
+3. Validate / reload / accept the change on the infrastructure side.
+4. `wp umc cache-state status --format=json` — re-read the current hash.
+   Do not reuse the value from step 1.
+5. `wp umc cache-state acknowledge <hash from step 4>`.
+
+If the configuration changes between steps 1 and 4, reconcile again against
+the new value before acknowledging. Skipping straight to step 5 with a hash
+captured before reconciliation is the documented ABA failure mode.
+
+### Contributor validation
+
+```bash
+composer phpcs
+composer test:unit
+composer test:integration
+composer make-pot:check
+composer audit
+composer release-audit
+```
+
+**Released as:** *(filled in at closure — tag, GitHub release, artifact
+SHA-256, PR number, and merge commit recorded here once published)*.
 
 ---
 

@@ -11,6 +11,7 @@ namespace UMC;
 
 use UMC\Admin\Geo\GeoSandboxRecentStore;
 use UMC\Admin\GeoSandboxController;
+use UMC\CacheState\CacheStateStore;
 use UMC\Cart\CartRecalculation;
 use UMC\Checkout\CheckoutTransitionStateRepository;
 use UMC\CurrencySwitcher;
@@ -34,7 +35,7 @@ final class PersistedKeys {
 	/**
 	 * Bump when the inventory shape or membership changes.
 	 */
-	public const INVENTORY_VERSION = 10;
+	public const INVENTORY_VERSION = 11;
 
 	/**
 	 * WordPress options written by the plugin.
@@ -46,6 +47,7 @@ final class PersistedKeys {
 			Settings::OPTION,
 			\UMC\Rates\RateUpdateState::OPTION,
 			ReportingCache::GENERATION_OPTION,
+			CacheStateStore::OPTION,
 		);
 	}
 

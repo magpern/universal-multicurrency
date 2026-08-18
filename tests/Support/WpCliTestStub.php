@@ -53,6 +53,15 @@ if ( ! class_exists( 'WP_CLI' ) ) {
 		}
 
 		/**
+		 * @param string $message Line to print, matching real WP_CLI::line()'s
+		 * plain echo-plus-newline behaviour so callers can assert on captured
+		 * output buffers exactly as they would against the real CLI.
+		 */
+		public static function line( $message = '' ): void {
+			echo (string) $message . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Test stub mirrors WP_CLI::line(), never rendered as HTML.
+		}
+
+		/**
 		 * @param string $message Warning message.
 		 */
 		public static function warning( $message ): void {
