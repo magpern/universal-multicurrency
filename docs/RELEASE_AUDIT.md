@@ -1,3 +1,33 @@
+# Release audit — v1.1.0 External Cache State Readiness
+
+Executable release-preparation gate for Universal Multicurrency **v1.1.0**.
+Post-1.0 release, not a numbered milestone (ADR-0031 §6 — no `M27`). Full
+detail: [ADR-0032](adr/0032-external-cache-state-readiness.md),
+[`docs/architecture/external-cache-state-readiness.md`](architecture/external-cache-state-readiness.md).
+
+**Repository status:** **in progress** — implementation and validation
+underway. No tag or GitHub release exists yet.
+
+## v1.1.0 release closure record
+
+| Item | Value |
+|---|---|
+| Version | **1.1.0** |
+| Settings schema | **7** (unchanged) |
+| Order snapshot schema | **5** (unchanged) |
+| Persisted-data inventory version | **11** (10 → 11: new `umc_cache_state` option, additive) |
+| Production migrations | none |
+| New persistence surface | `umc_cache_state` (schema_version, acknowledged_hash, acknowledged_at), autoload false, deleted on uninstall |
+| New CLI surface | `wp umc cache-state status`, `wp umc cache-state acknowledge <hash>` — no `check` subcommand |
+| New hooks | none — registered inside the existing `site_status_tests`/`debug_information` filters |
+| Boundary guards | `CacheStateBoundaryGuardTest` (no SSH/nginx/exec/outbound-HTTP capability; sole persistence gateway), plus all pre-existing whole-tree guards (`SecuritySourceGuardTest`, `RatesPersistenceGuardTest`, `PerformanceGuardTest`) covering the new files unmodified |
+| Unresolved release blockers | **0** |
+| Git tag `v1.1.0` | **Not yet created** |
+| GitHub release `v1.1.0` | **Not yet published** |
+| Deployment | **Not performed** |
+
+---
+
 # Release audit — v1.0.0 Production Readiness & Roadmap Closure
 
 Executable release-preparation gate for Universal Multicurrency **v1.0.0**.

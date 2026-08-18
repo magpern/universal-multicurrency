@@ -540,6 +540,30 @@ Another multicurrency plugin performing geo-based switching is reported
 through the existing passive conflict detection architecture when
 detectable.
 
+## External cache-state readiness (v1.1.0)
+
+The Compatibility → Cache category gains one deterministic result reporting
+whether this installation's cache-critical configuration (base currency, the
+enabled-∧-rated currency set, geo-routing enablement) matches what an
+external full-page cache was last told to reconcile against:
+
+| State | id | severity |
+|---|---|---|
+| Never acknowledged | `cache.state_not_enrolled` | `INFO` |
+| Acknowledged and matching | `cache.state_reconciled` | `INFO` |
+| Acknowledged but the configuration has changed since | `cache.state_reconciliation_required` | `WARNING` |
+
+This is entirely separate from the existing object/page-cache detection
+above (`cache.object_dropin`, `cache.plugin.*`, `cache.none_detected`,
+`cache.edge_note`) — it does not detect or classify a cache technology, it
+reports the plugin's own opt-in reconciliation contract for external
+infrastructure that keys on this plugin's semantic state. See
+[ADR-0032](adr/0032-external-cache-state-readiness.md),
+[`docs/architecture/external-cache-state-readiness.md`](architecture/external-cache-state-readiness.md),
+and [`docs/CLI.md`](CLI.md) for the full contract, the `wp umc cache-state`
+commands, and the acknowledgement transaction. The plugin never controls,
+purges, reloads, or holds credentials for any external cache.
+
 ## Changing this document
 
 This document is the single authoritative source for every version claim and

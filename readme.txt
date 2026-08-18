@@ -4,7 +4,7 @@ Tags: woocommerce, currency, multicurrency, exchange rates, money
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,6 +49,15 @@ Not for production traffic. Two runtime converters can double-convert prices. De
 The plugin ships a POT template (`languages/universal-multicurrency.pot`) for translators. Bundled locale `.mo` files are not included in this release.
 
 == Changelog ==
+
+= 1.1.0 =
+* External Cache State Readiness (post-1.0 release, not a numbered milestone)
+* New UMC-owned, read-only readiness signal for external full-page caches that key their configuration on this plugin's cache-critical state (base currency, enabled-and-rated currency set, geo-routing enablement)
+* Deterministic sha256-derived state hash published via `wp umc cache-state status` and surfaced in Site Health and Compatibility -> Cache
+* External operators/automation acknowledge reconciliation via `wp umc cache-state acknowledge <hash>` -- a claim, never a runtime verification
+* Plugin gains no ability to control, purge, reload, or hold credentials for any external cache
+* New standalone option `umc_cache_state`, deleted on uninstall; Settings schema 7 unchanged; PersistedKeys inventory 10 -> 11 (additive)
+* No new WordPress hook; no REST/AJAX surface
 
 = 1.0.0 =
 * v1.0 Production Readiness & Roadmap Closure (Milestone 26)
