@@ -21,6 +21,22 @@ use UMC\Settings;
  */
 final class GeoCurrencyDecisionServiceTest extends TestCase {
 
+	/**
+	 * WC_Session_Stub (tests/unit/Doubles/WooCommerceSwitcherDoubles.php) is
+	 * process-wide: it persists writes in $GLOBALS with no reset between
+	 * tests. mark_applied() in this same file writes SESSION_GEO_APPLIED /
+	 * SESSION_GEO_SESSION_DONE, which otherwise leaks into whichever test
+	 * happens to run afterward under a randomized execution order (observed
+	 * via Infection's --order-by=random initial-suite run). Reset before
+	 * every test so each one owns its own session precondition regardless
+	 * of order.
+	 */
+	protected function setUp(): void {
+		parent::setUp();
+
+		unset( $GLOBALS['umc_currency_switcher_test_session'] );
+	}
+
 	private function service( array $geo ): GeoCurrencyDecisionService {
 		$settings = new Settings(
 			array(
