@@ -621,7 +621,7 @@ the same "release pending" → "complete and released" convention the closed
 milestones above used, with its own ADR and, where warranted, its own
 `docs/architecture/*.md` specification.
 
-## v1.1.0 — External Cache State Readiness — release pending
+## v1.1.0 — External Cache State Readiness (**v1.1.0**) — complete and released
 
 **ADR:** [ADR-0032](adr/0032-external-cache-state-readiness.md)
 **Architecture spec:** [`docs/architecture/external-cache-state-readiness.md`](architecture/external-cache-state-readiness.md)
@@ -640,3 +640,20 @@ ADR-0032 for the full boundary.
 `Settings::SCHEMA_VERSION` stays **7** (no settings migration).
 `PersistedKeys::INVENTORY_VERSION` moves 10 → **11** (new option
 `umc_cache_state`, additive).
+
+**Released as:** **v1.1.0** — tag `v1.1.0`, GitHub release published,
+artifact `universal-multicurrency-1.1.0.zip` (550475 bytes; SHA-256
+`fdcc8a4f83d9262b02b1b0b75ea1bc51a92d7aa768c6725b9b1fad4ce2faa1c4`). PR
+**#28** (feature), PR **#29** (corrective fix — see below), merge commit
+`a7ff03558328698be0bb6b16d4206cb7984f730e`. Full detail:
+[`RELEASE_AUDIT.md`](RELEASE_AUDIT.md).
+
+**Corrective finding during release validation:** main CI's `mutation` job
+(Infection, `--order-by=random`) intermittently failed on
+`GeoCurrencyDecisionServiceTest` — a pre-existing, order-dependent
+test-isolation bug (a shared `$GLOBALS` session-stub double leaking state
+between two tests in the same file) unrelated to this release, reproduced
+deterministically against unmodified `main` before this branch existed.
+Fixed in PR #29 (`setUp()` now resets the shared double), verified against
+the original failing seed plus five additional random seeds, then a fresh
+independent main CI run confirmed 14/14 green on the actual tag commit.

@@ -5,8 +5,10 @@ Post-1.0 release, not a numbered milestone (ADR-0031 §6 — no `M27`). Full
 detail: [ADR-0032](adr/0032-external-cache-state-readiness.md),
 [`docs/architecture/external-cache-state-readiness.md`](architecture/external-cache-state-readiness.md).
 
-**Repository status:** **in progress** — implementation and validation
-underway. No tag or GitHub release exists yet.
+**Repository status:** **released as v1.1.0**. Git tag **`v1.1.0`** and
+GitHub release are published, on merge commit
+`a7ff03558328698be0bb6b16d4206cb7984f730e`. PR **#28** (feature), PR **#29**
+(corrective test-isolation fix, see §"Corrective finding" below).
 
 ## v1.1.0 release closure record
 
@@ -21,10 +23,37 @@ underway. No tag or GitHub release exists yet.
 | New CLI surface | `wp umc cache-state status`, `wp umc cache-state acknowledge <hash>` — no `check` subcommand |
 | New hooks | none — registered inside the existing `site_status_tests`/`debug_information` filters |
 | Boundary guards | `CacheStateBoundaryGuardTest` (no SSH/nginx/exec/outbound-HTTP capability; sole persistence gateway), plus all pre-existing whole-tree guards (`SecuritySourceGuardTest`, `RatesPersistenceGuardTest`, `PerformanceGuardTest`) covering the new files unmodified |
+| Baseline (measured at WP0, clean `main` commit `2780477`) | 1183 unit / 753 integration, both green |
+| Final counts | 1228 unit / 777 integration, both green — no regressions |
+| Manual acceptance | Live `dev.biopentra.eu` WordPress + WooCommerce stack (bind-mounted checkout): never-enrolled baseline, enrollment, stale-hash rejection, geo mutation, base-currency mutation (detected live, no hook), rate-value-only mutation (hash unchanged), Site Health across all four states, Compatibility → Cache — full restoration verified (`umc_settings` byte-identical, `woocommerce_currency` restored, `umc_cache_state` returned to its original absent state) |
 | Unresolved release blockers | **0** |
-| Git tag `v1.1.0` | **Not yet created** |
-| GitHub release `v1.1.0` | **Not yet published** |
+| Git tag `v1.1.0` | **Created** |
+| GitHub release `v1.1.0` | **Published** |
+| PR #28 CI run | **32195952724** — 14/14 jobs green on the reviewed feature HEAD |
+| PR #29 CI run | **32219304114** — 14/14 jobs green (corrective fix) |
+| Main CI run (final, on tag commit) | **32219396655** — 14/14 jobs green on the exact merge commit `a7ff03558328698be0bb6b16d4206cb7984f730e` |
+| Canonical release-audit | Run directly on the merge commit — all steps **PASS** |
+| Release workflow | **32219610720** (success) |
+| Artifact | `universal-multicurrency-1.1.0.zip` (550475 bytes; SHA-256 `fdcc8a4f83d9262b02b1b0b75ea1bc51a92d7aa768c6725b9b1fad4ce2faa1c4`) — downloaded from the published GitHub release itself (not a local build) and independently inspected: 365 entries, correct version metadata throughout, all `CacheState`/CLI/Compatibility classes present, no `tests/`, no `node_modules`, no `.git`, no `.github`, no `.env`, no `CLAUDE.local.md`, no secret-like content |
 | Deployment | **Not performed** |
+
+### Corrective finding during release validation
+
+The first main-CI run on PR #28's merge commit (`3e03371`) failed on the
+`mutation` job (Infection, `--order-by=random`):
+`GeoCurrencyDecisionServiceTest::test_should_apply_for_mode_is_true_without_a_woocommerce_session`
+intermittently failed depending on random seed. Root cause: `WC_Session_Stub`
+(a process-wide test double) persists writes in `$GLOBALS` with no reset
+between tests; `mark_applied()`, exercised earlier in the same test file,
+leaks `SESSION_GEO_APPLIED`/`SESSION_GEO_SESSION_DONE` into whichever test
+runs after it under randomized ordering. Reproduced deterministically against
+**unmodified `main`** (pre-v1.1.0, commit `2780477`) with the exact failing
+seed — confirming this predates and is unrelated to the v1.1.0 cache-state
+work. A blind CI re-run failed again with a different seed, ruling out mere
+bad luck. Fixed in PR #29 by resetting the shared global in `setUp()`;
+verified against the original failing seed plus five additional seeds before
+merging. The final main CI run (`32219396655`, on the actual tag commit) is
+green with no re-runs.
 
 ---
 

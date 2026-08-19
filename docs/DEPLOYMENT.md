@@ -37,11 +37,11 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release on `main`:** **v1.0.0** (tagged and published).
+**Current release on `main`:** **v1.1.0** (tagged and published).
 
 ---
 
-## v1.1.0 — External Cache State Readiness (release pending)
+## v1.1.0 — External Cache State Readiness (released)
 
 Post-1.0 release, not a numbered milestone (ADR-0031 §6 — no `M27` is ever
 created). Adds a UMC-owned, read-only readiness signal for external
@@ -95,8 +95,21 @@ composer audit
 composer release-audit
 ```
 
-**Released as:** *(filled in at closure — tag, GitHub release, artifact
-SHA-256, PR number, and merge commit recorded here once published)*.
+**Released as:** **v1.1.0** — tag `v1.1.0`, GitHub release published,
+artifact `universal-multicurrency-1.1.0.zip` (550475 bytes; SHA-256
+`fdcc8a4f83d9262b02b1b0b75ea1bc51a92d7aa768c6725b9b1fad4ce2faa1c4`) —
+downloaded from the published GitHub release itself (not a local build) and
+independently inspected: 365 entries, correct version metadata throughout
+(plugin header, `UMC_VERSION`, readme.txt Stable tag all `1.1.0`), all new
+`CacheState`/CLI/Compatibility classes present, no `tests/`, no
+`node_modules`, no `.git`, no `.github`, no `.env`, no `CLAUDE.local.md`, no
+secret-like content. PR **#28** (feature, merge commit
+`3e03371ebb598b1693ff1a86510bc0126946cd29`), PR **#29** (corrective
+test-isolation fix found during main-CI validation — pre-existing, unrelated
+to this release; see [`RELEASE_AUDIT.md`](RELEASE_AUDIT.md)), merge commit
+`a7ff03558328698be0bb6b16d4206cb7984f730e` — the tag target. Deployment to
+production: **not performed** — a separate, explicitly authorized operation,
+as with v1.0.0.
 
 ---
 
