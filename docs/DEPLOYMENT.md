@@ -37,7 +37,15 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release on `main`:** **v1.1.1** (in progress on `fix/v1.1.1-variable-price-range`) (tagged and published).
+**Current release on `main`:** **v1.1.1** (tagged and published).
+
+## v1.1.1 — Variable Product Price Range Fix (released)
+
+Corrective release for ADR-0033 (variable-product parent ranges after currency
+switch). Schemas unchanged. **Released as:** **v1.1.1** — tag `v1.1.1`, GitHub
+release published, artifact `universal-multicurrency-1.1.1.zip` (551237 bytes;
+SHA-256 `96ddf9d65a21e6ab5df10527f23108c6eabff4c21d48126a09734d3321e4533a`).
+PR **#30**. See [`RELEASE_AUDIT.md`](RELEASE_AUDIT.md).
 
 ---
 

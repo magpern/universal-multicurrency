@@ -5,10 +5,11 @@ Post-1.0 corrective release, not a numbered milestone (ADR-0031 §6 — no `M27`
 Full detail: [ADR-0033](adr/0033-variable-product-price-range-currency-identity.md),
 [`docs/architecture/variable-product-price-range-currency-identity.md`](architecture/variable-product-price-range-currency-identity.md).
 
-**Repository status:** **release candidate on branch** `fix/v1.1.1-variable-price-range`
-(not yet tagged). Persistence unchanged from v1.1.0.
+**Repository status:** **released as v1.1.1**. Git tag **`v1.1.1`** and
+GitHub release are published, on merge commit
+`1f5b1b3eb61115dc3781d7dfca33dc5643114d35`. PR **#30**.
 
-## v1.1.1 release preparation record
+## v1.1.1 release closure record
 
 | Item | Value |
 |---|---|
@@ -19,15 +20,19 @@ Full detail: [ADR-0033](adr/0033-variable-product-price-range-currency-identity.
 | CacheState contract | **v1** (unchanged) |
 | Production migrations | none |
 | Baseline (v1.1.0 closure `96c0c40`) | 1228 unit / 777 integration |
-| This branch measured | 1229 unit / 787 integration (+1 unit structure assertion, +10 V111 regressions) |
+| Final counts | 1229 unit / 787 integration (+1 unit structure assertion, +10 V111 regressions) |
 | Root cause | `WC_Product_Variable::is_on_sale()` ignores `'edit'` and nests `get_variation_prices()` under `PriceHooks::$resolving`, poisoning `wc_var_prices_*` with base amounts under a foreign-currency hash |
 | Fix | Variation-price filters bypass the re-entrancy guard; `ProductSaleStateResolver` resolves variable sale state from children without `get_variation_prices()` |
 | Playwright | `specs/v111-variable-price-range.spec.ts` — EUR→DKK numeric range + variation agreement + EUR restore (DEV) |
 | Unresolved release blockers | **0** |
 | Open Milestone 8 review findings | **0** |
-| Git tag `v1.1.1` | **Not yet created** |
-| GitHub release `v1.1.1` | **Not yet published** |
-| Deployment | **Not performed** (DEV verification only) |
+| Git tag `v1.1.1` | **Created** |
+| GitHub release `v1.1.1` | **Published** |
+| PR #30 CI run | **32526881294** — 14/14 jobs green on the reviewed feature HEAD |
+| Main CI run (final, on tag commit) | **32527038661** — 14/14 jobs green on the exact merge commit `1f5b1b3eb61115dc3781d7dfca33dc5643114d35` |
+| Release workflow | **32527206642** (success) |
+| Artifact | `universal-multicurrency-1.1.1.zip` (551237 bytes; SHA-256 `96ddf9d65a21e6ab5df10527f23108c6eabff4c21d48126a09734d3321e4533a`) — downloaded from the published GitHub release itself (not a local build) and independently inspected: 365 entries, correct version metadata throughout (plugin header, `UMC_VERSION`, readme.txt Stable tag all `1.1.1`), ADR-0033 fix present in `PriceHooks` / `ProductSaleStateResolver`, no `tests/`, no `node_modules`, no `.git`, no `.github`, no `.env`, no `CLAUDE.local.md`, no secret-like content |
+| Deployment | **Not performed** |
 
 ## Prior release: v1.1.0 External Cache State Readiness
 

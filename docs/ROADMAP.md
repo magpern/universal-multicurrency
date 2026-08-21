@@ -622,7 +622,7 @@ milestones above used, with its own ADR and, where warranted, its own
 `docs/architecture/*.md` specification.
 
 
-## v1.1.1 — Variable Product Price Range Fix (**v1.1.1**) — in progress
+## v1.1.1 — Variable Product Price Range Fix (**v1.1.1**) — complete and released
 
 **ADR:** [ADR-0033](adr/0033-variable-product-price-range-currency-identity.md)
 **Architecture spec:** [`docs/architecture/variable-product-price-range-currency-identity.md`](architecture/variable-product-price-range-currency-identity.md)
@@ -634,6 +634,12 @@ where `WC_Product_Variable::is_on_sale()` nested `get_variation_prices()` under
 `PriceHooks::$resolving` and cached base amounts under the foreign-currency hash.
 
 Persistence / CacheState / schemas: **unchanged** from v1.1.0.
+
+**Released as:** **v1.1.1** — tag `v1.1.1`, GitHub release published,
+artifact `universal-multicurrency-1.1.1.zip` (551237 bytes; SHA-256
+`96ddf9d65a21e6ab5df10527f23108c6eabff4c21d48126a09734d3321e4533a`). PR
+**#30**, merge commit `1f5b1b3eb61115dc3781d7dfca33dc5643114d35`. Full detail:
+[`RELEASE_AUDIT.md`](RELEASE_AUDIT.md).
 
 ## v1.1.0 — External Cache State Readiness (**v1.1.0**) — complete and released
 
