@@ -4,7 +4,7 @@ Tags: woocommerce, currency, multicurrency, exchange rates, money
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,6 +49,9 @@ Not for production traffic. Two runtime converters can double-convert prices. De
 The plugin ships a POT template (`languages/universal-multicurrency.pot`) for translators. Bundled locale `.mo` files are not included in this release.
 
 == Changelog ==
+
+= 1.1.1 =
+* Fix: variable-product min/max price ranges now resolve in the active currency when a parent get_price() runs before the range cache is built (WooCommerce Variable::is_on_sale re-entrancy).
 
 = 1.1.0 =
 * External Cache State Readiness (post-1.0 release, not a numbered milestone)
@@ -238,6 +241,9 @@ The plugin ships a POT template (`languages/universal-multicurrency.pot`) for tr
 * Storefront conversion, classic cart/checkout, order snapshots, historical order display, refunds, and Store API / blocks parity (milestones 2–5)
 
 == Upgrade Notice ==
+
+= 1.1.1 =
+Fix for variable-product price ranges after currency switch. Safe in-place upgrade from 1.1.0; no migration.
 
 = 0.17.0 =
 WooCommerce Compatibility & Transaction Integrity. Free-shipping thresholds now convert with the cart. No settings schema change — safe upgrade from 0.16.x. Requires WooCommerce 8.2+, PHP 8.1+, and HPOS.

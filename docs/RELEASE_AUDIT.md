@@ -1,3 +1,36 @@
+# Release audit — v1.1.1 Variable Product Price Range Fix
+
+Executable release-preparation gate for Universal Multicurrency **v1.1.1**.
+Post-1.0 corrective release, not a numbered milestone (ADR-0031 §6 — no `M27`).
+Full detail: [ADR-0033](adr/0033-variable-product-price-range-currency-identity.md),
+[`docs/architecture/variable-product-price-range-currency-identity.md`](architecture/variable-product-price-range-currency-identity.md).
+
+**Repository status:** **release candidate on branch** `fix/v1.1.1-variable-price-range`
+(not yet tagged). Persistence unchanged from v1.1.0.
+
+## v1.1.1 release preparation record
+
+| Item | Value |
+|---|---|
+| Version | **1.1.1** |
+| Settings schema | **7** (unchanged) |
+| Order snapshot schema | **5** (unchanged) |
+| Persisted-data inventory version | **11** (unchanged) |
+| CacheState contract | **v1** (unchanged) |
+| Production migrations | none |
+| Baseline (v1.1.0 closure `96c0c40`) | 1228 unit / 777 integration |
+| This branch measured | 1229 unit / 787 integration (+1 unit structure assertion, +10 V111 regressions) |
+| Root cause | `WC_Product_Variable::is_on_sale()` ignores `'edit'` and nests `get_variation_prices()` under `PriceHooks::$resolving`, poisoning `wc_var_prices_*` with base amounts under a foreign-currency hash |
+| Fix | Variation-price filters bypass the re-entrancy guard; `ProductSaleStateResolver` resolves variable sale state from children without `get_variation_prices()` |
+| Playwright | `specs/v111-variable-price-range.spec.ts` — EUR→DKK numeric range + variation agreement + EUR restore (DEV) |
+| Unresolved release blockers | **0** |
+| Open Milestone 8 review findings | **0** |
+| Git tag `v1.1.1` | **Not yet created** |
+| GitHub release `v1.1.1` | **Not yet published** |
+| Deployment | **Not performed** (DEV verification only) |
+
+## Prior release: v1.1.0 External Cache State Readiness
+
 # Release audit — v1.1.0 External Cache State Readiness
 
 Executable release-preparation gate for Universal Multicurrency **v1.1.0**.
