@@ -51,4 +51,12 @@ final class PriceHooksStructureTest extends TestCase {
 		// programming errors must propagate, not be masked as raw prices.
 		$this->assertStringNotContainsString( 'catch', $this->source() );
 	}
+
+	public function test_variation_prices_path_documents_reentrancy_bypass(): void {
+		$this->assertStringContainsString(
+			'Intentionally bypasses',
+			$this->source(),
+			'Bulk variation-price filters must document the ADR-0033 re-entrancy bypass.'
+		);
+	}
 }

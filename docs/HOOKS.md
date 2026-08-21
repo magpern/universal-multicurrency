@@ -33,7 +33,7 @@ unless **both**:
 | `woocommerce_product_variation_get_price` | `($value, $variation)` | Single-variation display (variations use the `woocommerce_product_variation_get_` prefix). |
 | `woocommerce_product_variation_get_regular_price` | `($value, $variation)` | As above. |
 | `woocommerce_product_variation_get_sale_price` | `($value, $variation)` | As above. |
-| `woocommerce_variation_prices_price` | `($price, $variation, $product)` | Bulk path behind variable-product price ranges, sorting, add-to-cart form. |
+| `woocommerce_variation_prices_price` | `($price, $variation, $product)` | Bulk path behind variable-product price ranges, sorting, add-to-cart form. Intentionally bypasses the parent-getter re-entrancy guard (ADR-0033 / v1.1.1). |
 | `woocommerce_variation_prices_regular_price` | `($price, $variation, $product)` | As above. |
 | `woocommerce_variation_prices_sale_price` | `($price, $variation, $product)` | As above. |
 | `woocommerce_get_variation_prices_hash` | `($hash, $product, $for_display)` | Appends `[active_code, rate]` so the `wc_var_prices_{id}` transient never crosses currencies and self-invalidates when a rate changes. **Critical for correctness.** |

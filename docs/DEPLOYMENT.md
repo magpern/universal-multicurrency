@@ -26,7 +26,7 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Produces `dist/universal-multicurrency-1.1.0.zip`. The archive includes `readme.txt`,
+Produces `dist/universal-multicurrency-1.1.1.zip`. The archive includes `readme.txt`,
 production `src/`, `vendor/`, bundled presentation assets, block metadata, and
 `languages/universal-multicurrency.pot`.
 
@@ -37,7 +37,7 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release on `main`:** **v1.1.0** (tagged and published).
+**Current release on `main`:** **v1.1.1** (in progress on `fix/v1.1.1-variable-price-range`) (tagged and published).
 
 ---
 
@@ -96,7 +96,7 @@ composer release-audit
 ```
 
 **Released as:** **v1.1.0** — tag `v1.1.0`, GitHub release published,
-artifact `universal-multicurrency-1.1.0.zip` (550475 bytes; SHA-256
+artifact `universal-multicurrency-1.1.1.zip` (550475 bytes; SHA-256
 `fdcc8a4f83d9262b02b1b0b75ea1bc51a92d7aa768c6725b9b1fad4ce2faa1c4`) —
 downloaded from the published GitHub release itself (not a local build) and
 independently inspected: 365 entries, correct version metadata throughout

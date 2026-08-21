@@ -621,6 +621,20 @@ the same "release pending" → "complete and released" convention the closed
 milestones above used, with its own ADR and, where warranted, its own
 `docs/architecture/*.md` specification.
 
+
+## v1.1.1 — Variable Product Price Range Fix (**v1.1.1**) — in progress
+
+**ADR:** [ADR-0033](adr/0033-variable-product-price-range-currency-identity.md)
+**Architecture spec:** [`docs/architecture/variable-product-price-range-currency-identity.md`](architecture/variable-product-price-range-currency-identity.md)
+**Branch:** `fix/v1.1.1-variable-price-range`
+
+Corrective release: variable-product min/max ranges must use the same active-currency
+pricing authority as selected variations after a currency switch. Fixes re-entrancy
+where `WC_Product_Variable::is_on_sale()` nested `get_variation_prices()` under
+`PriceHooks::$resolving` and cached base amounts under the foreign-currency hash.
+
+Persistence / CacheState / schemas: **unchanged** from v1.1.0.
+
 ## v1.1.0 — External Cache State Readiness (**v1.1.0**) — complete and released
 
 **ADR:** [ADR-0032](adr/0032-external-cache-state-readiness.md)

@@ -4,5 +4,6 @@ playwright-report/
 .env
 .fixtures.json
 .v1-fixtures.json
+.v111-fixtures.json
 *.png
 *.zip

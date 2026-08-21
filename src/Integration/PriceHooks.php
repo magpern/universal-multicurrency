@@ -202,6 +202,13 @@ final class PriceHooks {
 	/**
 	 * Resolves one cached variation price through the fixed/converted seam.
 	 *
+	 * Intentionally bypasses {@see $resolving}: WooCommerce may build the
+	 * variation-price table while a parent `get_price()` resolve is in progress
+	 * (`WC_Product_Variable::is_on_sale()` always calls `get_variation_prices()`).
+	 * Blocking here would cache base amounts under the foreign-currency hash
+	 * (ADR-0033). Values passed to these filters are already `'edit'`-context
+	 * base amounts, so resolving them here cannot double-convert.
+	 *
 	 * @param mixed  $price     Base-authored price.
 	 * @param mixed  $variation Variation product.
 	 * @param string $field     Resolution field.
@@ -211,7 +218,11 @@ final class PriceHooks {
 			return $price;
 		}
 
-		return $this->resolve( $price, $variation, $field );
+		if ( ! $this->should_convert( $variation ) ) {
+			return $price;
+		}
+
+		return $this->resolver->resolve( $price, $variation, $field )->amount();
 	}
 
 	/**
