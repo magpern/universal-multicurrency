@@ -622,6 +622,20 @@ milestones above used, with its own ADR and, where warranted, its own
 `docs/architecture/*.md` specification.
 
 
+## v1.2.0 — Free Shipping Threshold Display API (**v1.2.0**) — pending
+
+**ADR:** [ADR-0034](adr/0034-free-shipping-threshold-display-api.md)
+**Architecture spec:** [`docs/architecture/free-shipping-threshold-display-api.md`](architecture/free-shipping-threshold-display-api.md)
+**Branch:** `feature/v1.2.0-free-shipping-threshold-display-api`
+
+Public PHP display API for the WooCommerce free-shipping minimum in the
+active UMC currency, backed by one shared threshold resolver also consumed by
+checkout eligibility. Not M27. No persistence/schema change. No REST/AJAX.
+No production deployment as part of the release process.
+
+WP1 must lock the base-authored over-precision rule into ADR-0034 before
+implementation (preference: global rejection).
+
 ## v1.1.1 — Variable Product Price Range Fix (**v1.1.1**) — complete and released
 
 **ADR:** [ADR-0033](adr/0033-variable-product-price-range-currency-identity.md)
