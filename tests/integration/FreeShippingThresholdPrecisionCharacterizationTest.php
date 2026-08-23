@@ -60,8 +60,18 @@ final class FreeShippingThresholdPrecisionCharacterizationTest extends WP_UnitTe
 	 */
 	private const PRECISE_MIN = '200.50';
 
+	/**
+	 * Shipping zone under test.
+	 *
+	 * @var WC_Shipping_Zone|null
+	 */
 	private ?WC_Shipping_Zone $zone = null;
 
+	/**
+	 * Free-shipping instance id.
+	 *
+	 * @var int
+	 */
 	private int $instance_id = 0;
 
 	public function set_up(): void {
@@ -215,7 +225,7 @@ final class FreeShippingThresholdPrecisionCharacterizationTest extends WP_UnitTe
 			'Native WC compares against raw 200.001; a 200.00 cart must not qualify.'
 		);
 
-		$displayed = wp_strip_all_tags( wc_price( self::OVERPRECISE_MIN, array( 'currency' => Golden::BASE ) ) );
+		$displayed  = wp_strip_all_tags( wc_price( self::OVERPRECISE_MIN, array( 'currency' => Golden::BASE ) ) );
 		$normalized = preg_replace( '/[^\d.,]/', '', $displayed );
 		$this->assertMatchesRegularExpression(
 			'/200[.,]00/',

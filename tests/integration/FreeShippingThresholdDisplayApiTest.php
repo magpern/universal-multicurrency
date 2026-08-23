@@ -56,16 +56,46 @@ final class FreeShippingThresholdDisplayApiTest extends WP_UnitTestCase {
 
 	private const BASE_THRESHOLD = '200.00';
 
+	/**
+	 * Shipping zone under test.
+	 *
+	 * @var WC_Shipping_Zone|null
+	 */
 	private ?WC_Shipping_Zone $zone = null;
 
+	/**
+	 * Free-shipping instance id.
+	 *
+	 * @var int
+	 */
 	private int $instance_id = 0;
 
+	/**
+	 * Shared threshold resolver under test.
+	 *
+	 * @var FreeShippingThresholdResolver|null
+	 */
 	private ?FreeShippingThresholdResolver $resolver = null;
 
+	/**
+	 * Public display service under test.
+	 *
+	 * @var FreeShippingThresholdDisplayService|null
+	 */
 	private ?FreeShippingThresholdDisplayService $display = null;
 
+	/**
+	 * Request-scoped currency facade.
+	 *
+	 * @var CurrencyContext|null
+	 */
 	private ?CurrencyContext $context = null;
 
+	/**
+	 * Price conversion seam.
+	 *
+	 * @var PriceConversionService|null
+	 */
 	private ?PriceConversionService $service = null;
 
 	public function set_up(): void {

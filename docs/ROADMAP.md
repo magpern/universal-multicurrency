@@ -622,7 +622,7 @@ milestones above used, with its own ADR and, where warranted, its own
 `docs/architecture/*.md` specification.
 
 
-## v1.2.0 — Free Shipping Threshold Display API (**v1.2.0**) — pending
+## v1.2.0 — Free Shipping Threshold Display API (**v1.2.0**) — release pending
 
 **ADR:** [ADR-0034](adr/0034-free-shipping-threshold-display-api.md)
 **Architecture spec:** [`docs/architecture/free-shipping-threshold-display-api.md`](architecture/free-shipping-threshold-display-api.md)
@@ -633,8 +633,9 @@ active UMC currency, backed by one shared threshold resolver also consumed by
 checkout eligibility. Not M27. No persistence/schema change. No REST/AJAX.
 No production deployment as part of the release process.
 
-WP1 must lock the base-authored over-precision rule into ADR-0034 before
-implementation (preference: global rejection).
+WP1 locked Option A (global rejection of base-authored over-precision beyond
+base currency decimals). Public symbol:
+`umc_get_free_shipping_threshold_display()`.
 
 ## v1.1.1 — Variable Product Price Range Fix (**v1.1.1**) — complete and released
 

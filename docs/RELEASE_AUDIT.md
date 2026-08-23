@@ -1,3 +1,37 @@
+# Release audit — v1.2.0 Free Shipping Threshold Display API
+
+Executable release-preparation gate for Universal Multicurrency **v1.2.0**.
+Post-1.0 feature release, not a numbered milestone (ADR-0031 §6 — no `M27`).
+Full detail: [ADR-0034](adr/0034-free-shipping-threshold-display-api.md),
+[`docs/architecture/free-shipping-threshold-display-api.md`](architecture/free-shipping-threshold-display-api.md).
+
+**Repository status:** release candidate prepared on the feature branch.
+Tag and GitHub release are created only after merge + fresh main CI +
+canonical release-audit PASS.
+
+## v1.2.0 release closure record
+
+| Item | Value |
+|---|---|
+| Version | **1.2.0** |
+| Settings schema | **7** (unchanged) |
+| Order snapshot schema | **5** (unchanged) |
+| Persisted-data inventory version | **11** (unchanged) |
+| CacheState contract | **v1** (unchanged) |
+| Production migrations | none |
+| Baseline (v1.1.1 closure `a0c4a10`) | 1229 unit / 787 integration |
+| Final counts (pre-merge) | 1238 unit / 797 integration |
+| Public API | `umc_get_free_shipping_threshold_display( string $base_threshold ): ?array` |
+| Shared resolver | `FreeShippingThresholdResolver` consumed by `ShippingConversion` and `FreeShippingThresholdDisplayService` |
+| Over-precision | Option A — global rejection when fractional digits exceed base currency decimals |
+| Unresolved release blockers | **0** |
+| Open Milestone 8 review findings | **0** |
+| Git tag `v1.2.0` | **Not yet created** |
+| GitHub release `v1.2.0` | **Not yet published** |
+| Deployment | **Not performed** |
+
+## Prior release: v1.1.1 Variable Product Price Range Fix
+
 # Release audit — v1.1.1 Variable Product Price Range Fix
 
 Executable release-preparation gate for Universal Multicurrency **v1.1.1**.
