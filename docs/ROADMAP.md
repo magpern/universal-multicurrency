@@ -622,7 +622,7 @@ milestones above used, with its own ADR and, where warranted, its own
 `docs/architecture/*.md` specification.
 
 
-## v1.2.0 — Free Shipping Threshold Display API (**v1.2.0**) — release pending
+## v1.2.0 — Free Shipping Threshold Display API (**v1.2.0**) — complete and released
 
 **ADR:** [ADR-0034](adr/0034-free-shipping-threshold-display-api.md)
 **Architecture spec:** [`docs/architecture/free-shipping-threshold-display-api.md`](architecture/free-shipping-threshold-display-api.md)
@@ -636,6 +636,12 @@ No production deployment as part of the release process.
 WP1 locked Option A (global rejection of base-authored over-precision beyond
 base currency decimals). Public symbol:
 `umc_get_free_shipping_threshold_display()`.
+
+**Released as:** **v1.2.0** — tag `v1.2.0`, GitHub release published,
+artifact `universal-multicurrency-1.2.0.zip` (557380 bytes; SHA-256
+`d339c698a6d951bfe78c5adb94a987ac8d7e89f380aac2ca84242c0066b419da`). PR
+**#31**, merge commit `a1fe8d842bfbc893e94cc45047a9a7e1f59b37e3`. Full detail:
+[`RELEASE_AUDIT.md`](RELEASE_AUDIT.md).
 
 ## v1.1.1 — Variable Product Price Range Fix (**v1.1.1**) — complete and released
 

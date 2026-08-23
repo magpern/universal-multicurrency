@@ -37,16 +37,19 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release on `main`:** **v1.1.1** (tagged and published). **v1.2.0** is prepared on the feature branch pending merge.
+**Current release on `main`:** **v1.2.0** (tagged and published).
 
-## v1.2.0 — Free Shipping Threshold Display API (prepared)
+## v1.2.0 — Free Shipping Threshold Display API (released)
 
 Post-1.0 feature release (ADR-0034 — no `M27`). Public PHP API
 `umc_get_free_shipping_threshold_display()` returns the free-shipping threshold
 in the active UMC currency using the same `FreeShippingThresholdResolver` as
-checkout eligibility. Schemas / PersistedKeys / CacheState unchanged. No
-production deployment as part of this release process. See
-[`RELEASE_AUDIT.md`](RELEASE_AUDIT.md).
+checkout eligibility. Schemas / PersistedKeys / CacheState unchanged.
+**Released as:** **v1.2.0** — tag `v1.2.0`, GitHub release published, artifact
+`universal-multicurrency-1.2.0.zip` (557380 bytes; SHA-256
+`d339c698a6d951bfe78c5adb94a987ac8d7e89f380aac2ca84242c0066b419da`). PR
+**#31**, merge commit `a1fe8d842bfbc893e94cc45047a9a7e1f59b37e3`. Production
+deployment: **not performed**. See [`RELEASE_AUDIT.md`](RELEASE_AUDIT.md).
 
 ---
 

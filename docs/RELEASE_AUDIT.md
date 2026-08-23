@@ -5,9 +5,9 @@ Post-1.0 feature release, not a numbered milestone (ADR-0031 §6 — no `M27`).
 Full detail: [ADR-0034](adr/0034-free-shipping-threshold-display-api.md),
 [`docs/architecture/free-shipping-threshold-display-api.md`](architecture/free-shipping-threshold-display-api.md).
 
-**Repository status:** release candidate prepared on the feature branch.
-Tag and GitHub release are created only after merge + fresh main CI +
-canonical release-audit PASS.
+**Repository status:** **released as v1.2.0**. Git tag **`v1.2.0`** and
+GitHub release are published, on merge commit
+`a1fe8d842bfbc893e94cc45047a9a7e1f59b37e3`. PR **#31**.
 
 ## v1.2.0 release closure record
 
@@ -20,15 +20,20 @@ canonical release-audit PASS.
 | CacheState contract | **v1** (unchanged) |
 | Production migrations | none |
 | Baseline (v1.1.1 closure `a0c4a10`) | 1229 unit / 787 integration |
-| Final counts (pre-merge) | 1238 unit / 797 integration |
+| Final counts | 1238 unit / 797 integration |
 | Public API | `umc_get_free_shipping_threshold_display( string $base_threshold ): ?array` |
 | Shared resolver | `FreeShippingThresholdResolver` consumed by `ShippingConversion` and `FreeShippingThresholdDisplayService` |
 | Over-precision | Option A — global rejection when fractional digits exceed base currency decimals |
 | Unresolved release blockers | **0** |
 | Open Milestone 8 review findings | **0** |
-| Git tag `v1.2.0` | **Not yet created** |
-| GitHub release `v1.2.0` | **Not yet published** |
+| Git tag `v1.2.0` | **Created** (annotated; target `a1fe8d842bfbc893e94cc45047a9a7e1f59b37e3`) |
+| GitHub release `v1.2.0` | **Published** (not draft, not prerelease) |
+| PR #31 CI run | **32631509127** — 14/14 jobs green on reviewed feature HEAD `70e90a6a3429a7a0d43e18d26118b6d892dfb232` |
+| Main CI run (final, on tag commit) | **32631599194** — 14/14 jobs green on exact merge commit `a1fe8d842bfbc893e94cc45047a9a7e1f59b37e3` |
+| Release workflow | **32631688347** (success) |
+| Artifact | `universal-multicurrency-1.2.0.zip` (557380 bytes; SHA-256 `d339c698a6d951bfe78c5adb94a987ac8d7e89f380aac2ca84242c0066b419da`) — downloaded from the published GitHub release itself (not a local build) and independently inspected: 371 entries, correct version metadata throughout (plugin header, `UMC_VERSION`, readme.txt Stable tag all `1.2.0`), `FreeShippingThresholdResolver` / `FreeShippingThresholdDisplayService` / `src/api.php` present, `ShippingConversion` uses shared resolver, no `tests/`, no `node_modules`, no `.git`, no `.github`, no `.env`, no secret-like content |
 | Deployment | **Not performed** |
+| M27 | **Not created** |
 
 ## Prior release: v1.1.1 Variable Product Price Range Fix
 
