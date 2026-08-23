@@ -62,7 +62,9 @@ use UMC\Integration\FeeConversion;
 use UMC\Integration\GatewayCompatibility;
 use UMC\Integration\PriceConversionService;
 use UMC\Integration\PriceHooks;
+use UMC\Integration\FreeShippingThresholdResolver;
 use UMC\Integration\ShippingConversion;
+use UMC\PublicApi\FreeShippingThresholdDisplayService;
 use UMC\Order\LineItemPriceProvenance;
 use UMC\Order\HistoricalFormattingResolver;
 use UMC\Order\HistoricalOrderDisplay;
@@ -126,6 +128,13 @@ final class Plugin {
 	private bool $booted = false;
 
 	/**
+	 * Bound free-shipping threshold display service (null until woocommerce_init).
+	 *
+	 * @var \UMC\PublicApi\FreeShippingThresholdDisplayService|null
+	 */
+	private ?\UMC\PublicApi\FreeShippingThresholdDisplayService $free_shipping_display_service = null;
+
+	/**
 	 * Returns the shared plugin instance.
 	 */
 	public static function instance(): Plugin {
@@ -134,6 +143,15 @@ final class Plugin {
 		}
 
 		return self::$instance;
+	}
+
+	/**
+	 * Bound public display service, or null before woocommerce_init wiring.
+	 *
+	 * @since 1.2.0
+	 */
+	public function free_shipping_threshold_display(): ?\UMC\PublicApi\FreeShippingThresholdDisplayService {
+		return $this->free_shipping_display_service;
 	}
 
 	/**
@@ -238,7 +256,7 @@ final class Plugin {
 		// and refund metadata.
 		add_action(
 			'woocommerce_init',
-			static function () use ( $context, $service, $settings, $version, $registry, $fixed_repository, $switcher_block ) {
+			function () use ( $context, $service, $settings, $version, $registry, $fixed_repository, $switcher_block ) {
 				// One GatewayCompatibility instance is shared between the
 				// storefront callback and the order-pay lock so the lock can
 				// deregister the storefront callback (matched by instance) and
@@ -285,7 +303,12 @@ final class Plugin {
 				( new CurrencyFormatting( $context ) )->register();
 				( new CartRecalculation( $context ) )->register();
 				( new CouponConversion( $service, $context ) )->register();
-				( new ShippingConversion( $service, $context ) )->register();
+				$threshold_resolver = new FreeShippingThresholdResolver( $service, $context );
+				( new ShippingConversion( $service, $context, $threshold_resolver ) )->register();
+				$this->free_shipping_display_service = new FreeShippingThresholdDisplayService(
+					$threshold_resolver,
+					$context
+				);
 				( new FeeConversion( $service, $context ) )->register();
 				$gateway_compat->register();
 

@@ -26,7 +26,7 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Produces `dist/universal-multicurrency-1.1.1.zip`. The archive includes `readme.txt`,
+Produces `dist/universal-multicurrency-1.2.0.zip`. The archive includes `readme.txt`,
 production `src/`, `vendor/`, bundled presentation assets, block metadata, and
 `languages/universal-multicurrency.pot`.
 
@@ -37,7 +37,18 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release on `main`:** **v1.1.1** (tagged and published).
+**Current release on `main`:** **v1.1.1** (tagged and published). **v1.2.0** is prepared on the feature branch pending merge.
+
+## v1.2.0 — Free Shipping Threshold Display API (prepared)
+
+Post-1.0 feature release (ADR-0034 — no `M27`). Public PHP API
+`umc_get_free_shipping_threshold_display()` returns the free-shipping threshold
+in the active UMC currency using the same `FreeShippingThresholdResolver` as
+checkout eligibility. Schemas / PersistedKeys / CacheState unchanged. No
+production deployment as part of this release process. See
+[`RELEASE_AUDIT.md`](RELEASE_AUDIT.md).
+
+---
 
 ## v1.1.1 — Variable Product Price Range Fix (released)
 

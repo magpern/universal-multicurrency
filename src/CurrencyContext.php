@@ -212,6 +212,10 @@ final class CurrencyContext {
 
 	/**
 	 * The base→active exchange rate as a decimal string ('1' when base is active).
+	 *
+	 * When the active foreign currency has no configured rate this still returns
+	 * `'1'` for legacy callers. New fail-closed paths must use
+	 * {@see has_active_exchange_rate()} instead of trusting this fallback.
 	 */
 	public function get_rate(): string {
 		if ( null !== $this->rate ) {
@@ -228,6 +232,26 @@ final class CurrencyContext {
 		$this->rate = ( null === $rate ) ? '1' : $rate;
 
 		return $this->rate;
+	}
+
+	/**
+	 * Whether the active currency has a real base→active exchange rate.
+	 *
+	 * Base currency is always true (identity rate). Foreign currencies require
+	 * an explicit configured rate — unlike {@see get_rate()}, this does not
+	 * treat a missing rate as `'1'`.
+	 *
+	 * @since 1.2.0
+	 */
+	public function has_active_exchange_rate(): bool {
+		if ( $this->is_base_active() ) {
+			return true;
+		}
+
+		return $this->rates->has_rate(
+			$this->registry->get_base_code(),
+			$this->get_active_code()
+		);
 	}
 
 	/**

@@ -28,6 +28,7 @@ use UMC\Integration\GatewayCompatibility;
 use UMC\Integration\PriceConversionService;
 use UMC\Integration\PriceHooks;
 use UMC\Tests\Support\ProductPricingTestGraph;
+use UMC\Integration\FreeShippingThresholdResolver;
 use UMC\Integration\ShippingConversion;
 use UMC\Order\HistoricalFormattingResolver;
 use UMC\Order\OrderCurrencyContext;
@@ -287,7 +288,7 @@ abstract class StoreApiTestCase extends WP_UnitTestCase {
 		( new CurrencyFormatting( $this->context ) )->register();
 		( new CartRecalculation( $this->context ) )->register();
 		( new CouponConversion( $service, $this->context ) )->register();
-		( new ShippingConversion( $service, $this->context ) )->register();
+		( new ShippingConversion( $service, $this->context, new FreeShippingThresholdResolver( $service, $this->context ) ) )->register();
 
 		// One shared instance, as Plugin::init() wires it: the order lock removes
 		// this exact callback so its order-currency rule sees the original set.

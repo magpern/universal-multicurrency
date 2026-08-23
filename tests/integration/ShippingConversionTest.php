@@ -15,6 +15,7 @@ use UMC\CurrencyContext;
 use UMC\CurrencyRegistry;
 use UMC\CurrencyResolver;
 use UMC\Integration\PriceConversionService;
+use UMC\Integration\FreeShippingThresholdResolver;
 use UMC\Integration\ShippingConversion;
 use UMC\Rates\ManualRateProvider;
 use UMC\Settings;
@@ -66,7 +67,7 @@ final class ShippingConversionTest extends WP_UnitTestCase {
 		$context  = new CurrencyContext( $registry, $rates, new CurrencyResolver() );
 		$service  = new PriceConversionService( $context );
 
-		( new ShippingConversion( $service, $context ) )->register();
+		( new ShippingConversion( $service, $context, new FreeShippingThresholdResolver( $service, $context ) ) )->register();
 
 		$_COOKIE[ CurrencyContext::COOKIE_NAME ] = $active;
 	}

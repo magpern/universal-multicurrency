@@ -126,7 +126,7 @@ All storefront hooks below register on `woocommerce_init` and gate on
 |---|---|---|---|
 | `woocommerce_package_rates` | `($rates, $package)` | 90 | Convert cost + per-class taxes for **core** methods (`flat_rate`, `free_shipping`, `local_pickup`) base→active by the same rate; non-core / third-party rates pass through unchanged (assumed already in the transaction currency). |
 | `woocommerce_cart_shipping_packages` | `($packages)` | 10 | Inject the rate identity into each package so WooCommerce's `shipping_for_package_*` cache is keyed per currency+rate and self-invalidates on a switch or rate edit. |
-| `woocommerce_shipping_free_shipping_is_available` | `($available, $package, $method)` | 10 | Re-evaluate free-shipping eligibility using a **converted** `min_amount` (base→active) so the threshold is compared in the same currency as the cart. Request-scoped only — does not persist settings or permanently mutate `$method->min_amount`. |
+| `woocommerce_shipping_free_shipping_is_available` | `($available, $package, $method)` | 10 | Re-evaluate free-shipping eligibility using a **converted** `min_amount` (base→active) via the shared `FreeShippingThresholdResolver` so the threshold is compared in the same currency as the cart. Request-scoped only — does not persist settings or permanently mutate `$method->min_amount`. Same resolver powers `umc_get_free_shipping_threshold_display()` (v1.2.0). |
 
 ### Fees — opt-in only (`Integration\FeeConversion`)
 
@@ -143,7 +143,7 @@ All storefront hooks below register on `woocommerce_init` and gate on
 | Effective checkout currency | M11 checkout policy may settle/fallback before order creation |
 | Order-owned currency | Authoritative after order creation (order-pay, emails, account, admin historical) |
 | Fixed monetary inputs | Convert once via `PriceConversionService` |
-| Free-shipping `min_amount` | Base-authored; converted at eligibility evaluation (M18) |
+| Free-shipping `min_amount` | Base-authored; converted at eligibility evaluation via shared `FreeShippingThresholdResolver` (M18; public display API in v1.2.0) |
 | Fees | **Pass-through by default** — opt in per fee via `umc_convert_fee` (wired M19); amounts convert once when opted in |
 | Third-party shipping | Pass-through unless `umc_convert_shipping_rate` opts in |
 
@@ -328,6 +328,71 @@ recurring action scheduled, when any automatic currency has a recorded failure,
 or when three or more are stale; `recommended` for one or two stale currencies;
 otherwise `good`. Covered by
 `tests/integration/Diagnostics/SiteHealthRateIntegrationTest.php`.
+
+## Public PHP API
+
+These are **not** WordPress hooks. They are global PHP functions for other
+plugins/themes to call with `function_exists()` feature detection.
+
+### `umc_get_free_shipping_threshold_display( string $base_threshold ): ?array`
+
+**Since:** 1.2.0  
+**Purpose:** Display a WooCommerce base-currency free-shipping threshold in the
+currently active UMC currency using the **same** threshold resolution checkout
+uses (`FreeShippingThresholdResolver` → `PriceConversionService` →
+`Converter::apply_rate`). Display-only — does **not** say whether the current
+cart qualifies.
+
+**Input:** `$base_threshold` — decimal string authored in the store **base**
+currency.
+
+**Success:**
+
+```php
+array(
+	'formatted_html' => string, // wc_price() HTML
+	'amount'         => string, // canonical decimal from the shared resolver
+	'currency_code'  => string,
+)
+```
+
+**Example:**
+
+```php
+if ( function_exists( 'umc_get_free_shipping_threshold_display' ) ) {
+	$threshold = umc_get_free_shipping_threshold_display( '200.00' );
+
+	if ( null !== $threshold ) {
+		echo wp_kses_post(
+			sprintf(
+				/* translators: %s: formatted free-shipping threshold */
+				__( 'Free shipping on orders of %s or more', 'your-textdomain' ),
+				$threshold['formatted_html']
+			)
+		);
+	}
+}
+```
+
+**Availability:**
+
+- `function_exists()` is true after plugin bootstrap (`src/api.php`).
+- Returns `null` until services bind on `woocommerce_init`.
+- Returns `null` when `! CurrencyContext::is_convertible_request()` (admin,
+  cron, non-Store REST, WP-CLI).
+- Normal storefront with **base** currency active still returns the three-key
+  base result.
+
+**Failure (`null`):** empty / non-numeric / negative input; unbound service;
+non-convertible request; missing foreign exchange rate (no `get_rate()` `'1'`
+fabrication); base-authored over-precision beyond base currency decimals
+(ADR-0034 Option A — global rejection).
+
+**Consumer rule:** Treat `amount`, `currency_code`, and `formatted_html` as
+authoritative. Do **not** convert, re-round, look up rates, substitute
+currencies, or rebuild formatting. Use `formatted_html` for presentation.
+
+See ADR-0034 and `docs/architecture/free-shipping-threshold-display-api.md`.
 
 ## Filters and actions the plugin provides
 

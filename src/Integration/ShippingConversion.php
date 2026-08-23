@@ -67,14 +67,27 @@ final class ShippingConversion {
 	private CurrencyContext $context;
 
 	/**
-	 * Binds the service to the seam and the context.
+	 * Shared free-shipping threshold resolver (eligibility + public display).
 	 *
-	 * @param PriceConversionService $service Conversion seam.
-	 * @param CurrencyContext        $context Request-scoped currency facade.
+	 * @var FreeShippingThresholdResolver
 	 */
-	public function __construct( PriceConversionService $service, CurrencyContext $context ) {
-		$this->service = $service;
-		$this->context = $context;
+	private FreeShippingThresholdResolver $thresholds;
+
+	/**
+	 * Binds the service to the seam, context, and shared threshold resolver.
+	 *
+	 * @param PriceConversionService        $service    Conversion seam.
+	 * @param CurrencyContext               $context    Request-scoped currency facade.
+	 * @param FreeShippingThresholdResolver $thresholds Shared threshold resolver.
+	 */
+	public function __construct(
+		PriceConversionService $service,
+		CurrencyContext $context,
+		FreeShippingThresholdResolver $thresholds
+	) {
+		$this->service    = $service;
+		$this->context    = $context;
+		$this->thresholds = $thresholds;
 	}
 
 	/**
@@ -163,7 +176,13 @@ final class ShippingConversion {
 			return $is_available;
 		}
 
-		$converted_min      = (float) $this->service->convert_amount( $base_min );
+		$resolved = $this->thresholds->resolve( (string) $base_min );
+
+		if ( null === $resolved ) {
+			return $is_available;
+		}
+
+		$converted_min      = (float) $resolved->amount();
 		$has_met_min_amount = $this->cart_meets_free_shipping_minimum( $method, $converted_min );
 		$has_coupon         = $this->cart_has_free_shipping_coupon();
 

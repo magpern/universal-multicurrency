@@ -4,7 +4,7 @@ Tags: woocommerce, currency, multicurrency, exchange rates, money
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.1.1
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,6 +49,13 @@ Not for production traffic. Two runtime converters can double-convert prices. De
 The plugin ships a POT template (`languages/universal-multicurrency.pot`) for translators. Bundled locale `.mo` files are not included in this release.
 
 == Changelog ==
+
+= 1.2.0 =
+* Free Shipping Threshold Display API (post-1.0 feature release, not a numbered milestone)
+* New public PHP function `umc_get_free_shipping_threshold_display()` returns formatted_html, amount, and currency_code for a base-authored free-shipping minimum in the active UMC currency
+* Checkout free-shipping eligibility and the display API share one FreeShippingThresholdResolver (PriceConversionService → Converter)
+* Convertible storefront context only; missing foreign rates fail closed (no rate-1 fabrication); base-authored over-precision rejected globally (ADR-0034 Option A)
+* Settings schema 7, OrderSnapshot 5, PersistedKeys 11, CacheState v1 unchanged; no DB migration
 
 = 1.1.1 =
 * Fix: variable-product min/max price ranges now resolve in the active currency when a parent get_price() runs before the range cache is built (WooCommerce Variable::is_on_sale re-entrancy).
