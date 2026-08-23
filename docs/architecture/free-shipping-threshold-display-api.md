@@ -1,6 +1,6 @@
 # Free Shipping Threshold Display API (v1.2.0)
 
-**Status:** Authoritative specification for v1.2.0 (WP0 freeze; WP1 over-precision scope pending).
+**Status:** Authoritative specification for v1.2.0 (WP1 over-precision locked: Option A global rejection).
 
 **ADR:** [`docs/adr/0034-free-shipping-threshold-display-api.md`](../adr/0034-free-shipping-threshold-display-api.md)
 
@@ -73,8 +73,8 @@ injected into both eligibility and the display service.
 ## Input / output rules
 
 - Input: base-currency decimal string (WooCommerce-authored threshold).
-- Input precision judged against **base** currency / WC base-threshold
-  semantics, not target decimals.
+- Input precision judged against **base** currency decimals (Option A: excess
+  fractional digits → `null` globally). Target decimals belong to Converter.
 - Foreign missing rate → `null` (no `get_rate()` `'1'` fabrication).
 - Formatting via `wc_price( $amount, array( 'currency' => $code ) )`.
 - Display-only: does not evaluate the current cart.
@@ -87,14 +87,15 @@ injected into both eligibility and the display service.
 | Non-convertible request | `null` |
 | Unbound service | `null` |
 | Missing foreign rate | `null` |
-| Over-precision (base-authored) | **WP1 decides** (preference: global rejection) |
+| Over-precision vs **base** decimals | `null` (global — Option A) |
 | Success | Three public keys only |
 
-## WP1 hard gate (before WP2)
+## WP1 evidence summary
 
-Characterize base vs foreign eligibility when `min_amount` has excess
-fractional precision (e.g. `200.001`). Amend ADR-0034 with Option A (global
-rejection) or Option B (base-active only) before implementing the resolver.
+- Base: cart `200.00` does not meet raw `min_amount` `200.001`; `wc_price`
+  shows `200.00`.
+- Foreign: Converter rounds `200.001` to target decimals for eligibility.
+- Valid `200.50` with active JPY (0dp) still converts correctly.
 
 ## Persistence
 

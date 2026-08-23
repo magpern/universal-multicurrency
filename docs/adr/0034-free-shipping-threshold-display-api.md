@@ -4,9 +4,8 @@
 
 Accepted (post-1.0 feature release, target **v1.2.0**).
 
-**WP1 over-precision scope:** deferred — empirical characterization must
-amend this ADR before production implementation (WP2) begins. Preference:
-**global rejection** of base-authored over-precision inputs.
+**WP1 over-precision scope:** **LOCKED — Option A (global rejection).**
+See §12.
 
 ## Relationship to ADR-0031 / ADR-0032 / ADR-0033
 
@@ -105,7 +104,7 @@ JPY).
 | Non-convertible request | `null` |
 | Before Plugin binds the display service (`woocommerce_init`) | `null` |
 | Foreign active currency with missing exchange rate | `null` |
-| Over-precision base input (scope) | **WP1 decides** — see §12 |
+| Over-precision base input (fractional digits beyond base currency decimals) | `null` for **every** active currency (**Option A**, WP1) |
 | Success | Exact three-key array |
 
 Missing foreign rate must **not** use `CurrencyContext::get_rate()`'s `'1'`
@@ -149,30 +148,39 @@ threshold. They SHOULD render `formatted_html` directly.
   in UMC.
 - No production deployment as part of this release process.
 
-### 12. Over-precision scope (WP1 hard gate)
+### 12. Over-precision scope — WP1 LOCKED (Option A)
 
-**Not frozen in WP0.**
+**Evidence** (`FreeShippingThresholdPrecisionCharacterizationTest`, store
+decimals = 2, threshold `200.001`):
 
-WP1 must characterize WooCommerce/UMC behavior when a base-authored
-`min_amount` has more fractional precision than truthful base-currency
-display semantics (e.g. `200.001` while store decimals are 2):
+| Context | Observation |
+|---|---|
+| Base active | Native WC compares cart against **raw** `200.001`. Cart at display-rounded `200.00` does **not** qualify. |
+| `wc_price( '200.001' )` | Displays as `200.00` (third fractional digit hidden). |
+| Foreign active | `Converter::apply_rate( '200.001', rate, target_decimals )` yields an exact target-decimal threshold that eligibility uses. |
+| Valid base `200.50` + active JPY (0dp) | Accepted; target rounding remains Converter’s job. |
 
-- What native WC compares when base is active.
-- What `wc_price()` displays.
-- What UMC produces when foreign is active (Converter target rounding).
+**Selected rule — Option A (global rejection):**
 
-Then choose:
+A base-authored `$base_threshold` whose fractional digit count exceeds the
+**base currency’s** decimals makes
+`umc_get_free_shipping_threshold_display()` return `null` for **every**
+active currency (base and foreign).
 
-| Option | Meaning | Preference |
-|---|---|---|
-| **A. Global rejection** | Over-precision input → API `null` for every active currency | **Preferred** |
-| **B. Base-active only** | `null` only while base is active; foreign may return converted/rounded threshold | Allowed only if evidence proves it truthful and preferable |
+**Rationale:** The input itself is not a truthful, consistently representable
+WooCommerce threshold across currencies. Global rejection gives consumers one
+predictable contract and prevents announcing `200.00` when base checkout
+requires `200.001`.
 
-**WP2 must not begin until this ADR is amended with the selected rule,
-evidence, and rejected alternative.**
+**Rejected — Option B (base-active only):** Would allow foreign display of a
+converted/rounded threshold from an over-precise base input. Rejected because
+the same merchant-authored string would succeed in one currency and fail in
+another, and the base display lie remains possible if a consumer only checks
+foreign paths.
 
-Never ship a display of `200.00` when WooCommerce actually requires
-`200.001`.
+**Implementation:** count fractional digits in the input decimal string
+against `CurrencyContext` / registry base currency decimals. Do not judge
+input precision against the **active** (target) currency.
 
 ## Consequences
 
