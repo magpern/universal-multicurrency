@@ -16,6 +16,7 @@ use UMC\CurrencyRegistry;
 use UMC\CurrencyResolver;
 use UMC\Integration\CurrencyFormatting;
 use UMC\Integration\PriceConversionService;
+use UMC\Integration\FreeShippingThresholdResolver;
 use UMC\Integration\ShippingConversion;
 use UMC\Rates\ManualRateProvider;
 use UMC\Settings;
@@ -141,7 +142,7 @@ final class FreeShippingThresholdPrecisionCharacterizationTest extends WP_UnitTe
 
 		ProductPricingTestGraph::register( $context, $registry );
 		( new CurrencyFormatting( $context ) )->register();
-		( new ShippingConversion( $service, $context ) )->register();
+		( new ShippingConversion( $service, $context, new FreeShippingThresholdResolver( $service, $context ) ) )->register();
 
 		if ( Golden::BASE === $active ) {
 			unset( $_COOKIE[ CurrencyContext::COOKIE_NAME ] );

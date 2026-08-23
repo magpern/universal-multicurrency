@@ -42,6 +42,9 @@ if ( is_readable( $umc_autoload ) ) {
 	require_once $umc_autoload;
 }
 
+// Public PHP API facades (also registered via Composer autoload.files).
+require_once __DIR__ . '/src/api.php';
+
 /*
  * Compatibility declarations are the ONLY WooCommerce hooks Milestone 0 is
  * allowed to register. No price, currency, cart, checkout, coupon, shipping,

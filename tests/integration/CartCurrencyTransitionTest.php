@@ -19,6 +19,7 @@ use UMC\Integration\CurrencyFormatting;
 use UMC\Integration\PriceConversionService;
 use UMC\Integration\PriceHooks;
 use UMC\Tests\Support\ProductPricingTestGraph;
+use UMC\Integration\FreeShippingThresholdResolver;
 use UMC\Integration\ShippingConversion;
 use UMC\Rates\ManualRateProvider;
 use UMC\Settings;
@@ -200,7 +201,7 @@ final class CartCurrencyTransitionTest extends WP_UnitTestCase {
 		( new CurrencyFormatting( $context ) )->register();
 		( new CartRecalculation( $context ) )->register();
 		( new CouponConversion( $service, $context ) )->register();
-		( new ShippingConversion( $service, $context ) )->register();
+		( new ShippingConversion( $service, $context, new FreeShippingThresholdResolver( $service, $context ) ) )->register();
 
 		if ( $active === $base ) {
 			unset( $_COOKIE[ CurrencyContext::COOKIE_NAME ] );
