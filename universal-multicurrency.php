@@ -3,7 +3,7 @@
  * Plugin Name: Universal Multicurrency for WooCommerce
  * Plugin URI: https://github.com/magpern/universal-multicurrency
  * Description: Unlimited currencies with manual or automatic exchange rates. WooCommerce remains the single source of truth for products and inventory; currency affects monetary values only.
- * Version: 1.2.0
+ * Version: 1.2.1
  * Author: magpern
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -19,7 +19,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'UMC_VERSION', '1.2.0' );
+define( 'UMC_VERSION', '1.2.1' );
 define( 'UMC_PLUGIN_FILE', __FILE__ );
 
 // PHP version guard. The "Requires PHP" header stops activation on WP 5.1+,
@@ -40,6 +40,19 @@ if ( version_compare( PHP_VERSION, '8.1', '<' ) ) {
 $umc_autoload = __DIR__ . '/vendor/autoload.php';
 if ( is_readable( $umc_autoload ) ) {
 	require_once $umc_autoload;
+}
+
+/**
+ * Automatic updates via the private update server. Define PRIVATE_UPDATE_SERVER
+ * (scheme + host, no trailing slash) in wp-config.php to enable; when it is not
+ * defined the plugin does not check for updates.
+ */
+if ( defined( 'PRIVATE_UPDATE_SERVER' ) && PRIVATE_UPDATE_SERVER && class_exists( \YahnisElsts\PluginUpdateChecker\v5\PucFactory::class ) ) {
+	\YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
+		rtrim( (string) PRIVATE_UPDATE_SERVER, '/' ) . '/?action=get_metadata&slug=universal-multicurrency',
+		__FILE__,
+		'universal-multicurrency'
+	);
 }
 
 // Public PHP API facades (also registered via Composer autoload.files).

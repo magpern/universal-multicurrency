@@ -1,3 +1,36 @@
+# Release audit — v1.2.1 Private update-server delivery
+
+Executable release-preparation gate for Universal Multicurrency **v1.2.1**.
+Infrastructure release — the plugin self-updates from a private update server via
+the bundled Plugin Update Checker v5 library. No functional change to
+pricing/conversion, schemas, PersistedKeys, or CacheState.
+
+**Repository status:** **prepared for v1.2.1**. Tag and GitHub release are cut by
+CI on the `v1.2.1` tag push.
+
+## v1.2.1 release closure record
+
+| Item | Value |
+|---|---|
+| Version | **1.2.1** |
+| Settings schema | **7** (unchanged) |
+| Order snapshot schema | **5** (unchanged) |
+| Persisted-data inventory version | **11** (unchanged) |
+| CacheState contract | **v1** (unchanged) |
+| Production migrations | none |
+| Change | bundled `yahnis-elsts/plugin-update-checker` ^5.6; `PucFactory::buildUpdateChecker` registered only when `PRIVATE_UPDATE_SERVER` is defined in `wp-config.php` |
+| Unresolved release blockers | **0** |
+| Open Milestone 8 review findings | **0** |
+| Git tag `v1.2.1` | **Not yet created** |
+| GitHub release `v1.2.1` | **Not yet published** |
+| Artifact | `universal-multicurrency-1.2.1.zip` — built by CI on the tag from `composer install --no-dev` + `bin/build-zip.sh` |
+| Deployment | **Not performed** |
+| M27 | **Not created** |
+
+## Prior release: v1.2.0 Free Shipping Threshold Display API
+
+### (v1.2.0 detail follows)
+
 # Release audit — v1.2.0 Free Shipping Threshold Display API
 
 Executable release-preparation gate for Universal Multicurrency **v1.2.0**.

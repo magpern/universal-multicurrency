@@ -4,7 +4,7 @@ Tags: woocommerce, currency, multicurrency, exchange rates, money
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,6 +49,10 @@ Not for production traffic. Two runtime converters can double-convert prices. De
 The plugin ships a POT template (`languages/universal-multicurrency.pot`) for translators. Bundled locale `.mo` files are not included in this release.
 
 == Changelog ==
+
+= 1.2.1 =
+* Self-updates from a private update server via the bundled Plugin Update Checker v5 library; base URL read from the PRIVATE_UPDATE_SERVER constant, inert when it is not defined. No functional change to pricing/conversion.
+* Settings schema 7, OrderSnapshot 5, PersistedKeys 11, CacheState v1 unchanged; no DB migration.
 
 = 1.2.0 =
 * Free Shipping Threshold Display API (post-1.0 feature release, not a numbered milestone)

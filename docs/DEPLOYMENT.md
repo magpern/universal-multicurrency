@@ -26,7 +26,7 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Produces `dist/universal-multicurrency-1.2.0.zip`. The archive includes `readme.txt`,
+Produces `dist/universal-multicurrency-1.2.1.zip`. The archive includes `readme.txt`,
 production `src/`, `vendor/`, bundled presentation assets, block metadata, and
 `languages/universal-multicurrency.pot`.
 
@@ -37,7 +37,17 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release on `main`:** **v1.2.0** (tagged and published).
+**Current release on `main`:** **v1.2.1** (prepared; tag/release cut by CI).
+
+## v1.2.1 — Private update-server delivery (prepared)
+
+Infrastructure release. The plugin self-updates from a private update server via
+the bundled Plugin Update Checker v5 library (`PucFactory::buildUpdateChecker`,
+active only when `PRIVATE_UPDATE_SERVER` is defined in `wp-config.php`). No
+functional change to pricing/conversion; schemas / PersistedKeys / CacheState
+unchanged. Build artifact `universal-multicurrency-1.2.1.zip`
+(`composer install --no-dev` + `bin/build-zip.sh`). Production deployment: **not
+performed**. See [`RELEASE_AUDIT.md`](RELEASE_AUDIT.md).
 
 ## v1.2.0 — Free Shipping Threshold Display API (released)
 
