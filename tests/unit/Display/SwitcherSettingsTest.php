@@ -425,6 +425,56 @@ final class SwitcherSettingsTest extends TestCase {
 		$this->assertContains( 'umc-switcher--theme-automatic', $classes );
 	}
 
+	public function test_modifier_classes_include_presentation_and_keep_legacy_preset(): void {
+		$classes = SwitcherSettings::from_array(
+			array(
+				'enabled'   => true,
+				'placement' => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
+				'design'    => array(
+					'presentation' => SwitcherSettings::PRESENTATION_EDGE_PILL,
+					'preset'       => SwitcherSettings::PRESET_FLOATING,
+					'theme'        => SwitcherSettings::THEME_BRAND,
+					'shape'        => SwitcherSettings::SHAPE_SQUARE,
+				),
+				'responsive' => array(
+					'mobile_behavior' => SwitcherSettings::MOBILE_BEHAVIOR_BOTTOM_SHEET,
+				),
+			)
+		)->modifier_classes();
+
+		$this->assertContains( 'umc-switcher--presentation-edge-pill', $classes );
+		$this->assertContains( 'umc-switcher--preset-floating', $classes );
+		$this->assertContains( 'umc-switcher--theme-brand', $classes );
+		$this->assertContains( 'umc-switcher--shape-square', $classes );
+		$this->assertContains( 'umc-switcher--mobile-bottom-sheet', $classes );
+	}
+
+	public function test_css_variables_use_curated_z_index_for_new_presentations(): void {
+		$classic = SwitcherSettings::from_array(
+			array(
+				'placement' => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
+				'design'    => array( 'presentation' => SwitcherSettings::PRESENTATION_CLASSIC_DROPDOWN ),
+			)
+		)->css_variables();
+
+		$edge = SwitcherSettings::from_array(
+			array(
+				'placement' => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
+				'design'    => array( 'presentation' => SwitcherSettings::PRESENTATION_EDGE_PILL ),
+			)
+		)->css_variables();
+
+		$sticky = SwitcherSettings::from_array(
+			array(
+				'placement' => SwitcherSettings::PLACEMENT_STICKY_FOOTER,
+			)
+		)->css_variables();
+
+		$this->assertSame( '9990', $classic['--umc-switcher-z-index'] );
+		$this->assertSame( '1000', $edge['--umc-switcher-z-index'] );
+		$this->assertSame( '40', $sticky['--umc-switcher-z-index'] );
+	}
+
 	public function test_modifier_classes_include_responsive_adjustments(): void {
 		$classes = SwitcherSettings::from_array(
 			array(
