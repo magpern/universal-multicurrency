@@ -54,7 +54,7 @@ final class CurrencyResolutionResultTest extends TestCase {
 		$this->assertFalse( $result->was_fallback_to_base() );
 
 		$candidates = $result->candidates();
-		$this->assertCount( 3, $candidates );
+		$this->assertCount( 4, $candidates );
 		$this->assertSame( CurrencyResolutionCandidate::STATUS_ACCEPTED, $candidates[0]->status() );
 		$this->assertSame( CurrencyResolutionCandidate::STATUS_ACCEPTED, $candidates[1]->status() );
 		$this->assertSame( CurrencyResolutionCandidate::STATUS_REJECTED, $candidates[2]->status() );
@@ -75,5 +75,13 @@ final class CurrencyResolutionResultTest extends TestCase {
 		$this->assertSame( CurrencyResolutionResult::SOURCE_SESSION, $result->winning_source() );
 		$this->assertNotSame( 'geo', $result->winning_source() );
 		$this->assertNotSame( 'visitor_location', $result->winning_source() );
+	}
+
+	public function test_evaluate_reports_user_preferred_winner(): void {
+		$result = ( new CurrencyResolver() )->evaluate( null, null, null, self::BASE, self::SELECTABLE, 'JPY' );
+
+		$this->assertSame( 'JPY', $result->currency() );
+		$this->assertSame( CurrencyResolutionResult::SOURCE_USER_PREFERRED, $result->winning_source() );
+		$this->assertFalse( $result->was_fallback_to_base() );
 	}
 }

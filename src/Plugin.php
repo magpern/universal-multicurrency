@@ -96,6 +96,10 @@ use UMC\StoreApi\CheckoutBlocksNoticeAssets;
 use UMC\StoreApi\CheckoutSnapshotAdapter;
 use UMC\StoreApi\OrderCurrencyLock;
 use UMC\StoreApi\StoreApiCheckoutPolicyAdapter;
+use UMC\User\PreferenceServices;
+use UMC\User\PreferredCurrency;
+use UMC\User\PreferredCurrencyField;
+use UMC\User\RegionalPreferencesHost;
 
 /**
  * Instantiates services once and registers their hooks.
@@ -211,7 +215,8 @@ final class Plugin {
 		$registry            = new CurrencyRegistry( $settings, $base );
 		$fixed_repository    = new FixedPriceRepository( $base->code() );
 		$rates               = new ManualRateProvider( $settings, $base->code() );
-		$context             = new CurrencyContext( $registry, $rates, new CurrencyResolver() );
+		$preferred_currency  = new PreferredCurrency( $registry, $rates );
+		$context             = new CurrencyContext( $registry, $rates, new CurrencyResolver(), $preferred_currency );
 		$service             = new PriceConversionService( $context );
 		$version             = defined( 'UMC_VERSION' ) ? (string) UMC_VERSION : '';
 		$switcher_block      = new SwitcherBlock();
@@ -256,7 +261,7 @@ final class Plugin {
 		// and refund metadata.
 		add_action(
 			'woocommerce_init',
-			function () use ( $context, $service, $settings, $version, $registry, $fixed_repository, $switcher_block ) {
+			function () use ( $context, $service, $settings, $version, $registry, $fixed_repository, $switcher_block, $preferred_currency ) {
 				// One GatewayCompatibility instance is shared between the
 				// storefront callback and the order-pay lock so the lock can
 				// deregister the storefront callback (matched by instance) and
@@ -267,6 +272,9 @@ final class Plugin {
 				$switcher         = new CurrencySwitcher( $context, $display_settings );
 
 				$switcher->maybe_switch();
+				PreferenceServices::bind_preferred_currency( $preferred_currency );
+				( new PreferredCurrencyField( $preferred_currency, $switcher ) )->register();
+				( new RegionalPreferencesHost( $preferred_currency ) )->register();
 
 				$metadata_provider = new WooCommerceCurrencyProvider();
 				$render_registry   = new AutomaticRenderRegistry();

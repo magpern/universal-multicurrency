@@ -12,7 +12,8 @@ namespace UMC;
 /**
  * Pure, WordPress-free resolution of the active currency code.
  *
- * Applies the priority order (explicit selection → session → cookie → base)
+ * Applies the priority order (explicit selection → session → cookie →
+ * authenticated user preference → base)
  * and returns the first candidate that is present in the selectable allow-list.
  * Anything invalid, disabled or rate-less is skipped; the base currency is the
  * final fallback and is always considered selectable.
@@ -31,11 +32,12 @@ final class CurrencyResolver {
 	 * @param string|null        $explicit   Explicitly selected code (this request), or null.
 	 * @param string|null        $session    Code stored in the WC session, or null.
 	 * @param string|null        $cookie     Code stored in the guest cookie, or null.
-	 * @param string             $base       Base currency code (always selectable).
-	 * @param array<int, string> $selectable Uppercase codes that may be activated (enabled and rated).
+	 * @param string             $base            Base currency code (always selectable).
+	 * @param array<int, string> $selectable      Uppercase codes that may be activated (enabled and rated).
+	 * @param string|null        $user_preferred  Authenticated user's preferred code, or null.
 	 */
-	public function resolve( ?string $explicit, ?string $session, ?string $cookie, string $base, array $selectable ): string {
-		return $this->evaluate( $explicit, $session, $cookie, $base, $selectable )->currency();
+	public function resolve( ?string $explicit, ?string $session, ?string $cookie, string $base, array $selectable, ?string $user_preferred = null ): string {
+		return $this->evaluate( $explicit, $session, $cookie, $base, $selectable, $user_preferred )->currency();
 	}
 
 	/**
@@ -48,16 +50,18 @@ final class CurrencyResolver {
 	 * @param string|null        $explicit   Explicitly selected code (this request), or null.
 	 * @param string|null        $session    Code stored in the WC session, or null.
 	 * @param string|null        $cookie     Code stored in the guest cookie, or null.
-	 * @param string             $base       Base currency code (always selectable).
-	 * @param array<int, string> $selectable Uppercase codes that may be activated (enabled and rated).
+	 * @param string             $base            Base currency code (always selectable).
+	 * @param array<int, string> $selectable      Uppercase codes that may be activated (enabled and rated).
+	 * @param string|null        $user_preferred  Authenticated user's preferred code, or null.
 	 */
-	public function evaluate( ?string $explicit, ?string $session, ?string $cookie, string $base, array $selectable ): CurrencyResolutionResult {
+	public function evaluate( ?string $explicit, ?string $session, ?string $cookie, string $base, array $selectable, ?string $user_preferred = null ): CurrencyResolutionResult {
 		$base       = strtoupper( $base );
 		$selectable = array_map( 'strtoupper', $selectable );
 		$sources    = array(
 			CurrencyResolutionResult::SOURCE_EXPLICIT => $explicit,
 			CurrencyResolutionResult::SOURCE_SESSION  => $session,
 			CurrencyResolutionResult::SOURCE_COOKIE   => $cookie,
+			CurrencyResolutionResult::SOURCE_USER_PREFERRED => $user_preferred,
 		);
 
 		$candidates     = array();

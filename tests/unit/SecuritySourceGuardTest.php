@@ -51,6 +51,7 @@ final class SecuritySourceGuardTest extends TestCase {
 		'ProductFixedPricesPanel.php',
 		'FixedPricingSettingsField.php',
 		'FixedPricingOperationController.php',
+		'PreferredCurrencyField.php',
 	);
 
 	/**
@@ -72,6 +73,7 @@ final class SecuritySourceGuardTest extends TestCase {
 		'SwitcherShortcodeScanner.php',
 		'ReportingCache.php',
 		'CacheStateStore.php',
+		'SiteDefaultLanguage.php',
 	);
 
 	private function root(): string {
@@ -181,6 +183,7 @@ final class SecuritySourceGuardTest extends TestCase {
 					'NoticeDismissal.php',
 					'GeoSandboxController.php',
 					'GeoSandboxRecentStore.php',
+					'PreferredCurrency.php',
 				)
 			),
 			'/\bget_user_meta\s*\(/',

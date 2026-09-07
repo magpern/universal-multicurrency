@@ -22,6 +22,7 @@ use UMC\Order\LineItemPriceProvenance;
 use UMC\Pricing\FixedPriceDocument;
 use UMC\Reporting\ReportingCache;
 use UMC\StoreApi\CartExtensionData;
+use UMC\User\PreferredCurrency;
 
 /**
  * Single source of truth for persisted-key contracts.
@@ -35,7 +36,7 @@ final class PersistedKeys {
 	/**
 	 * Bump when the inventory shape or membership changes.
 	 */
-	public const INVENTORY_VERSION = 11;
+	public const INVENTORY_VERSION = 12;
 
 	/**
 	 * WordPress options written by the plugin.
@@ -121,6 +122,7 @@ final class PersistedKeys {
 			'umc_dismissed_notices',
 			GeoSandboxController::RESULT_META,
 			GeoSandboxRecentStore::META_KEY,
+			PreferredCurrency::META_KEY,
 		);
 	}
 

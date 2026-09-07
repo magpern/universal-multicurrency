@@ -21,6 +21,7 @@ use UMC\Display\SwitcherSettings;
 use UMC\Display\SwitcherSettingsRepository;
 use UMC\Rates\ManualRateProvider;
 use UMC\Settings;
+use UMC\User\PreferredCurrency;
 use WP_UnitTestCase;
 
 /**
@@ -48,6 +49,7 @@ final class SwitcherSelectionTest extends WP_UnitTestCase {
 		}
 
 		delete_option( Settings::OPTION );
+		wp_set_current_user( 0 );
 		parent::tear_down();
 	}
 
@@ -78,6 +80,35 @@ final class SwitcherSelectionTest extends WP_UnitTestCase {
 		$this->assertSame( 'SEK', WC()->session->get( CurrencyContext::SESSION_KEY ) );
 	}
 
+	public function test_session_wins_over_logged_in_user_preference(): void {
+		$this->save_settings( true );
+		$user_id = self::factory()->user->create();
+		wp_set_current_user( $user_id );
+		update_user_meta( $user_id, PreferredCurrency::META_KEY, 'SEK' );
+		WC()->session->set( CurrencyContext::SESSION_KEY, 'EUR' );
+
+		$this->assertSame( 'EUR', $this->preference_context()->get_active_code() );
+	}
+
+	public function test_cookie_wins_over_logged_in_user_preference_without_session(): void {
+		$this->save_settings( true );
+		$user_id = self::factory()->user->create();
+		wp_set_current_user( $user_id );
+		update_user_meta( $user_id, PreferredCurrency::META_KEY, 'EUR' );
+		$_COOKIE[ CurrencyContext::COOKIE_NAME ] = 'SEK';
+
+		$this->assertSame( 'SEK', $this->preference_context()->get_active_code() );
+	}
+
+	public function test_valid_user_preference_counts_as_existing_geo_source(): void {
+		$this->save_settings( true );
+		$user_id = self::factory()->user->create();
+		wp_set_current_user( $user_id );
+		update_user_meta( $user_id, PreferredCurrency::META_KEY, 'SEK' );
+
+		$this->assertTrue( $this->preference_context()->has_valid_shopper_currency_source() );
+	}
+
 	private function persist_without_cookie_notice( CurrencySwitcher $switcher, string $code ): void {
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Suppresses wc_setcookie notices after PHPUnit bootstrap sends headers.
 		$previous = set_error_handler(
@@ -105,6 +136,15 @@ final class SwitcherSelectionTest extends WP_UnitTestCase {
 		$context  = new CurrencyContext( $registry, new ManualRateProvider( $settings, 'EUR' ), new CurrencyResolver() );
 
 		return new CurrencySwitcher( $context, new SwitcherSettingsRepository( $settings ) );
+	}
+
+	private function preference_context(): CurrencyContext {
+		$settings   = new Settings();
+		$registry   = new CurrencyRegistry( $settings, new Currency( 'EUR', 2 ) );
+		$rates      = new ManualRateProvider( $settings, 'EUR' );
+		$preference = new PreferredCurrency( $registry, $rates );
+
+		return new CurrencyContext( $registry, $rates, new CurrencyResolver(), $preference );
 	}
 
 	private function save_settings( bool $remember ): void {

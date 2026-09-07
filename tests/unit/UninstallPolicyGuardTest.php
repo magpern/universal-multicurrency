@@ -106,6 +106,7 @@ final class UninstallPolicyGuardTest extends TestCase {
 				'umc_dismissed_notices',
 				\UMC\Admin\GeoSandboxController::RESULT_META,
 				\UMC\Admin\Geo\GeoSandboxRecentStore::META_KEY,
+				\UMC\User\PreferredCurrency::META_KEY,
 			),
 			PersistedKeys::uninstall_preserved_user_meta_keys()
 		);

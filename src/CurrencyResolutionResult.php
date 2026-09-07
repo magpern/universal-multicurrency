@@ -12,21 +12,23 @@ namespace UMC;
 /**
  * Immutable outcome of {@see CurrencyResolver::evaluate()}.
  *
- * Winning source is truthful to resolver inputs only: explicit|session|cookie|base.
+ * Winning source is truthful to resolver inputs only:
+ * explicit|session|cookie|user_preferred|base.
  * Visitor Location provenance is never a winning_source here.
  */
 final class CurrencyResolutionResult {
 
-	public const SOURCE_EXPLICIT = 'explicit';
-	public const SOURCE_SESSION  = 'session';
-	public const SOURCE_COOKIE   = 'cookie';
-	public const SOURCE_BASE     = 'base';
+	public const SOURCE_EXPLICIT       = 'explicit';
+	public const SOURCE_SESSION        = 'session';
+	public const SOURCE_COOKIE         = 'cookie';
+	public const SOURCE_USER_PREFERRED = 'user_preferred';
+	public const SOURCE_BASE           = 'base';
 
 	/**
 	 * Creates a resolution result.
 	 *
 	 * @param string                                  $currency              Resolved currency code.
-	 * @param string                                  $winning_source        explicit|session|cookie|base.
+	 * @param string                                  $winning_source        explicit|session|cookie|user_preferred|base.
 	 * @param array<int, CurrencyResolutionCandidate> $candidates       Ordered candidate evaluations.
 	 * @param bool                                    $was_fallback_to_base  Whether base was used as fallback.
 	 */

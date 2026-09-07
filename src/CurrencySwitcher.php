@@ -33,6 +33,7 @@ final class CurrencySwitcher {
 
 	public const ORIGIN_CUSTOMER         = 'customer';
 	public const ORIGIN_VISITOR_LOCATION = 'visitor_location';
+	public const ORIGIN_USER_PREFERENCE  = 'user_preference';
 
 	private const COOKIE_LIFETIME = 30 * DAY_IN_SECONDS;
 
@@ -127,16 +128,23 @@ final class CurrencySwitcher {
 	/**
 	 * Persists the selected code to the session and the guest cookie.
 	 *
-	 * @param string $code   Validated currency code.
-	 * @param bool   $manual Whether the shopper explicitly chose this currency.
+	 * @param string      $code    Validated currency code.
+	 * @param bool        $manual  Whether the shopper explicitly chose this currency.
+	 * @param string|null $origin  Explicit explanatory origin, when applicable.
 	 */
-	public function persist( string $code, bool $manual = false ): void {
+	public function persist( string $code, bool $manual = false, ?string $origin = null ): void {
+		$allowed_origins = array(
+			self::ORIGIN_CUSTOMER,
+			self::ORIGIN_VISITOR_LOCATION,
+			self::ORIGIN_USER_PREFERENCE,
+		);
+		$origin          = in_array( $origin, $allowed_origins, true )
+			? $origin
+			: ( $manual ? self::ORIGIN_CUSTOMER : self::ORIGIN_VISITOR_LOCATION );
+
 		if ( function_exists( 'WC' ) && WC()->session ) {
 			WC()->session->set( CurrencyContext::SESSION_KEY, $code );
-			WC()->session->set(
-				self::SESSION_CURRENCY_ORIGIN,
-				$manual ? self::ORIGIN_CUSTOMER : self::ORIGIN_VISITOR_LOCATION
-			);
+			WC()->session->set( self::SESSION_CURRENCY_ORIGIN, $origin );
 
 			if ( $manual ) {
 				WC()->session->set( self::SESSION_MANUAL_SELECTION, '1' );
@@ -178,7 +186,11 @@ final class CurrencySwitcher {
 			return null;
 		}
 
-		if ( self::ORIGIN_CUSTOMER !== $value && self::ORIGIN_VISITOR_LOCATION !== $value ) {
+		if ( ! in_array(
+			$value,
+			array( self::ORIGIN_CUSTOMER, self::ORIGIN_VISITOR_LOCATION, self::ORIGIN_USER_PREFERENCE ),
+			true
+		) ) {
 			return null;
 		}
 
