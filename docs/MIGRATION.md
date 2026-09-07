@@ -155,6 +155,12 @@ Offsets, content ordering, Custom CSS, and icon presentation settings are
 preserved unchanged. Because Edge Pill is opt-in for existing stores, an
 upgraded floating switcher keeps its prior appearance (ADR-0035).
 
+ADR-0037 does **not** bump the settings schema. `tab` is an additive
+`design.presentation` enum. Saved `mobile_behavior` values are preserved.
+Family floating presentations default to `retain` only when that key is
+absent. EUR presentation-region overrides may remain stored but are not
+applied.
+
 Defaults for the initialized display fields come from `Settings::sanitize()`,
 which every migration result passes through.
 

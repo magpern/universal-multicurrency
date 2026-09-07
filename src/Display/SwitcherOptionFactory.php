@@ -49,8 +49,12 @@ final class SwitcherOptionFactory {
 	 * @param array<string, true> $duplicate_symbols Duplicate symbol map.
 	 */
 	public function __construct( SwitcherSettings $settings, array $duplicate_symbols = array() ) {
-		$trigger      = $settings->trigger_content();
-		$menu         = $settings->menu_content();
+		$trigger      = $settings->is_uml_family_floating()
+			? SwitcherSettings::uml_family_trigger_content()
+			: $settings->trigger_content();
+		$menu         = $settings->is_uml_family_floating()
+			? SwitcherSettings::uml_family_menu_content()
+			: $settings->menu_content();
 		$presentation = CurrencyPresentationResolver::from_settings( $settings );
 
 		$this->trigger_composer  = new SwitcherElementComposer( $trigger, $duplicate_symbols, $presentation );

@@ -496,6 +496,12 @@ final class DisplaySettingsField {
 				'diagram'     => $this->controls->diagram_presentation_minimal_icon(),
 				'badge'       => '',
 			),
+			SwitcherSettings::PRESENTATION_TAB           => array(
+				'label'       => __( 'Tab', 'universal-multicurrency' ),
+				'description' => __( 'Vertical edge tab with flag and currency code.', 'universal-multicurrency' ),
+				'diagram'     => $this->controls->diagram_presentation_tab(),
+				'badge'       => '',
+			),
 			SwitcherSettings::PRESENTATION_CLASSIC_DROPDOWN => array(
 				'label'       => __( 'Classic Dropdown', 'universal-multicurrency' ),
 				'description' => __( 'Traditional dropdown on the side edge.', 'universal-multicurrency' ),
@@ -739,7 +745,7 @@ final class DisplaySettingsField {
 		?>
 		<div class="umc-display-card">
 			<h3 class="umc-display-card__title"><?php esc_html_e( 'Currency presentation icons', 'universal-multicurrency' ); ?></h3>
-			<p class="description"><?php esc_html_e( 'Optional bundled flags are visual presentation only. A currency does not always correspond to one country. Built-in defaults are suggestions; you may override them per currency.', 'universal-multicurrency' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Optional bundled flags are visual presentation only. A currency does not always correspond to one country. Built-in defaults are suggestions; you may override them per currency except EUR, which always uses the European Union flag.', 'universal-multicurrency' ); ?></p>
 			<label class="umc-display-field">
 				<span><?php esc_html_e( 'Icon size', 'universal-multicurrency' ); ?></span>
 				<select name="umc_display[presentation][icon_size]" data-umc-display-field="icon_size">
@@ -782,6 +788,22 @@ final class DisplaySettingsField {
 				</thead>
 				<tbody>
 					<?php foreach ( $this->presentation_override_rows() as $row ) : ?>
+						<?php if ( ! empty( $row['locked'] ) ) : ?>
+							<tr>
+								<td><code><?php echo esc_html( $row['code'] ); ?></code></td>
+								<td>
+									<p class="description" data-umc-eur-flag-policy>
+										<?php esc_html_e( 'European Union flag (authoritative). This currency cannot use a different presentation region.', 'universal-multicurrency' ); ?>
+									</p>
+									<?php if ( '' !== $row['selected'] ) : ?>
+										<p class="description" data-umc-eur-override-ignored>
+											<?php esc_html_e( 'A previously saved presentation-region override is still stored for this currency but is not applied.', 'universal-multicurrency' ); ?>
+										</p>
+									<?php endif; ?>
+								</td>
+								<td><?php echo esc_html( $row['default_label'] ); ?></td>
+							</tr>
+						<?php else : ?>
 						<tr>
 							<td><code><?php echo esc_html( $row['code'] ); ?></code></td>
 							<td>
@@ -794,6 +816,7 @@ final class DisplaySettingsField {
 							</td>
 							<td><?php echo esc_html( $row['default_label'] ); ?></td>
 						</tr>
+						<?php endif; ?>
 					<?php endforeach; ?>
 				</tbody>
 			</table>
@@ -807,7 +830,7 @@ final class DisplaySettingsField {
 	/**
 	 * Enabled currency rows for the presentation override table.
 	 *
-	 * @return array<int, array{code: string, selected: string, default_label: string}>
+	 * @return array<int, array{code: string, selected: string, default_label: string, locked: bool}>
 	 */
 	private function presentation_override_rows(): array {
 		$settings  = $this->settings_repository->get();
@@ -823,15 +846,17 @@ final class DisplaySettingsField {
 				continue;
 			}
 
+			$code           = strtoupper( $code );
 			$default_region = CurrencyPresentationResolver::built_in_region_for_currency( $code );
 			$default_label  = null === $default_region
 				? __( 'None', 'universal-multicurrency' )
 				: CurrencyPresentationAssetRegistry::region_label( $default_region );
 
 			$rows[] = array(
-				'code'          => strtoupper( $code ),
-				'selected'      => $overrides[ strtoupper( $code ) ] ?? '',
+				'code'          => $code,
+				'selected'      => $overrides[ $code ] ?? '',
 				'default_label' => $default_label,
+				'locked'        => CurrencyPresentationResolver::is_override_locked( $code ),
 			);
 		}
 
@@ -1543,6 +1568,10 @@ final class DisplaySettingsField {
 
 			$currency = strtoupper( trim( $currency ) );
 			$region   = is_string( $region ) ? strtoupper( trim( $region ) ) : '';
+
+			if ( CurrencyPresentationResolver::is_override_locked( $currency ) ) {
+				continue;
+			}
 
 			if ( '' === $region ) {
 				unset( $merged[ $currency ] );

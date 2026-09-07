@@ -19,7 +19,14 @@ presentation icons. They are **not** geographic authority — see
 - Path/shape-only SVG (no scripts, no external references, no event handlers)
 - Intended for `<img src="local-plugin-url">` rendering (not inline SVG at runtime)
 - `EU` represents the European Union presentation region for EUR — not a member state
-- Region identifiers: `CH`, `DK`, `EU`, `GB`, `NO`, `PL`, `SE`, `US`
+- Region identifiers: `AU`, `BR`, `CA`, `CH`, `CN`, `CZ`, `DK`, `EU`, `GB`, `HK`, `IN`, `JP`, `KR`, `MX`, `NO`, `NZ`, `PL`, `SE`, `SG`, `US`, `ZA`
+
+EUR always uses the European Union presentation region. A stored
+`icon_overrides['EUR']` value is retained for backward-data preservation and
+is ignored at presentation time (ADR-0037).
+
+Supranational / ambiguous ISO codes (`XOF`, `XAF`, `XCD`, `XPF`, `XDR`, `XAU`,
+`XAG`, `XPT`, `XPD`) have no default flag.
 
 ## Security review checklist
 

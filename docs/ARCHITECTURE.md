@@ -116,6 +116,11 @@ Existing floating stores map to Classic / Floating Card / Minimal Icon — never
 auto-converted to Edge Pill — so upgraded stores keep their prior appearance.
 See [`MIGRATION.md`](MIGRATION.md) § Internal settings schema migrations.
 
+ADR-0037 aligns UML-family floating presentations with Universal Multilingual
+v1.12.0 as a **presentation refactor** of this same stack. Schema remains **8**;
+no `migrate_8_to_9`. See
+[`docs/architecture/switcher-uml-family-alignment.md`](architecture/switcher-uml-family-alignment.md).
+
 `SettingsUpgrader` responsibilities:
 
 - parse the stored schema version (missing/malformed → 0)

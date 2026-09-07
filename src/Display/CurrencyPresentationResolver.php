@@ -11,6 +11,9 @@ namespace UMC\Display;
 
 /**
  * Applies merchant overrides and runtime built-in defaults.
+ *
+ * EUR always resolves to the European Union presentation region. Merchant
+ * `icon_overrides['EUR']` is ignored at presentation time (ADR-0037).
  */
 final class CurrencyPresentationResolver {
 
@@ -28,6 +31,36 @@ final class CurrencyPresentationResolver {
 		'EUR' => CurrencyPresentationAssetRegistry::REGION_EU,
 		'USD' => CurrencyPresentationAssetRegistry::REGION_US,
 		'CHF' => CurrencyPresentationAssetRegistry::REGION_CH,
+		'JPY' => CurrencyPresentationAssetRegistry::REGION_JP,
+		'CAD' => CurrencyPresentationAssetRegistry::REGION_CA,
+		'AUD' => CurrencyPresentationAssetRegistry::REGION_AU,
+		'NZD' => CurrencyPresentationAssetRegistry::REGION_NZ,
+		'KRW' => CurrencyPresentationAssetRegistry::REGION_KR,
+		'CNY' => CurrencyPresentationAssetRegistry::REGION_CN,
+		'INR' => CurrencyPresentationAssetRegistry::REGION_IN,
+		'BRL' => CurrencyPresentationAssetRegistry::REGION_BR,
+		'MXN' => CurrencyPresentationAssetRegistry::REGION_MX,
+		'SGD' => CurrencyPresentationAssetRegistry::REGION_SG,
+		'HKD' => CurrencyPresentationAssetRegistry::REGION_HK,
+		'ZAR' => CurrencyPresentationAssetRegistry::REGION_ZA,
+		'CZK' => CurrencyPresentationAssetRegistry::REGION_CZ,
+	);
+
+	/**
+	 * ISO currency codes that must never receive a default flag.
+	 *
+	 * @var array<int, string>
+	 */
+	private const NO_FLAG_CODES = array(
+		'XOF',
+		'XAF',
+		'XCD',
+		'XPF',
+		'XDR',
+		'XAU',
+		'XAG',
+		'XPT',
+		'XPD',
 	);
 
 	/**
@@ -63,7 +96,20 @@ final class CurrencyPresentationResolver {
 	public static function built_in_region_for_currency( string $code ): ?string {
 		$code = strtoupper( trim( $code ) );
 
+		if ( in_array( $code, self::NO_FLAG_CODES, true ) ) {
+			return null;
+		}
+
 		return self::BUILTIN_DEFAULTS[ $code ] ?? null;
+	}
+
+	/**
+	 * Whether merchant overrides are ignored for this currency at presentation time.
+	 *
+	 * @param string $code Currency code.
+	 */
+	public static function is_override_locked( string $code ): bool {
+		return 'EUR' === strtoupper( trim( $code ) );
 	}
 
 	/**
@@ -72,7 +118,18 @@ final class CurrencyPresentationResolver {
 	 * @param string $code Currency code.
 	 */
 	public function region_for_currency( string $code ): ?string {
-		$code   = strtoupper( trim( $code ) );
+		$code = strtoupper( trim( $code ) );
+
+		if ( self::is_override_locked( $code ) ) {
+			$region = CurrencyPresentationAssetRegistry::REGION_EU;
+
+			return CurrencyPresentationAssetRegistry::is_valid_region( $region ) ? $region : null;
+		}
+
+		if ( in_array( $code, self::NO_FLAG_CODES, true ) ) {
+			return null;
+		}
+
 		$region = $this->overrides[ $code ] ?? self::BUILTIN_DEFAULTS[ $code ] ?? null;
 
 		if ( null === $region || ! CurrencyPresentationAssetRegistry::is_valid_region( $region ) ) {

@@ -78,7 +78,7 @@ final class SettingsMigrationV7ToV8Test extends TestCase {
 				SwitcherSettings::PLACEMENT_FLOATING_SIDE,
 				SwitcherSettings::PRESET_MINIMAL,
 				SwitcherSettings::PRESENTATION_MINIMAL_ICON,
-				SwitcherSettings::MOBILE_BEHAVIOR_BOTTOM_SHEET,
+				SwitcherSettings::MOBILE_BEHAVIOR_RETAIN,
 			),
 			'sticky footer'            => array(
 				SwitcherSettings::PLACEMENT_STICKY_FOOTER,

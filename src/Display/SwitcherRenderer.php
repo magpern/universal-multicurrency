@@ -39,17 +39,19 @@ final class SwitcherRenderer {
 			return '';
 		}
 
-		$items = '';
+		$family = $view_model->settings()->is_uml_family_floating();
+		$items  = '';
 
 		foreach ( $view_model->options() as $option ) {
-			$items .= $this->render_option_link( $option, $view_model->is_preview() );
+			$items .= $this->render_option_link( $option, $view_model->is_preview(), false, $family );
 		}
 
 		$sheet_title = esc_html__( 'Choose currency', 'universal-multicurrency' );
 		$close_label = esc_html__( 'Close', 'universal-multicurrency' );
+		$menu_hidden = $family ? '' : ' hidden';
 
 		return sprintf(
-			'<div %1$s><button type="button" class="umc-switcher__trigger" id="%2$s" aria-expanded="false" aria-controls="%3$s" aria-label="%4$s"><span class="umc-switcher__trigger-content">%5$s</span>%6$s</button><div class="umc-switcher__backdrop" hidden aria-hidden="true"></div><div class="umc-switcher__panel" id="%3$s"><h2 class="umc-switcher__sheet-title" id="%7$s" hidden>%8$s</h2><button type="button" class="umc-switcher__close" hidden>%9$s</button><span class="umc-switcher__sheet-divider" hidden aria-hidden="true"></span><ul class="umc-switcher__menu" id="%10$s" hidden>%11$s</ul></div></div>',
+			'<div %1$s><button type="button" class="umc-switcher__trigger" id="%2$s" aria-expanded="false" aria-controls="%3$s" aria-label="%4$s"><span class="umc-switcher__trigger-content">%5$s</span>%6$s</button><div class="umc-switcher__backdrop" hidden aria-hidden="true"></div><div class="umc-switcher__panel" id="%3$s"><h2 class="umc-switcher__sheet-title" id="%7$s" hidden>%8$s</h2><button type="button" class="umc-switcher__close" hidden>%9$s</button><span class="umc-switcher__sheet-divider" hidden aria-hidden="true"></span><ul class="umc-switcher__menu" id="%10$s"%12$s>%11$s</ul></div></div>',
 			$this->root_attributes( $view_model ),
 			esc_attr( $view_model->trigger_id() ),
 			esc_attr( $view_model->panel_id() ),
@@ -60,7 +62,8 @@ final class SwitcherRenderer {
 			$sheet_title,
 			$close_label,
 			esc_attr( $view_model->menu_id() ),
-			$items
+			$items,
+			$menu_hidden
 		);
 	}
 
@@ -90,20 +93,25 @@ final class SwitcherRenderer {
 	/**
 	 * Renders one currency option as a switch link.
 	 *
-	 * @param SwitcherOptionViewModel $option  Currency option.
-	 * @param bool                    $preview Whether preview mode is active.
-	 * @param bool                    $inline  Whether the link is inline in a list item.
+	 * @param SwitcherOptionViewModel $option     Currency option.
+	 * @param bool                    $preview    Whether preview mode is active.
+	 * @param bool                    $inline     Whether the link is inline in a list item.
+	 * @param bool                    $with_check Whether to emit the current-item check glyph.
 	 */
-	private function render_option_link( SwitcherOptionViewModel $option, bool $preview, bool $inline = false ): string {
+	private function render_option_link( SwitcherOptionViewModel $option, bool $preview, bool $inline = false, bool $with_check = false ): string {
 		$current = $option->is_active() ? ' aria-current="true"' : '';
 		$rel     = $preview ? '' : ' rel="nofollow"';
+		$check   = ( $option->is_active() && $with_check )
+			? '<span class="umc-switcher__check" aria-hidden="true"></span>'
+			: '';
 
 		$link = sprintf(
-			'<a class="umc-switcher__link" href="%1$s"%2$s%3$s>%4$s</a>',
+			'<a class="umc-switcher__link" href="%1$s"%2$s%3$s>%4$s%5$s</a>',
 			esc_url( $option->url() ),
 			$rel,
 			$current,
-			$this->menu_content( $option )
+			$this->menu_content( $option ),
+			$check
 		);
 
 		if ( $inline ) {
@@ -154,7 +162,7 @@ final class SwitcherRenderer {
 	 * @param array<int, string> $extra_classes Additional root classes.
 	 */
 	private function root_attributes( SwitcherViewModel $view_model, array $extra_classes = array() ): string {
-		return sprintf(
+		$attributes = sprintf(
 			'class="%1$s" style="%2$s" data-umc-placement="%3$s" data-umc-style="%4$s" data-umc-presentation="%5$s" data-umc-mobile-behavior="%6$s"',
 			esc_attr( implode( ' ', array_merge( $view_model->root_classes(), $extra_classes ) ) ),
 			esc_attr( SwitcherPresentationCss::style_attribute( $view_model->css_variables() ) ),
@@ -163,5 +171,14 @@ final class SwitcherRenderer {
 			esc_attr( $view_model->presentation_attribute() ),
 			esc_attr( $view_model->mobile_behavior_attribute() )
 		);
+
+		if ( $view_model->emits_edge_attributes() ) {
+			$attributes .= sprintf(
+				' data-um-edge-control="currency" data-um-edge="%1$s" data-um-edge-slot="2" data-um-edge-priority="20"',
+				esc_attr( $view_model->edge_side() )
+			);
+		}
+
+		return $attributes;
 	}
 }

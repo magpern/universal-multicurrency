@@ -80,6 +80,8 @@ final class SwitcherSettings {
 
 	public const PRESENTATION_MINIMAL_ICON = 'minimal_icon';
 
+	public const PRESENTATION_TAB = 'tab';
+
 	public const PRESENTATION_CLASSIC_DROPDOWN = 'classic_dropdown';
 
 	public const PRESENTATION_STICKY_FOOTER = 'sticky_footer';
@@ -168,8 +170,20 @@ final class SwitcherSettings {
 		self::PRESENTATION_EDGE_PILL,
 		self::PRESENTATION_FLOATING_CARD,
 		self::PRESENTATION_MINIMAL_ICON,
+		self::PRESENTATION_TAB,
 		self::PRESENTATION_CLASSIC_DROPDOWN,
 		self::PRESENTATION_STICKY_FOOTER,
+	);
+
+	/**
+	 * UML-family floating presentations (visual contract with UML v1.12.0).
+	 *
+	 * @var array<int, string>
+	 */
+	public const UML_FAMILY_PRESENTATIONS = array(
+		self::PRESENTATION_EDGE_PILL,
+		self::PRESENTATION_MINIMAL_ICON,
+		self::PRESENTATION_TAB,
 	);
 
 	/**
@@ -429,8 +443,13 @@ final class SwitcherSettings {
 			$style_coerced = true;
 		}
 
+		$vertical_raw = (string) ( $merged['position']['vertical_alignment'] ?? self::ALIGN_MIDDLE );
+		if ( 'center' === $vertical_raw ) {
+			$vertical_raw = self::ALIGN_MIDDLE;
+		}
+
 		$vertical_alignment = self::sanitize_enum(
-			(string) ( $merged['position']['vertical_alignment'] ?? self::ALIGN_MIDDLE ),
+			$vertical_raw,
 			array( self::ALIGN_TOP, self::ALIGN_MIDDLE, self::ALIGN_BOTTOM ),
 			self::ALIGN_MIDDLE
 		);
@@ -771,6 +790,53 @@ final class SwitcherSettings {
 	}
 
 	/**
+	 * Whether this instance is a UML-family floating edge control.
+	 */
+	public function is_uml_family_floating(): bool {
+		return self::PLACEMENT_FLOATING_SIDE === $this->placement
+			&& self::is_uml_family_presentation( $this->selector_presentation() );
+	}
+
+	/**
+	 * Whether a presentation identifier belongs to the UML visual family.
+	 *
+	 * @param string $presentation Selector presentation.
+	 */
+	public static function is_uml_family_presentation( string $presentation ): bool {
+		return in_array( $presentation, self::UML_FAMILY_PRESENTATIONS, true );
+	}
+
+	/**
+	 * Forced trigger content for UML-family floating (flag + code).
+	 *
+	 * @return array{show_code: bool, show_symbol: bool, show_name: bool, show_icon: bool, order: array<int, string>}
+	 */
+	public static function uml_family_trigger_content(): array {
+		return array(
+			'show_code'   => true,
+			'show_symbol' => false,
+			'show_name'   => false,
+			'show_icon'   => true,
+			'order'       => array( self::ELEMENT_ICON, self::ELEMENT_CODE ),
+		);
+	}
+
+	/**
+	 * Forced menu content for UML-family floating (flag + code + name).
+	 *
+	 * @return array{show_code: bool, show_symbol: bool, show_name: bool, show_icon: bool, order: array<int, string>}
+	 */
+	public static function uml_family_menu_content(): array {
+		return array(
+			'show_code'   => true,
+			'show_symbol' => false,
+			'show_name'   => true,
+			'show_icon'   => true,
+			'order'       => array( self::ELEMENT_ICON, self::ELEMENT_CODE, self::ELEMENT_NAME ),
+		);
+	}
+
+	/**
 	 * Selected preset identifier.
 	 */
 	public function preset(): string {
@@ -935,6 +1001,10 @@ final class SwitcherSettings {
 		}
 
 		$classes[] = 'umc-switcher--presentation-' . str_replace( '_', '-', (string) $this->design['presentation'] );
+
+		if ( $this->is_uml_family_floating() ) {
+			$classes[] = 'umc-switcher--uml-family';
+		}
 		$classes[] = 'umc-switcher--preset-' . $this->design['preset'];
 		$classes[] = 'umc-switcher--theme-' . $this->design['theme'];
 		$classes[] = 'umc-switcher--size-' . $this->design['size'];
@@ -1274,6 +1344,7 @@ final class SwitcherSettings {
 				self::PRESENTATION_EDGE_PILL,
 				self::PRESENTATION_FLOATING_CARD,
 				self::PRESENTATION_MINIMAL_ICON,
+				self::PRESENTATION_TAB,
 				self::PRESENTATION_CLASSIC_DROPDOWN,
 			),
 			true
@@ -1317,12 +1388,8 @@ final class SwitcherSettings {
 	 * @param string $presentation Selector presentation.
 	 */
 	public static function default_mobile_behavior_for( string $presentation ): string {
-		if ( in_array(
-			$presentation,
-			array( self::PRESENTATION_EDGE_PILL, self::PRESENTATION_MINIMAL_ICON ),
-			true
-		) ) {
-			return self::MOBILE_BEHAVIOR_BOTTOM_SHEET;
+		if ( self::is_uml_family_presentation( $presentation ) ) {
+			return self::MOBILE_BEHAVIOR_RETAIN;
 		}
 
 		return self::MOBILE_BEHAVIOR_RETAIN;
@@ -1435,7 +1502,7 @@ final class SwitcherSettings {
 			: self::MOBILE_BEHAVIOR_RETAIN;
 
 		$behavior = self::sanitize_enum(
-			isset( $source['mobile_behavior'] ) && is_string( $source['mobile_behavior'] )
+			array_key_exists( 'mobile_behavior', $source ) && is_string( $source['mobile_behavior'] )
 				? $source['mobile_behavior']
 				: $default,
 			self::MOBILE_BEHAVIORS,
@@ -1589,6 +1656,10 @@ final class SwitcherSettings {
 			}
 
 			if ( 1 !== preg_match( '/^[A-Z]{3}$/', $currency ) ) {
+				continue;
+			}
+
+			if ( CurrencyPresentationResolver::is_override_locked( $currency ) ) {
 				continue;
 			}
 

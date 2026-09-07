@@ -160,8 +160,8 @@ final class SwitcherElementComposerTest extends TestCase {
 		);
 
 		$this->assertSame(
-			'<span class="umc-switcher__symbol">¥</span>',
-			$composer->html( 'JPY', '¥', 'Japanese yen' )
+			'<span class="umc-switcher__symbol">Fr</span>',
+			$composer->html( 'XOF', 'Fr', 'West African CFA franc' )
 		);
 	}
 
@@ -174,13 +174,13 @@ final class SwitcherElementComposerTest extends TestCase {
 				'show_icon'   => true,
 				'order'       => array( 'icon' ),
 			),
-			array( '$' => true ),
+			array( 'Fr' => true ),
 			new CurrencyPresentationResolver()
 		);
 
 		$this->assertSame(
-			'<span class="umc-switcher__code">CAD</span>',
-			$composer->html( 'CAD', '$', 'Canadian dollar' )
+			'<span class="umc-switcher__code">XAF</span>',
+			$composer->html( 'XAF', 'Fr', 'Central African CFA franc' )
 		);
 	}
 

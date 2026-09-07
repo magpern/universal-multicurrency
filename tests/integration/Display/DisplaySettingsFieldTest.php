@@ -307,7 +307,7 @@ final class DisplaySettingsFieldTest extends WP_UnitTestCase {
 
 		$this->assertStringContainsString( 'umc-display-enable-row', $html );
 
-		// Floating-side Display contract: 3 placement + 2 style + 4 presentation = 9 choice cards.
+		// Floating-side Display contract: 3 placement + 2 style + 5 presentation = 10 choice cards.
 		$choice_card        = 'class="umc-ui-choice-card umc-display-choice-card"';
 		$placement_cards    = $this->extract_attr_subtree( $html, 'data-umc-placement-cards' );
 		$style_cards        = $this->extract_attr_subtree( $html, 'data-umc-style-cards' );
@@ -315,16 +315,16 @@ final class DisplaySettingsFieldTest extends WP_UnitTestCase {
 
 		$this->assertSame( 3, substr_count( $placement_cards, $choice_card ), 'Placement offers Manual, Floating side, and Sticky footer.' );
 		$this->assertSame( 2, substr_count( $style_cards, $choice_card ), 'Style offers Dropdown and Horizontal list.' );
-		$this->assertSame( 4, substr_count( $presentation_cards, $choice_card ), 'Floating Selector style offers four presentation presets.' );
+		$this->assertSame( 5, substr_count( $presentation_cards, $choice_card ), 'Floating Selector style offers five presentation presets.' );
 		$this->assertSame(
-			9,
+			10,
 			substr_count( $placement_cards, $choice_card )
 				+ substr_count( $style_cards, $choice_card )
 				+ substr_count( $presentation_cards, $choice_card ),
-			'Floating-side configurator choice-card containers total nine cards.'
+			'Floating-side configurator choice-card containers total ten cards.'
 		);
 		$this->assertSame(
-			9,
+			10,
 			substr_count( $html, $choice_card ),
 			'No choice cards may render outside the placement/style/presentation configurator containers.'
 		);
@@ -334,6 +334,7 @@ final class DisplaySettingsFieldTest extends WP_UnitTestCase {
 				SwitcherSettings::PRESENTATION_EDGE_PILL,
 				SwitcherSettings::PRESENTATION_FLOATING_CARD,
 				SwitcherSettings::PRESENTATION_MINIMAL_ICON,
+				SwitcherSettings::PRESENTATION_TAB,
 				SwitcherSettings::PRESENTATION_CLASSIC_DROPDOWN,
 			) as $presentation
 		) {
@@ -362,7 +363,7 @@ final class DisplaySettingsFieldTest extends WP_UnitTestCase {
 		$this->assertSame( 3, substr_count( $html, 'name="umc_display[placement]"' ) );
 		$this->assertSame( 2, substr_count( $html, 'name="umc_display[style]"' ) );
 		$this->assertStringContainsString( 'data-umc-selector-style-card', $html );
-		$this->assertSame( 4, substr_count( $html, 'name="umc_display[design][presentation]"' ) );
+		$this->assertSame( 5, substr_count( $html, 'name="umc_display[design][presentation]"' ) );
 		$this->assertStringContainsString( 'data-umc-position-panel="floating_side"', $html );
 		$this->assertStringContainsString( 'data-umc-position-panel="sticky_footer"', $html );
 		$this->assertStringContainsString( 'data-umc-manual-panel', $html );
@@ -611,6 +612,29 @@ final class DisplaySettingsFieldTest extends WP_UnitTestCase {
 
 		$this->assertStringContainsString( 'presentations', $data );
 		$this->assertStringContainsString( 'mobileBehaviors', $data );
+	}
+
+	public function test_eur_override_picker_is_absent_and_stored_override_is_explained(): void {
+		$this->save_display(
+			array(
+				'enabled'      => true,
+				'presentation' => array(
+					'icon_overrides' => array(
+						'EUR' => 'SE',
+						'USD' => 'US',
+					),
+				),
+			)
+		);
+
+		$html = $this->capture_render();
+
+		$this->assertStringContainsString( 'data-umc-eur-flag-policy', $html );
+		$this->assertStringContainsString( 'data-umc-eur-override-ignored', $html );
+		$this->assertStringNotContainsString(
+			'name="umc_display[presentation][icon_overrides][EUR]"',
+			$html
+		);
 	}
 
 	private function authorize_custom_css(): void {

@@ -36,6 +36,10 @@
 		return root.classList.contains('umc-switcher--preview');
 	}
 
+	function isUmlFamily(root) {
+		return root.classList.contains('umc-switcher--uml-family');
+	}
+
 	function presentationOf(root) {
 		return (root.getAttribute('data-umc-presentation') || 'classic-dropdown').replace(/_/g, '-');
 	}
@@ -210,6 +214,10 @@
 		var behavior = mobileBehaviorOf(root);
 		var mobile = isMobileViewport();
 
+		if (isUmlFamily(root) && behavior === 'retain') {
+			return 'expand';
+		}
+
 		if (presentation === 'sticky-footer') {
 			if (mobile) {
 				return 'sheet';
@@ -282,6 +290,7 @@
 		var wasSheet = isSheetOpen(root);
 		root.classList.remove(OPEN_CLASS);
 		root.classList.remove(OPEN_UP_CLASS);
+		root.setAttribute('data-umc-open', '0');
 		p.trigger.setAttribute('aria-expanded', 'false');
 		p.menu.hidden = true;
 		clearSheetDialog(root);
@@ -308,6 +317,7 @@
 		closeOtherInstances(root, strategy === 'sheet');
 
 		root.classList.add(OPEN_CLASS);
+		root.setAttribute('data-umc-open', '1');
 		p.trigger.setAttribute('aria-expanded', 'true');
 		p.menu.hidden = false;
 
@@ -530,6 +540,10 @@
 		instances.forEach(function (root) {
 			bindRootKeyboard(root);
 			bindPreviewLinks(root);
+			if (!isPreview(root)) {
+				root.setAttribute('data-umc-enhanced', '1');
+				root.setAttribute('data-umc-open', '0');
+			}
 		});
 
 		document.addEventListener('click', onDocumentClick);

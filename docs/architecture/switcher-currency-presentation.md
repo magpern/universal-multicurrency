@@ -99,9 +99,13 @@ inconsistent legacy/manual settings without implicit placement outside `order[]`
 | USD | US |
 | CHF | CH |
 
-Effective mapping: `merchant override ?? built-in default ?? none`.
+Effective mapping: `merchant override ?? built-in default ?? none`, except
+**EUR**, which always resolves to **EU** at presentation time (ADR-0037).
+Merchant `icon_overrides['EUR']` may remain stored and is ignored.
 
-EUR defaults to **EU**, not a member-state flag.
+Additional issuer defaults (CAD, AUD, NZD, KRW, CNY, INR, BRL, MXN, SGD, HKD,
+ZAR, CZK, JPY) ship with bundled SVGs. Supranational codes listed in
+ADR-0037 have no default flag.
 
 ---
 

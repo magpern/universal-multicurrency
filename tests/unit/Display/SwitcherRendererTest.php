@@ -218,6 +218,86 @@ final class SwitcherRendererTest extends TestCase {
 		$this->assertStringContainsString( '<span class="umc-switcher__symbol">&lt;script&gt;</span>', $html );
 	}
 
+	public function test_uml_family_trigger_is_flag_plus_code_with_edge_attributes(): void {
+		$html = ( new SwitcherRenderer() )->render(
+			$this->view_model(
+				array(
+					'placement' => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
+					'design'    => array(
+						'presentation' => SwitcherSettings::PRESENTATION_EDGE_PILL,
+					),
+					'position'  => array(
+						'side' => SwitcherSettings::SIDE_RIGHT,
+					),
+				)
+			)
+		);
+
+		$this->assertStringContainsString( 'umc-switcher--uml-family', $html );
+		$this->assertStringContainsString( 'data-um-edge-control="currency"', $html );
+		$this->assertStringContainsString( 'data-um-edge="right"', $html );
+		$this->assertStringContainsString( 'data-um-edge-slot="2"', $html );
+		$this->assertStringContainsString( 'data-um-edge-priority="20"', $html );
+		$this->assertStringContainsString( 'umc-switcher__code">SEK</span>', $html );
+		$this->assertStringContainsString( 'umc-switcher__icon', $html );
+		$this->assertStringContainsString( 'SE.svg', $html );
+		$this->assertStringContainsString( 'aria-current="true"', $html );
+		$this->assertStringContainsString( 'umc-switcher__check', $html );
+		$this->assertStringNotContainsString( 'aria-current="page"', $html );
+		$this->assertStringNotContainsString( 'role="listbox"', $html );
+		$this->assertDoesNotMatchRegularExpression( '/<ul class="umc-switcher__menu"[^>]*hidden/', $html );
+		$this->assertStringNotContainsString( 'aiml-', $html );
+		$this->assertStringNotContainsString( 'data-aiml-', $html );
+	}
+
+	public function test_uml_family_code_only_fallback_when_unmapped(): void {
+		$html = ( new SwitcherRenderer() )->render(
+			$this->view_model(
+				array(
+					'placement' => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
+					'design'    => array(
+						'presentation' => SwitcherSettings::PRESENTATION_MINIMAL_ICON,
+					),
+				),
+				'XOF',
+				'Fr'
+			)
+		);
+
+		$this->assertStringContainsString(
+			'<span class="umc-switcher__trigger-content"><span class="umc-switcher__code">XOF</span></span>',
+			$html
+		);
+	}
+
+	public function test_manual_classic_does_not_emit_edge_or_family_class(): void {
+		$html = ( new SwitcherRenderer() )->render( $this->view_model() );
+
+		$this->assertStringNotContainsString( 'umc-switcher--uml-family', $html );
+		$this->assertStringNotContainsString( 'data-um-edge-control', $html );
+		$this->assertStringNotContainsString( 'data-um-edge-slot', $html );
+	}
+
+	public function test_tab_presentation_emits_family_hooks(): void {
+		$html = ( new SwitcherRenderer() )->render(
+			$this->view_model(
+				array(
+					'placement' => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
+					'position'  => array(
+						'side' => SwitcherSettings::SIDE_LEFT,
+					),
+					'design'    => array(
+						'presentation' => SwitcherSettings::PRESENTATION_TAB,
+					),
+				)
+			)
+		);
+
+		$this->assertStringContainsString( 'umc-switcher--presentation-tab', $html );
+		$this->assertStringContainsString( 'umc-switcher--uml-family', $html );
+		$this->assertStringContainsString( 'data-um-edge="left"', $html );
+	}
+
 	/**
 	 * Builds a two-currency dropdown view model through the real option factory.
 	 *

@@ -61,10 +61,12 @@ optional Universal Geo Context integration.
 **Section: Display.** Place the switcher via shortcode
 (`[universal_multicurrency_switcher]`), the bundled Gutenberg block
 (**Universal Multicurrency → Currency Switcher** in the block inserter), or
-a floating placement (side/bottom). Customize placement, trigger/menu
-content (code, symbol, name, optional bundled currency icons), theme/size/
-shape presets, and — for advanced needs — raw CSS via the gated Advanced
-Custom CSS field. See
+a floating placement (side/bottom). Floating Edge Pill / Minimal Icon / Tab
+presentations show a flag plus the currency code on the collapsed control
+(European Union flag for EUR). Customize placement, trigger/menu content
+(code, symbol, name, optional bundled currency icons), theme/size/shape
+presets, and — for advanced needs — raw CSS via the gated Advanced Custom CSS
+field. See
 [`docs/SWITCHER_CUSTOMIZATION.md`](SWITCHER_CUSTOMIZATION.md) for the full
 reference, including the CSS custom-property contract for theme
 integration.

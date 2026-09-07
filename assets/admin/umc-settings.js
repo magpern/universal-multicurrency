@@ -5,11 +5,13 @@
 
 	var PRESETS = [ 'default', 'minimal', 'pill', 'compact', 'borderless', 'floating' ];
 
-	var PRESENTATIONS = [ 'edge_pill', 'floating_card', 'minimal_icon', 'classic_dropdown', 'sticky_footer' ];
+	var PRESENTATIONS = [ 'edge_pill', 'floating_card', 'minimal_icon', 'tab', 'classic_dropdown', 'sticky_footer' ];
+
+	var UML_FAMILY_PRESENTATIONS = [ 'edge_pill', 'minimal_icon', 'tab' ];
 
 	var MOBILE_SHEET_BEHAVIORS = [ 'bottom_sheet', 'sticky_compact' ];
 
-	var PRESENTATIONS_DEFAULT_SHEET = [ 'edge_pill', 'minimal_icon' ];
+	var PRESENTATIONS_DEFAULT_SHEET = [];
 
 	var OVERRIDE_PROPERTIES = {
 		surface: '--umc-switcher-surface',
@@ -101,6 +103,7 @@
 		var $frame = $root.find( '[data-umc-preview-frame]' );
 		var previewState = 'collapsed';
 		var previewViewport = 'desktop';
+		var mobileBehaviorDirty = false;
 
 		if ( ! $switcher.length ) {
 			return;
@@ -170,7 +173,16 @@
 			return value;
 		}
 
+		function isUmlFamilyPreview() {
+			return 'floating_side' === placement()
+				&& UML_FAMILY_PRESENTATIONS.indexOf( presentationValue() ) !== -1;
+		}
+
 		function elementOrder( context ) {
+			if ( isUmlFamilyPreview() ) {
+				return 'trigger' === context ? [ 'icon', 'code' ] : [ 'icon', 'code', 'name' ];
+			}
+
 			var order = String( fieldValue( context + '_order' ) || '' )
 				.split( ',' )
 				.map( function ( part ) {
@@ -190,6 +202,10 @@
 		}
 
 		function visibleElements( context ) {
+			if ( isUmlFamilyPreview() ) {
+				return 'trigger' === context ? [ 'icon', 'code' ] : [ 'icon', 'code', 'name' ];
+			}
+
 			var visible = elementOrder( context ).filter( function ( element ) {
 				return !! fieldValue( context + '_show_' + element );
 			} );
@@ -406,10 +422,28 @@
 
 			$root.find( '[data-umc-display-field="edge_offset"]' ).filter( ':enabled' ).val( '0' );
 
-			var $bottomSheet = $root.find( 'input[name="umc_display[responsive][mobile_behavior]"][value="bottom_sheet"]' );
+			var $retain = $root.find( 'input[name="umc_display[responsive][mobile_behavior]"][value="retain"]' );
 
-			if ( $bottomSheet.length ) {
-				$bottomSheet.prop( 'checked', true );
+			if ( $retain.length ) {
+				$retain.prop( 'checked', true );
+			}
+		}
+
+		function applyFamilyMobileRetain() {
+			if ( mobileBehaviorDirty ) {
+				return;
+			}
+
+			var presentation = presentationValue();
+
+			if ( [ 'edge_pill', 'minimal_icon', 'tab' ].indexOf( presentation ) === -1 ) {
+				return;
+			}
+
+			var $retain = $root.find( 'input[name="umc_display[responsive][mobile_behavior]"][value="retain"]' );
+
+			if ( $retain.length ) {
+				$retain.prop( 'checked', true );
 			}
 		}
 
@@ -478,6 +512,11 @@
 			if ( $trigger.length ) {
 				$trigger.attr( 'aria-expanded', isDropdown && isOpen ? 'true' : 'false' );
 			}
+
+			if ( $switcher.hasClass( 'umc-switcher--uml-family' ) ) {
+				$switcher.attr( 'data-umc-enhanced', '1' );
+				$switcher.attr( 'data-umc-open', isDropdown && isOpen ? '1' : '0' );
+			}
 		}
 
 		function updateChevron( $trigger ) {
@@ -486,7 +525,7 @@
 			}
 
 			var presentation = presentationValue();
-			var hideChevron = 'edge_pill' === presentation || 'minimal_icon' === presentation;
+			var hideChevron = 'edge_pill' === presentation || 'minimal_icon' === presentation || 'tab' === presentation;
 
 			if ( hideChevron || ! fieldValue( 'show_chevron' ) ) {
 				$trigger.find( '.umc-switcher__chevron' ).remove();
@@ -711,6 +750,20 @@
 				}[ fieldValue( 'icon_shape' ) || 'natural' ] || 'umc-switcher--icon-shape-natural'
 			);
 
+			$switcher.toggleClass( 'umc-switcher--uml-family', isUmlFamilyPreview() );
+
+			if ( isUmlFamilyPreview() ) {
+				$switcher.attr( 'data-um-edge-control', 'currency' );
+				$switcher.attr( 'data-um-edge', fieldValue( 'side' ) || 'right' );
+				$switcher.attr( 'data-um-edge-slot', '2' );
+				$switcher.attr( 'data-um-edge-priority', '20' );
+			} else {
+				$switcher.removeAttr( 'data-um-edge-control' );
+				$switcher.removeAttr( 'data-um-edge' );
+				$switcher.removeAttr( 'data-um-edge-slot' );
+				$switcher.removeAttr( 'data-um-edge-priority' );
+			}
+
 			$switcher.toggleClass( 'umc-switcher--expanded', 'horizontal_list' === style );
 		}
 
@@ -815,6 +868,15 @@
 		$root.on( 'change', 'input[name="umc_display[placement]"]', function () {
 			applyFloatingDefaults();
 			refreshPreview();
+		} );
+
+		$root.on( 'change', 'input[name="umc_display[design][presentation]"]', function () {
+			applyFamilyMobileRetain();
+			refreshPreview();
+		} );
+
+		$root.on( 'change', 'input[name="umc_display[responsive][mobile_behavior]"]', function () {
+			mobileBehaviorDirty = true;
 		} );
 
 		$root.on( 'click', '.umc-display-preview__state-btn', function ( event ) {
