@@ -90,10 +90,18 @@ final class SwitcherSettings {
 
 	public const MOTION_OFF = 'off';
 
-	/** @deprecated Read alias normalized to {@see MOTION_STANDARD}. */
+	/**
+	 * Deprecated motion token retained as a read alias for `standard`.
+	 *
+	 * @deprecated Read alias normalized to {@see MOTION_STANDARD}.
+	 */
 	public const MOTION_SUBTLE = 'subtle';
 
-	/** @deprecated Read alias normalized to {@see MOTION_OFF}. */
+	/**
+	 * Deprecated motion token retained as a read alias for `off`.
+	 *
+	 * @deprecated Read alias normalized to {@see MOTION_OFF}.
+	 */
 	public const MOTION_NONE = 'none';
 
 	public const MOBILE_BEHAVIOR_RETAIN = 'retain';
@@ -1254,7 +1262,7 @@ final class SwitcherSettings {
 			return $design;
 		}
 
-		// floating_side
+		// Floating side keeps the selected presentation when it is floating-legal.
 		if ( self::PRESENTATION_STICKY_FOOTER === $presentation ) {
 			$design['presentation'] = self::PRESENTATION_EDGE_PILL;
 			return $design;
