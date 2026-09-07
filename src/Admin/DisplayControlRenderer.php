@@ -177,6 +177,47 @@ final class DisplayControlRenderer {
 	}
 
 	/**
+	 * Returns a static diagram for the Edge Pill selector style.
+	 */
+	public function diagram_presentation_edge_pill(): string {
+		return $this->svg_frame(
+			'<rect x="6" y="8" width="52" height="36" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><rect x="48" y="14" width="8" height="24" rx="4" fill="currentColor"/><rect x="40" y="18" width="8" height="16" rx="2" fill="currentColor" opacity="0.35"/>'
+		);
+	}
+
+	/**
+	 * Returns a static diagram for the Floating Card selector style.
+	 */
+	public function diagram_presentation_floating_card(): string {
+		return $this->svg_frame(
+			'<rect x="6" y="8" width="52" height="36" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><rect x="38" y="14" width="14" height="10" rx="4" fill="currentColor" opacity="0.85"/><rect x="34" y="26" width="18" height="12" rx="3" fill="currentColor" opacity="0.35"/>'
+		);
+	}
+
+	/**
+	 * Returns a static diagram for the Minimal Icon selector style.
+	 */
+	public function diagram_presentation_minimal_icon(): string {
+		return $this->svg_frame(
+			'<rect x="6" y="8" width="52" height="36" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="45" cy="22" r="7" fill="currentColor"/><rect x="36" y="30" width="18" height="10" rx="3" fill="currentColor" opacity="0.35"/>'
+		);
+	}
+
+	/**
+	 * Returns a static diagram for the Classic Dropdown selector style.
+	 */
+	public function diagram_presentation_classic_dropdown(): string {
+		return $this->diagram_style_dropdown();
+	}
+
+	/**
+	 * Returns a static diagram for the Sticky Footer selector style.
+	 */
+	public function diagram_presentation_sticky_footer(): string {
+		return $this->diagram_placement_floating_bottom();
+	}
+
+	/**
 	 * Wraps static SVG path markup in an accessible decorative shell.
 	 *
 	 * @param string $inner Inner SVG markup.

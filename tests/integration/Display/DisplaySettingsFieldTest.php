@@ -146,6 +146,49 @@ final class DisplaySettingsFieldTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'name="umc_display[design][size]"', $html );
 		$this->assertStringContainsString( 'name="umc_display[design][shape]"', $html );
 		$this->assertStringContainsString( 'name="umc_display[design][motion]"', $html );
+		$this->assertStringContainsString( 'value="' . SwitcherSettings::THEME_BRAND . '"', $html );
+		$this->assertStringContainsString( 'value="' . SwitcherSettings::SHAPE_SQUARE . '"', $html );
+	}
+
+	public function test_render_includes_selector_style_and_preview_state_controls(): void {
+		$this->save_display(
+			array(
+				'enabled'   => true,
+				'placement' => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
+				'design'    => array(
+					'presentation' => SwitcherSettings::PRESENTATION_EDGE_PILL,
+				),
+			)
+		);
+
+		$html = $this->capture_render();
+
+		$this->assertStringContainsString( 'data-umc-selector-style-card', $html );
+		$this->assertStringContainsString( 'name="umc_display[design][presentation]"', $html );
+		$this->assertStringContainsString( 'value="' . SwitcherSettings::PRESENTATION_EDGE_PILL . '"', $html );
+		$this->assertStringContainsString( 'data-umc-preview-state="collapsed"', $html );
+		$this->assertStringContainsString( 'data-umc-preview-state="open"', $html );
+		$this->assertStringContainsString( 'name="umc_display[responsive][mobile_behavior]"', $html );
+	}
+
+	public function test_render_hides_shape_for_edge_pill_presentation(): void {
+		$this->save_display(
+			array(
+				'placement' => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
+				'design'    => array(
+					'presentation' => SwitcherSettings::PRESENTATION_EDGE_PILL,
+					'shape'        => SwitcherSettings::SHAPE_ROUNDED,
+				),
+			)
+		);
+
+		$html = $this->capture_render();
+
+		$this->assertStringContainsString( 'data-umc-shape-fieldset', $html );
+		$this->assertStringContainsString(
+			'<input type="hidden" name="umc_display[design][shape]" value="' . SwitcherSettings::SHAPE_ROUNDED . '"',
+			$html
+		);
 	}
 
 	public function test_render_includes_subnav_pill_and_panel_for_every_section(): void {
@@ -266,6 +309,8 @@ final class DisplaySettingsFieldTest extends WP_UnitTestCase {
 		$this->assertSame( 5, substr_count( $html, 'class="umc-ui-choice-card umc-display-choice-card"' ) );
 		$this->assertSame( 3, substr_count( $html, 'name="umc_display[placement]"' ) );
 		$this->assertSame( 2, substr_count( $html, 'name="umc_display[style]"' ) );
+		$this->assertStringContainsString( 'data-umc-selector-style-card', $html );
+		$this->assertSame( 4, substr_count( $html, 'name="umc_display[design][presentation]"' ) );
 		$this->assertStringContainsString( 'data-umc-position-panel="floating_side"', $html );
 		$this->assertStringContainsString( 'data-umc-position-panel="sticky_footer"', $html );
 		$this->assertStringContainsString( 'data-umc-manual-panel', $html );
@@ -500,7 +545,7 @@ final class DisplaySettingsFieldTest extends WP_UnitTestCase {
 		$this->assertFalse( $content['trigger']['show_name'] );
 	}
 
-	public function test_admin_assets_enqueue_switcher_styles_only_on_display_section(): void {
+	public function test_admin_assets_localize_presentation_preview_config(): void {
 		$_GET['page']    = 'wc-settings';
 		$_GET['tab']     = 'umc';
 		$_GET['section'] = SettingsPage::SECTION_DISPLAY;
@@ -508,6 +553,12 @@ final class DisplaySettingsFieldTest extends WP_UnitTestCase {
 		( new AdminAssets() )->enqueue( 'woocommerce_page_wc-settings' );
 
 		$this->assertTrue( wp_style_is( 'umc-switcher', 'enqueued' ) );
+		$this->assertTrue( wp_script_is( 'umc-admin-settings', 'enqueued' ) );
+
+		$data = $GLOBALS['wp_scripts']->registered['umc-admin-settings']->extra['data'] ?? '';
+
+		$this->assertStringContainsString( 'presentations', $data );
+		$this->assertStringContainsString( 'mobileBehaviors', $data );
 	}
 
 	private function authorize_custom_css(): void {

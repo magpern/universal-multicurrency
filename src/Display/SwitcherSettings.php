@@ -1434,9 +1434,8 @@ final class SwitcherSettings {
 			$default
 		);
 
-		if ( self::PLACEMENT_FLOATING_SIDE !== $placement ) {
-			$behavior = self::MOBILE_BEHAVIOR_RETAIN;
-		}
+		// Keep inactive floating mobile strategies when placement is not floating_side.
+		// Runtime ignores this field unless placement is floating_side.
 
 		return array(
 			'hide_name_on_mobile' => self::is_truthy( $source['hide_name_on_mobile'] ?? false ),
