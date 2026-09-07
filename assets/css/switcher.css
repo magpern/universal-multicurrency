@@ -83,14 +83,19 @@
 .umc-switcher button.umc-switcher__close {
 	appearance: none;
 	-webkit-appearance: none;
-	background-image: none;
+	background: var(--umc-surface) !important;
+	background-image: none !important;
+	border-radius: var(--umc-radius) !important;
+	color: inherit !important;
 	letter-spacing: normal;
-	text-transform: none;
 	text-shadow: none;
+	text-transform: none;
 }
 
 .umc-switcher a.umc-switcher__link {
+	background-image: none;
 	box-shadow: none;
+	color: inherit;
 	letter-spacing: normal;
 	text-transform: none;
 }

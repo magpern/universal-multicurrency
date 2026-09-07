@@ -110,18 +110,23 @@ final class SwitcherAssets {
 		$base = plugin_dir_url( UMC_PLUGIN_FILE ) . 'assets/';
 		$path = plugin_dir_path( UMC_PLUGIN_FILE ) . 'assets/';
 
+		$style_file  = $path . 'css/switcher.css';
+		$script_file = $path . 'js/switcher.js';
+		$style_ver   = is_readable( $style_file ) ? (string) filemtime( $style_file ) : UMC_VERSION;
+		$script_ver  = is_readable( $script_file ) ? (string) filemtime( $script_file ) : UMC_VERSION;
+
 		wp_register_style(
 			self::STYLE_HANDLE,
 			$base . 'css/switcher.css',
 			array(),
-			UMC_VERSION
+			$style_ver
 		);
 
 		wp_register_script(
 			self::SCRIPT_HANDLE,
 			$base . 'js/switcher.js',
 			array(),
-			UMC_VERSION,
+			$script_ver,
 			true
 		);
 
@@ -226,7 +231,9 @@ final class SwitcherAssets {
 			return;
 		}
 
-		$url = esc_url( plugin_dir_url( UMC_PLUGIN_FILE ) . 'assets/css/switcher.css?ver=' . rawurlencode( UMC_VERSION ) );
+		$style_file = plugin_dir_path( UMC_PLUGIN_FILE ) . 'assets/css/switcher.css';
+		$style_ver  = is_readable( $style_file ) ? (string) filemtime( $style_file ) : UMC_VERSION;
+		$url        = esc_url( plugin_dir_url( UMC_PLUGIN_FILE ) . 'assets/css/switcher.css?ver=' . rawurlencode( $style_ver ) );
 
 		printf(
 			'<link rel="stylesheet" id="%1$s-css-fallback" href="%2$s" media="all" />', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- Intentional late shortcode stylesheet fallback when enqueue missed the print window.
