@@ -478,7 +478,7 @@ final class DisplaySettingsField {
 		$hidden       = $is_manual || $is_sticky ? ' umc-display-card--hidden' : '';
 
 		$floating_options = array(
-			SwitcherSettings::PRESENTATION_EDGE_PILL => array(
+			SwitcherSettings::PRESENTATION_EDGE_PILL     => array(
 				'label'       => __( 'Edge Pill', 'universal-multicurrency' ),
 				'description' => __( 'Flush edge tab that expands inward.', 'universal-multicurrency' ),
 				'diagram'     => $this->controls->diagram_presentation_edge_pill(),
@@ -490,7 +490,7 @@ final class DisplaySettingsField {
 				'diagram'     => $this->controls->diagram_presentation_floating_card(),
 				'badge'       => '',
 			),
-			SwitcherSettings::PRESENTATION_MINIMAL_ICON => array(
+			SwitcherSettings::PRESENTATION_MINIMAL_ICON  => array(
 				'label'       => __( 'Minimal Icon', 'universal-multicurrency' ),
 				'description' => __( 'Compact circular control with a popover menu.', 'universal-multicurrency' ),
 				'diagram'     => $this->controls->diagram_presentation_minimal_icon(),
@@ -1129,10 +1129,10 @@ final class DisplaySettingsField {
 	 * @param SwitcherSettings $settings Current display settings.
 	 */
 	private function render_responsive_card( SwitcherSettings $settings ): void {
-		$responsive       = $settings->responsive();
-		$mobile_behavior  = $settings->mobile_behavior();
-		$is_floating      = SwitcherSettings::PLACEMENT_FLOATING_SIDE === $settings->placement();
-		$behavior_hidden  = $is_floating ? '' : ' umc-display-panel--hidden';
+		$responsive      = $settings->responsive();
+		$mobile_behavior = $settings->mobile_behavior();
+		$is_floating     = SwitcherSettings::PLACEMENT_FLOATING_SIDE === $settings->placement();
+		$behavior_hidden = $is_floating ? '' : ' umc-display-panel--hidden';
 
 		?>
 		<div class="umc-display-card">

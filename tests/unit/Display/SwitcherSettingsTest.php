@@ -428,9 +428,9 @@ final class SwitcherSettingsTest extends TestCase {
 	public function test_modifier_classes_include_presentation_and_keep_legacy_preset(): void {
 		$classes = SwitcherSettings::from_array(
 			array(
-				'enabled'   => true,
-				'placement' => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
-				'design'    => array(
+				'enabled'    => true,
+				'placement'  => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
+				'design'     => array(
 					'presentation' => SwitcherSettings::PRESENTATION_EDGE_PILL,
 					'preset'       => SwitcherSettings::PRESET_FLOATING,
 					'theme'        => SwitcherSettings::THEME_BRAND,

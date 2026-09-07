@@ -94,7 +94,7 @@ test.describe('v1.3 switcher presentation controller (harness)', () => {
 		const triggerText = await minimal.locator('.umc-switcher__trigger-content').innerText();
 		expect(triggerText.trim().length).toBeGreaterThan(0);
 		await expect(minimal.locator('.umc-switcher__trigger-content .umc-switcher__icon')).toHaveCount(0);
-		await expect(minimal.locator('.umc-switcher__symbol')).toContainText('¥');
+		await expect(minimal.locator('.umc-switcher__trigger-content .umc-switcher__symbol')).toContainText('¥');
 	});
 
 	test('currency links keep canonical ?currency= hrefs', async ({ page }) => {
