@@ -79,20 +79,20 @@ final class AdminAssets {
 				'umc-admin-settings',
 				'umcDisplayPreview',
 				array(
-					'placements'     => array(
+					'placements'       => array(
 						SwitcherSettings::PLACEMENT_MANUAL,
 						SwitcherSettings::PLACEMENT_FLOATING_SIDE,
 						SwitcherSettings::PLACEMENT_STICKY_FOOTER,
 					),
-					'styles'         => array(
+					'styles'           => array(
 						SwitcherSettings::STYLE_DROPDOWN,
 						SwitcherSettings::STYLE_HORIZONTAL_LIST,
 					),
-					'presentations'  => SwitcherSettings::PRESENTATIONS,
-					'presets'        => SwitcherSettings::PRESETS,
-					'mobileBehaviors' => SwitcherSettings::MOBILE_BEHAVIORS,
-					'elements'       => SwitcherElementComposer::ORDERABLE_ELEMENTS,
-					'samples'        => array(
+					'presentations'    => SwitcherSettings::PRESENTATIONS,
+					'presets'          => SwitcherSettings::PRESETS,
+					'mobileBehaviors'  => SwitcherSettings::MOBILE_BEHAVIORS,
+					'elements'         => SwitcherElementComposer::ORDERABLE_ELEMENTS,
+					'samples'          => array(
 						array(
 							'code'    => 'EUR',
 							'symbol'  => '€',
@@ -118,16 +118,16 @@ final class AdminAssets {
 							)->asset_url_for_currency( 'USD' ) ?? '' ),
 						),
 					),
-					'statusOn'       => __( 'On', 'universal-multicurrency' ),
-					'statusOff'      => __( 'Off', 'universal-multicurrency' ),
-					'copySuccess'    => __( 'Shortcode copied.', 'universal-multicurrency' ),
-					'copyFailed'     => __( 'Could not copy shortcode.', 'universal-multicurrency' ),
-					'copyPrompt'     => __( 'Copy shortcode:', 'universal-multicurrency' ),
+					'statusOn'         => __( 'On', 'universal-multicurrency' ),
+					'statusOff'        => __( 'Off', 'universal-multicurrency' ),
+					'copySuccess'      => __( 'Shortcode copied.', 'universal-multicurrency' ),
+					'copyFailed'       => __( 'Could not copy shortcode.', 'universal-multicurrency' ),
+					'copyPrompt'       => __( 'Copy shortcode:', 'universal-multicurrency' ),
 					'recommendedBadge' => __( 'Recommended', 'universal-multicurrency' ),
 					'previewCollapsed' => __( 'Collapsed', 'universal-multicurrency' ),
-					'previewOpen'    => __( 'Open', 'universal-multicurrency' ),
-					'previewDesktop' => __( 'Desktop', 'universal-multicurrency' ),
-					'previewMobile'  => __( 'Mobile', 'universal-multicurrency' ),
+					'previewOpen'      => __( 'Open', 'universal-multicurrency' ),
+					'previewDesktop'   => __( 'Desktop', 'universal-multicurrency' ),
+					'previewMobile'    => __( 'Mobile', 'universal-multicurrency' ),
 				)
 			);
 		}

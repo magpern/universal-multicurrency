@@ -306,7 +306,59 @@ final class DisplaySettingsFieldTest extends WP_UnitTestCase {
 		$html = $this->capture_render();
 
 		$this->assertStringContainsString( 'umc-display-enable-row', $html );
-		$this->assertSame( 5, substr_count( $html, 'class="umc-ui-choice-card umc-display-choice-card"' ) );
+
+		// Floating-side Display contract: 3 placement + 2 style + 4 presentation = 9 choice cards.
+		$choice_card        = 'class="umc-ui-choice-card umc-display-choice-card"';
+		$placement_cards    = $this->extract_attr_subtree( $html, 'data-umc-placement-cards' );
+		$style_cards        = $this->extract_attr_subtree( $html, 'data-umc-style-cards' );
+		$presentation_cards = $this->extract_attr_subtree( $html, 'data-umc-presentation-cards' );
+
+		$this->assertSame( 3, substr_count( $placement_cards, $choice_card ), 'Placement offers Manual, Floating side, and Sticky footer.' );
+		$this->assertSame( 2, substr_count( $style_cards, $choice_card ), 'Style offers Dropdown and Horizontal list.' );
+		$this->assertSame( 4, substr_count( $presentation_cards, $choice_card ), 'Floating Selector style offers four presentation presets.' );
+		$this->assertSame(
+			9,
+			substr_count( $placement_cards, $choice_card )
+				+ substr_count( $style_cards, $choice_card )
+				+ substr_count( $presentation_cards, $choice_card ),
+			'Floating-side configurator choice-card containers total nine cards.'
+		);
+		$this->assertSame(
+			9,
+			substr_count( $html, $choice_card ),
+			'No choice cards may render outside the placement/style/presentation configurator containers.'
+		);
+
+		foreach (
+			array(
+				SwitcherSettings::PRESENTATION_EDGE_PILL,
+				SwitcherSettings::PRESENTATION_FLOATING_CARD,
+				SwitcherSettings::PRESENTATION_MINIMAL_ICON,
+				SwitcherSettings::PRESENTATION_CLASSIC_DROPDOWN,
+			) as $presentation
+		) {
+			$this->assertStringContainsString(
+				'data-umc-presentation-option="' . $presentation . '"',
+				$presentation_cards,
+				'Presentation choice cards must expose option ' . $presentation . '.'
+			);
+			$this->assertStringContainsString(
+				'value="' . $presentation . '"',
+				$presentation_cards
+			);
+		}
+
+		$this->assertSame(
+			1,
+			substr_count( $presentation_cards, 'umc-display-choice-card__badge' ),
+			'Only Edge Pill carries a Recommended badge among floating presentation choices.'
+		);
+		$this->assertMatchesRegularExpression(
+			'/data-umc-presentation-option="' . preg_quote( SwitcherSettings::PRESENTATION_EDGE_PILL, '/' ) . '"[^>]*>[\s\S]*?umc-display-choice-card__badge[\s\S]*?Recommended/',
+			$presentation_cards,
+			'Edge Pill must carry the Recommended badge treatment.'
+		);
+
 		$this->assertSame( 3, substr_count( $html, 'name="umc_display[placement]"' ) );
 		$this->assertSame( 2, substr_count( $html, 'name="umc_display[style]"' ) );
 		$this->assertStringContainsString( 'data-umc-selector-style-card', $html );
@@ -618,8 +670,13 @@ final class DisplaySettingsFieldTest extends WP_UnitTestCase {
 	}
 
 	private function extract_panel_subtree( string $html, string $panel ): string {
-		$needle = 'data-umc-position-panel="' . $panel . '"';
+		return $this->extract_attr_subtree( $html, 'data-umc-position-panel="' . $panel . '"' );
+	}
 
+	/**
+	 * Returns the outer <div> whose opening tag contains $needle.
+	 */
+	private function extract_attr_subtree( string $html, string $needle ): string {
 		$start = strpos( $html, $needle );
 
 		if ( false === $start ) {

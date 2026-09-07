@@ -411,9 +411,9 @@ final class SettingsUpgrader {
 	 * @return array<string, mixed>
 	 */
 	private static function migrate_display_7_to_8( array $display ): array {
-		$defaults = SwitcherSettings::default_array();
-		$design   = is_array( $display['design'] ?? null ) ? $display['design'] : array();
-		$preset   = is_string( $design['preset'] ?? null ) ? $design['preset'] : SwitcherSettings::PRESET_DEFAULT;
+		$defaults  = SwitcherSettings::default_array();
+		$design    = is_array( $display['design'] ?? null ) ? $display['design'] : array();
+		$preset    = is_string( $design['preset'] ?? null ) ? $design['preset'] : SwitcherSettings::PRESET_DEFAULT;
 		$placement = is_string( $display['placement'] ?? null )
 			? $display['placement']
 			: SwitcherSettings::PLACEMENT_MANUAL;

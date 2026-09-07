@@ -40,8 +40,8 @@ final class SettingsMigrationV7ToV8Test extends TestCase {
 		string $presentation,
 		string $mobile
 	): void {
-		$fixture = $this->v7_fixture();
-		$fixture['display']['placement']     = $placement;
+		$fixture                                = $this->v7_fixture();
+		$fixture['display']['placement']        = $placement;
 		$fixture['display']['design']['preset'] = $preset;
 
 		$display = SettingsUpgrader::migrate_7_to_8( $fixture )['display'];
@@ -90,10 +90,10 @@ final class SettingsMigrationV7ToV8Test extends TestCase {
 	}
 
 	public function test_migrate_7_to_8_normalizes_motion_aliases(): void {
-		$subtle = $this->v7_fixture();
+		$subtle                                = $this->v7_fixture();
 		$subtle['display']['design']['motion'] = SwitcherSettings::MOTION_SUBTLE;
 
-		$none = $this->v7_fixture();
+		$none                                = $this->v7_fixture();
 		$none['display']['design']['motion'] = SwitcherSettings::MOTION_NONE;
 
 		$this->assertSame(
@@ -127,7 +127,7 @@ final class SettingsMigrationV7ToV8Test extends TestCase {
 	}
 
 	public function test_canonical_fixture_render_equivalence_apart_from_additive_chrome(): void {
-		$fixture_v7 = $this->canonical_floating_fixture()['display'];
+		$fixture_v7  = $this->canonical_floating_fixture()['display'];
 		$v7_settings = SwitcherSettings::from_array( $fixture_v7 );
 
 		$upgraded    = SettingsUpgrader::migrate_7_to_8( $this->canonical_floating_fixture() )['display'];
@@ -222,17 +222,17 @@ final class SettingsMigrationV7ToV8Test extends TestCase {
 		$fixture = $this->v7_fixture();
 
 		$fixture['display'] = array(
-			'enabled'    => true,
-			'placement'  => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
-			'style'      => SwitcherSettings::STYLE_DROPDOWN,
-			'position'   => array(
+			'enabled'      => true,
+			'placement'    => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
+			'style'        => SwitcherSettings::STYLE_DROPDOWN,
+			'position'     => array(
 				'side'               => SwitcherSettings::SIDE_LEFT,
 				'vertical_alignment' => SwitcherSettings::ALIGN_TOP,
 				'vertical_offset'    => 40,
 				'edge_offset'        => 24,
 				'bottom_offset'      => 16,
 			),
-			'content'    => array(
+			'content'      => array(
 				'trigger'      => array(
 					'show_code'   => true,
 					'show_symbol' => true,
@@ -249,7 +249,7 @@ final class SettingsMigrationV7ToV8Test extends TestCase {
 				),
 				'show_chevron' => true,
 			),
-			'design'     => array(
+			'design'       => array(
 				'preset'    => SwitcherSettings::PRESET_BORDERLESS,
 				'theme'     => SwitcherSettings::THEME_LIGHT,
 				'size'      => SwitcherSettings::SIZE_LARGE,
@@ -257,19 +257,19 @@ final class SettingsMigrationV7ToV8Test extends TestCase {
 				'overrides' => array( 'radius' => 12 ),
 				'motion'    => SwitcherSettings::MOTION_SUBTLE,
 			),
-			'behavior'   => array(
+			'behavior'     => array(
 				'remember_selection' => true,
 				'active_first'       => true,
 			),
-			'visibility' => array(
+			'visibility'   => array(
 				'desktop' => true,
 				'mobile'  => true,
 			),
-			'responsive' => array(
+			'responsive'   => array(
 				'hide_name_on_mobile' => true,
 				'compact_on_mobile'   => false,
 			),
-			'custom_css' => '.umc-switcher { color: #111; }',
+			'custom_css'   => '.umc-switcher { color: #111; }',
 			'presentation' => array(
 				'icon_overrides' => array(),
 				'icon_size'      => SwitcherSettings::SIZE_STANDARD,
