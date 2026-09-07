@@ -20,8 +20,8 @@ final class CurrencyResolverTest extends TestCase {
 	private const BASE       = 'EUR';
 	private const SELECTABLE = array( 'SEK', 'JPY' );
 
-	private function resolve( ?string $explicit, ?string $session, ?string $cookie ): string {
-		return ( new CurrencyResolver() )->resolve( $explicit, $session, $cookie, self::BASE, self::SELECTABLE );
+	private function resolve( ?string $explicit, ?string $session, ?string $cookie, ?string $user_preferred = null ): string {
+		return ( new CurrencyResolver() )->resolve( $explicit, $session, $cookie, self::BASE, self::SELECTABLE, $user_preferred );
 	}
 
 	public function test_explicit_wins_over_session_and_cookie(): void {
@@ -34,6 +34,22 @@ final class CurrencyResolverTest extends TestCase {
 
 	public function test_cookie_used_when_no_explicit_or_session(): void {
 		$this->assertSame( 'JPY', $this->resolve( null, null, 'JPY' ) );
+	}
+
+	public function test_session_wins_over_user_preference(): void {
+		$this->assertSame( 'SEK', $this->resolve( null, 'SEK', null, 'JPY' ) );
+	}
+
+	public function test_cookie_wins_over_user_preference(): void {
+		$this->assertSame( 'JPY', $this->resolve( null, null, 'JPY', 'SEK' ) );
+	}
+
+	public function test_user_preference_used_when_higher_sources_are_empty(): void {
+		$this->assertSame( 'SEK', $this->resolve( null, null, null, 'SEK' ) );
+	}
+
+	public function test_invalid_user_preference_is_skipped(): void {
+		$this->assertSame( 'EUR', $this->resolve( null, null, null, 'GBP' ) );
 	}
 
 	public function test_base_returned_when_nothing_selected(): void {

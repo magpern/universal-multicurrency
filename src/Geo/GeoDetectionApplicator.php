@@ -194,6 +194,10 @@ final class GeoDetectionApplicator {
 			return;
 		}
 
+		if ( ! $this->allows_checkout_geo_reevaluation() ) {
+			return;
+		}
+
 		$change_source = $this->detect_checkout_country_change_source( $settings );
 
 		if ( '' === $change_source ) {
@@ -205,6 +209,29 @@ final class GeoDetectionApplicator {
 		}
 
 		$this->apply_for_country_context( $settings, true );
+	}
+
+	/**
+	 * Whether checkout geo may re-evaluate the shopper currency.
+	 *
+	 * Geo may refresh an existing visitor-location selection. It must not
+	 * overwrite a logged-in preferred currency when session/cookie are empty,
+	 * nor a customer/user_preference-originated persisted selection.
+	 */
+	private function allows_checkout_geo_reevaluation(): bool {
+		$origin = CurrencySwitcher::read_currency_origin();
+
+		if ( CurrencySwitcher::ORIGIN_VISITOR_LOCATION === $origin ) {
+			return true;
+		}
+
+		if ( CurrencySwitcher::ORIGIN_CUSTOMER === $origin || CurrencySwitcher::ORIGIN_USER_PREFERENCE === $origin ) {
+			return false;
+		}
+
+		// No explanatory origin: only proceed when there is no stronger
+		// shopper source (including authenticated user_preferred).
+		return ! $this->context->has_valid_shopper_currency_source();
 	}
 
 	/**

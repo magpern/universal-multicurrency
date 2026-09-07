@@ -84,6 +84,14 @@ final class CurrencySwitcherTest extends TestCase {
 		$this->assertArrayNotHasKey( CurrencySwitcher::SESSION_MANUAL_SELECTION, $this->session );
 	}
 
+	public function test_preference_persist_sets_user_preference_origin(): void {
+		$switcher = $this->switcher( true );
+		$switcher->persist( 'SEK', true, CurrencySwitcher::ORIGIN_USER_PREFERENCE );
+
+		$this->assertSame( CurrencySwitcher::ORIGIN_USER_PREFERENCE, CurrencySwitcher::read_currency_origin() );
+		$this->assertSame( '1', $this->session[ CurrencySwitcher::SESSION_MANUAL_SELECTION ] );
+	}
+
 	public function test_origin_overwrite_follows_latest_persist_without_changing_resolver_outcome(): void {
 		$switcher = $this->switcher( true );
 		$resolver = new CurrencyResolver();

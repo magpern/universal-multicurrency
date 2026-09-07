@@ -28,6 +28,7 @@ use UMC\Rates\RateUpdateState;
 use UMC\Settings;
 use UMC\StoreApi\CartExtensionData;
 use UMC\Tests\Support\SourceGuardTrait;
+use UMC\User\PreferredCurrency;
 
 /**
  * `PersistedKeys` is the code source of truth; `docs/PERSISTED_DATA.md` is the
@@ -139,6 +140,7 @@ final class PersistedKeysInventoryTest extends TestCase {
 				NoticeDismissal::META_KEY,
 				GeoSandboxController::RESULT_META,
 				GeoSandboxRecentStore::META_KEY,
+				PreferredCurrency::META_KEY,
 			),
 			PersistedKeys::user_meta_keys()
 		);
@@ -212,7 +214,7 @@ final class PersistedKeysInventoryTest extends TestCase {
 		$this->assertContains( \UMC\Reporting\ReportingCache::GENERATION_OPTION, $inventory['options'] );
 		$this->assertContains( \UMC\Reporting\ReportingCache::TRANSIENT_PREFIX . '*', $inventory['transients'] );
 		$this->assertContains( OrderSnapshot::META_CURRENCY_ORIGIN, $inventory['order_meta'] );
-		$this->assertSame( 11, $inventory['inventory_version'] );
+		$this->assertSame( 12, $inventory['inventory_version'] );
 	}
 
 	public function test_reporting_transient_pattern_matches_cache_key_prefix(): void {

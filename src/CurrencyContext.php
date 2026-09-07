@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace UMC;
 
 use UMC\Rates\RateProvider;
+use UMC\User\PreferredCurrency;
 
 /**
  * Lightweight request facade over the currency domain.
@@ -48,6 +49,13 @@ final class CurrencyContext {
 	private CurrencyResolver $resolver;
 
 	/**
+	 * Authenticated user preference service, when bound.
+	 *
+	 * @var PreferredCurrency|null
+	 */
+	private ?PreferredCurrency $preferred_currency;
+
+	/**
 	 * Memoized active currency.
 	 *
 	 * @var Currency|null
@@ -78,14 +86,21 @@ final class CurrencyContext {
 	/**
 	 * Binds the facade to its collaborators.
 	 *
-	 * @param CurrencyRegistry $registry Currency registry.
-	 * @param RateProvider     $rates    Rate provider.
-	 * @param CurrencyResolver $resolver Resolution logic.
+	 * @param CurrencyRegistry       $registry Currency registry.
+	 * @param RateProvider           $rates    Rate provider.
+	 * @param CurrencyResolver       $resolver            Resolution logic.
+	 * @param PreferredCurrency|null $preferred_currency  Authenticated preference service.
 	 */
-	public function __construct( CurrencyRegistry $registry, RateProvider $rates, CurrencyResolver $resolver ) {
-		$this->registry = $registry;
-		$this->rates    = $rates;
-		$this->resolver = $resolver;
+	public function __construct(
+		CurrencyRegistry $registry,
+		RateProvider $rates,
+		CurrencyResolver $resolver,
+		?PreferredCurrency $preferred_currency = null
+	) {
+		$this->registry           = $registry;
+		$this->rates              = $rates;
+		$this->resolver           = $resolver;
+		$this->preferred_currency = $preferred_currency;
 	}
 
 	/**
@@ -147,7 +162,8 @@ final class CurrencyContext {
 			$this->read_session(),
 			$this->read_cookie(),
 			$base,
-			$this->get_selectable_codes()
+			$this->get_selectable_codes(),
+			$this->read_user_preferred()
 		);
 
 		$currency     = $this->registry->get_currency( $code );
@@ -166,7 +182,8 @@ final class CurrencyContext {
 			$this->read_session(),
 			$this->read_cookie(),
 			$base,
-			$this->get_selectable_codes()
+			$this->get_selectable_codes(),
+			$this->read_user_preferred()
 		);
 
 		return strtoupper( $code );
@@ -363,13 +380,13 @@ final class CurrencyContext {
 	}
 
 	/**
-	 * Whether explicit, session, or cookie already supplies a valid selectable currency.
+	 * Whether a shopper source already supplies a valid selectable currency.
 	 */
 	public function has_valid_shopper_currency_source(): bool {
 		$base       = $this->registry->get_base_code();
 		$selectable = $this->get_selectable_codes();
 
-		foreach ( array( $this->read_explicit(), $this->read_session(), $this->read_cookie() ) as $candidate ) {
+		foreach ( array( $this->read_explicit(), $this->read_session(), $this->read_cookie(), $this->read_user_preferred() ) as $candidate ) {
 			if ( null === $candidate ) {
 				continue;
 			}
@@ -441,6 +458,19 @@ final class CurrencyContext {
 
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Normalized in normalize_currency_code().
 		return $this->normalize_currency_code( wp_unslash( $_COOKIE[ self::COOKIE_NAME ] ) );
+	}
+
+	/**
+	 * Reads the current logged-in user's valid stored preference.
+	 */
+	private function read_user_preferred(): ?string {
+		if ( null === $this->preferred_currency || ! is_user_logged_in() ) {
+			return null;
+		}
+
+		$user_id = (int) get_current_user_id();
+
+		return $user_id > 0 ? $this->preferred_currency->get( $user_id ) : null;
 	}
 
 	/**

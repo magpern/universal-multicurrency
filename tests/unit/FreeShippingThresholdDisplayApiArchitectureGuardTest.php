@@ -25,7 +25,7 @@ final class FreeShippingThresholdDisplayApiArchitectureGuardTest extends TestCas
 	public function test_persistence_baselines_unchanged_from_v111(): void {
 		$this->assertSame( 8, Settings::SCHEMA_VERSION );
 		$this->assertSame( 5, OrderSnapshot::SCHEMA_VERSION );
-		$this->assertSame( 11, PersistedKeys::INVENTORY_VERSION );
+		$this->assertSame( 12, PersistedKeys::INVENTORY_VERSION );
 	}
 
 	public function test_public_api_layer_contains_no_monetary_arithmetic(): void {

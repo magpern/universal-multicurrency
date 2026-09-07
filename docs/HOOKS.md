@@ -334,6 +334,19 @@ otherwise `good`. Covered by
 These are **not** WordPress hooks. They are global PHP functions for other
 plugins/themes to call with `function_exists()` feature detection.
 
+### Authenticated preferred-currency API
+
+- `umc_get_preferred_currency( int $user_id ): ?string` returns the valid stored
+  code. It returns `null` when unbound, unauthorized, empty, or invalid.
+- `umc_get_preferred_currency_state( int $user_id ): ?array` returns the exact
+  `available`, `editable`, `stored`, `effective`, `source`, `label`, `options`,
+  and `unavailable_message` state contract. Unauthorized callers receive no
+  stored-meta disclosure.
+- `umc_set_preferred_currency( int $user_id, ?string $code ): true|\WP_Error`
+  sets an uppercase selectable code or clears the user meta when passed `null`.
+
+Authorization is self or `current_user_can( 'edit_user', $user_id )`.
+
 ### `umc_get_free_shipping_threshold_display( string $base_threshold ): ?array`
 
 **Since:** 1.2.0  
@@ -393,6 +406,25 @@ authoritative. Do **not** convert, re-round, look up rates, substitute
 currencies, or rebuild formatting. Use `formatted_html` for presentation.
 
 See ADR-0034 and `docs/architecture/free-shipping-threshold-display-api.md`.
+
+## Regional Preferences composition
+
+Universal Multicurrency and Universal Multilingual share these string-stable
+hooks without a package dependency. Context actions receive
+`array{surface: profile|account, user_id: int, can_edit: bool}`.
+
+| Hook | Type | Purpose |
+|---|---|---|
+| `um_regional_preferences_render` | action | Providers render their claimed field. |
+| `um_regional_preferences_save` | action | Providers validate and save their own field and nonce. |
+| `um_regional_preferences_rendered` | action/guard | Marks that one host opened the section this request. |
+| `um_regional_preferences_save_started` | action/guard | Marks that one host began save dispatch this request. |
+| `um_regional_preferences_claimed_slots` | filter | Returns claimed `language` / `currency` slots. |
+
+UMC's `PreferredCurrencyField` claims `currency`. Its fallback host runs at
+priority 20; UML's primary host runs at priority 10. An unclaimed language slot
+uses the site `WPLANG` value (empty means `en_US`) and never the viewer locale.
+See `docs/architecture/user-regional-preferences.md` and ADR-0036.
 
 ## Filters and actions the plugin provides
 

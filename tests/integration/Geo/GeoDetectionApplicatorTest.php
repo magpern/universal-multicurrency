@@ -261,6 +261,30 @@ final class GeoDetectionApplicatorTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Checkout geo re-eval must not overwrite a logged-in preferred currency when
+	 * session/cookie are empty (user_preferred is a valid shopper source).
+	 */
+	public function test_checkout_reeval_does_not_overwrite_user_preferred_without_session(): void {
+		$this->save_settings( array( 'SEK', 'DKK' ), true, false, GeoDetectionSettings::MODE_UNTIL_MANUAL );
+
+		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
+		update_user_meta( $user_id, \UMC\User\PreferredCurrency::META_KEY, 'SEK' );
+
+		WC()->session->set( CurrencyContext::SESSION_KEY, null );
+		WC()->session->set( CurrencySwitcher::SESSION_CURRENCY_ORIGIN, null );
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Test simulates checkout AJAX payload.
+		$_POST['billing_country'] = 'DK';
+
+		$applicator = $this->build_applicator( 'DK', true );
+		$this->reapply_without_cookie_notice( $applicator );
+
+		$this->assertNull( WC()->session->get( CurrencyContext::SESSION_KEY ) );
+		$this->assertSame( 'SEK', get_user_meta( $user_id, \UMC\User\PreferredCurrency::META_KEY, true ) );
+	}
+
+	/**
 	 * A successful geo application persists via CurrencySwitcher::persist()
 	 * with manual defaulting to false — the shopper must remain able to
 	 * override it, so the manual-selection marker must NOT be set.
@@ -332,8 +356,9 @@ final class GeoDetectionApplicatorTest extends WP_UnitTestCase {
 	 * shared persisted Settings option written by save_settings().
 	 *
 	 * @param string $resolved_country Country code the fake provider resolves for this request.
+	 * @param bool   $with_preference  Whether to bind PreferredCurrency into CurrencyContext.
 	 */
-	private function build_applicator( string $resolved_country ): GeoDetectionApplicator {
+	private function build_applicator( string $resolved_country, bool $with_preference = false ): GeoDetectionApplicator {
 		$settings = new Settings();
 
 		$settings_repo    = new GeoDetectionSettingsRepository( $settings );
@@ -349,7 +374,8 @@ final class GeoDetectionApplicatorTest extends WP_UnitTestCase {
 		$base_currency = new Currency( self::BASE, 2 );
 		$registry      = new CurrencyRegistry( $settings, $base_currency );
 		$rates         = new ManualRateProvider( $settings, self::BASE );
-		$context       = new CurrencyContext( $registry, $rates, new CurrencyResolver() );
+		$preference    = $with_preference ? new \UMC\User\PreferredCurrency( $registry, $rates ) : null;
+		$context       = new CurrencyContext( $registry, $rates, new CurrencyResolver(), $preference );
 		$switcher      = new CurrencySwitcher( $context, new SwitcherSettingsRepository( $settings ) );
 
 		$order_context = new OrderCurrencyContext(

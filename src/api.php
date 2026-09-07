@@ -12,6 +12,7 @@
 declare(strict_types=1);
 
 use UMC\Plugin;
+use UMC\User\PreferenceServices;
 
 if ( ! function_exists( 'umc_get_free_shipping_threshold_display' ) ) {
 	/**
@@ -37,5 +38,69 @@ if ( ! function_exists( 'umc_get_free_shipping_threshold_display' ) ) {
 		}
 
 		return $service->get_display( $base_threshold );
+	}
+}
+
+if ( ! function_exists( 'umc_get_preferred_currency' ) ) {
+	/**
+	 * Returns a user's valid stored preferred currency.
+	 *
+	 * @since 1.3.0
+	 *
+	 * @param int $user_id User id.
+	 */
+	function umc_get_preferred_currency( int $user_id ): ?string {
+		$service = PreferenceServices::preferred_currency();
+
+		return null !== $service ? $service->get( $user_id ) : null;
+	}
+}
+
+if ( ! function_exists( 'umc_get_preferred_currency_state' ) ) {
+	/**
+	 * Returns effective preferred-currency state.
+	 *
+	 * @since 1.3.0
+	 *
+	 * @param int $user_id User id.
+	 * @return array{
+	 *   available: bool,
+	 *   editable: bool,
+	 *   stored: ?string,
+	 *   effective: string,
+	 *   source: string,
+	 *   label: string,
+	 *   options: array<string, string>,
+	 *   unavailable_message: ?string
+	 * }|null
+	 */
+	function umc_get_preferred_currency_state( int $user_id ): ?array {
+		$service = PreferenceServices::preferred_currency();
+
+		return null !== $service ? $service->get_state( $user_id ) : null;
+	}
+}
+
+if ( ! function_exists( 'umc_set_preferred_currency' ) ) {
+	/**
+	 * Sets or clears a user's preferred currency.
+	 *
+	 * @since 1.3.0
+	 *
+	 * @param int         $user_id User id.
+	 * @param string|null $code    Currency code, or null to clear.
+	 * @return true|\WP_Error
+	 */
+	function umc_set_preferred_currency( int $user_id, ?string $code ): bool|\WP_Error {
+		$service = PreferenceServices::preferred_currency();
+
+		if ( null === $service ) {
+			return new \WP_Error(
+				'umc_unavailable',
+				__( 'Multicurrency support is not currently available.', 'universal-multicurrency' )
+			);
+		}
+
+		return $service->set( $user_id, $code );
 	}
 }
