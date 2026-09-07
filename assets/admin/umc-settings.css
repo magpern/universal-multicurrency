@@ -618,10 +618,26 @@
 	gap: 4px;
 }
 
+.umc-display-preview__state {
+	display: inline-flex;
+	gap: 4px;
+}
+
+.umc-display-preview__state-btn.is-active,
 .umc-display-preview__viewport-btn.is-active {
 	background: var(--umc-accent-soft);
 	border-color: var(--umc-accent);
 	color: var(--umc-accent);
+}
+
+.umc-display-details {
+	margin-bottom: var(--umc-space-2);
+}
+
+.umc-display-details__summary {
+	cursor: pointer;
+	font-weight: 600;
+	margin-bottom: var(--umc-space-1);
 }
 
 .umc-display-preview-frame {

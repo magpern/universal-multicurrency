@@ -139,6 +139,7 @@ final class DisplaySettingsField {
 						<?php $this->render_subnav(); ?>
 						<div class="umc-display-tabpanel" data-umc-display-panel="placement" role="group" aria-label="<?php esc_attr_e( 'Placement settings', 'universal-multicurrency' ); ?>">
 							<?php $this->render_switcher_card( $settings ); ?>
+							<?php $this->render_selector_style_card( $settings ); ?>
 							<?php $this->render_position_card( $settings ); ?>
 						</div>
 						<div class="umc-display-tabpanel" data-umc-display-panel="content" role="group" aria-label="<?php esc_attr_e( 'Content settings', 'universal-multicurrency' ); ?>">
@@ -158,6 +159,10 @@ final class DisplaySettingsField {
 					<div class="umc-display-preview">
 						<div class="umc-display-preview__header">
 							<h3 class="umc-display-preview__title"><?php esc_html_e( 'Live preview', 'universal-multicurrency' ); ?></h3>
+							<div class="umc-display-preview__state" role="group" aria-label="<?php esc_attr_e( 'Preview open state', 'universal-multicurrency' ); ?>">
+								<button type="button" class="button umc-display-preview__state-btn is-active" data-umc-preview-state="collapsed"><?php esc_html_e( 'Collapsed', 'universal-multicurrency' ); ?></button>
+								<button type="button" class="button umc-display-preview__state-btn" data-umc-preview-state="open"><?php esc_html_e( 'Open', 'universal-multicurrency' ); ?></button>
+							</div>
 							<div class="umc-display-preview__viewport" role="group" aria-label="<?php esc_attr_e( 'Preview viewport', 'universal-multicurrency' ); ?>">
 								<button type="button" class="button umc-display-preview__viewport-btn is-active" data-umc-preview-viewport="desktop"><?php esc_html_e( 'Desktop', 'universal-multicurrency' ); ?></button>
 								<button type="button" class="button umc-display-preview__viewport-btn" data-umc-preview-viewport="mobile"><?php esc_html_e( 'Mobile', 'universal-multicurrency' ); ?></button>
@@ -221,6 +226,11 @@ final class DisplaySettingsField {
 		$merged['content']      = $this->merge_content(
 			is_array( $stored['content'] ?? null ) ? $stored['content'] : array(),
 			is_array( $raw['content'] ?? null ) ? $raw['content'] : array()
+		);
+		$merged['responsive']   = $this->merge_responsive_preserving_inactive(
+			is_array( $stored['responsive'] ?? null ) ? $stored['responsive'] : SwitcherSettings::default_array()['responsive'],
+			is_array( $raw['responsive'] ?? null ) ? $raw['responsive'] : array(),
+			$active_placement
 		);
 		$merged['presentation'] = $this->merge_presentation(
 			is_array( $stored['presentation'] ?? null ) ? $stored['presentation'] : SwitcherSettings::default_array()['presentation'],
@@ -383,7 +393,7 @@ final class DisplaySettingsField {
 							'diagram'     => $this->controls->diagram_placement_floating_side(),
 						),
 						SwitcherSettings::PLACEMENT_STICKY_FOOTER => array(
-							'label'       => __( 'Floating bottom', 'universal-multicurrency' ),
+							'label'       => __( 'Sticky footer', 'universal-multicurrency' ),
 							'description' => __( 'Fixed above the bottom edge.', 'universal-multicurrency' ),
 							'diagram'     => $this->controls->diagram_placement_floating_bottom(),
 						),
@@ -451,6 +461,82 @@ final class DisplaySettingsField {
 					</button>
 				</div>
 			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Renders selector style choice cards filtered by placement.
+	 *
+	 * @param SwitcherSettings $settings Current display settings.
+	 */
+	private function render_selector_style_card( SwitcherSettings $settings ): void {
+		$placement    = $settings->placement();
+		$presentation = $settings->selector_presentation();
+		$is_sticky    = SwitcherSettings::PLACEMENT_STICKY_FOOTER === $placement;
+		$is_manual    = SwitcherSettings::PLACEMENT_MANUAL === $placement;
+		$hidden       = $is_manual || $is_sticky ? ' umc-display-card--hidden' : '';
+
+		$floating_options = array(
+			SwitcherSettings::PRESENTATION_EDGE_PILL     => array(
+				'label'       => __( 'Edge Pill', 'universal-multicurrency' ),
+				'description' => __( 'Flush edge tab that expands inward.', 'universal-multicurrency' ),
+				'diagram'     => $this->controls->diagram_presentation_edge_pill(),
+				'badge'       => __( 'Recommended', 'universal-multicurrency' ),
+			),
+			SwitcherSettings::PRESENTATION_FLOATING_CARD => array(
+				'label'       => __( 'Floating Card', 'universal-multicurrency' ),
+				'description' => __( 'Inset floating control with a popover menu.', 'universal-multicurrency' ),
+				'diagram'     => $this->controls->diagram_presentation_floating_card(),
+				'badge'       => '',
+			),
+			SwitcherSettings::PRESENTATION_MINIMAL_ICON  => array(
+				'label'       => __( 'Minimal Icon', 'universal-multicurrency' ),
+				'description' => __( 'Compact circular control with a popover menu.', 'universal-multicurrency' ),
+				'diagram'     => $this->controls->diagram_presentation_minimal_icon(),
+				'badge'       => '',
+			),
+			SwitcherSettings::PRESENTATION_CLASSIC_DROPDOWN => array(
+				'label'       => __( 'Classic Dropdown', 'universal-multicurrency' ),
+				'description' => __( 'Traditional dropdown on the side edge.', 'universal-multicurrency' ),
+				'diagram'     => $this->controls->diagram_presentation_classic_dropdown(),
+				'badge'       => '',
+			),
+		);
+
+		?>
+		<div class="umc-display-card umc-display-card--selector-style<?php echo esc_attr( $hidden ); ?>" data-umc-selector-style-card>
+			<h3 class="umc-display-card__title"><?php esc_html_e( 'Selector style', 'universal-multicurrency' ); ?></h3>
+			<?php if ( $is_manual ) : ?>
+				<input type="hidden" name="umc_display[design][presentation]" value="<?php echo esc_attr( $presentation ); ?>" data-umc-display-field="presentation" />
+			<?php elseif ( $is_sticky ) : ?>
+				<input type="hidden" name="umc_display[design][presentation]" value="<?php echo esc_attr( SwitcherSettings::PRESENTATION_STICKY_FOOTER ); ?>" data-umc-display-field="presentation" />
+			<?php else : ?>
+				<fieldset class="umc-display-fieldset">
+					<legend class="screen-reader-text"><?php esc_html_e( 'Selector style', 'universal-multicurrency' ); ?></legend>
+					<div class="umc-display-choice-cards" data-umc-presentation-cards>
+						<?php
+						foreach ( $floating_options as $value => $meta ) {
+							$this->echo_control_markup(
+								$this->controls->choice_card(
+									'umc_display[design][presentation]',
+									$value,
+									$presentation === $value,
+									$meta['label'],
+									$meta['description'],
+									$meta['diagram'],
+									array(
+										'data-umc-display-field' => 'presentation',
+										'data-umc-presentation-option' => $value,
+									),
+									$meta['badge']
+								)
+							);
+						}
+						?>
+					</div>
+				</fieldset>
+			<?php endif; ?>
 		</div>
 		<?php
 	}
@@ -846,31 +932,37 @@ final class DisplaySettingsField {
 	 * @param SwitcherSettings $settings Current display settings.
 	 */
 	private function render_design_card( SwitcherSettings $settings ): void {
-		$appearance = $settings->appearance();
+		$appearance   = $settings->appearance();
+		$presentation = $settings->selector_presentation();
+		$hide_shape   = SwitcherSettings::PRESENTATION_EDGE_PILL === $presentation;
+
 		?>
 		<div class="umc-display-card">
 			<h3 class="umc-display-card__title"><?php esc_html_e( 'Design', 'universal-multicurrency' ); ?></h3>
-			<fieldset class="umc-display-fieldset">
-				<legend><?php esc_html_e( 'Preset', 'universal-multicurrency' ); ?></legend>
-				<?php
-				$this->echo_control_markup(
-					$this->controls->segmented_control(
-						'umc_display[design][preset]',
-						array(
-							SwitcherSettings::PRESET_DEFAULT => __( 'Default', 'universal-multicurrency' ),
-							SwitcherSettings::PRESET_MINIMAL => __( 'Minimal', 'universal-multicurrency' ),
-							SwitcherSettings::PRESET_PILL => __( 'Pill', 'universal-multicurrency' ),
-							SwitcherSettings::PRESET_COMPACT => __( 'Compact', 'universal-multicurrency' ),
-							SwitcherSettings::PRESET_BORDERLESS => __( 'Borderless', 'universal-multicurrency' ),
-							SwitcherSettings::PRESET_FLOATING => __( 'Floating', 'universal-multicurrency' ),
-						),
-						$settings->preset(),
-						array( 'data-umc-display-field' => 'preset' )
-					)
-				);
-				?>
-				<p class="description"><?php esc_html_e( 'A preset is a starting point. Default changes nothing, and theme, size, shape, and your own overrides always win over the preset.', 'universal-multicurrency' ); ?></p>
-			</fieldset>
+			<details class="umc-display-details">
+				<summary class="umc-display-details__summary"><?php esc_html_e( 'Legacy design tokens', 'universal-multicurrency' ); ?></summary>
+				<fieldset class="umc-display-fieldset">
+					<legend><?php esc_html_e( 'Token preset', 'universal-multicurrency' ); ?></legend>
+					<?php
+					$this->echo_control_markup(
+						$this->controls->segmented_control(
+							'umc_display[design][preset]',
+							array(
+								SwitcherSettings::PRESET_DEFAULT => __( 'Default', 'universal-multicurrency' ),
+								SwitcherSettings::PRESET_MINIMAL => __( 'Minimal', 'universal-multicurrency' ),
+								SwitcherSettings::PRESET_PILL => __( 'Pill', 'universal-multicurrency' ),
+								SwitcherSettings::PRESET_COMPACT => __( 'Compact', 'universal-multicurrency' ),
+								SwitcherSettings::PRESET_BORDERLESS => __( 'Borderless', 'universal-multicurrency' ),
+								SwitcherSettings::PRESET_FLOATING => __( 'Floating', 'universal-multicurrency' ),
+							),
+							$settings->preset(),
+							array( 'data-umc-display-field' => 'preset' )
+						)
+					);
+					?>
+					<p class="description"><?php esc_html_e( 'Legacy token layer applied underneath selector style geometry. Theme, size, shape, and overrides still win over these tokens.', 'universal-multicurrency' ); ?></p>
+				</fieldset>
+			</details>
 			<fieldset class="umc-display-fieldset">
 				<legend><?php esc_html_e( 'Theme', 'universal-multicurrency' ); ?></legend>
 				<?php
@@ -878,9 +970,10 @@ final class DisplaySettingsField {
 					$this->controls->segmented_control(
 						'umc_display[design][theme]',
 						array(
-							SwitcherSettings::THEME_AUTOMATIC => __( 'Automatic', 'universal-multicurrency' ),
+							SwitcherSettings::THEME_AUTOMATIC => __( 'Site theme', 'universal-multicurrency' ),
 							SwitcherSettings::THEME_LIGHT => __( 'Light', 'universal-multicurrency' ),
 							SwitcherSettings::THEME_DARK  => __( 'Dark', 'universal-multicurrency' ),
+							SwitcherSettings::THEME_BRAND => __( 'Brand', 'universal-multicurrency' ),
 						),
 						$appearance['theme'],
 						array( 'data-umc-display-field' => 'theme' )
@@ -896,7 +989,7 @@ final class DisplaySettingsField {
 						'umc_display[design][size]',
 						array(
 							SwitcherSettings::SIZE_COMPACT => __( 'Compact', 'universal-multicurrency' ),
-							SwitcherSettings::SIZE_STANDARD => __( 'Standard', 'universal-multicurrency' ),
+							SwitcherSettings::SIZE_STANDARD => __( 'Regular', 'universal-multicurrency' ),
 							SwitcherSettings::SIZE_LARGE   => __( 'Large', 'universal-multicurrency' ),
 						),
 						$appearance['size'],
@@ -905,21 +998,29 @@ final class DisplaySettingsField {
 				);
 				?>
 			</fieldset>
-			<fieldset class="umc-display-fieldset">
+			<fieldset class="umc-display-fieldset<?php echo $hide_shape ? ' umc-display-panel--hidden' : ''; ?>" data-umc-shape-fieldset>
 				<legend><?php esc_html_e( 'Shape', 'universal-multicurrency' ); ?></legend>
 				<?php
-				$this->echo_control_markup(
-					$this->controls->segmented_control(
-						'umc_display[design][shape]',
-						array(
-							SwitcherSettings::SHAPE_SLIGHT => __( 'Slight', 'universal-multicurrency' ),
-							SwitcherSettings::SHAPE_ROUNDED => __( 'Rounded', 'universal-multicurrency' ),
-							SwitcherSettings::SHAPE_PILL   => __( 'Pill', 'universal-multicurrency' ),
-						),
-						$appearance['shape'],
-						array( 'data-umc-display-field' => 'shape' )
-					)
-				);
+				if ( $hide_shape ) {
+					printf(
+						'<input type="hidden" name="umc_display[design][shape]" value="%s" data-umc-display-field="shape" />',
+						esc_attr( $appearance['shape'] )
+					);
+				} else {
+					$this->echo_control_markup(
+						$this->controls->segmented_control(
+							'umc_display[design][shape]',
+							array(
+								SwitcherSettings::SHAPE_SQUARE => __( 'Square', 'universal-multicurrency' ),
+								SwitcherSettings::SHAPE_SLIGHT => __( 'Slight', 'universal-multicurrency' ),
+								SwitcherSettings::SHAPE_ROUNDED => __( 'Rounded', 'universal-multicurrency' ),
+								SwitcherSettings::SHAPE_PILL   => __( 'Pill', 'universal-multicurrency' ),
+							),
+							$appearance['shape'],
+							array( 'data-umc-display-field' => 'shape' )
+						)
+					);
+				}
 				?>
 			</fieldset>
 			<fieldset class="umc-display-fieldset">
@@ -929,8 +1030,9 @@ final class DisplaySettingsField {
 					$this->controls->segmented_control(
 						'umc_display[design][motion]',
 						array(
-							SwitcherSettings::MOTION_SUBTLE => __( 'Subtle', 'universal-multicurrency' ),
-							SwitcherSettings::MOTION_NONE => __( 'None', 'universal-multicurrency' ),
+							SwitcherSettings::MOTION_STANDARD => __( 'Standard', 'universal-multicurrency' ),
+							SwitcherSettings::MOTION_REDUCED => __( 'Reduced', 'universal-multicurrency' ),
+							SwitcherSettings::MOTION_OFF => __( 'Off', 'universal-multicurrency' ),
 						),
 						$settings->motion(),
 						array( 'data-umc-display-field' => 'motion' )
@@ -1027,10 +1129,36 @@ final class DisplaySettingsField {
 	 * @param SwitcherSettings $settings Current display settings.
 	 */
 	private function render_responsive_card( SwitcherSettings $settings ): void {
-		$responsive = $settings->responsive();
+		$responsive      = $settings->responsive();
+		$mobile_behavior = $settings->mobile_behavior();
+		$is_floating     = SwitcherSettings::PLACEMENT_FLOATING_SIDE === $settings->placement();
+		$behavior_hidden = $is_floating ? '' : ' umc-display-panel--hidden';
+
 		?>
 		<div class="umc-display-card">
 			<h3 class="umc-display-card__title"><?php esc_html_e( 'Mobile adjustments', 'universal-multicurrency' ); ?></h3>
+			<fieldset class="umc-display-fieldset<?php echo esc_attr( $behavior_hidden ); ?>" data-umc-mobile-behavior-panel>
+				<legend><?php esc_html_e( 'Mobile behaviour', 'universal-multicurrency' ); ?></legend>
+				<?php if ( ! $is_floating ) : ?>
+					<input type="hidden" name="umc_display[responsive][mobile_behavior]" value="<?php echo esc_attr( $mobile_behavior ); ?>" data-umc-display-field="mobile_behavior" />
+				<?php else : ?>
+					<?php
+					$this->echo_control_markup(
+						$this->controls->segmented_control(
+							'umc_display[responsive][mobile_behavior]',
+							array(
+								SwitcherSettings::MOBILE_BEHAVIOR_RETAIN => __( 'Side selector', 'universal-multicurrency' ),
+								SwitcherSettings::MOBILE_BEHAVIOR_BOTTOM_SHEET => __( 'Bottom sheet', 'universal-multicurrency' ),
+								SwitcherSettings::MOBILE_BEHAVIOR_STICKY_COMPACT => __( 'Compact sticky bar', 'universal-multicurrency' ),
+							),
+							$mobile_behavior,
+							array( 'data-umc-display-field' => 'mobile_behavior' )
+						)
+					);
+					?>
+					<p class="description"><?php esc_html_e( 'Compact sticky bar is a small-screen layout for the floating selector. It does not turn the storefront into Sticky footer placement, and it does not add a second automatic switcher.', 'universal-multicurrency' ); ?></p>
+				<?php endif; ?>
+			</fieldset>
 			<?php
 			$this->echo_control_markup(
 				$this->controls->toggle_row(
@@ -1293,6 +1421,10 @@ final class DisplaySettingsField {
 					continue;
 				}
 
+				if ( 'responsive' === $group && 'mobile_behavior' === $key ) {
+					continue;
+				}
+
 				$raw[ $group ][ $key ] = ! empty( $value );
 			}
 		}
@@ -1340,6 +1472,28 @@ final class DisplaySettingsField {
 		}
 
 		return $group;
+	}
+
+	/**
+	 * Merges responsive POST values while preserving inactive mobile behaviour.
+	 *
+	 * @param array<string, mixed> $stored   Stored responsive settings.
+	 * @param array<string, mixed> $posted   Posted responsive payload.
+	 * @param string               $placement Active placement mode.
+	 * @return array<string, mixed>
+	 */
+	private function merge_responsive_preserving_inactive( array $stored, array $posted, string $placement ): array {
+		$merged = array_replace_recursive( $stored, $posted );
+
+		if (
+			SwitcherSettings::PLACEMENT_FLOATING_SIDE !== $placement
+			&& ! array_key_exists( 'mobile_behavior', $posted )
+			&& isset( $stored['mobile_behavior'] )
+		) {
+			$merged['mobile_behavior'] = $stored['mobile_behavior'];
+		}
+
+		return $merged;
 	}
 
 	/**

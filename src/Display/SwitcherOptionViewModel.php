@@ -27,6 +27,7 @@ final class SwitcherOptionViewModel {
 	 * @param bool        $is_active            Whether this option is active.
 	 * @param string|null $menu_html            Escaped menu element markup.
 	 * @param string|null $trigger_content_html Escaped trigger element markup.
+	 * @param string      $accessible_label     Screen-reader trigger name.
 	 */
 	public function __construct(
 		private string $code,
@@ -35,7 +36,8 @@ final class SwitcherOptionViewModel {
 		private string $url,
 		private bool $is_active,
 		private ?string $menu_html = null,
-		private ?string $trigger_content_html = null
+		private ?string $trigger_content_html = null,
+		private string $accessible_label = ''
 	) {
 	}
 
@@ -86,5 +88,16 @@ final class SwitcherOptionViewModel {
 	 */
 	public function is_active(): bool {
 		return $this->is_active;
+	}
+
+	/**
+	 * Accessible trigger name (currency name + ISO code).
+	 */
+	public function accessible_label(): string {
+		if ( '' !== $this->accessible_label ) {
+			return $this->accessible_label;
+		}
+
+		return SwitcherLabelFormatter::format_accessible_name( $this->code, $this->code );
 	}
 }

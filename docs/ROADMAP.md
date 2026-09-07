@@ -622,6 +622,23 @@ milestones above used, with its own ADR and, where warranted, its own
 `docs/architecture/*.md` specification.
 
 
+## v1.3.0 — Switcher Presentation Presets / Edge Pill (**v1.3.0**) — release pending
+
+**ADR:** [ADR-0035](adr/0035-switcher-presentation-presets.md)
+**Architecture spec:** [`docs/architecture/switcher-presentation-presets.md`](architecture/switcher-presentation-presets.md)
+**Branch:** `feature/display-edge-pill-selector`
+
+Redesigns the floating currency selector as curated presentation presets
+(Edge Pill recommended for new Floating setups; Floating Card; Minimal Icon;
+Classic Dropdown; Sticky Footer surface) on the existing shared
+`SwitcherSettings` → ViewModel → `SwitcherRenderer` → shared-assets stack.
+Settings schema **7 → 8** with a visually neutral migration (existing floating
+stores stay Classic unless the merchant opts in). Real bottom-sheet dialog
+contract; legacy `design.preset` token classes remain live under presentation
+geometry. Not M27. No OrderSnapshot / PersistedKeys / CacheState hash change.
+No REST/AJAX switching. No FOX/WOOCS coupling. No production deployment as
+part of the release process.
+
 ## v1.2.0 — Free Shipping Threshold Display API (**v1.2.0**) — complete and released
 
 **ADR:** [ADR-0034](adr/0034-free-shipping-threshold-display-api.md)

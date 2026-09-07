@@ -243,7 +243,7 @@ final class SettingsUpgraderTest extends TestCase {
 
 	public function test_production_runner_registers_v0_to_v1_and_v1_to_v2_migrations(): void {
 		$this->assertSame(
-			array( 1, 2, 3, 4, 5, 6, 7 ),
+			array( 1, 2, 3, 4, 5, 6, 7, 8 ),
 			array_keys( SettingsUpgrader::production_migrations() )
 		);
 		$this->assertSame( SettingsUpgrader::MIGRATE_0_TO_1, SettingsUpgrader::production_migrations()[1] );
@@ -253,6 +253,7 @@ final class SettingsUpgraderTest extends TestCase {
 		$this->assertSame( SettingsUpgrader::MIGRATE_4_TO_5, SettingsUpgrader::production_migrations()[5] );
 		$this->assertSame( SettingsUpgrader::MIGRATE_5_TO_6, SettingsUpgrader::production_migrations()[6] );
 		$this->assertSame( SettingsUpgrader::MIGRATE_6_TO_7, SettingsUpgrader::production_migrations()[7] );
+		$this->assertSame( SettingsUpgrader::MIGRATE_7_TO_8, SettingsUpgrader::production_migrations()[8] );
 	}
 
 	public function test_v2_to_v3_migration_preserves_existing_settings_and_adds_display_defaults(): void {

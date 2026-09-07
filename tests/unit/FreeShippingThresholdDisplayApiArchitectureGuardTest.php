@@ -23,7 +23,7 @@ final class FreeShippingThresholdDisplayApiArchitectureGuardTest extends TestCas
 	use SourceGuardTrait;
 
 	public function test_persistence_baselines_unchanged_from_v111(): void {
-		$this->assertSame( 7, Settings::SCHEMA_VERSION );
+		$this->assertSame( 8, Settings::SCHEMA_VERSION );
 		$this->assertSame( 5, OrderSnapshot::SCHEMA_VERSION );
 		$this->assertSame( 11, PersistedKeys::INVENTORY_VERSION );
 	}

@@ -5,6 +5,12 @@
 
 	var PRESETS = [ 'default', 'minimal', 'pill', 'compact', 'borderless', 'floating' ];
 
+	var PRESENTATIONS = [ 'edge_pill', 'floating_card', 'minimal_icon', 'classic_dropdown', 'sticky_footer' ];
+
+	var MOBILE_SHEET_BEHAVIORS = [ 'bottom_sheet', 'sticky_compact' ];
+
+	var PRESENTATIONS_DEFAULT_SHEET = [ 'edge_pill', 'minimal_icon' ];
+
 	var OVERRIDE_PROPERTIES = {
 		surface: '--umc-switcher-surface',
 		text: '--umc-switcher-text',
@@ -21,8 +27,9 @@
 	var OVERRIDE_DIMENSIONS = [ 'radius', 'control_height', 'spacing' ];
 
 	var MOTION_DURATIONS = {
-		none: '0ms',
-		subtle: '150ms',
+		off: '0ms',
+		reduced: '80ms',
+		standard: '150ms',
 	};
 
 	function toggleEditor( targetId, open ) {
@@ -89,8 +96,11 @@
 		var samples = config.samples || [];
 		var elements = ( config.elements && config.elements.length ) ? config.elements : CONTENT_ELEMENTS;
 		var presets = ( config.presets && config.presets.length ) ? config.presets : PRESETS;
+		var presentations = ( config.presentations && config.presentations.length ) ? config.presentations : PRESENTATIONS;
 		var $switcher = $root.find( '.umc-switcher' ).first();
 		var $frame = $root.find( '[data-umc-preview-frame]' );
+		var previewState = 'collapsed';
+		var previewViewport = 'desktop';
 
 		if ( ! $switcher.length ) {
 			return;
@@ -128,6 +138,26 @@
 
 		function placement() {
 			return $root.find( 'input[name="umc_display[placement]"]:checked' ).val() || 'manual';
+		}
+
+		function presentationValue() {
+			var value = fieldValue( 'presentation' );
+
+			if ( null !== value && undefined !== value && '' !== value ) {
+				return String( value );
+			}
+
+			return 'classic_dropdown';
+		}
+
+		function mobileBehaviorValue() {
+			var value = fieldValue( 'mobile_behavior' );
+
+			if ( null !== value && undefined !== value && '' !== value ) {
+				return String( value );
+			}
+
+			return 'retain';
 		}
 
 		function styleValue() {
@@ -337,18 +367,133 @@
 			}
 		}
 
+		function updateSelectorStyleCard() {
+			var current = placement();
+			var $card = $root.find( '[data-umc-selector-style-card]' );
+			var isFloating = 'floating_side' === current;
+
+			$card.toggleClass( 'umc-display-card--hidden', 'manual' === current || 'sticky_footer' === current );
+		}
+
+		function updateMobileBehaviorPanel() {
+			var isFloating = 'floating_side' === placement();
+			var $panel = $root.find( '[data-umc-mobile-behavior-panel]' );
+
+			$panel.toggleClass( 'umc-display-panel--hidden', ! isFloating );
+		}
+
+		function updateShapeFieldset() {
+			var isEdgePill = 'edge_pill' === presentationValue();
+			var $fieldset = $root.find( '[data-umc-shape-fieldset]' );
+
+			$fieldset.toggleClass( 'umc-display-panel--hidden', isEdgePill );
+		}
+
+		function applyFloatingDefaults() {
+			if ( 'floating_side' !== placement() ) {
+				return;
+			}
+
+			if ( 'classic_dropdown' !== presentationValue() ) {
+				return;
+			}
+
+			var $edgePill = $root.find( 'input[name="umc_display[design][presentation]"][value="edge_pill"]' );
+
+			if ( $edgePill.length ) {
+				$edgePill.prop( 'checked', true );
+			}
+
+			$root.find( '[data-umc-display-field="edge_offset"]' ).filter( ':enabled' ).val( '0' );
+
+			var $bottomSheet = $root.find( 'input[name="umc_display[responsive][mobile_behavior]"][value="bottom_sheet"]' );
+
+			if ( $bottomSheet.length ) {
+				$bottomSheet.prop( 'checked', true );
+			}
+		}
+
+		function previewShouldUseMobileSheet() {
+			if ( 'mobile' !== previewViewport ) {
+				return false;
+			}
+
+			if ( 'floating_side' !== placement() ) {
+				return 'sticky_footer' === placement();
+			}
+
+			var behavior = mobileBehaviorValue();
+
+			if ( MOBILE_SHEET_BEHAVIORS.indexOf( behavior ) !== -1 ) {
+				return true;
+			}
+
+			return PRESENTATIONS_DEFAULT_SHEET.indexOf( presentationValue() ) !== -1;
+		}
+
+		function updateOpenState() {
+			var isDropdown = 'dropdown' === styleValue();
+			var isOpen = 'open' === previewState;
+			var $menu = $switcher.find( '.umc-switcher__menu' ).first();
+			var $panel = $switcher.find( '.umc-switcher__panel' ).first();
+			var $backdrop = $switcher.find( '.umc-switcher__backdrop' ).first();
+			var $close = $switcher.find( '.umc-switcher__close' ).first();
+			var $sheetTitle = $switcher.find( '.umc-switcher__sheet-title' ).first();
+			var $divider = $switcher.find( '.umc-switcher__sheet-divider' ).first();
+			var $trigger = $switcher.find( '.umc-switcher__trigger' ).first();
+			var useSheet = previewShouldUseMobileSheet();
+
+			$switcher.toggleClass( 'umc-switcher--open', isDropdown && isOpen );
+			$switcher.toggleClass( 'umc-switcher--sheet', isDropdown && isOpen && useSheet );
+			$switcher.toggleClass( 'umc-switcher--mobile-sheet', isDropdown && isOpen && useSheet );
+			$switcher.toggleClass( 'umc-switcher--preview-show-names', false );
+
+			if ( $menu.length ) {
+				$menu.prop( 'hidden', ! isDropdown || ! isOpen );
+			}
+
+			if ( $panel.length && useSheet && isOpen ) {
+				$panel.attr( 'role', 'dialog' );
+				$panel.attr( 'aria-modal', 'true' );
+			} else if ( $panel.length ) {
+				$panel.removeAttr( 'role aria-modal aria-labelledby' );
+			}
+
+			if ( $backdrop.length ) {
+				$backdrop.prop( 'hidden', ! ( isDropdown && isOpen && useSheet ) );
+			}
+
+			if ( $close.length ) {
+				$close.prop( 'hidden', ! ( isDropdown && isOpen && useSheet ) );
+			}
+
+			if ( $sheetTitle.length ) {
+				$sheetTitle.prop( 'hidden', ! ( isDropdown && isOpen && useSheet ) );
+			}
+
+			if ( $divider.length ) {
+				$divider.prop( 'hidden', ! ( isDropdown && isOpen && useSheet ) );
+			}
+
+			if ( $trigger.length ) {
+				$trigger.attr( 'aria-expanded', isDropdown && isOpen ? 'true' : 'false' );
+			}
+		}
+
 		function updateChevron( $trigger ) {
 			if ( ! $trigger.length ) {
 				return;
 			}
 
-			var enabled = !! fieldValue( 'show_chevron' );
-			var $chevron = $trigger.find( '.umc-switcher__chevron' );
+			var presentation = presentationValue();
+			var hideChevron = 'edge_pill' === presentation || 'minimal_icon' === presentation;
 
-			if ( ! enabled ) {
-				$chevron.remove();
+			if ( hideChevron || ! fieldValue( 'show_chevron' ) ) {
+				$trigger.find( '.umc-switcher__chevron' ).remove();
 				return;
 			}
+
+			var $chevron = $trigger.find( '.umc-switcher__chevron' );
 
 			if ( ! $chevron.length ) {
 				$( '<span/>' )
@@ -378,17 +523,7 @@
 			} );
 
 			updateChevron( $trigger );
-
-			// The preview keeps the dropdown open so menu composition stays visible.
-			$switcher.toggleClass( 'umc-switcher--preview-show-names', isDropdown );
-
-			if ( $menu.length ) {
-				$menu.prop( 'hidden', ! isDropdown );
-			}
-
-			if ( $trigger.length ) {
-				$trigger.attr( 'aria-expanded', isDropdown ? 'true' : 'false' );
-			}
+			updateOpenState();
 		}
 
 		function updateOrder() {
@@ -439,11 +574,11 @@
 		}
 
 		function updateMotion() {
-			var motion = fieldValue( 'motion' ) || 'subtle';
+			var motion = fieldValue( 'motion' ) || 'standard';
 
 			$switcher.css(
 				'--umc-switcher-transition-duration',
-				MOTION_DURATIONS[ motion ] || MOTION_DURATIONS.subtle
+				MOTION_DURATIONS[ motion ] || MOTION_DURATIONS.standard
 			);
 		}
 
@@ -500,6 +635,18 @@
 			);
 
 			var preset = fieldValue( 'preset' ) || 'default';
+			var presentation = presentationValue();
+			var presentationClass = 'umc-switcher--presentation-' + presentation.replace( /_/g, '-' );
+
+			setExclusiveClass(
+				presentations.map( function ( token ) {
+					return 'umc-switcher--presentation-' + token.replace( /_/g, '-' );
+				} ),
+				presentations.indexOf( presentation ) === -1 ? 'umc-switcher--presentation-classic-dropdown' : presentationClass
+			);
+
+			$switcher.attr( 'data-umc-presentation', presentation.replace( /_/g, '-' ) );
+			$switcher.attr( 'data-umc-mobile-behavior', mobileBehaviorValue().replace( /_/g, '-' ) );
 
 			setExclusiveClass(
 				presets.map( function ( token ) {
@@ -509,11 +656,12 @@
 			);
 
 			setExclusiveClass(
-				[ 'umc-switcher--theme-automatic', 'umc-switcher--theme-light', 'umc-switcher--theme-dark' ],
+				[ 'umc-switcher--theme-automatic', 'umc-switcher--theme-light', 'umc-switcher--theme-dark', 'umc-switcher--theme-brand' ],
 				{
 					automatic: 'umc-switcher--theme-automatic',
 					light: 'umc-switcher--theme-light',
 					dark: 'umc-switcher--theme-dark',
+					brand: 'umc-switcher--theme-brand',
 				}[ fieldValue( 'theme' ) || 'automatic' ] || 'umc-switcher--theme-automatic'
 			);
 
@@ -527,12 +675,22 @@
 			);
 
 			setExclusiveClass(
-				[ 'umc-switcher--shape-slight', 'umc-switcher--shape-rounded', 'umc-switcher--shape-pill' ],
+				[ 'umc-switcher--shape-slight', 'umc-switcher--shape-rounded', 'umc-switcher--shape-pill', 'umc-switcher--shape-square' ],
 				{
 					slight: 'umc-switcher--shape-slight',
 					rounded: 'umc-switcher--shape-rounded',
 					pill: 'umc-switcher--shape-pill',
+					square: 'umc-switcher--shape-square',
 				}[ fieldValue( 'shape' ) || 'rounded' ] || 'umc-switcher--shape-rounded'
+			);
+
+			setExclusiveClass(
+				[ 'umc-switcher--mobile-retain', 'umc-switcher--mobile-bottom-sheet', 'umc-switcher--mobile-sticky-compact' ],
+				{
+					retain: 'umc-switcher--mobile-retain',
+					bottom_sheet: 'umc-switcher--mobile-bottom-sheet',
+					sticky_compact: 'umc-switcher--mobile-sticky-compact',
+				}[ mobileBehaviorValue() ] || 'umc-switcher--mobile-retain'
 			);
 
 			setExclusiveClass(
@@ -558,6 +716,9 @@
 
 		function refreshPreview() {
 			updateStyleControls();
+			updateSelectorStyleCard();
+			updateMobileBehaviorPanel();
+			updateShapeFieldset();
 			updatePositionPanels();
 			updateManualPanel();
 			updateEnableStatus();
@@ -649,16 +810,32 @@
 			window.prompt( config.copyPrompt || 'Copy shortcode:', text );
 		}
 
-		$root.on( 'change input', '[data-umc-display-field], input[name="umc_display[placement]"], input[name="umc_display[style]"]', refreshPreview );
+		$root.on( 'change input', '[data-umc-display-field], input[name="umc_display[placement]"], input[name="umc_display[style]"], input[name="umc_display[design][presentation]"], input[name="umc_display[responsive][mobile_behavior]"]', refreshPreview );
+
+		$root.on( 'change', 'input[name="umc_display[placement]"]', function () {
+			applyFloatingDefaults();
+			refreshPreview();
+		} );
+
+		$root.on( 'click', '.umc-display-preview__state-btn', function ( event ) {
+			event.preventDefault();
+
+			previewState = String( $( this ).data( 'umc-preview-state' ) || 'collapsed' );
+
+			$root.find( '.umc-display-preview__state-btn' ).removeClass( 'is-active' );
+			$( this ).addClass( 'is-active' );
+			updateOpenState();
+		} );
 
 		$root.on( 'click', '.umc-display-preview__viewport-btn', function ( event ) {
 			event.preventDefault();
 
-			var mode = $( this ).data( 'umc-preview-viewport' );
+			previewViewport = String( $( this ).data( 'umc-preview-viewport' ) || 'desktop' );
 
 			$root.find( '.umc-display-preview__viewport-btn' ).removeClass( 'is-active' );
 			$( this ).addClass( 'is-active' );
-			$frame.toggleClass( 'umc-display-preview-frame--mobile', 'mobile' === mode );
+			$frame.toggleClass( 'umc-display-preview-frame--mobile', 'mobile' === previewViewport );
+			updateOpenState();
 		} );
 
 		$root.on( 'click', '.umc-switcher__link', function ( event ) {

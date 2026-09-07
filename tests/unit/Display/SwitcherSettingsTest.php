@@ -50,15 +50,16 @@ final class SwitcherSettingsTest extends TestCase {
 		$this->assertSame( SwitcherSettings::ICON_SHAPE_NATURAL, $defaults['presentation']['icon_shape'] );
 	}
 
-	public function test_default_design_is_default_preset_with_subtle_motion(): void {
+	public function test_default_design_is_default_preset_with_standard_motion(): void {
 		$design = SwitcherSettings::default_array()['design'];
 
+		$this->assertSame( SwitcherSettings::PRESENTATION_CLASSIC_DROPDOWN, $design['presentation'] );
 		$this->assertSame( SwitcherSettings::PRESET_DEFAULT, $design['preset'] );
 		$this->assertSame( SwitcherSettings::THEME_AUTOMATIC, $design['theme'] );
 		$this->assertSame( SwitcherSettings::SIZE_STANDARD, $design['size'] );
 		$this->assertSame( SwitcherSettings::SHAPE_ROUNDED, $design['shape'] );
 		$this->assertSame( array(), $design['overrides'] );
-		$this->assertSame( SwitcherSettings::MOTION_SUBTLE, $design['motion'] );
+		$this->assertSame( SwitcherSettings::MOTION_STANDARD, $design['motion'] );
 	}
 
 	public function test_default_responsive_bag_is_off_and_custom_css_is_empty(): void {
@@ -66,6 +67,7 @@ final class SwitcherSettingsTest extends TestCase {
 
 		$this->assertFalse( $defaults['responsive']['hide_name_on_mobile'] );
 		$this->assertFalse( $defaults['responsive']['compact_on_mobile'] );
+		$this->assertSame( SwitcherSettings::MOBILE_BEHAVIOR_RETAIN, $defaults['responsive']['mobile_behavior'] );
 		$this->assertSame( '', $defaults['custom_css'] );
 	}
 
@@ -116,7 +118,7 @@ final class SwitcherSettingsTest extends TestCase {
 					'preset' => 'brutalist',
 					'theme'  => 'neon',
 					'size'   => 'huge',
-					'shape'  => 'square',
+					'shape'  => 'diamond',
 					'motion' => 'bouncy',
 				),
 			)
@@ -128,7 +130,7 @@ final class SwitcherSettingsTest extends TestCase {
 		$this->assertSame( SwitcherSettings::THEME_AUTOMATIC, $settings->design()['theme'] );
 		$this->assertSame( SwitcherSettings::SIZE_STANDARD, $settings->design()['size'] );
 		$this->assertSame( SwitcherSettings::SHAPE_ROUNDED, $settings->design()['shape'] );
-		$this->assertSame( SwitcherSettings::MOTION_SUBTLE, $settings->motion() );
+		$this->assertSame( SwitcherSettings::MOTION_STANDARD, $settings->motion() );
 	}
 
 	public function test_legacy_appearance_is_read_into_design(): void {
@@ -267,7 +269,7 @@ final class SwitcherSettingsTest extends TestCase {
 		$variables = SwitcherSettings::from_array(
 			array(
 				'design' => array(
-					'motion'    => SwitcherSettings::MOTION_NONE,
+					'motion'    => SwitcherSettings::MOTION_OFF,
 					'overrides' => array(
 						'surface' => '#101010',
 						'radius'  => 4,
@@ -421,6 +423,56 @@ final class SwitcherSettingsTest extends TestCase {
 
 		$this->assertContains( 'umc-switcher--preset-minimal', $classes );
 		$this->assertContains( 'umc-switcher--theme-automatic', $classes );
+	}
+
+	public function test_modifier_classes_include_presentation_and_keep_legacy_preset(): void {
+		$classes = SwitcherSettings::from_array(
+			array(
+				'enabled'    => true,
+				'placement'  => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
+				'design'     => array(
+					'presentation' => SwitcherSettings::PRESENTATION_EDGE_PILL,
+					'preset'       => SwitcherSettings::PRESET_FLOATING,
+					'theme'        => SwitcherSettings::THEME_BRAND,
+					'shape'        => SwitcherSettings::SHAPE_SQUARE,
+				),
+				'responsive' => array(
+					'mobile_behavior' => SwitcherSettings::MOBILE_BEHAVIOR_BOTTOM_SHEET,
+				),
+			)
+		)->modifier_classes();
+
+		$this->assertContains( 'umc-switcher--presentation-edge-pill', $classes );
+		$this->assertContains( 'umc-switcher--preset-floating', $classes );
+		$this->assertContains( 'umc-switcher--theme-brand', $classes );
+		$this->assertContains( 'umc-switcher--shape-square', $classes );
+		$this->assertContains( 'umc-switcher--mobile-bottom-sheet', $classes );
+	}
+
+	public function test_css_variables_use_curated_z_index_for_new_presentations(): void {
+		$classic = SwitcherSettings::from_array(
+			array(
+				'placement' => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
+				'design'    => array( 'presentation' => SwitcherSettings::PRESENTATION_CLASSIC_DROPDOWN ),
+			)
+		)->css_variables();
+
+		$edge = SwitcherSettings::from_array(
+			array(
+				'placement' => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
+				'design'    => array( 'presentation' => SwitcherSettings::PRESENTATION_EDGE_PILL ),
+			)
+		)->css_variables();
+
+		$sticky = SwitcherSettings::from_array(
+			array(
+				'placement' => SwitcherSettings::PLACEMENT_STICKY_FOOTER,
+			)
+		)->css_variables();
+
+		$this->assertSame( '9990', $classic['--umc-switcher-z-index'] );
+		$this->assertSame( '1000', $edge['--umc-switcher-z-index'] );
+		$this->assertSame( '40', $sticky['--umc-switcher-z-index'] );
 	}
 
 	public function test_modifier_classes_include_responsive_adjustments(): void {

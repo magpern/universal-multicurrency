@@ -128,10 +128,18 @@ final class DisplaySettingsFieldTest extends TestCase {
 	public function test_design_and_responsive_payload_is_persisted(): void {
 		$_POST['umc_display'] = array(
 			'enabled'    => '1',
+			'placement'  => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
+			'visibility' => array(
+				'desktop' => '1',
+				'mobile'  => '1',
+			),
 			'design'     => array(
-				'preset'    => SwitcherSettings::PRESET_PILL,
-				'motion'    => SwitcherSettings::MOTION_NONE,
-				'overrides' => array(
+				'preset'       => SwitcherSettings::PRESET_PILL,
+				'presentation' => SwitcherSettings::PRESENTATION_EDGE_PILL,
+				'theme'        => SwitcherSettings::THEME_BRAND,
+				'shape'        => SwitcherSettings::SHAPE_SQUARE,
+				'motion'       => SwitcherSettings::MOTION_OFF,
+				'overrides'    => array(
 					'surface'        => '#111827',
 					'radius'         => '14',
 					'control_height' => '',
@@ -141,6 +149,7 @@ final class DisplaySettingsFieldTest extends TestCase {
 			'responsive' => array(
 				'hide_name_on_mobile' => '1',
 				'compact_on_mobile'   => '1',
+				'mobile_behavior'     => SwitcherSettings::MOBILE_BEHAVIOR_BOTTOM_SHEET,
 			),
 		);
 
@@ -151,13 +160,35 @@ final class DisplaySettingsFieldTest extends TestCase {
 		$display = $result['display'];
 
 		$this->assertSame( SwitcherSettings::PRESET_PILL, $display['design']['preset'] );
-		$this->assertSame( SwitcherSettings::MOTION_NONE, $display['design']['motion'] );
+		$this->assertSame( SwitcherSettings::PRESENTATION_EDGE_PILL, $display['design']['presentation'] );
+		$this->assertSame( SwitcherSettings::THEME_BRAND, $display['design']['theme'] );
+		$this->assertSame( SwitcherSettings::SHAPE_SQUARE, $display['design']['shape'] );
+		$this->assertSame( SwitcherSettings::MOTION_OFF, $display['design']['motion'] );
 		$this->assertSame( '#111827', $display['design']['overrides']['surface'] );
 		$this->assertSame( 14, $display['design']['overrides']['radius'] );
 		$this->assertArrayNotHasKey( 'control_height', $display['design']['overrides'] );
 		$this->assertArrayNotHasKey( 'spacing', $display['design']['overrides'] );
 		$this->assertTrue( $display['responsive']['hide_name_on_mobile'] );
 		$this->assertTrue( $display['responsive']['compact_on_mobile'] );
+		$this->assertSame( SwitcherSettings::MOBILE_BEHAVIOR_BOTTOM_SHEET, $display['responsive']['mobile_behavior'] );
+	}
+
+	public function test_mobile_behavior_is_not_booleanized(): void {
+		$_POST['umc_display'] = array(
+			'enabled'    => '1',
+			'placement'  => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
+			'responsive' => array(
+				'mobile_behavior' => SwitcherSettings::MOBILE_BEHAVIOR_STICKY_COMPACT,
+			),
+		);
+
+		$result = $this->field()->parse_post();
+
+		$this->assertNotNull( $result );
+		$this->assertSame(
+			SwitcherSettings::MOBILE_BEHAVIOR_STICKY_COMPACT,
+			$result['display']['responsive']['mobile_behavior']
+		);
 	}
 
 	public function test_invalid_visibility_submission_is_rejected(): void {
@@ -182,13 +213,17 @@ final class DisplaySettingsFieldTest extends TestCase {
 
 		$display['custom_css'] = $custom_css;
 
-		$settings = new Settings(
-			array(
-				'currencies' => array(),
-				'display'    => $display,
+		return $this->field_with_settings(
+			new Settings(
+				array(
+					'currencies' => array(),
+					'display'    => $display,
+				)
 			)
 		);
+	}
 
+	private function field_with_settings( Settings $settings ): DisplaySettingsField {
 		$repository = new SwitcherSettingsRepository( $settings );
 		$registry   = new CurrencyRegistry( $settings, new Currency( 'EUR', 2 ) );
 		$context    = new CurrencyContext( $registry, new ManualRateProvider( $settings, 'EUR' ), new CurrencyResolver() );

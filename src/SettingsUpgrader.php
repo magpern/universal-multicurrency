@@ -67,6 +67,7 @@ final class SettingsUpgrader {
 			5 => self::MIGRATE_4_TO_5,
 			6 => self::MIGRATE_5_TO_6,
 			7 => self::MIGRATE_6_TO_7,
+			8 => self::MIGRATE_7_TO_8,
 		);
 	}
 
@@ -371,6 +372,79 @@ final class SettingsUpgrader {
 	public const MIGRATE_6_TO_7 = array( self::class, 'migrate_6_to_7' );
 
 	/**
+	 * Real v7 → v8 migration.
+	 *
+	 * Adds design.presentation and responsive.mobile_behavior with visually
+	 * neutral mapping. Existing floating stores are never auto-converted to
+	 * Edge Pill (ADR-0035).
+	 *
+	 * @param array<string, mixed> $data Raw settings at schema version 7.
+	 * @return array<string, mixed>
+	 */
+	public static function migrate_7_to_8( array $data ): array {
+		return array(
+			'schema_version'       => 8,
+			'rate_mode'            => $data['rate_mode'] ?? Settings::RATE_MODE_MANUAL,
+			'rate_provider'        => $data['rate_provider'] ?? Settings::DEFAULT_RATE_PROVIDER,
+			'rate_update_interval' => $data['rate_update_interval'] ?? Settings::DEFAULT_RATE_INTERVAL,
+			'rate_max_age_hours'   => $data['rate_max_age_hours'] ?? Settings::DEFAULT_RATE_MAX_AGE_HOURS,
+			'currencies'           => is_array( $data['currencies'] ?? null ) ? $data['currencies'] : array(),
+			'display'              => self::migrate_display_7_to_8(
+				is_array( $data['display'] ?? null ) ? $data['display'] : array()
+			),
+			'checkout'             => is_array( $data['checkout'] ?? null ) ? $data['checkout'] : CheckoutSettings::default_array(),
+			'geo'                  => is_array( $data['geo'] ?? null ) ? $data['geo'] : GeoDetectionSettings::default_array(),
+		);
+	}
+
+	/**
+	 * Migration callable for v7 → v8.
+	 *
+	 * @var callable(array<string, mixed>): array<string, mixed>
+	 */
+	public const MIGRATE_7_TO_8 = array( self::class, 'migrate_7_to_8' );
+
+	/**
+	 * Rewrites one schema-7 Display block into the schema-8 shape.
+	 *
+	 * @param array<string, mixed> $display Schema-7 Display block.
+	 * @return array<string, mixed>
+	 */
+	private static function migrate_display_7_to_8( array $display ): array {
+		$defaults  = SwitcherSettings::default_array();
+		$design    = is_array( $display['design'] ?? null ) ? $display['design'] : array();
+		$preset    = is_string( $design['preset'] ?? null ) ? $design['preset'] : SwitcherSettings::PRESET_DEFAULT;
+		$placement = is_string( $display['placement'] ?? null )
+			? $display['placement']
+			: SwitcherSettings::PLACEMENT_MANUAL;
+
+		$presentation = SwitcherSettings::derive_presentation_from_legacy( $placement, $preset );
+		$motion_raw   = is_string( $design['motion'] ?? null ) ? $design['motion'] : SwitcherSettings::MOTION_STANDARD;
+
+		$upgraded = array_replace_recursive(
+			$defaults,
+			$display,
+			array(
+				'design'     => array_merge(
+					$design,
+					array(
+						'presentation' => $presentation,
+						'motion'       => $motion_raw,
+					)
+				),
+				'responsive' => array_merge(
+					is_array( $display['responsive'] ?? null ) ? $display['responsive'] : array(),
+					array(
+						'mobile_behavior' => SwitcherSettings::default_mobile_behavior_for( $presentation ),
+					)
+				),
+			)
+		);
+
+		return SwitcherSettings::from_array( $upgraded )->to_array();
+	}
+
+	/**
 	 * Rewrites one schema-6 Display block into the schema-7 shape.
 	 *
 	 * @param array<string, mixed> $display Schema-6 Display block.
@@ -448,7 +522,7 @@ final class SettingsUpgrader {
 				'size'      => $design['size'] ?? $appearance['size'] ?? $defaults['design']['size'],
 				'shape'     => $design['shape'] ?? $appearance['shape'] ?? $defaults['design']['shape'],
 				'overrides' => array(),
-				'motion'    => SwitcherSettings::MOTION_SUBTLE,
+				'motion'    => SwitcherSettings::MOTION_STANDARD,
 			),
 			'behavior'   => is_array( $display['behavior'] ?? null ) ? $display['behavior'] : $defaults['behavior'],
 			'visibility' => is_array( $display['visibility'] ?? null ) ? $display['visibility'] : $defaults['visibility'],

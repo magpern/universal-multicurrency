@@ -59,11 +59,11 @@ final class SettingsMigrationV6ToV7Test extends TestCase {
 		$this->assertSame( $once, $twice );
 	}
 
-	public function test_upgrade_from_schema_six_reaches_schema_seven(): void {
+	public function test_upgrade_from_schema_six_reaches_current_schema(): void {
 		$result = ( new SettingsUpgrader() )->upgrade( $this->v6_fixture() );
 
 		$this->assertFalse( $result->is_failed() );
-		$this->assertSame( 7, $result->settings()['schema_version'] );
+		$this->assertSame( Settings::SCHEMA_VERSION, $result->settings()['schema_version'] );
 	}
 
 	/**

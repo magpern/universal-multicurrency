@@ -34,12 +34,37 @@ final class SwitcherRendererTest extends TestCase {
 		$html = ( new SwitcherRenderer() )->render( $this->view_model() );
 
 		$this->assertStringContainsString( 'aria-expanded="false"', $html );
-		$this->assertStringContainsString( 'aria-controls="umc-switcher-menu-1"', $html );
+		$this->assertStringContainsString( 'aria-controls="umc-switcher-panel-1"', $html );
 		$this->assertStringContainsString( 'id="umc-switcher-trigger-1"', $html );
+		$this->assertStringContainsString( 'id="umc-switcher-menu-1"', $html );
 		$this->assertStringContainsString( 'aria-current="true"', $html );
+		$this->assertStringContainsString( 'aria-label="Currency:', $html );
 		$this->assertStringNotContainsString( 'role="listbox"', $html );
 		$this->assertStringNotContainsString( 'role="option"', $html );
+		$this->assertStringNotContainsString( 'role="dialog"', $html );
 		$this->assertStringNotContainsString( 'aria-activedescendant', $html );
+		$this->assertStringContainsString( 'umc-switcher__backdrop', $html );
+		$this->assertStringContainsString( 'umc-switcher__close" hidden', $html );
+	}
+
+	public function test_root_exposes_placement_style_and_presentation_hooks(): void {
+		$html = ( new SwitcherRenderer() )->render( $this->view_model() );
+
+		$this->assertStringContainsString( 'data-umc-placement="manual"', $html );
+		$this->assertStringContainsString( 'data-umc-style="dropdown"', $html );
+		$this->assertStringContainsString( 'data-umc-presentation="classic-dropdown"', $html );
+		$this->assertStringContainsString( 'data-umc-mobile-behavior="retain"', $html );
+	}
+
+	public function test_two_instances_have_unique_ids(): void {
+		$first  = ( new SwitcherRenderer() )->render( $this->view_model( array(), 'SEK', 'kr', '1' ) );
+		$second = ( new SwitcherRenderer() )->render( $this->view_model( array(), 'SEK', 'kr', '2' ) );
+
+		$this->assertStringContainsString( 'umc-switcher-trigger-1', $first );
+		$this->assertStringContainsString( 'umc-switcher-panel-1', $first );
+		$this->assertStringContainsString( 'umc-switcher-trigger-2', $second );
+		$this->assertStringContainsString( 'umc-switcher-panel-2', $second );
+		$this->assertStringNotContainsString( 'umc-switcher-trigger-2', $first );
 	}
 
 	public function test_trigger_wraps_structured_elements_in_trigger_content(): void {
@@ -68,13 +93,6 @@ final class SwitcherRendererTest extends TestCase {
 		$this->assertStringContainsString( '<li class="umc-switcher__item is-active">', $html );
 		$this->assertMatchesRegularExpression( '/<li class="umc-switcher__item">/', $html );
 		$this->assertStringNotContainsString( 'umc-switcher--active', $html );
-	}
-
-	public function test_root_exposes_placement_and_style_hooks(): void {
-		$html = ( new SwitcherRenderer() )->render( $this->view_model() );
-
-		$this->assertStringContainsString( 'data-umc-placement="manual"', $html );
-		$this->assertStringContainsString( 'data-umc-style="dropdown"', $html );
 	}
 
 	public function test_sticky_footer_placement_hook_matches_modifier_class(): void {
@@ -206,8 +224,14 @@ final class SwitcherRendererTest extends TestCase {
 	 * @param array<string, mixed> $display     Display setting overrides.
 	 * @param string               $active_code Active currency code.
 	 * @param string               $symbol      Active currency symbol.
+	 * @param string               $instance_id DOM instance id suffix.
 	 */
-	private function view_model( array $display = array(), string $active_code = 'SEK', string $symbol = 'kr' ): SwitcherViewModel {
+	private function view_model(
+		array $display = array(),
+		string $active_code = 'SEK',
+		string $symbol = 'kr',
+		string $instance_id = '1'
+	): SwitcherViewModel {
 		$settings = SwitcherSettings::from_array(
 			array_replace_recursive(
 				array( 'enabled' => true ),
@@ -219,6 +243,6 @@ final class SwitcherRendererTest extends TestCase {
 		$active  = $factory->create( $active_code, $symbol, $active_code . ' name', '?currency=' . $active_code, true );
 		$other   = $factory->create( 'EUR', '€', 'Euro', '?currency=EUR', false );
 
-		return new SwitcherViewModel( '1', $settings, array( $active, $other ), $active, false );
+		return new SwitcherViewModel( $instance_id, $settings, array( $active, $other ), $active, false );
 	}
 }

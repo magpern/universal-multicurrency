@@ -120,7 +120,48 @@ final class SwitcherViewModel {
 	}
 
 	/**
-	 * Menu element id for aria-controls.
+	 * Presentation value for the public `data-umc-presentation` styling hook.
+	 */
+	public function presentation_attribute(): string {
+		return str_replace( '_', '-', $this->settings->selector_presentation() );
+	}
+
+	/**
+	 * Mobile behaviour value for `data-umc-mobile-behavior`.
+	 */
+	public function mobile_behavior_attribute(): string {
+		return str_replace( '_', '-', $this->settings->mobile_behavior() );
+	}
+
+	/**
+	 * Accessible name for the trigger button.
+	 */
+	public function accessible_trigger_label(): string {
+		$active = $this->active;
+
+		if ( null === $active ) {
+			return '';
+		}
+
+		return $active->accessible_label();
+	}
+
+	/**
+	 * Panel element id for aria-controls / sheet dialog root.
+	 */
+	public function panel_id(): string {
+		return 'umc-switcher-panel-' . $this->instance_id;
+	}
+
+	/**
+	 * Sheet title element id for aria-labelledby.
+	 */
+	public function title_id(): string {
+		return 'umc-switcher-title-' . $this->instance_id;
+	}
+
+	/**
+	 * Menu element id.
 	 */
 	public function menu_id(): string {
 		return 'umc-switcher-menu-' . $this->instance_id;

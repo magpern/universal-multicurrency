@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace UMC\Tests\Unit\Display;
 
 use PHPUnit\Framework\TestCase;
+use UMC\Display\CurrencyPresentationResolver;
 use UMC\Display\SwitcherElementComposer;
 
 /**
@@ -142,6 +143,44 @@ final class SwitcherElementComposerTest extends TestCase {
 		$this->assertSame(
 			'<span class="umc-switcher__code">SEK</span>',
 			$composer->html( 'SEK', 'kr', 'Swedish krona' )
+		);
+	}
+
+	public function test_missing_icon_falls_back_to_unambiguous_symbol(): void {
+		$composer = new SwitcherElementComposer(
+			array(
+				'show_code'   => false,
+				'show_symbol' => false,
+				'show_name'   => false,
+				'show_icon'   => true,
+				'order'       => array( 'icon' ),
+			),
+			array(),
+			new CurrencyPresentationResolver()
+		);
+
+		$this->assertSame(
+			'<span class="umc-switcher__symbol">¥</span>',
+			$composer->html( 'JPY', '¥', 'Japanese yen' )
+		);
+	}
+
+	public function test_missing_icon_falls_back_to_code_when_symbol_ambiguous(): void {
+		$composer = new SwitcherElementComposer(
+			array(
+				'show_code'   => false,
+				'show_symbol' => false,
+				'show_name'   => false,
+				'show_icon'   => true,
+				'order'       => array( 'icon' ),
+			),
+			array( '$' => true ),
+			new CurrencyPresentationResolver()
+		);
+
+		$this->assertSame(
+			'<span class="umc-switcher__code">CAD</span>',
+			$composer->html( 'CAD', '$', 'Canadian dollar' )
 		);
 	}
 

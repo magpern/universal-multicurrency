@@ -31,54 +31,81 @@ msgstr ""
 msgid "magpern"
 msgstr ""
 
-#: src/Admin/AdminAssets.php:119
-#: src/Admin/DisplaySettingsField.php:293
+#: src/Admin/AdminAssets.php:121
+#: src/Admin/DisplaySettingsField.php:303
 msgid "On"
 msgstr ""
 
-#: src/Admin/AdminAssets.php:120
-#: src/Admin/DisplaySettingsField.php:293
+#: src/Admin/AdminAssets.php:122
+#: src/Admin/DisplaySettingsField.php:303
+#: src/Admin/DisplaySettingsField.php:1035
 msgid "Off"
 msgstr ""
 
-#: src/Admin/AdminAssets.php:121
+#: src/Admin/AdminAssets.php:123
 msgid "Shortcode copied."
 msgstr ""
 
-#: src/Admin/AdminAssets.php:122
+#: src/Admin/AdminAssets.php:124
 msgid "Could not copy shortcode."
 msgstr ""
 
-#: src/Admin/AdminAssets.php:123
+#: src/Admin/AdminAssets.php:125
 msgid "Copy shortcode:"
 msgstr ""
 
+#: src/Admin/AdminAssets.php:126
+#: src/Admin/CheckoutSettingsField.php:102
+#: src/Admin/DisplaySettingsField.php:485
+msgid "Recommended"
+msgstr ""
+
+#: src/Admin/AdminAssets.php:127
+#: src/Admin/DisplaySettingsField.php:163
+msgid "Collapsed"
+msgstr ""
+
+#: src/Admin/AdminAssets.php:128
+#: src/Admin/DisplaySettingsField.php:164
+msgid "Open"
+msgstr ""
+
+#: src/Admin/AdminAssets.php:129
+#: src/Admin/DisplaySettingsField.php:167
+msgid "Desktop"
+msgstr ""
+
+#: src/Admin/AdminAssets.php:130
+#: src/Admin/DisplaySettingsField.php:168
+msgid "Mobile"
+msgstr ""
+
 #. translators: 1: rule type label, 2: new position
-#: src/Admin/AdminAssets.php:143
+#: src/Admin/AdminAssets.php:150
 #, php-format
 msgid "%1$s rule moved to position %2$d"
 msgstr ""
 
 #. translators: %s: rule type label
-#: src/Admin/AdminAssets.php:145
+#: src/Admin/AdminAssets.php:152
 #, php-format
 msgid "%1$s rule removed"
 msgstr ""
 
-#: src/Admin/AdminAssets.php:174
+#: src/Admin/AdminAssets.php:181
 msgid "Report copied."
 msgstr ""
 
-#: src/Admin/AdminAssets.php:175
+#: src/Admin/AdminAssets.php:182
 msgid "Could not copy report."
 msgstr ""
 
-#: src/Admin/AdminAssets.php:176
+#: src/Admin/AdminAssets.php:183
 #: src/Admin/CompatibilitySettingsField.php:216
 msgid "Show technical evidence"
 msgstr ""
 
-#: src/Admin/AdminAssets.php:177
+#: src/Admin/AdminAssets.php:184
 msgid "Hide technical evidence"
 msgstr ""
 
@@ -216,10 +243,6 @@ msgstr ""
 msgid "Customers continue checkout in the currency they selected while browsing."
 msgstr ""
 
-#: src/Admin/CheckoutSettingsField.php:102
-msgid "Recommended"
-msgstr ""
-
 #: src/Admin/CheckoutSettingsField.php:109
 msgid "Customers browse and use the cart in their selected currency, then checkout switches to the store currency."
 msgstr ""
@@ -257,7 +280,7 @@ msgid "Integrations"
 msgstr ""
 
 #: src/Admin/CompatibilitySettingsField.php:74
-#: src/Admin/DisplaySettingsField.php:875
+#: src/Admin/DisplaySettingsField.php:967
 msgid "Theme"
 msgstr ""
 
@@ -404,7 +427,7 @@ msgid "Enabled"
 msgstr ""
 
 #: src/Admin/CurrencyOverviewField.php:52
-#: src/Admin/DisplaySettingsField.php:692
+#: src/Admin/DisplaySettingsField.php:778
 #: src/Admin/FixedPricingSettingsField.php:143
 msgid "Currency"
 msgstr ""
@@ -496,6 +519,7 @@ msgid "Remove"
 msgstr ""
 
 #: src/Admin/CurrencyOverviewField.php:200
+#: src/Display/SwitcherRenderer.php:49
 msgid "Close"
 msgstr ""
 
@@ -574,7 +598,6 @@ msgstr ""
 
 #: src/Admin/CurrencyOverviewField.php:284
 #: src/Admin/CurrencyTableField.php:251
-#: src/Admin/DisplaySettingsField.php:881
 #: src/Admin/ExchangeRateSettingsField.php:104
 #: src/Admin/ViewModel/CurrencyViewModelFactory.php:247
 #: src/Admin/ViewModel/CurrencyViewModelFactory.php:253
@@ -588,18 +611,18 @@ msgid "Currencies"
 msgstr ""
 
 #: src/Admin/CurrencyTableField.php:101
-#: src/Admin/DisplaySettingsField.php:779
+#: src/Admin/DisplaySettingsField.php:865
 msgid "Code"
 msgstr ""
 
 #: src/Admin/CurrencyTableField.php:102
-#: src/Admin/DisplaySettingsField.php:780
+#: src/Admin/DisplaySettingsField.php:866
 #: src/Admin/OrderCurrencyMetaBox.php:244
 msgid "Symbol"
 msgstr ""
 
 #: src/Admin/CurrencyTableField.php:103
-#: src/Admin/DisplaySettingsField.php:472
+#: src/Admin/DisplaySettingsField.php:558
 msgid "Position"
 msgstr ""
 
@@ -885,501 +908,570 @@ msgstr ""
 msgid "Placement settings"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:144
+#: src/Admin/DisplaySettingsField.php:145
 msgid "Content settings"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:149
+#: src/Admin/DisplaySettingsField.php:150
 msgid "Design settings"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:154
+#: src/Admin/DisplaySettingsField.php:155
 msgid "Advanced settings"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:160
+#: src/Admin/DisplaySettingsField.php:161
 msgid "Live preview"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:161
+#: src/Admin/DisplaySettingsField.php:162
+msgid "Preview open state"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:166
 msgid "Preview viewport"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:162
-msgid "Desktop"
-msgstr ""
-
-#: src/Admin/DisplaySettingsField.php:163
-msgid "Mobile"
-msgstr ""
-
-#: src/Admin/DisplaySettingsField.php:176
+#: src/Admin/DisplaySettingsField.php:181
 msgid "Switcher is currently disabled"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:180
+#: src/Admin/DisplaySettingsField.php:185
 msgid "Preview simulates a storefront viewport. Currency links do not change the customer selection."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:285
+#: src/Admin/DisplaySettingsField.php:295
 msgid "Enable storefront switcher"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:313
+#: src/Admin/DisplaySettingsField.php:323
 msgid "Automatic placement is enabled and a currency switcher shortcode was detected on an important page or menu link. Both may appear on the storefront."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:322
+#: src/Admin/DisplaySettingsField.php:332
 msgid "Automatic placement injects the switcher on every storefront page. Use manual placement with a shortcode when you need precise control."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:336
-#: src/Admin/DisplaySettingsField.php:371
+#: src/Admin/DisplaySettingsField.php:346
+#: src/Admin/DisplaySettingsField.php:381
 msgid "Placement"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:337
-#: src/Admin/DisplaySettingsField.php:560
+#: src/Admin/DisplaySettingsField.php:347
+#: src/Admin/DisplaySettingsField.php:646
 msgid "Content"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:338
-#: src/Admin/DisplaySettingsField.php:852
+#: src/Admin/DisplaySettingsField.php:348
+#: src/Admin/DisplaySettingsField.php:941
 msgid "Design"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:339
+#: src/Admin/DisplaySettingsField.php:349
 #: src/Admin/SettingsPage.php:283
 msgid "Advanced"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:343
+#: src/Admin/DisplaySettingsField.php:353
 msgid "Display sections"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:369
+#: src/Admin/DisplaySettingsField.php:379
 msgid "Switcher"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:376
+#: src/Admin/DisplaySettingsField.php:386
 msgid "Manual placement"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:377
+#: src/Admin/DisplaySettingsField.php:387
 msgid "Place the switcher with a shortcode."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:381
+#: src/Admin/DisplaySettingsField.php:391
 msgid "Floating side"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:382
+#: src/Admin/DisplaySettingsField.php:392
 msgid "Fixed to the left or right edge."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:386
-msgid "Floating bottom"
+#: src/Admin/DisplaySettingsField.php:396
+msgid "Sticky footer"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:387
+#: src/Admin/DisplaySettingsField.php:397
 msgid "Fixed above the bottom edge."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:409
+#: src/Admin/DisplaySettingsField.php:419
 msgid "Style"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:417
+#: src/Admin/DisplaySettingsField.php:427
 msgid "Dropdown"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:418
+#: src/Admin/DisplaySettingsField.php:428
 msgid "Compact trigger with a menu."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:434
+#: src/Admin/DisplaySettingsField.php:444
 msgid "Horizontal list"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:435
+#: src/Admin/DisplaySettingsField.php:445
 msgid "Inline currency links."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:442
+#: src/Admin/DisplaySettingsField.php:452
 msgid "Horizontal list is available with manual placement only. Automatic placements always use the dropdown style."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:445
+#: src/Admin/DisplaySettingsField.php:455
 msgid "Manual shortcode"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:446
+#: src/Admin/DisplaySettingsField.php:456
 msgid "Add this shortcode to a page, post, or widget area."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:449
+#: src/Admin/DisplaySettingsField.php:459
 msgid "Copy shortcode"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:450
+#: src/Admin/DisplaySettingsField.php:460
 msgid "Copy"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:477
-msgid "Vertical position"
+#: src/Admin/DisplaySettingsField.php:482
+msgid "Edge Pill"
 msgstr ""
 
 #: src/Admin/DisplaySettingsField.php:483
+msgid "Flush edge tab that expands inward."
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:488
+msgid "Floating Card"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:489
+msgid "Inset floating control with a popover menu."
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:494
+msgid "Minimal Icon"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:495
+msgid "Compact circular control with a popover menu."
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:500
+msgid "Classic Dropdown"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:501
+msgid "Traditional dropdown on the side edge."
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:509
+#: src/Admin/DisplaySettingsField.php:516
+msgid "Selector style"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:563
+msgid "Vertical position"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:569
 msgid "Top"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:484
+#: src/Admin/DisplaySettingsField.php:570
 msgid "Middle"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:485
+#: src/Admin/DisplaySettingsField.php:571
 msgid "Bottom"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:499
+#: src/Admin/DisplaySettingsField.php:585
 msgid "Vertical offset (px)"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:503
-#: src/Admin/DisplaySettingsField.php:510
+#: src/Admin/DisplaySettingsField.php:589
+#: src/Admin/DisplaySettingsField.php:596
 msgid "Edge offset (px)"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:514
+#: src/Admin/DisplaySettingsField.php:600
 msgid "Bottom offset (px)"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:531
+#: src/Admin/DisplaySettingsField.php:617
 msgid "Left"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:532
+#: src/Admin/DisplaySettingsField.php:618
 msgid "Right"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:536
+#: src/Admin/DisplaySettingsField.php:622
 msgid "Side"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:564
+#: src/Admin/DisplaySettingsField.php:650
 msgid "Closed switcher (trigger)"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:565
+#: src/Admin/DisplaySettingsField.php:651
 msgid "What customers see before they open the switcher."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:571
+#: src/Admin/DisplaySettingsField.php:657
 msgid "Currency list (menu)"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:572
+#: src/Admin/DisplaySettingsField.php:658
 msgid "What each currency option shows in the list."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:580
+#: src/Admin/DisplaySettingsField.php:666
 msgid "Show a dropdown arrow on the trigger"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:581
+#: src/Admin/DisplaySettingsField.php:667
 msgid "Decorative only; the arrow is hidden from assistive technology."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:618
+#: src/Admin/DisplaySettingsField.php:704
 msgid "Element order"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:625
+#: src/Admin/DisplaySettingsField.php:711
 msgid "Hidden elements are skipped; the order applies to the elements you enabled."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:637
+#: src/Admin/DisplaySettingsField.php:723
 msgid "Show currency code"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:638
+#: src/Admin/DisplaySettingsField.php:724
 msgid "Show currency symbol"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:639
+#: src/Admin/DisplaySettingsField.php:725
 msgid "Show currency name"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:640
+#: src/Admin/DisplaySettingsField.php:726
 msgid "Show presentation icon"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:655
+#: src/Admin/DisplaySettingsField.php:741
 msgid "Currency presentation icons"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:656
+#: src/Admin/DisplaySettingsField.php:742
 msgid "Optional bundled flags are visual presentation only. A currency does not always correspond to one country. Built-in defaults are suggestions; you may override them per currency."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:658
+#: src/Admin/DisplaySettingsField.php:744
 msgid "Icon size"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:663
-#: src/Admin/DisplaySettingsField.php:863
-#: src/Admin/DisplaySettingsField.php:898
+#: src/Admin/DisplaySettingsField.php:749
+#: src/Admin/DisplaySettingsField.php:954
+#: src/Admin/DisplaySettingsField.php:991
 msgid "Compact"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:664
-#: src/Admin/DisplaySettingsField.php:899
+#: src/Admin/DisplaySettingsField.php:750
+#: src/Admin/DisplaySettingsField.php:1033
 msgid "Standard"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:665
-#: src/Admin/DisplaySettingsField.php:900
+#: src/Admin/DisplaySettingsField.php:751
+#: src/Admin/DisplaySettingsField.php:993
 msgid "Large"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:674
+#: src/Admin/DisplaySettingsField.php:760
 msgid "Icon shape"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:679
+#: src/Admin/DisplaySettingsField.php:765
 msgid "Natural"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:680
+#: src/Admin/DisplaySettingsField.php:766
+#: src/Admin/DisplaySettingsField.php:1014
 msgid "Square"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:681
+#: src/Admin/DisplaySettingsField.php:767
 msgid "Circle"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:693
+#: src/Admin/DisplaySettingsField.php:779
 msgid "Presentation region"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:694
-#: src/Admin/DisplaySettingsField.php:860
+#: src/Admin/DisplaySettingsField.php:780
+#: src/Admin/DisplaySettingsField.php:951
 msgid "Default"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:703
+#: src/Admin/DisplaySettingsField.php:789
 msgid "Use built-in default"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:715
+#: src/Admin/DisplaySettingsField.php:801
 msgid "Overrides for disabled currencies remain saved even when they are not listed here."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:742
-#: src/Admin/DisplaySettingsField.php:933
+#: src/Admin/DisplaySettingsField.php:828
 #: src/Diagnostics/SiteHealthReport.php:871
 msgid "None"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:781
+#: src/Admin/DisplaySettingsField.php:867
 msgid "Name"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:782
+#: src/Admin/DisplaySettingsField.php:868
 msgid "Icon"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:854
-msgid "Preset"
+#: src/Admin/DisplaySettingsField.php:943
+msgid "Legacy design tokens"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:861
+#: src/Admin/DisplaySettingsField.php:945
+msgid "Token preset"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:952
 msgid "Minimal"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:862
-#: src/Admin/DisplaySettingsField.php:917
+#: src/Admin/DisplaySettingsField.php:953
+#: src/Admin/DisplaySettingsField.php:1017
 msgid "Pill"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:864
+#: src/Admin/DisplaySettingsField.php:955
 msgid "Borderless"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:865
+#: src/Admin/DisplaySettingsField.php:956
 msgid "Floating"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:872
-msgid "A preset is a starting point. Default changes nothing, and theme, size, shape, and your own overrides always win over the preset."
+#: src/Admin/DisplaySettingsField.php:963
+msgid "Legacy token layer applied underneath selector style geometry. Theme, size, shape, and overrides still win over these tokens."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:882
+#: src/Admin/DisplaySettingsField.php:973
+msgid "Site theme"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:974
 msgid "Light"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:883
+#: src/Admin/DisplaySettingsField.php:975
 msgid "Dark"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:892
+#: src/Admin/DisplaySettingsField.php:976
+msgid "Brand"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:985
 msgid "Size"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:909
+#: src/Admin/DisplaySettingsField.php:992
+msgid "Regular"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:1002
 msgid "Shape"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:915
+#: src/Admin/DisplaySettingsField.php:1015
 msgid "Slight"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:916
+#: src/Admin/DisplaySettingsField.php:1016
 msgid "Rounded"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:926
+#: src/Admin/DisplaySettingsField.php:1027
 msgid "Motion"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:932
-msgid "Subtle"
+#: src/Admin/DisplaySettingsField.php:1034
+msgid "Reduced"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:940
+#: src/Admin/DisplaySettingsField.php:1042
 msgid "Customers who ask their system to reduce motion never see transitions, whichever option you choose."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:954
+#: src/Admin/DisplaySettingsField.php:1056
 msgid "Background"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:955
+#: src/Admin/DisplaySettingsField.php:1057
 msgid "Text"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:956
+#: src/Admin/DisplaySettingsField.php:1058
 msgid "Border"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:957
+#: src/Admin/DisplaySettingsField.php:1059
 msgid "Hover background"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:958
+#: src/Admin/DisplaySettingsField.php:1060
 msgid "Selected background"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:959
+#: src/Admin/DisplaySettingsField.php:1061
 msgid "Focus ring"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:963
+#: src/Admin/DisplaySettingsField.php:1065
 msgid "Corner radius (px)"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:964
+#: src/Admin/DisplaySettingsField.php:1066
 msgid "Control height (px)"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:965
+#: src/Admin/DisplaySettingsField.php:1067
 msgid "Spacing (px)"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:966
+#: src/Admin/DisplaySettingsField.php:1068
 msgid "Font weight"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:971
+#: src/Admin/DisplaySettingsField.php:1073
 msgid "Color overrides"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:972
+#: src/Admin/DisplaySettingsField.php:1074
 msgid "Leave a field empty to inherit the theme value. Accepts hex (#1f2937) or rgb()/rgba() colors."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:984
-#: src/Admin/DisplaySettingsField.php:1004
+#: src/Admin/DisplaySettingsField.php:1086
+#: src/Admin/DisplaySettingsField.php:1106
 msgid "Inherit"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:992
+#: src/Admin/DisplaySettingsField.php:1094
 msgid "Size and spacing overrides"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:993
+#: src/Admin/DisplaySettingsField.php:1095
 msgid "Leave a field empty to inherit the preset, theme, and size values."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:1033
+#: src/Admin/DisplaySettingsField.php:1139
 msgid "Mobile adjustments"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:1039
+#: src/Admin/DisplaySettingsField.php:1141
+msgid "Mobile behaviour"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:1150
+msgid "Side selector"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:1151
+msgid "Bottom sheet"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:1152
+msgid "Compact sticky bar"
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:1159
+msgid "Compact sticky bar is a small-screen layout for the floating selector. It does not turn the storefront into Sticky footer placement, and it does not add a second automatic switcher."
+msgstr ""
+
+#: src/Admin/DisplaySettingsField.php:1167
 msgid "Hide the currency name on small screens"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:1049
+#: src/Admin/DisplaySettingsField.php:1177
 msgid "Use compact spacing on small screens"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:1055
+#: src/Admin/DisplaySettingsField.php:1183
 msgid "These adjustments apply on screens narrower than 768px. Check them on a device or a narrow browser window — the admin preview frame is not a real viewport."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:1071
+#: src/Admin/DisplaySettingsField.php:1199
 msgid "Advanced Custom CSS"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:1076
+#: src/Admin/DisplaySettingsField.php:1204
 msgid "Custom CSS applies on the storefront after you save. The live preview reflects the structured Design settings only — verify Custom CSS on a storefront page."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:1084
+#: src/Admin/DisplaySettingsField.php:1212
 msgid "Editing Custom CSS also requires the WordPress \"edit_css\" capability. Your stored CSS is shown read-only and is preserved exactly when you save other Display settings."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:1090
+#: src/Admin/DisplaySettingsField.php:1218
 msgid "Switcher CSS"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:1112
+#: src/Admin/DisplaySettingsField.php:1240
 msgid "Write complete selectors. Custom CSS is not scoped for you — prefix rules with .umc-switcher so the rest of your site is unaffected. @import, url(), backslash escape sequences, expression(), behavior:, -moz-binding, and raw angle brackets are rejected. A rejected submission keeps your last saved CSS and shows an error notice."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:1126
+#: src/Admin/DisplaySettingsField.php:1254
 msgid "Behavior"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:1132
+#: src/Admin/DisplaySettingsField.php:1260
 msgid "Show selected currency first"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:1142
+#: src/Admin/DisplaySettingsField.php:1270
 msgid "Remember selected currency between visits"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:1143
+#: src/Admin/DisplaySettingsField.php:1271
 msgid "When disabled, the selection applies to the current browsing session only."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:1161
+#: src/Admin/DisplaySettingsField.php:1289
 msgid "Device visibility"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:1163
+#: src/Admin/DisplaySettingsField.php:1291
 msgid "Show on desktop"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:1164
+#: src/Admin/DisplaySettingsField.php:1292
 msgid "Show on mobile"
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:1166
+#: src/Admin/DisplaySettingsField.php:1294
 msgid "When the switcher is enabled, at least one device option must remain selected."
 msgstr ""
 
-#: src/Admin/DisplaySettingsField.php:1194
+#: src/Admin/DisplaySettingsField.php:1322
 msgid "yourstore.example/shop"
 msgstr ""
 
@@ -3699,6 +3791,16 @@ msgstr ""
 
 #: src/Diagnostics/SiteHealthReport.php:940
 msgid "High-Performance Order Storage (HPOS) is not enabled. Universal Multicurrency supports legacy order storage, but HPOS is recommended."
+msgstr ""
+
+#. translators: 1: currency name, 2: ISO currency code
+#: src/Display/SwitcherLabelFormatter.php:81
+#, php-format
+msgid "Currency: %1$s, %2$s"
+msgstr ""
+
+#: src/Display/SwitcherRenderer.php:48
+msgid "Choose currency"
 msgstr ""
 
 #. translators: %d: maximum number of routing rules

@@ -72,11 +72,12 @@ final class SwitcherOptionFactory {
 		return new SwitcherOptionViewModel(
 			$code,
 			$this->menu_formatter->format( $code, $symbol, $name ),
-			$this->trigger_formatter->format( $code, $symbol, $name ),
+			$this->trigger_formatter->format_compact( $code, $symbol, $name ),
 			$url,
 			$is_active,
 			$this->menu_composer->html( $code, $symbol, $name ),
-			$this->trigger_composer->html( $code, $symbol, $name )
+			$this->trigger_composer->html( $code, $symbol, $name ),
+			SwitcherLabelFormatter::format_accessible_name( $name, $code )
 		);
 	}
 }

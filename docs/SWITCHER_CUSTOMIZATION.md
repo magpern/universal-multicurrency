@@ -2,14 +2,17 @@
 
 Merchant and developer reference for Universal Multicurrency storefront switcher
 presentation: structured design and layout (M17), presentation icons (M22),
-and the native Gutenberg block (M23).
+the native Gutenberg block (M23), and selector presentation presets (v1.3 /
+ADR-0035).
 
 Authoritative architecture: [`docs/architecture/switcher-customization.md`](architecture/switcher-customization.md),
 [`docs/architecture/switcher-currency-presentation.md`](architecture/switcher-currency-presentation.md),
-[`docs/architecture/native-switcher-block.md`](architecture/native-switcher-block.md)
+[`docs/architecture/native-switcher-block.md`](architecture/native-switcher-block.md),
+[`docs/architecture/switcher-presentation-presets.md`](architecture/switcher-presentation-presets.md)
 ADRs: [`0022`](adr/0022-switcher-customization-css-contract.md),
 [`0027`](adr/0027-switcher-currency-presentation.md),
-[`0028`](adr/0028-native-switcher-block-rendering-surface.md)
+[`0028`](adr/0028-native-switcher-block-rendering-surface.md),
+[`0035`](adr/0035-switcher-presentation-presets.md)
 
 ---
 
@@ -17,27 +20,34 @@ ADRs: [`0022`](adr/0022-switcher-customization-css-contract.md),
 
 In **WooCommerce → Settings → Multicurrency → Display**:
 
-1. **Placement** — manual shortcode, native block, floating side, floating bottom
-2. **Content** — trigger vs menu visibility (code / symbol / name / icon), order, chevron
-3. **Design** — preset, theme, size, shape, colors, spacing, motion, responsive bag
-4. **Currency presentation icons** — optional bundled flags, size, shape, per-currency overrides (M22)
-5. **Advanced** — Custom CSS (capability-gated)
+1. **Placement** — manual shortcode / native block, floating side, sticky footer
+2. **Selector style** — Edge Pill / Floating Card / Minimal Icon / Classic Dropdown / Sticky Footer (filtered by placement)
+3. **Content** — trigger vs menu visibility (code / symbol / name / icon), order, chevron
+4. **Design** — theme (including Brand), size, shape (including Square), motion, colors, spacing; legacy token preset remains available under progressive disclosure
+5. **Currency presentation icons** — optional bundled flags, size, shape, per-currency overrides (M22). This is the top-level `display.presentation` icon subtree — not `design.presentation`.
+6. **Mobile behaviour** (floating only) — Side selector / Bottom sheet / Compact sticky bar
+7. **Advanced** — Custom CSS (capability-gated)
 
-Live admin preview updates **structured** controls only. Advanced Custom CSS
-applies on the **storefront after save** — verify there, not in wp-admin.
+Live admin preview updates **structured** controls only, including Collapsed/Open
+and Desktop/Mobile frames. Advanced Custom CSS applies on the **storefront after
+save** — verify there, not in wp-admin.
 
 ---
 
 ## Presentation precedence
 
 1. Plugin base styles
-2. Selected preset (Default is a no-op relative to theme/size/shape)
-3. Theme / size / shape
-4. Structured overrides (CSS variables)
-5. Responsive structured overrides
-6. Advanced Custom CSS (last)
+2. Layout modifiers (`--floating-side`, `--floating-bottom`, …)
+3. Selector presentation geometry (`--presentation-edge-pill`, …)
+4. Legacy preset token tweaks (`--preset-*` — still live under presentation)
+5. Theme / size / shape
+6. Structured overrides (CSS variables)
+7. Responsive / mobile behaviour
+8. Reduced motion / print
+9. Advanced Custom CSS (last)
 
-Changing preset does not silently clear overrides or Custom CSS.
+Choosing a new selector style does **not** clear `design.preset` or Custom CSS.
+Legacy `--preset-*` classes remain on the root for merchant CSS compatibility.
 
 ---
 
@@ -54,6 +64,9 @@ Changing preset does not silently clear overrides or Custom CSS.
 .umc-switcher__icon img
 [data-umc-icon-type="flag"]
 .umc-switcher__chevron   /* only when enabled */
+.umc-switcher__panel
+.umc-switcher__close     /* sheet chrome; hidden until sheet mode */
+.umc-switcher__sheet-title
 .umc-switcher__menu
 .umc-switcher__list
 .umc-switcher__item
@@ -63,17 +76,22 @@ Changing preset does not silently clear overrides or Custom CSS.
 ```
 
 Modifiers (settings-driven): `--dropdown`, `--horizontal-list`, `--manual`,
-`--floating-side`, `--floating-bottom`, `--side-*`, `--align-*`, `--theme-*`,
-`--size-*`, `--shape-*`, `--preset-*`, `--icon-size-*`, `--icon-shape-*`, `--hide-mobile`, `--hide-desktop`,
+`--floating-side`, `--floating-bottom`, `--side-*`, `--align-*`,
+`--presentation-*`, `--theme-*`, `--size-*`, `--shape-*`, `--preset-*`,
+`--icon-size-*`, `--icon-shape-*`, `--mobile-retain`, `--mobile-bottom-sheet`,
+`--mobile-sticky-compact`, `--hide-mobile`, `--hide-desktop`,
 `--hide-name-on-mobile`, `--compact-on-mobile`.
 
-The two responsive modifiers take effect below 768px only.
+The two responsive bag modifiers take effect below 768px only.
 
-Optional hooks: `[data-umc-placement]`, `[data-umc-style]`.
+Public data hooks: `[data-umc-placement]`, `[data-umc-style]`,
+`[data-umc-presentation]`, `[data-umc-mobile-behavior]`.
 
 ### Internal (do not rely on)
 
-`.umc-switcher--open`, `.umc-switcher--open-up`, `.umc-switcher--expanded`,
+`.umc-switcher--open`, `.umc-switcher--open-up`, `.umc-switcher--sheet`,
+`.umc-switcher--mobile-sheet`, `.umc-switcher--expanded`,
+`.umc-switcher__backdrop`, `.umc-switcher__sheet-divider`,
 preview-only classes, instance element IDs.
 
 Flags / `__option` / `--active` BEM modifiers are **not** part of this contract.
@@ -83,7 +101,7 @@ Flags / `__option` / `--active` BEM modifiers are **not** part of this contract.
 ## Public CSS variables
 
 Prefer `--umc-switcher-*` names (font, trigger, hover, open, menu, item,
-selected, focus-ring, gap, transition, offsets, z-index).
+selected, focus-ring, gap, transition, offsets, z-index, panel-width, accent).
 
 Legacy aliases from v0.15 (`--umc-surface`, `--umc-text`, `--umc-border`,
 `--umc-hover`, `--umc-selected-bg`, `--umc-focus-ring`, `--umc-radius`,
@@ -144,7 +162,8 @@ Accessibility: Custom CSS can remove focus styles or shrink targets. Keep
 ## Shortcode
 
 `[universal_multicurrency_switcher]` (alias `[umc_switcher]`). Presentation is
-global; shortcode attributes do not override design in M17.
+global; shortcode attributes do not override design in M17. Shortcode instances
+continue to inherit the store’s global Display settings (placement included).
 
 ---
 
@@ -168,5 +187,7 @@ shopper currency state and use unique instance IDs for accessibility.
 ## Multiple instances
 
 Multiple shortcodes plus one automatic floating switcher may appear. Style rules
-apply to all `.umc-switcher` roots unless you target `data-umc-placement` or
-modifier classes.
+apply to all `.umc-switcher` roots unless you target `data-umc-placement`,
+`data-umc-presentation`, or modifier classes. Opening one non-sheet switcher
+closes other open non-sheet switchers; only one sheet dialog may be open at a
+time.

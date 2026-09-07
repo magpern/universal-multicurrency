@@ -13,15 +13,16 @@ use PHPUnit\Framework\TestCase;
 use UMC\Display\SwitcherSettings;
 
 /**
- * Pins v0.15 switcher appearance across all 27 theme × size × shape combinations.
+ * Pins switcher appearance across the theme × size × shape matrix.
  *
- * Milestone 17 restructures Display settings (schema 5 → 6) and layers a preset
- * class under theme/size/shape. Merchant appearance must not drift because of
- * that restructuring, so this test documents both halves of the contract:
+ * Milestone 17 restructured Display settings (schema 5 → 6) and layered a preset
+ * class under theme/size/shape. Schema 8 adds `brand` theme and `square` shape
+ * without changing the cascade contract for legacy combinations. This test
+ * documents both halves of the contract:
  *
  * 1. the modifier classes each combination emits, and
  * 2. the effective control height and border radius produced by the stylesheet
- *    cascade, where `shape` wins the radius over `size` for slight and pill.
+ *    cascade, where `shape` wins the radius over `size` for slight, pill, and square.
  */
 final class LegacyAppearanceMatrixTest extends TestCase {
 
@@ -62,10 +63,11 @@ final class LegacyAppearanceMatrixTest extends TestCase {
 	private const EXPECTED_SHAPE_RADIUS = array(
 		SwitcherSettings::SHAPE_SLIGHT => '6px',
 		SwitcherSettings::SHAPE_PILL   => '999px',
+		SwitcherSettings::SHAPE_SQUARE => '2px',
 	);
 
 	/**
-	 * All 27 theme × size × shape combinations.
+	 * All theme × size × shape combinations (4 × 3 × 4 = 48).
 	 *
 	 * @return array<string, array{0: string, 1: string, 2: string}>
 	 */
@@ -83,8 +85,8 @@ final class LegacyAppearanceMatrixTest extends TestCase {
 		return $cases;
 	}
 
-	public function test_matrix_covers_twenty_seven_combinations(): void {
-		$this->assertCount( 27, self::appearance_matrix_provider() );
+	public function test_matrix_covers_forty_eight_combinations(): void {
+		$this->assertCount( 48, self::appearance_matrix_provider() );
 	}
 
 	/**
@@ -183,7 +185,7 @@ final class LegacyAppearanceMatrixTest extends TestCase {
 			$last_preset = max( $last_preset, $position );
 		}
 
-		foreach ( array( 'size-compact', 'size-large', 'shape-slight', 'shape-pill' ) as $modifier ) {
+		foreach ( array( 'size-compact', 'size-large', 'shape-slight', 'shape-pill', 'shape-square' ) as $modifier ) {
 			$position = strpos( $source, '.umc-switcher--' . $modifier . ' {' );
 
 			$this->assertIsInt( $position, 'Missing modifier rule: ' . $modifier );
