@@ -115,4 +115,11 @@ final class SwitcherLabelFormatterTest extends TestCase {
 
 		$this->assertSame( 'SEK', $formatter->format( 'SEK', 'kr', 'Swedish krona' ) );
 	}
+
+	public function test_accessible_name_includes_currency_name_and_code(): void {
+		$this->assertSame(
+			'Currency: Swedish krona, SEK',
+			SwitcherLabelFormatter::format_accessible_name( 'Swedish krona', 'SEK' )
+		);
+	}
 }

@@ -68,6 +68,23 @@ final class SwitcherLabelFormatter {
 	}
 
 	/**
+	 * Builds the accessible trigger name used for aria-label.
+	 *
+	 * @param string $name Currency name.
+	 * @param string $code ISO currency code.
+	 */
+	public static function format_accessible_name( string $name, string $code ): string {
+		$label_name = '' !== $name ? $name : $code;
+
+		return sprintf(
+			/* translators: 1: currency name, 2: ISO currency code */
+			__( 'Currency: %1$s, %2$s', 'universal-multicurrency' ),
+			$label_name,
+			$code
+		);
+	}
+
+	/**
 	 * Detects duplicate symbols among selectable currencies.
 	 *
 	 * @param array<int, string> $symbols Symbol values keyed arbitrarily.

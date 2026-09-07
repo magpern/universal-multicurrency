@@ -215,10 +215,18 @@ final class SwitcherElementComposer {
 		}
 
 		if ( array() === $parts ) {
-			$parts[] = array(
-				'type'  => self::ELEMENT_CODE,
-				'value' => $code,
-			);
+			// Missing-icon face: requested icon had no URL and nothing else remained.
+			if ( $this->visible[ self::ELEMENT_ICON ] && '' !== $symbol && ! isset( $this->duplicate_symbols[ $symbol ] ) ) {
+				$parts[] = array(
+					'type'  => self::ELEMENT_SYMBOL,
+					'value' => $symbol,
+				);
+			} else {
+				$parts[] = array(
+					'type'  => self::ELEMENT_CODE,
+					'value' => $code,
+				);
+			}
 		}
 
 		return $parts;

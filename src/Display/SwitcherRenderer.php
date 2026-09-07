@@ -45,13 +45,21 @@ final class SwitcherRenderer {
 			$items .= $this->render_option_link( $option, $view_model->is_preview() );
 		}
 
+		$sheet_title = esc_html__( 'Choose currency', 'universal-multicurrency' );
+		$close_label = esc_html__( 'Close', 'universal-multicurrency' );
+
 		return sprintf(
-			'<div %1$s><button type="button" class="umc-switcher__trigger" id="%2$s" aria-expanded="false" aria-controls="%3$s"><span class="umc-switcher__trigger-content">%4$s</span>%5$s</button><ul class="umc-switcher__menu" id="%3$s" hidden>%6$s</ul></div>',
+			'<div %1$s><button type="button" class="umc-switcher__trigger" id="%2$s" aria-expanded="false" aria-controls="%3$s" aria-label="%4$s"><span class="umc-switcher__trigger-content">%5$s</span>%6$s</button><div class="umc-switcher__backdrop" hidden aria-hidden="true"></div><div class="umc-switcher__panel" id="%3$s"><h2 class="umc-switcher__sheet-title" id="%7$s" hidden>%8$s</h2><button type="button" class="umc-switcher__close" hidden>%9$s</button><span class="umc-switcher__sheet-divider" hidden aria-hidden="true"></span><ul class="umc-switcher__menu" id="%10$s" hidden>%11$s</ul></div></div>',
 			$this->root_attributes( $view_model ),
 			esc_attr( $view_model->trigger_id() ),
-			esc_attr( $view_model->menu_id() ),
+			esc_attr( $view_model->panel_id() ),
+			esc_attr( $view_model->accessible_trigger_label() ),
 			$this->trigger_content( $active ),
 			$view_model->show_chevron() ? '<span class="umc-switcher__chevron" aria-hidden="true"></span>' : '',
+			esc_attr( $view_model->title_id() ),
+			$sheet_title,
+			$close_label,
+			esc_attr( $view_model->menu_id() ),
 			$items
 		);
 	}
@@ -147,11 +155,13 @@ final class SwitcherRenderer {
 	 */
 	private function root_attributes( SwitcherViewModel $view_model, array $extra_classes = array() ): string {
 		return sprintf(
-			'class="%1$s" style="%2$s" data-umc-placement="%3$s" data-umc-style="%4$s"',
+			'class="%1$s" style="%2$s" data-umc-placement="%3$s" data-umc-style="%4$s" data-umc-presentation="%5$s" data-umc-mobile-behavior="%6$s"',
 			esc_attr( implode( ' ', array_merge( $view_model->root_classes(), $extra_classes ) ) ),
 			esc_attr( SwitcherPresentationCss::style_attribute( $view_model->css_variables() ) ),
 			esc_attr( $view_model->placement_attribute() ),
-			esc_attr( $view_model->style_attribute() )
+			esc_attr( $view_model->style_attribute() ),
+			esc_attr( $view_model->presentation_attribute() ),
+			esc_attr( $view_model->mobile_behavior_attribute() )
 		);
 	}
 }
