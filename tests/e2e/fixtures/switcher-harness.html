@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+	<meta charset="utf-8" />
+	<title>UMC switcher harness</title>
+	<link rel="stylesheet" href="../../../assets/css/switcher.css" />
+	<style>
+		body { font-family: system-ui, sans-serif; margin: 0; min-height: 100vh; }
+		.stage { position: relative; min-height: 100vh; padding: 2rem; }
+	</style>
+</head>
+<body>
+	<div class="stage">
+		<div class="umc-switcher umc-switcher--dropdown umc-switcher--floating-side umc-switcher--side-right umc-switcher--align-middle umc-switcher--presentation-edge-pill umc-switcher--preset-default umc-switcher--theme-automatic umc-switcher--size-standard umc-switcher--shape-rounded umc-switcher--mobile-bottom-sheet"
+			style="--umc-switcher-edge-offset:0px;--umc-switcher-z-index:1000"
+			data-umc-placement="floating-side"
+			data-umc-style="dropdown"
+			data-umc-presentation="edge-pill"
+			data-umc-mobile-behavior="bottom-sheet"
+			data-testid="switcher-a">
+			<button type="button" class="umc-switcher__trigger" id="umc-switcher-trigger-1" aria-expanded="false" aria-controls="umc-switcher-panel-1" aria-label="Currency: Swedish krona, SEK">
+				<span class="umc-switcher__trigger-content"><span class="umc-switcher__symbol">kr</span><span class="umc-switcher__code">SEK</span></span>
+			</button>
+			<div class="umc-switcher__backdrop" hidden aria-hidden="true"></div>
+			<div class="umc-switcher__panel" id="umc-switcher-panel-1">
+				<h2 class="umc-switcher__sheet-title" id="umc-switcher-title-1" hidden>Choose currency</h2>
+				<button type="button" class="umc-switcher__close" hidden>Close</button>
+				<span class="umc-switcher__sheet-divider" hidden aria-hidden="true"></span>
+				<ul class="umc-switcher__menu" id="umc-switcher-menu-1" hidden>
+					<li class="umc-switcher__item is-active"><a class="umc-switcher__link" href="?currency=SEK" aria-current="true"><span class="umc-switcher__code">SEK</span></a></li>
+					<li class="umc-switcher__item"><a class="umc-switcher__link" href="?currency=EUR"><span class="umc-switcher__code">EUR</span></a></li>
+				</ul>
+			</div>
+		</div>
+
+		<div class="umc-switcher umc-switcher--dropdown umc-switcher--manual umc-switcher--presentation-classic-dropdown umc-switcher--preset-default umc-switcher--theme-automatic umc-switcher--size-standard umc-switcher--shape-rounded"
+			style="position:absolute;top:1rem;left:1rem;--umc-switcher-z-index:9990"
+			data-umc-placement="manual"
+			data-umc-style="dropdown"
+			data-umc-presentation="classic-dropdown"
+			data-umc-mobile-behavior="retain"
+			data-testid="switcher-b">
+			<button type="button" class="umc-switcher__trigger" id="umc-switcher-trigger-2" aria-expanded="false" aria-controls="umc-switcher-panel-2" aria-label="Currency: Euro, EUR">
+				<span class="umc-switcher__trigger-content"><span class="umc-switcher__code">EUR</span></span>
+			</button>
+			<div class="umc-switcher__backdrop" hidden aria-hidden="true"></div>
+			<div class="umc-switcher__panel" id="umc-switcher-panel-2">
+				<h2 class="umc-switcher__sheet-title" id="umc-switcher-title-2" hidden>Choose currency</h2>
+				<button type="button" class="umc-switcher__close" hidden>Close</button>
+				<span class="umc-switcher__sheet-divider" hidden aria-hidden="true"></span>
+				<ul class="umc-switcher__menu" id="umc-switcher-menu-2" hidden>
+					<li class="umc-switcher__item"><a class="umc-switcher__link" href="?currency=SEK"><span class="umc-switcher__code">SEK</span></a></li>
+					<li class="umc-switcher__item is-active"><a class="umc-switcher__link" href="?currency=EUR" aria-current="true"><span class="umc-switcher__code">EUR</span></a></li>
+				</ul>
+			</div>
+		</div>
+
+		<div class="umc-switcher umc-switcher--dropdown umc-switcher--floating-side umc-switcher--side-left umc-switcher--align-top umc-switcher--presentation-floating-card umc-switcher--preset-floating umc-switcher--theme-light umc-switcher--size-standard umc-switcher--shape-rounded umc-switcher--mobile-retain"
+			style="--umc-switcher-edge-offset:16px;--umc-switcher-z-index:1000;top:5rem"
+			data-umc-placement="floating-side"
+			data-umc-style="dropdown"
+			data-umc-presentation="floating-card"
+			data-umc-mobile-behavior="retain"
+			data-testid="switcher-card">
+			<button type="button" class="umc-switcher__trigger" id="umc-switcher-trigger-3" aria-expanded="false" aria-controls="umc-switcher-panel-3" aria-label="Currency: US Dollar, USD">
+				<span class="umc-switcher__trigger-content"><span class="umc-switcher__code">USD</span><span class="umc-switcher__symbol">$</span></span>
+			</button>
+			<div class="umc-switcher__backdrop" hidden aria-hidden="true"></div>
+			<div class="umc-switcher__panel" id="umc-switcher-panel-3">
+				<h2 class="umc-switcher__sheet-title" id="umc-switcher-title-3" hidden>Choose currency</h2>
+				<button type="button" class="umc-switcher__close" hidden>Close</button>
+				<span class="umc-switcher__sheet-divider" hidden aria-hidden="true"></span>
+				<ul class="umc-switcher__menu" id="umc-switcher-menu-3" hidden>
+					<li class="umc-switcher__item is-active"><a class="umc-switcher__link" href="?currency=USD" aria-current="true"><span class="umc-switcher__code">USD</span><span class="umc-switcher__name">United States dollar with a deliberately long label for overflow</span></a></li>
+					<li class="umc-switcher__item"><a class="umc-switcher__link" href="?currency=EUR"><span class="umc-switcher__code">EUR</span><span class="umc-switcher__name">Euro</span></a></li>
+					<li class="umc-switcher__item"><a class="umc-switcher__link" href="?currency=SEK"><span class="umc-switcher__code">SEK</span><span class="umc-switcher__name">Swedish krona</span></a></li>
+					<li class="umc-switcher__item"><a class="umc-switcher__link" href="?currency=GBP"><span class="umc-switcher__code">GBP</span><span class="umc-switcher__name">Pound sterling</span></a></li>
+					<li class="umc-switcher__item"><a class="umc-switcher__link" href="?currency=CHF"><span class="umc-switcher__code">CHF</span><span class="umc-switcher__name">Swiss franc</span></a></li>
+					<li class="umc-switcher__item"><a class="umc-switcher__link" href="?currency=NOK"><span class="umc-switcher__code">NOK</span><span class="umc-switcher__name">Norwegian krone</span></a></li>
+					<li class="umc-switcher__item"><a class="umc-switcher__link" href="?currency=DKK"><span class="umc-switcher__code">DKK</span><span class="umc-switcher__name">Danish krone</span></a></li>
+					<li class="umc-switcher__item"><a class="umc-switcher__link" href="?currency=PLN"><span class="umc-switcher__code">PLN</span><span class="umc-switcher__name">Polish zloty</span></a></li>
+				</ul>
+			</div>
+		</div>
+
+		<div class="umc-switcher umc-switcher--dropdown umc-switcher--manual umc-switcher--presentation-minimal-icon umc-switcher--preset-minimal umc-switcher--theme-automatic umc-switcher--size-standard umc-switcher--shape-pill"
+			style="position:absolute;top:1rem;left:12rem"
+			data-umc-placement="manual"
+			data-umc-style="dropdown"
+			data-umc-presentation="minimal-icon"
+			data-umc-mobile-behavior="bottom-sheet"
+			data-testid="switcher-minimal">
+			<button type="button" class="umc-switcher__trigger" id="umc-switcher-trigger-4" aria-expanded="false" aria-controls="umc-switcher-panel-4" aria-label="Currency: Japanese yen, JPY">
+				<span class="umc-switcher__trigger-content"><span class="umc-switcher__symbol">¥</span></span>
+			</button>
+			<div class="umc-switcher__backdrop" hidden aria-hidden="true"></div>
+			<div class="umc-switcher__panel" id="umc-switcher-panel-4">
+				<h2 class="umc-switcher__sheet-title" id="umc-switcher-title-4" hidden>Choose currency</h2>
+				<button type="button" class="umc-switcher__close" hidden>Close</button>
+				<span class="umc-switcher__sheet-divider" hidden aria-hidden="true"></span>
+				<ul class="umc-switcher__menu" id="umc-switcher-menu-4" hidden>
+					<li class="umc-switcher__item is-active"><a class="umc-switcher__link" href="?currency=JPY" aria-current="true"><span class="umc-switcher__symbol">¥</span></a></li>
+					<li class="umc-switcher__item"><a class="umc-switcher__link" href="?currency=EUR"><span class="umc-switcher__code">EUR</span></a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	<script src="../../../assets/js/switcher.js"></script>
+</body>
+</html>
