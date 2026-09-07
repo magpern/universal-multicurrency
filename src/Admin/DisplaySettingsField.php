@@ -929,8 +929,9 @@ final class DisplaySettingsField {
 					$this->controls->segmented_control(
 						'umc_display[design][motion]',
 						array(
-							SwitcherSettings::MOTION_SUBTLE => __( 'Subtle', 'universal-multicurrency' ),
-							SwitcherSettings::MOTION_NONE => __( 'None', 'universal-multicurrency' ),
+							SwitcherSettings::MOTION_STANDARD => __( 'Standard', 'universal-multicurrency' ),
+							SwitcherSettings::MOTION_REDUCED => __( 'Reduced', 'universal-multicurrency' ),
+							SwitcherSettings::MOTION_OFF => __( 'Off', 'universal-multicurrency' ),
 						),
 						$settings->motion(),
 						array( 'data-umc-display-field' => 'motion' )

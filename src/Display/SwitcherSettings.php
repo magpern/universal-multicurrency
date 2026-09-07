@@ -10,12 +10,13 @@ declare(strict_types=1);
 namespace UMC\Display;
 
 /**
- * Immutable, sanitized Display switcher configuration (settings schema 7).
+ * Immutable, sanitized Display switcher configuration (settings schema 8).
  *
- * Presentation is layered: base CSS → preset class → theme/size/shape →
- * sparse structured overrides → responsive bag → Custom CSS (ADR-0022).
- * Schema-5 stores are read through the legacy `appearance.*` and flat
- * `content.*` aliases until the 5 → 6 migration rewrites them.
+ * Presentation is layered: base CSS → presentation class → legacy preset →
+ * theme/size/shape → sparse structured overrides → responsive bag → Custom CSS
+ * (ADR-0022, ADR-0035). Schema-5 stores are read through the legacy
+ * `appearance.*` and flat `content.*` aliases until the 5 → 6 migration
+ * rewrites them.
  */
 final class SwitcherSettings {
 
@@ -45,6 +46,8 @@ final class SwitcherSettings {
 
 	public const THEME_DARK = 'dark';
 
+	public const THEME_BRAND = 'brand';
+
 	public const SIZE_COMPACT = 'compact';
 
 	public const SIZE_STANDARD = 'standard';
@@ -56,6 +59,8 @@ final class SwitcherSettings {
 	public const SHAPE_ROUNDED = 'rounded';
 
 	public const SHAPE_PILL = 'pill';
+
+	public const SHAPE_SQUARE = 'square';
 
 	public const PRESET_DEFAULT = 'default';
 
@@ -69,9 +74,33 @@ final class SwitcherSettings {
 
 	public const PRESET_FLOATING = 'floating';
 
+	public const PRESENTATION_EDGE_PILL = 'edge_pill';
+
+	public const PRESENTATION_FLOATING_CARD = 'floating_card';
+
+	public const PRESENTATION_MINIMAL_ICON = 'minimal_icon';
+
+	public const PRESENTATION_CLASSIC_DROPDOWN = 'classic_dropdown';
+
+	public const PRESENTATION_STICKY_FOOTER = 'sticky_footer';
+
+	public const MOTION_STANDARD = 'standard';
+
+	public const MOTION_REDUCED = 'reduced';
+
+	public const MOTION_OFF = 'off';
+
+	/** @deprecated Read alias normalized to {@see MOTION_STANDARD}. */
+	public const MOTION_SUBTLE = 'subtle';
+
+	/** @deprecated Read alias normalized to {@see MOTION_OFF}. */
 	public const MOTION_NONE = 'none';
 
-	public const MOTION_SUBTLE = 'subtle';
+	public const MOBILE_BEHAVIOR_RETAIN = 'retain';
+
+	public const MOBILE_BEHAVIOR_BOTTOM_SHEET = 'bottom_sheet';
+
+	public const MOBILE_BEHAVIOR_STICKY_COMPACT = 'sticky_compact';
 
 	public const ELEMENT_CODE = 'code';
 
@@ -92,7 +121,7 @@ final class SwitcherSettings {
 	 *
 	 * @var array<int, string>
 	 */
-	public const THEMES = array( self::THEME_AUTOMATIC, self::THEME_LIGHT, self::THEME_DARK );
+	public const THEMES = array( self::THEME_AUTOMATIC, self::THEME_LIGHT, self::THEME_DARK, self::THEME_BRAND );
 
 	/**
 	 * Allowed size values.
@@ -106,7 +135,7 @@ final class SwitcherSettings {
 	 *
 	 * @var array<int, string>
 	 */
-	public const SHAPES = array( self::SHAPE_SLIGHT, self::SHAPE_ROUNDED, self::SHAPE_PILL );
+	public const SHAPES = array( self::SHAPE_SLIGHT, self::SHAPE_ROUNDED, self::SHAPE_PILL, self::SHAPE_SQUARE );
 
 	/**
 	 * Allowed preset identifiers.
@@ -123,11 +152,35 @@ final class SwitcherSettings {
 	);
 
 	/**
-	 * Allowed motion levels.
+	 * Allowed selector presentation identifiers.
 	 *
 	 * @var array<int, string>
 	 */
-	public const MOTIONS = array( self::MOTION_NONE, self::MOTION_SUBTLE );
+	public const PRESENTATIONS = array(
+		self::PRESENTATION_EDGE_PILL,
+		self::PRESENTATION_FLOATING_CARD,
+		self::PRESENTATION_MINIMAL_ICON,
+		self::PRESENTATION_CLASSIC_DROPDOWN,
+		self::PRESENTATION_STICKY_FOOTER,
+	);
+
+	/**
+	 * Allowed motion levels (persisted canonical values).
+	 *
+	 * @var array<int, string>
+	 */
+	public const MOTIONS = array( self::MOTION_STANDARD, self::MOTION_REDUCED, self::MOTION_OFF );
+
+	/**
+	 * Allowed floating-mode mobile behaviours.
+	 *
+	 * @var array<int, string>
+	 */
+	public const MOBILE_BEHAVIORS = array(
+		self::MOBILE_BEHAVIOR_RETAIN,
+		self::MOBILE_BEHAVIOR_BOTTOM_SHEET,
+		self::MOBILE_BEHAVIOR_STICKY_COMPACT,
+	);
 
 	/**
 	 * Allowed presentation icon shape values.
@@ -227,8 +280,9 @@ final class SwitcherSettings {
 	 * @var array<string, string>
 	 */
 	private const MOTION_DURATIONS = array(
-		self::MOTION_NONE   => '0ms',
-		self::MOTION_SUBTLE => '150ms',
+		self::MOTION_OFF      => '0ms',
+		self::MOTION_REDUCED  => '80ms',
+		self::MOTION_STANDARD => '150ms',
 	);
 
 	private const DIMENSION_MIN = 0;
@@ -382,6 +436,15 @@ final class SwitcherSettings {
 			? $merged['presentation']
 			: $defaults['presentation'];
 
+		$design = self::sanitize_design( $raw, $defaults['design'] );
+		$design = self::coerce_design_presentation( $design, $placement );
+
+		$responsive = self::sanitize_responsive(
+			$raw['responsive'] ?? null,
+			(string) $design['presentation'],
+			$placement
+		);
+
 		return new self(
 			! empty( $merged['enabled'] ),
 			$placement,
@@ -406,7 +469,7 @@ final class SwitcherSettings {
 				),
 			),
 			self::sanitize_content( $raw, $defaults['content'] ),
-			self::sanitize_design( $raw, $defaults['design'] ),
+			$design,
 			array(
 				'remember_selection' => ! isset( $merged['behavior']['remember_selection'] ) || (bool) $merged['behavior']['remember_selection'],
 				'active_first'       => ! isset( $merged['behavior']['active_first'] ) || (bool) $merged['behavior']['active_first'],
@@ -415,7 +478,7 @@ final class SwitcherSettings {
 				'desktop' => ! isset( $merged['visibility']['desktop'] ) || (bool) $merged['visibility']['desktop'],
 				'mobile'  => ! isset( $merged['visibility']['mobile'] ) || (bool) $merged['visibility']['mobile'],
 			),
-			self::sanitize_responsive( $raw['responsive'] ?? null ),
+			$responsive,
 			SwitcherCustomCss::sanitize( $raw['custom_css'] ?? '' ),
 			self::sanitize_presentation( $raw, $presentation_defaults ),
 			$style_coerced
@@ -457,12 +520,13 @@ final class SwitcherSettings {
 				'show_chevron' => false,
 			),
 			'design'       => array(
-				'preset'    => self::PRESET_DEFAULT,
-				'theme'     => self::THEME_AUTOMATIC,
-				'size'      => self::SIZE_STANDARD,
-				'shape'     => self::SHAPE_ROUNDED,
-				'overrides' => array(),
-				'motion'    => self::MOTION_SUBTLE,
+				'presentation' => self::PRESENTATION_CLASSIC_DROPDOWN,
+				'preset'       => self::PRESET_DEFAULT,
+				'theme'        => self::THEME_AUTOMATIC,
+				'size'         => self::SIZE_STANDARD,
+				'shape'        => self::SHAPE_ROUNDED,
+				'overrides'    => array(),
+				'motion'       => self::MOTION_STANDARD,
 			),
 			'behavior'     => array(
 				'remember_selection' => true,
@@ -475,6 +539,7 @@ final class SwitcherSettings {
 			'responsive'   => array(
 				'hide_name_on_mobile' => false,
 				'compact_on_mobile'   => false,
+				'mobile_behavior'     => self::MOBILE_BEHAVIOR_RETAIN,
 			),
 			'custom_css'   => '',
 			'presentation' => array(
@@ -691,6 +756,13 @@ final class SwitcherSettings {
 	}
 
 	/**
+	 * Selected selector presentation identifier.
+	 */
+	public function selector_presentation(): string {
+		return (string) $this->design['presentation'];
+	}
+
+	/**
 	 * Selected preset identifier.
 	 */
 	public function preset(): string {
@@ -702,6 +774,13 @@ final class SwitcherSettings {
 	 */
 	public function motion(): string {
 		return (string) $this->design['motion'];
+	}
+
+	/**
+	 * Floating-mode mobile behaviour (ignored unless placement is floating_side).
+	 */
+	public function mobile_behavior(): string {
+		return (string) ( $this->responsive['mobile_behavior'] ?? self::MOBILE_BEHAVIOR_RETAIN );
 	}
 
 	/**
@@ -847,10 +926,15 @@ final class SwitcherSettings {
 			$classes[] = 'umc-switcher--align-' . $this->position['vertical_alignment'];
 		}
 
+		$classes[] = 'umc-switcher--presentation-' . str_replace( '_', '-', (string) $this->design['presentation'] );
 		$classes[] = 'umc-switcher--preset-' . $this->design['preset'];
 		$classes[] = 'umc-switcher--theme-' . $this->design['theme'];
 		$classes[] = 'umc-switcher--size-' . $this->design['size'];
 		$classes[] = 'umc-switcher--shape-' . $this->design['shape'];
+
+		if ( self::PLACEMENT_FLOATING_SIDE === $this->placement ) {
+			$classes[] = 'umc-switcher--mobile-' . str_replace( '_', '-', $this->mobile_behavior() );
+		}
 
 		if ( $this->responsive['hide_name_on_mobile'] ) {
 			$classes[] = 'umc-switcher--hide-name-on-mobile';
@@ -888,6 +972,12 @@ final class SwitcherSettings {
 		$vertical = (string) $this->position['vertical_offset'] . 'px';
 		$bottom   = (string) $this->position['bottom_offset'] . 'px';
 
+		$presentation = (string) $this->design['presentation'];
+		$z_index      = self::PRESENTATION_CLASSIC_DROPDOWN === $presentation
+			|| self::PLACEMENT_MANUAL === $this->placement
+			? '9990'
+			: ( self::PRESENTATION_STICKY_FOOTER === $presentation ? '40' : '1000' );
+
 		$variables = array(
 			'--umc-switcher-edge-offset'         => $edge,
 			'--umc-switcher-vertical-offset'     => $vertical,
@@ -895,8 +985,8 @@ final class SwitcherSettings {
 			'--umc-edge-offset'                  => $edge,
 			'--umc-vertical-offset'              => $vertical,
 			'--umc-bottom-offset'                => $bottom,
-			'--umc-switcher-z-index'             => '9990',
-			'--umc-switcher-transition-duration' => self::MOTION_DURATIONS[ $this->design['motion'] ] ?? self::MOTION_DURATIONS[ self::MOTION_SUBTLE ],
+			'--umc-switcher-z-index'             => $z_index,
+			'--umc-switcher-transition-duration' => self::MOTION_DURATIONS[ $this->design['motion'] ] ?? self::MOTION_DURATIONS[ self::MOTION_STANDARD ],
 		);
 
 		foreach ( $this->design['overrides'] as $key => $value ) {
@@ -1081,34 +1171,153 @@ final class SwitcherSettings {
 		$design     = is_array( $raw['design'] ?? null ) ? $raw['design'] : array();
 		$appearance = is_array( $raw['appearance'] ?? null ) ? $raw['appearance'] : array();
 
+		$has_presentation = array_key_exists( 'presentation', $design );
+
 		return array(
-			'preset'    => self::sanitize_enum(
+			'presentation' => $has_presentation
+				? self::sanitize_enum(
+					self::read_string( $design, 'presentation', (string) $defaults['presentation'] ),
+					self::PRESENTATIONS,
+					self::PRESENTATION_CLASSIC_DROPDOWN
+				)
+				: '',
+			'preset'       => self::sanitize_enum(
 				self::read_string( $design, 'preset', (string) $defaults['preset'] ),
 				self::PRESETS,
 				self::PRESET_DEFAULT
 			),
-			'theme'     => self::sanitize_enum(
+			'theme'        => self::sanitize_enum(
 				self::read_aliased_string( $design, $appearance, 'theme', (string) $defaults['theme'] ),
 				self::THEMES,
 				self::THEME_AUTOMATIC
 			),
-			'size'      => self::sanitize_enum(
+			'size'         => self::sanitize_enum(
 				self::read_aliased_string( $design, $appearance, 'size', (string) $defaults['size'] ),
 				self::SIZES,
 				self::SIZE_STANDARD
 			),
-			'shape'     => self::sanitize_enum(
+			'shape'        => self::sanitize_enum(
 				self::read_aliased_string( $design, $appearance, 'shape', (string) $defaults['shape'] ),
 				self::SHAPES,
 				self::SHAPE_ROUNDED
 			),
-			'overrides' => self::sanitize_overrides( $design['overrides'] ?? null ),
-			'motion'    => self::sanitize_enum(
-				self::read_string( $design, 'motion', (string) $defaults['motion'] ),
-				self::MOTIONS,
-				self::MOTION_SUBTLE
+			'overrides'    => self::sanitize_overrides( $design['overrides'] ?? null ),
+			'motion'       => self::sanitize_motion(
+				self::read_string( $design, 'motion', (string) $defaults['motion'] )
 			),
 		);
+	}
+
+	/**
+	 * Normalizes motion, mapping schema-7 aliases onto canonical schema-8 values.
+	 *
+	 * @param string $raw Raw motion token.
+	 */
+	private static function sanitize_motion( string $raw ): string {
+		$aliases = array(
+			self::MOTION_SUBTLE => self::MOTION_STANDARD,
+			self::MOTION_NONE   => self::MOTION_OFF,
+		);
+
+		$normalized = $aliases[ $raw ] ?? $raw;
+
+		return self::sanitize_enum( $normalized, self::MOTIONS, self::MOTION_STANDARD );
+	}
+
+	/**
+	 * Coerces design.presentation to a value legal for the active placement.
+	 *
+	 * When presentation is missing from legacy stores, derives it from placement
+	 * and design.preset per the ADR-0035 migration mapping.
+	 *
+	 * @param array<string, mixed> $design    Sanitized design subtree.
+	 * @param string               $placement Placement mode.
+	 * @return array<string, mixed>
+	 */
+	private static function coerce_design_presentation( array $design, string $placement ): array {
+		if ( '' === (string) $design['presentation'] ) {
+			$design['presentation'] = self::derive_presentation_from_legacy(
+				$placement,
+				(string) $design['preset']
+			);
+		}
+
+		$presentation = (string) $design['presentation'];
+
+		if ( self::PLACEMENT_STICKY_FOOTER === $placement ) {
+			$design['presentation'] = self::PRESENTATION_STICKY_FOOTER;
+			return $design;
+		}
+
+		if ( self::PLACEMENT_MANUAL === $placement ) {
+			$design['presentation'] = self::PRESENTATION_CLASSIC_DROPDOWN;
+			return $design;
+		}
+
+		// floating_side
+		if ( self::PRESENTATION_STICKY_FOOTER === $presentation ) {
+			$design['presentation'] = self::PRESENTATION_EDGE_PILL;
+			return $design;
+		}
+
+		if ( ! in_array(
+			$presentation,
+			array(
+				self::PRESENTATION_EDGE_PILL,
+				self::PRESENTATION_FLOATING_CARD,
+				self::PRESENTATION_MINIMAL_ICON,
+				self::PRESENTATION_CLASSIC_DROPDOWN,
+			),
+			true
+		) ) {
+			$design['presentation'] = self::PRESENTATION_CLASSIC_DROPDOWN;
+		}
+
+		return $design;
+	}
+
+	/**
+	 * Derives presentation for stores that have not yet persisted the field.
+	 *
+	 * Mirrors migrate_display_7_to_8 mapping so unclean schema-7 arrays still
+	 * render correctly before the upgrader runs.
+	 *
+	 * @param string $placement Placement mode.
+	 * @param string $preset    Legacy design.preset.
+	 */
+	public static function derive_presentation_from_legacy( string $placement, string $preset ): string {
+		if ( self::PLACEMENT_STICKY_FOOTER === $placement ) {
+			return self::PRESENTATION_STICKY_FOOTER;
+		}
+
+		if ( self::PLACEMENT_FLOATING_SIDE === $placement ) {
+			if ( self::PRESET_FLOATING === $preset ) {
+				return self::PRESENTATION_FLOATING_CARD;
+			}
+
+			if ( self::PRESET_MINIMAL === $preset ) {
+				return self::PRESENTATION_MINIMAL_ICON;
+			}
+		}
+
+		return self::PRESENTATION_CLASSIC_DROPDOWN;
+	}
+
+	/**
+	 * Default mobile_behavior for a presentation under floating_side.
+	 *
+	 * @param string $presentation Selector presentation.
+	 */
+	public static function default_mobile_behavior_for( string $presentation ): string {
+		if ( in_array(
+			$presentation,
+			array( self::PRESENTATION_EDGE_PILL, self::PRESENTATION_MINIMAL_ICON ),
+			true
+		) ) {
+			return self::MOBILE_BEHAVIOR_BOTTOM_SHEET;
+		}
+
+		return self::MOBILE_BEHAVIOR_RETAIN;
 	}
 
 	/**
@@ -1206,15 +1415,33 @@ final class SwitcherSettings {
 	/**
 	 * Normalizes the responsive override bag.
 	 *
-	 * @param mixed $raw Raw responsive settings.
-	 * @return array<string, bool>
+	 * @param mixed  $raw          Raw responsive settings.
+	 * @param string $presentation Coerced selector presentation.
+	 * @param string $placement    Placement mode.
+	 * @return array<string, bool|string>
 	 */
-	private static function sanitize_responsive( mixed $raw ): array {
-		$source = is_array( $raw ) ? $raw : array();
+	private static function sanitize_responsive( mixed $raw, string $presentation, string $placement ): array {
+		$source  = is_array( $raw ) ? $raw : array();
+		$default = self::PLACEMENT_FLOATING_SIDE === $placement
+			? self::default_mobile_behavior_for( $presentation )
+			: self::MOBILE_BEHAVIOR_RETAIN;
+
+		$behavior = self::sanitize_enum(
+			isset( $source['mobile_behavior'] ) && is_string( $source['mobile_behavior'] )
+				? $source['mobile_behavior']
+				: $default,
+			self::MOBILE_BEHAVIORS,
+			$default
+		);
+
+		if ( self::PLACEMENT_FLOATING_SIDE !== $placement ) {
+			$behavior = self::MOBILE_BEHAVIOR_RETAIN;
+		}
 
 		return array(
 			'hide_name_on_mobile' => self::is_truthy( $source['hide_name_on_mobile'] ?? false ),
 			'compact_on_mobile'   => self::is_truthy( $source['compact_on_mobile'] ?? false ),
+			'mobile_behavior'     => $behavior,
 		);
 	}
 

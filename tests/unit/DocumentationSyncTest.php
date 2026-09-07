@@ -381,8 +381,8 @@ final class DocumentationSyncTest extends TestCase {
 	}
 
 	public function test_settings_schema_documentation_matches_implementation(): void {
-		$this->assertSame( 7, Settings::SCHEMA_VERSION );
-		$this->assertSame( array( 1, 2, 3, 4, 5, 6, 7 ), array_keys( SettingsUpgrader::production_migrations() ) );
+		$this->assertSame( 8, Settings::SCHEMA_VERSION );
+		$this->assertSame( array( 1, 2, 3, 4, 5, 6, 7, 8 ), array_keys( SettingsUpgrader::production_migrations() ) );
 
 		foreach ( array( 'docs/ARCHITECTURE.md', 'docs/MIGRATION.md' ) as $file ) {
 			$source = $this->read( $file );
@@ -395,6 +395,7 @@ final class DocumentationSyncTest extends TestCase {
 			$this->assertStringContainsString( 'migrate_4_to_5', $source, $file );
 			$this->assertStringContainsString( 'migrate_5_to_6', $source, $file );
 			$this->assertStringContainsString( 'migrate_6_to_7', $source, $file );
+			$this->assertStringContainsString( 'migrate_7_to_8', $source, $file );
 		}
 
 		$this->assertStringContainsString( 'schema_version', $this->read( 'docs/PERSISTED_DATA.md' ) );

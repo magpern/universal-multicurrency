@@ -54,7 +54,7 @@ These run automatically inside UMC when it first reads `umc_settings` after an
 upgrade. They are **not** a foreign-switcher import: `SettingsUpgrader` only
 ever reads UMC's own option.
 
-`Settings::SCHEMA_VERSION` is **7**. Seven production migrations exist, keyed by
+`Settings::SCHEMA_VERSION` is **8**. Eight production migrations exist, keyed by
 the version they produce, and are applied in ascending order:
 
 | From → To | Migration | Change |
@@ -66,6 +66,7 @@ the version they produce, and are applied in ascending order:
 | 4 → 5 | `SettingsUpgrader::migrate_4_to_5` | Adds Geo Detection defaults (`geo` subtree disabled, empty rules) |
 | 5 → 6 | `SettingsUpgrader::migrate_5_to_6` | Restructures the Display block for layered switcher presentation (below) |
 | 6 → 7 | `SettingsUpgrader::migrate_6_to_7` | Adds optional switcher presentation icons with safe defaults (below) |
+| 7 → 8 | `SettingsUpgrader::migrate_7_to_8` | Adds selector presentation presets with visually neutral mapping (below) |
 
 ### What v1 → v2 changes
 
@@ -137,6 +138,22 @@ did on v0.15 (ADR-0022).
 Existing code/symbol/name visibility, design tokens, placement, and Custom CSS
 are preserved unchanged. Because icons default off, an upgraded switcher renders
 the same as on v0.20 (ADR-0027).
+
+### What v7 → v8 changes
+
+| Field | Before (v7) | After (v8) |
+|---|---|---|
+| Selector presentation | *(absent)* | **`design.presentation`** derived from placement + legacy preset (never Edge Pill for existing floating stores) |
+| Mobile behaviour | *(absent)* | **`responsive.mobile_behavior`** (`retain` / `bottom_sheet` / `sticky_compact`; floating-only) |
+| Motion | `subtle` / `none` | Normalized to **`standard`** / **`off`** (`reduced` added) |
+| Theme | `automatic` / `light` / `dark` | Adds **`brand`** (existing values preserved) |
+| Shape | `slight` / `rounded` / `pill` | Adds **`square`** (existing values preserved) |
+| Legacy preset | `design.preset` | **Preserved exactly** and still emitted as `--preset-*` |
+| Schema marker | `schema_version: 7` | **`schema_version: 8`** |
+
+Offsets, content ordering, Custom CSS, and icon presentation settings are
+preserved unchanged. Because Edge Pill is opt-in for existing stores, an
+upgraded floating switcher keeps its prior appearance (ADR-0035).
 
 Defaults for the initialized display fields come from `Settings::sanitize()`,
 which every migration result passes through.

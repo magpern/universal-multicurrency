@@ -68,7 +68,7 @@ fitting SPL type (`InvalidArgumentException` / `RuntimeException`).
 
 ### Settings schema upgrade (Milestones 7–8)
 
-`Settings::SCHEMA_VERSION` is **7** and must not be bumped unless a genuine
+`Settings::SCHEMA_VERSION` is **8** and must not be bumped unless a genuine
 settings shape change requires it. Production migrations exist because the
 stored shape actually changed; none is an artificial bump.
 
@@ -108,6 +108,12 @@ render exactly as they did in v0.15.
 settings (ADR-0027): `presentation.*`, per-context `show_icon` (default
 `false`), and leaves existing `order[]` arrays unchanged so upgraded stores
 render exactly as they did in v0.20.
+
+`SettingsUpgrader::migrate_7_to_8` adds selector presentation presets
+(ADR-0035): `design.presentation`, `responsive.mobile_behavior`, motion
+aliases (`subtle`→`standard`, `none`→`off`), and theme/shape extensions.
+Existing floating stores map to Classic / Floating Card / Minimal Icon — never
+auto-converted to Edge Pill — so upgraded stores keep their prior appearance.
 See [`MIGRATION.md`](MIGRATION.md) § Internal settings schema migrations.
 
 `SettingsUpgrader` responsibilities:

@@ -63,7 +63,7 @@ final class SettingsMigrationV5ToV6Test extends TestCase {
 		$this->assertSame( SwitcherSettings::SIZE_LARGE, $display['design']['size'] );
 		$this->assertSame( SwitcherSettings::SHAPE_PILL, $display['design']['shape'] );
 		$this->assertSame( array(), $display['design']['overrides'] );
-		$this->assertSame( SwitcherSettings::MOTION_SUBTLE, $display['design']['motion'] );
+		$this->assertSame( SwitcherSettings::MOTION_STANDARD, $display['design']['motion'] );
 		$this->assertArrayNotHasKey( 'appearance', $display );
 	}
 
@@ -188,6 +188,7 @@ final class SettingsMigrationV5ToV6Test extends TestCase {
 			array(
 				'hide_name_on_mobile' => false,
 				'compact_on_mobile'   => false,
+				'mobile_behavior'     => SwitcherSettings::MOBILE_BEHAVIOR_RETAIN,
 			),
 			$display['responsive']
 		);

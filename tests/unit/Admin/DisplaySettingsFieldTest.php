@@ -130,7 +130,7 @@ final class DisplaySettingsFieldTest extends TestCase {
 			'enabled'    => '1',
 			'design'     => array(
 				'preset'    => SwitcherSettings::PRESET_PILL,
-				'motion'    => SwitcherSettings::MOTION_NONE,
+				'motion'    => SwitcherSettings::MOTION_OFF,
 				'overrides' => array(
 					'surface'        => '#111827',
 					'radius'         => '14',
@@ -151,7 +151,7 @@ final class DisplaySettingsFieldTest extends TestCase {
 		$display = $result['display'];
 
 		$this->assertSame( SwitcherSettings::PRESET_PILL, $display['design']['preset'] );
-		$this->assertSame( SwitcherSettings::MOTION_NONE, $display['design']['motion'] );
+		$this->assertSame( SwitcherSettings::MOTION_OFF, $display['design']['motion'] );
 		$this->assertSame( '#111827', $display['design']['overrides']['surface'] );
 		$this->assertSame( 14, $display['design']['overrides']['radius'] );
 		$this->assertArrayNotHasKey( 'control_height', $display['design']['overrides'] );

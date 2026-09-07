@@ -50,15 +50,16 @@ final class SwitcherSettingsTest extends TestCase {
 		$this->assertSame( SwitcherSettings::ICON_SHAPE_NATURAL, $defaults['presentation']['icon_shape'] );
 	}
 
-	public function test_default_design_is_default_preset_with_subtle_motion(): void {
+	public function test_default_design_is_default_preset_with_standard_motion(): void {
 		$design = SwitcherSettings::default_array()['design'];
 
+		$this->assertSame( SwitcherSettings::PRESENTATION_CLASSIC_DROPDOWN, $design['presentation'] );
 		$this->assertSame( SwitcherSettings::PRESET_DEFAULT, $design['preset'] );
 		$this->assertSame( SwitcherSettings::THEME_AUTOMATIC, $design['theme'] );
 		$this->assertSame( SwitcherSettings::SIZE_STANDARD, $design['size'] );
 		$this->assertSame( SwitcherSettings::SHAPE_ROUNDED, $design['shape'] );
 		$this->assertSame( array(), $design['overrides'] );
-		$this->assertSame( SwitcherSettings::MOTION_SUBTLE, $design['motion'] );
+		$this->assertSame( SwitcherSettings::MOTION_STANDARD, $design['motion'] );
 	}
 
 	public function test_default_responsive_bag_is_off_and_custom_css_is_empty(): void {
@@ -66,6 +67,7 @@ final class SwitcherSettingsTest extends TestCase {
 
 		$this->assertFalse( $defaults['responsive']['hide_name_on_mobile'] );
 		$this->assertFalse( $defaults['responsive']['compact_on_mobile'] );
+		$this->assertSame( SwitcherSettings::MOBILE_BEHAVIOR_RETAIN, $defaults['responsive']['mobile_behavior'] );
 		$this->assertSame( '', $defaults['custom_css'] );
 	}
 
@@ -116,7 +118,7 @@ final class SwitcherSettingsTest extends TestCase {
 					'preset' => 'brutalist',
 					'theme'  => 'neon',
 					'size'   => 'huge',
-					'shape'  => 'square',
+					'shape'  => 'diamond',
 					'motion' => 'bouncy',
 				),
 			)
@@ -128,7 +130,7 @@ final class SwitcherSettingsTest extends TestCase {
 		$this->assertSame( SwitcherSettings::THEME_AUTOMATIC, $settings->design()['theme'] );
 		$this->assertSame( SwitcherSettings::SIZE_STANDARD, $settings->design()['size'] );
 		$this->assertSame( SwitcherSettings::SHAPE_ROUNDED, $settings->design()['shape'] );
-		$this->assertSame( SwitcherSettings::MOTION_SUBTLE, $settings->motion() );
+		$this->assertSame( SwitcherSettings::MOTION_STANDARD, $settings->motion() );
 	}
 
 	public function test_legacy_appearance_is_read_into_design(): void {
@@ -267,7 +269,7 @@ final class SwitcherSettingsTest extends TestCase {
 		$variables = SwitcherSettings::from_array(
 			array(
 				'design' => array(
-					'motion'    => SwitcherSettings::MOTION_NONE,
+					'motion'    => SwitcherSettings::MOTION_OFF,
 					'overrides' => array(
 						'surface' => '#101010',
 						'radius'  => 4,
