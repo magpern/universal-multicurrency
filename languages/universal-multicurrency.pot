@@ -429,6 +429,8 @@ msgstr ""
 #: src/Admin/CurrencyOverviewField.php:52
 #: src/Admin/DisplaySettingsField.php:778
 #: src/Admin/FixedPricingSettingsField.php:143
+#: src/User/PreferredCurrencyField.php:73
+#: src/User/RegionalPreferencesHost.php:219
 msgid "Currency"
 msgstr ""
 
@@ -2956,6 +2958,13 @@ msgstr ""
 msgid "Current"
 msgstr ""
 
+#: src/api.php:100
+#: src/User/PreferredCurrency.php:109
+#: src/User/PreferredCurrency.php:140
+#: src/User/RegionalPreferencesHost.php:226
+msgid "Multicurrency support is not currently available."
+msgstr ""
+
 #. translators: 1: shopper currency code, 2: effective checkout currency code.
 #: src/Checkout/CheckoutNoticeService.php:99
 #, php-format
@@ -3935,6 +3944,55 @@ msgstr ""
 
 #: src/StoreApi/CartExtensionData.php:197
 msgid "Checkout transition notice payload for Blocks."
+msgstr ""
+
+#. translators: %s: currency label
+#: src/User/PreferredCurrency.php:93
+#, php-format
+msgid "%s (store default)"
+msgstr ""
+
+#: src/User/PreferredCurrency.php:132
+msgid "Invalid user."
+msgstr ""
+
+#: src/User/PreferredCurrency.php:136
+msgid "You are not allowed to edit this preference."
+msgstr ""
+
+#: src/User/PreferredCurrency.php:151
+msgid "That currency is not available."
+msgstr ""
+
+#: src/User/PreferredCurrencyField.php:79
+msgid "Use store default"
+msgstr ""
+
+#: src/User/PreferredCurrencyField.php:108
+msgid "Preferred currency for your account."
+msgstr ""
+
+#: src/User/RegionalPreferencesHost.php:120
+#: src/User/RegionalPreferencesHost.php:123
+msgid "Regional preferences"
+msgstr ""
+
+#: src/User/RegionalPreferencesHost.php:198
+msgid "Language"
+msgstr ""
+
+#: src/User/RegionalPreferencesHost.php:205
+msgid "Multilingual support is not currently available."
+msgstr ""
+
+#: src/User/RegionalPreferencesHost.php:216
+msgid "Store default (unavailable)"
+msgstr ""
+
+#. translators: %s: locale code
+#: src/User/SiteDefaultLanguage.php:38
+#, php-format
+msgid "%s (site default)"
 msgstr ""
 
 #: universal-multicurrency.php:33
