@@ -73,6 +73,10 @@ final class RegionalPreferencesHost {
 			return;
 		}
 
+		if ( did_action( RegionalPreferencesComposition::ACTION_RENDERED ) > 0 ) {
+			return;
+		}
+
 		echo '<fieldset class="umc-regional-preferences">';
 		$this->render_section( RegionalPreferencesComposition::SURFACE_ACCOUNT, $user_id, true, false );
 		echo '</fieldset>';
