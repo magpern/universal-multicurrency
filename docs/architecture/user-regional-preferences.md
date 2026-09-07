@@ -9,3 +9,7 @@ active.
 The cross-plugin contract and rollout sequence are defined in the
 [Universal Multilingual implementation plan](https://github.com/magpern/universal-multilingual/blob/main/docs/plans/USER_REGIONAL_PREFERENCES_IMPLEMENTATION_PLAN.md).
 UMC deliberately does not duplicate that plan under `docs/plans/`.
+
+## Closure
+
+See UML closure: https://github.com/magpern/universal-multilingual/blob/main/docs/plans/USER_REGIONAL_PREFERENCES_CLOSURE.md
