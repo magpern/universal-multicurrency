@@ -26,7 +26,7 @@ In **WooCommerce → Settings → Multicurrency → Display**:
 2. **Selector style** — Edge Pill / Floating Card / Minimal Icon / Tab / Classic Dropdown / Sticky Footer (filtered by placement)
 3. **Content** — trigger vs menu visibility (code / symbol / name / icon), order, chevron
 4. **Design** — theme (including Brand), size, shape (including Square), motion, colors, spacing; legacy token preset remains available under progressive disclosure
-5. **Currency presentation icons** — optional bundled flags, size, shape, per-currency overrides (M22). EUR always uses the European Union flag and cannot be remapped. This is the top-level `display.presentation` icon subtree — not `design.presentation`.
+5. **Currency presentation icons** — optional bundled flags, size, shape, per-currency overrides (M22). EUR always uses the European Union flag and cannot be remapped. Flags are presentation-only and are not derived from Visitor Location / geo; unknown or unmapped currencies fall back to the currency code with no flag. Selector presentation does not change currency authority (`explicit > session > cookie > user_preferred > base`). This is the top-level `display.presentation` icon subtree — not `design.presentation`.
 6. **Mobile behaviour** (floating only) — Side selector / Bottom sheet / Compact sticky bar
 7. **Advanced** — Custom CSS (capability-gated)
 

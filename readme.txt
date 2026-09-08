@@ -4,7 +4,7 @@ Tags: woocommerce, currency, multicurrency, exchange rates, money
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.2.1
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,6 +49,14 @@ Not for production traffic. Two runtime converters can double-convert prices. De
 The plugin ships a POT template (`languages/universal-multicurrency.pot`) for translators. Bundled locale `.mo` files are not included in this release.
 
 == Changelog ==
+
+= 1.3.0 =
+* Regional Preferences: authenticated preferred currency on WordPress Profile and WooCommerce Account details, composed with Universal Multilingual Regional Preferences. Resolver precedence remains explicit > session > cookie > user_preferred > base.
+* Currency selector: Edge Pill / Minimal Icon / Tab floating family on the existing switcher stack, with flag + ISO currency code on the collapsed control.
+* EUR always uses the European Union flag (non-overridable). Flags are presentation-only and are not derived from visitor geo. Unknown or unmapped currencies fall back to code only.
+* Same-edge stacking with other `data-um-edge-control` plugins via CSS :has(); no UML runtime dependency.
+* Accessibility and progressive enhancement: disclosure semantics, no-JS ?currency= links, data-umc-enhanced after JS init. Switching remains ?currency= navigation (no AJAX/REST).
+* Settings schema 8, OrderSnapshot 5, PersistedKeys 12, CacheState v1; no DB migration. See the release audit.
 
 = 1.2.1 =
 * Self-updates from a private update server via the bundled Plugin Update Checker v5 library; base URL read from the PRIVATE_UPDATE_SERVER constant, inert when it is not defined. No functional change to pricing/conversion.
@@ -252,6 +260,9 @@ The plugin ships a POT template (`languages/universal-multicurrency.pot`) for tr
 * Storefront conversion, classic cart/checkout, order snapshots, historical order display, refunds, and Store API / blocks parity (milestones 2–5)
 
 == Upgrade Notice ==
+
+= 1.3.0 =
+Selector and Regional Preferences release. Settings schema 7→8 migrates existing floating stores to Classic unless the merchant opts in. Preferred-currency meta is additive. Safe in-place upgrade; no DB migration.
 
 = 1.1.1 =
 Fix for variable-product price ranges after currency switch. Safe in-place upgrade from 1.1.0; no migration.

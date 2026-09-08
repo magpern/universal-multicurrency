@@ -622,27 +622,50 @@ milestones above used, with its own ADR and, where warranted, its own
 `docs/architecture/*.md` specification.
 
 
-## v1.3.0 — Switcher Presentation Presets / Edge Pill (**v1.3.0**) — release pending
+## v1.3.0 — Regional Preferences and UML-family selector (**v1.3.0**) — release pending
 
-**ADR:** [ADR-0035](adr/0035-switcher-presentation-presets.md)
-**Architecture spec:** [`docs/architecture/switcher-presentation-presets.md`](architecture/switcher-presentation-presets.md)
-**UML-family alignment ADR:** [ADR-0037](adr/0037-switcher-uml-family-alignment.md)
-**UML-family spec:** [`docs/architecture/switcher-uml-family-alignment.md`](architecture/switcher-uml-family-alignment.md)
-**Branch:** `feature/umc-selector-uml-alignment`
+**ADRs:** [ADR-0035](adr/0035-switcher-presentation-presets.md),
+[ADR-0036](adr/0036-authenticated-preferred-currency.md),
+[ADR-0037](adr/0037-switcher-uml-family-alignment.md)
+**Architecture specs:** [`switcher-presentation-presets.md`](architecture/switcher-presentation-presets.md),
+[`user-regional-preferences.md`](architecture/user-regional-preferences.md),
+[`switcher-uml-family-alignment.md`](architecture/switcher-uml-family-alignment.md)
+**PRs:** [#32](https://github.com/magpern/universal-multicurrency/pull/32) Edge Pill,
+[#33](https://github.com/magpern/universal-multicurrency/pull/33) Regional Preferences,
+[#34](https://github.com/magpern/universal-multicurrency/pull/34) UML-family alignment
+
+This release includes all merged work since **v1.2.1**.
 
 Redesigns the floating currency selector as curated presentation presets
 (Edge Pill recommended for new Floating setups; Floating Card; Minimal Icon;
 Tab; Classic Dropdown; Sticky Footer surface) on the existing shared
 `SwitcherSettings` → ViewModel → `SwitcherRenderer` → shared-assets stack.
 Settings schema **7 → 8** with a visually neutral migration (existing floating
-stores stay Classic unless the merchant opts in). ADR-0037 aligns UML-family
-floating presentations with Universal Multilingual **v1.12.0** without a UML
-runtime dependency, schema bump, or currency-authority change. Real
-bottom-sheet dialog contract remains available when explicitly saved; new
-family defaults use `retain`. Legacy `design.preset` token classes remain live
-under presentation geometry. Not M27. No OrderSnapshot / PersistedKeys /
-CacheState hash change. No REST/AJAX switching. No FOX/WOOCS coupling. No
-production deployment as part of the release process.
+stores stay Classic unless the merchant opts in). Authenticated preferred
+currency (WordPress Profile + WooCommerce Account) adds `umc_preferred_currency`
+user meta; resolver precedence remains `explicit > session > cookie >
+user_preferred > base`. ADR-0037 aligns UML-family floating presentations with
+Universal Multilingual **v1.12.0** without a UML runtime dependency or
+currency-authority change. Collapsed family trigger shows flag + ISO code.
+EUR always uses the EU flag (presentation-only; geo does not choose flags;
+unknown/unmapped currencies fall back to code). Real bottom-sheet dialog
+contract remains available when explicitly saved; new family defaults use
+`retain`. Same-edge stacking uses `data-um-edge-control` + CSS `:has()`.
+Legacy `design.preset` token classes remain live under presentation geometry.
+Not M27. OrderSnapshot **5** and CacheState **v1** unchanged. PersistedKeys
+**11 → 12**. No REST/AJAX switching. No FOX/WOOCS coupling. No production
+deployment as part of the release process.
+
+## v1.2.1 — Private update-server delivery (**v1.2.1**) — complete and released
+
+Infrastructure release. The plugin self-updates from a private update server via
+the bundled Plugin Update Checker v5 library. No functional change to
+pricing/conversion. Settings schema **7**, PersistedKeys **11**, OrderSnapshot
+**5**, CacheState **v1** unchanged.
+
+**Released as:** **v1.2.1** — tag `v1.2.1`, GitHub release published, artifact
+`universal-multicurrency-1.2.1.zip`. Production deployment was not part of the
+release process. Full detail: [`RELEASE_AUDIT.md`](RELEASE_AUDIT.md).
 
 ## v1.2.0 — Free Shipping Threshold Display API (**v1.2.0**) — complete and released
 

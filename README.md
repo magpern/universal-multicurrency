@@ -6,8 +6,9 @@ per-currency pricing. Products and inventory stay in the store's base
 currency; conversion happens at runtime on storefront, cart, checkout, and
 Store API surfaces. Orders carry a permanent exchange-rate snapshot.
 
-**Current release:** **v0.24.0** (plugin header and `UMC_VERSION`) — Fixed
-Pricing CSV Interchange (ADR-0030). See [`docs/RELEASE_AUDIT.md`](docs/RELEASE_AUDIT.md)
+**Current release:** **v1.3.0** (plugin header and `UMC_VERSION`) — Regional
+Preferences, Edge Pill / UML-family currency selector (ADR-0035, ADR-0036,
+ADR-0037). See [`docs/RELEASE_AUDIT.md`](docs/RELEASE_AUDIT.md)
 for the release-closure record and [`docs/ROADMAP.md`](docs/ROADMAP.md) for
 full milestone history.
 
@@ -18,11 +19,15 @@ full milestone history.
   a thin `wp umc rates` CLI.
 - **Visitor Location** — optional, disabled-by-default ordered
   country/region → currency routing, always subordinate to manual shopper
-  selection and checkout currency locks.
+  selection, authenticated preferred currency, and checkout currency locks.
+- **Regional Preferences** — authenticated shoppers can save a preferred
+  currency on WordPress Profile and WooCommerce Account details. Resolver
+  precedence is explicit > session > cookie > user_preferred > base.
 - **Storefront switcher** — shortcode, widget, and native Gutenberg block,
   with structured presentation settings (placement, Edge Pill / Minimal Icon /
-  Tab floating family, theme, size, shape, optional bundled currency icons)
-  and optional Advanced CSS.
+  Tab floating family, theme, size, shape, optional bundled currency flags).
+  EUR always uses the EU flag. Flags are presentation-only and are not chosen
+  by geo; unknown currencies fall back to code. Optional Advanced CSS.
 - **Checkout currency policy** — selected-currency or store-currency entry
   modes, causality-proven payment-gateway fallback, Classic and Checkout
   Blocks parity.
@@ -116,6 +121,18 @@ CI legs, and passive conflict detectors.
 
 Highlights only — see [`readme.txt`](readme.txt) for the complete
 release-by-release changelog.
+
+### 1.3.0 — Regional Preferences and UML-family selector
+
+Authenticated preferred currency (WordPress Profile + WooCommerce Account),
+Edge Pill / Minimal Icon / Tab floating family aligned with Universal
+Multilingual v1.12.0 visuals, flag + ISO code on the collapsed control, and
+EUR → EU flag enforcement. Settings schema 8, PersistedKeys 12; no DB
+migration. Currency authority, `?currency=` switching, session, cookie, geo,
+and pricing/FX are unchanged. See
+[ADR-0035](docs/adr/0035-switcher-presentation-presets.md),
+[ADR-0036](docs/adr/0036-authenticated-preferred-currency.md),
+[ADR-0037](docs/adr/0037-switcher-uml-family-alignment.md).
 
 ### 0.24.0 — Fixed Pricing CSV Interchange
 

@@ -63,13 +63,20 @@ optional Universal Geo Context integration.
 (**Universal Multicurrency → Currency Switcher** in the block inserter), or
 a floating placement (side/bottom). Floating Edge Pill / Minimal Icon / Tab
 presentations show a flag plus the currency code on the collapsed control
-(European Union flag for EUR). Customize placement, trigger/menu content
-(code, symbol, name, optional bundled currency icons), theme/size/shape
-presets, and — for advanced needs — raw CSS via the gated Advanced Custom CSS
-field. See
+(European Union flag for EUR). Flags are presentation-only: they are not
+chosen from Visitor Location / geo, and they do not change which currency is
+authoritative. Unknown or unmapped currencies show the code without a flag.
+Customize placement, trigger/menu content (code, symbol, name, optional
+bundled currency icons), theme/size/shape presets, and — for advanced needs —
+raw CSS via the gated Advanced Custom CSS field. See
 [`docs/SWITCHER_CUSTOMIZATION.md`](SWITCHER_CUSTOMIZATION.md) for the full
 reference, including the CSS custom-property contract for theme
 integration.
+
+Logged-in shoppers can also save a **preferred currency** on their WordPress
+profile or WooCommerce Account details (Regional Preferences). That preference
+applies only when there is no explicit `?currency=` choice, session, or cookie
+— it never overrides a shopper's current selection.
 
 ## 7. Fixed product pricing (optional)
 

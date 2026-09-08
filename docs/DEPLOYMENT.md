@@ -26,7 +26,7 @@ composer install --no-dev
 bash bin/build-zip.sh
 ```
 
-Produces `dist/universal-multicurrency-1.2.1.zip`. The archive includes `readme.txt`,
+Produces `dist/universal-multicurrency-1.3.0.zip`. The archive includes `readme.txt`,
 production `src/`, `vendor/`, bundled presentation assets, block metadata, and
 `languages/universal-multicurrency.pot`.
 
@@ -37,16 +37,28 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release on `main`:** **v1.2.1** (prepared; tag/release cut by CI).
+**Current release on `main`:** **v1.3.0** (prepared; tag/release cut by CI).
 
-## v1.2.1 — Private update-server delivery (prepared)
+## v1.3.0 — Regional Preferences and UML-family selector (prepared)
+
+Post-1.0 feature release (ADR-0035, ADR-0036, ADR-0037 — no `M27`). Authenticated
+preferred currency on WordPress Profile / WooCommerce Account; Edge Pill /
+Minimal Icon / Tab floating family with flag + ISO code; EUR always uses the EU
+flag (presentation-only; not derived from geo). Settings schema **8**,
+PersistedKeys **12**, OrderSnapshot **5**, CacheState **v1**; no DB migration.
+`?currency=` switching, session, cookie, geo, and pricing/FX are unchanged.
+Build artifact `universal-multicurrency-1.3.0.zip`
+(`composer install --no-dev` + `bin/build-zip.sh`). Production deployment: **not
+performed**. See [`RELEASE_AUDIT.md`](RELEASE_AUDIT.md).
+
+## v1.2.1 — Private update-server delivery (released)
 
 Infrastructure release. The plugin self-updates from a private update server via
 the bundled Plugin Update Checker v5 library (`PucFactory::buildUpdateChecker`,
 active only when `PRIVATE_UPDATE_SERVER` is defined in `wp-config.php`). No
 functional change to pricing/conversion; schemas / PersistedKeys / CacheState
-unchanged. Build artifact `universal-multicurrency-1.2.1.zip`
-(`composer install --no-dev` + `bin/build-zip.sh`). Production deployment: **not
+unchanged. **Released as:** **v1.2.1** — tag `v1.2.1`, GitHub release published,
+artifact `universal-multicurrency-1.2.1.zip`. Production deployment: **not
 performed**. See [`RELEASE_AUDIT.md`](RELEASE_AUDIT.md).
 
 ## v1.2.0 — Free Shipping Threshold Display API (released)

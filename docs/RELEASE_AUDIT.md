@@ -1,3 +1,34 @@
+# Release audit — v1.3.0 Regional Preferences and UML-family selector
+
+Executable release-preparation gate for Universal Multicurrency **v1.3.0**.
+Post-1.0 feature release, not a numbered milestone (ADR-0031 §6 — no `M27`).
+Includes all merged work since **v1.2.1**: Edge Pill / presentation presets
+(ADR-0035, PR #32), authenticated Regional Preferences (ADR-0036, PR #33), and
+UML-family floating selector alignment (ADR-0037, PR #34).
+
+**Repository status:** **prepared for v1.3.0**. Tag and GitHub release are cut by
+CI on the `v1.3.0` tag push.
+
+## v1.3.0 release closure record
+
+| Item | Value |
+|---|---|
+| Version | **1.3.0** |
+| Settings schema | **8** |
+| Order snapshot schema | **5** (unchanged) |
+| Persisted-data inventory version | **12** |
+| CacheState contract | **v1** (unchanged) |
+| Production migrations | none (settings schema 7→8 in-place; preferred-currency user meta additive) |
+| Unresolved release blockers | **0** |
+| Open Milestone 8 review findings | **0** |
+| Git tag `v1.3.0` | **Not yet created** |
+| GitHub release `v1.3.0` | **Not yet published** |
+| Artifact | `universal-multicurrency-1.3.0.zip` — built by CI on the tag from `composer install --no-dev` + `bin/build-zip.sh` |
+| Deployment | **Not performed** |
+| M27 | **Not created** |
+
+## Prior release: v1.2.1 Private update-server delivery
+
 # Release audit — v1.2.1 Private update-server delivery
 
 Executable release-preparation gate for Universal Multicurrency **v1.2.1**.
@@ -5,8 +36,9 @@ Infrastructure release — the plugin self-updates from a private update server 
 the bundled Plugin Update Checker v5 library. No functional change to
 pricing/conversion, schemas, PersistedKeys, or CacheState.
 
-**Repository status:** **prepared for v1.2.1**. Tag and GitHub release are cut by
-CI on the `v1.2.1` tag push.
+**Repository status:** **released as v1.2.1**. Git tag **`v1.2.1`** and
+GitHub release are published, on commit
+`be18f2d629caec5dfd45d2b459fe31cfb4178b8a`.
 
 ## v1.2.1 release closure record
 
@@ -21,8 +53,8 @@ CI on the `v1.2.1` tag push.
 | Change | bundled `yahnis-elsts/plugin-update-checker` ^5.6; `PucFactory::buildUpdateChecker` registered only when `PRIVATE_UPDATE_SERVER` is defined in `wp-config.php` |
 | Unresolved release blockers | **0** |
 | Open Milestone 8 review findings | **0** |
-| Git tag `v1.2.1` | **Not yet created** |
-| GitHub release `v1.2.1` | **Not yet published** |
+| Git tag `v1.2.1` | **Created** (annotated; target `be18f2d629caec5dfd45d2b459fe31cfb4178b8a`) |
+| GitHub release `v1.2.1` | **Published** (not draft, not prerelease) |
 | Artifact | `universal-multicurrency-1.2.1.zip` — built by CI on the tag from `composer install --no-dev` + `bin/build-zip.sh` |
 | Deployment | **Not performed** |
 | M27 | **Not created** |
