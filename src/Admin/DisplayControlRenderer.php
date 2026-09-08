@@ -204,6 +204,15 @@ final class DisplayControlRenderer {
 	}
 
 	/**
+	 * Returns a static diagram for the Tab selector style.
+	 */
+	public function diagram_presentation_tab(): string {
+		return $this->svg_frame(
+			'<rect x="6" y="8" width="52" height="36" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><rect x="50" y="12" width="8" height="28" rx="3" fill="currentColor"/><rect x="38" y="16" width="12" height="20" rx="2" fill="currentColor" opacity="0.35"/>'
+		);
+	}
+
+	/**
 	 * Returns a static diagram for the Classic Dropdown selector style.
 	 */
 	public function diagram_presentation_classic_dropdown(): string {

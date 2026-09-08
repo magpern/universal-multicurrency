@@ -8,11 +8,13 @@ ADR-0035).
 Authoritative architecture: [`docs/architecture/switcher-customization.md`](architecture/switcher-customization.md),
 [`docs/architecture/switcher-currency-presentation.md`](architecture/switcher-currency-presentation.md),
 [`docs/architecture/native-switcher-block.md`](architecture/native-switcher-block.md),
-[`docs/architecture/switcher-presentation-presets.md`](architecture/switcher-presentation-presets.md)
+[`docs/architecture/switcher-presentation-presets.md`](architecture/switcher-presentation-presets.md),
+[`docs/architecture/switcher-uml-family-alignment.md`](architecture/switcher-uml-family-alignment.md)
 ADRs: [`0022`](adr/0022-switcher-customization-css-contract.md),
 [`0027`](adr/0027-switcher-currency-presentation.md),
 [`0028`](adr/0028-native-switcher-block-rendering-surface.md),
-[`0035`](adr/0035-switcher-presentation-presets.md)
+[`0035`](adr/0035-switcher-presentation-presets.md),
+[`0037`](adr/0037-switcher-uml-family-alignment.md)
 
 ---
 
@@ -21,10 +23,10 @@ ADRs: [`0022`](adr/0022-switcher-customization-css-contract.md),
 In **WooCommerce → Settings → Multicurrency → Display**:
 
 1. **Placement** — manual shortcode / native block, floating side, sticky footer
-2. **Selector style** — Edge Pill / Floating Card / Minimal Icon / Classic Dropdown / Sticky Footer (filtered by placement)
+2. **Selector style** — Edge Pill / Floating Card / Minimal Icon / Tab / Classic Dropdown / Sticky Footer (filtered by placement)
 3. **Content** — trigger vs menu visibility (code / symbol / name / icon), order, chevron
 4. **Design** — theme (including Brand), size, shape (including Square), motion, colors, spacing; legacy token preset remains available under progressive disclosure
-5. **Currency presentation icons** — optional bundled flags, size, shape, per-currency overrides (M22). This is the top-level `display.presentation` icon subtree — not `design.presentation`.
+5. **Currency presentation icons** — optional bundled flags, size, shape, per-currency overrides (M22). EUR always uses the European Union flag and cannot be remapped. This is the top-level `display.presentation` icon subtree — not `design.presentation`.
 6. **Mobile behaviour** (floating only) — Side selector / Bottom sheet / Compact sticky bar
 7. **Advanced** — Custom CSS (capability-gated)
 
@@ -80,9 +82,14 @@ Modifiers (settings-driven): `--dropdown`, `--horizontal-list`, `--manual`,
 `--presentation-*`, `--theme-*`, `--size-*`, `--shape-*`, `--preset-*`,
 `--icon-size-*`, `--icon-shape-*`, `--mobile-retain`, `--mobile-bottom-sheet`,
 `--mobile-sticky-compact`, `--hide-mobile`, `--hide-desktop`,
-`--hide-name-on-mobile`, `--compact-on-mobile`.
+`--hide-name-on-mobile`, `--compact-on-mobile`, `--uml-family`.
 
-The two responsive bag modifiers take effect below 768px only.
+UML-family floating presentations (`edge_pill`, `minimal_icon`, `tab` on
+`floating_side`) use a 781px / 782px visibility boundary, flush-edge docking,
+and `data-um-edge-*` attributes. See
+[`docs/EDGE_CONTROL_CONVENTION.md`](EDGE_CONTROL_CONVENTION.md) and
+[ADR-0037](adr/0037-switcher-uml-family-alignment.md).
+Classic, manual, and block surfaces keep the existing 767px / 768px bag.
 
 Public data hooks: `[data-umc-placement]`, `[data-umc-style]`,
 `[data-umc-presentation]`, `[data-umc-mobile-behavior]`.

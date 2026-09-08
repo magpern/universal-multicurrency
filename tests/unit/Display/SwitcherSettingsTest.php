@@ -510,6 +510,124 @@ final class SwitcherSettingsTest extends TestCase {
 		$this->assertSame( 1, count( array_filter( $classes, static fn( string $modifier ): bool => 'umc-switcher--manual' === $modifier ) ) );
 	}
 
+	public function test_tab_is_accepted_for_floating_side(): void {
+		$settings = SwitcherSettings::from_array(
+			array(
+				'placement' => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
+				'design'    => array(
+					'presentation' => SwitcherSettings::PRESENTATION_TAB,
+				),
+			)
+		);
+
+		$this->assertSame( SwitcherSettings::PRESENTATION_TAB, $settings->selector_presentation() );
+		$this->assertTrue( $settings->is_uml_family_floating() );
+		$this->assertContains( 'umc-switcher--uml-family', $settings->modifier_classes() );
+		$this->assertContains( 'umc-switcher--presentation-tab', $settings->modifier_classes() );
+	}
+
+	public function test_unknown_presentation_falls_back_for_floating_side(): void {
+		$settings = SwitcherSettings::from_array(
+			array(
+				'placement' => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
+				'design'    => array(
+					'presentation' => 'neon_orb',
+				),
+			)
+		);
+
+		$this->assertSame( SwitcherSettings::PRESENTATION_CLASSIC_DROPDOWN, $settings->selector_presentation() );
+		$this->assertFalse( $settings->is_uml_family_floating() );
+	}
+
+	public function test_center_vertical_alignment_sanitizes_to_middle(): void {
+		$settings = SwitcherSettings::from_array(
+			array(
+				'placement' => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
+				'position'  => array(
+					'vertical_alignment' => 'center',
+				),
+			)
+		);
+
+		$this->assertSame( SwitcherSettings::ALIGN_MIDDLE, $settings->position()['vertical_alignment'] );
+	}
+
+	public function test_stored_middle_alignment_is_not_rewritten_to_center(): void {
+		$settings = SwitcherSettings::from_array(
+			array(
+				'placement' => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
+				'position'  => array(
+					'vertical_alignment' => SwitcherSettings::ALIGN_MIDDLE,
+				),
+			)
+		);
+
+		$this->assertSame( SwitcherSettings::ALIGN_MIDDLE, $settings->to_array()['position']['vertical_alignment'] );
+		$this->assertArrayNotHasKey( 'center', array_flip( array( $settings->position()['vertical_alignment'] ) ) );
+	}
+
+	public function test_present_mobile_behavior_is_never_rewritten(): void {
+		$settings = SwitcherSettings::from_array(
+			array(
+				'placement'  => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
+				'design'     => array(
+					'presentation' => SwitcherSettings::PRESENTATION_EDGE_PILL,
+				),
+				'responsive' => array(
+					'mobile_behavior' => SwitcherSettings::MOBILE_BEHAVIOR_BOTTOM_SHEET,
+				),
+			)
+		);
+
+		$this->assertSame( SwitcherSettings::MOBILE_BEHAVIOR_BOTTOM_SHEET, $settings->mobile_behavior() );
+
+		$reloaded = SwitcherSettings::from_array( $settings->to_array() );
+		$this->assertSame( SwitcherSettings::MOBILE_BEHAVIOR_BOTTOM_SHEET, $reloaded->mobile_behavior() );
+	}
+
+	public function test_absent_family_mobile_behavior_defaults_to_retain(): void {
+		foreach ( SwitcherSettings::UML_FAMILY_PRESENTATIONS as $presentation ) {
+			$settings = SwitcherSettings::from_array(
+				array(
+					'placement' => SwitcherSettings::PLACEMENT_FLOATING_SIDE,
+					'design'    => array(
+						'presentation' => $presentation,
+					),
+				)
+			);
+
+			$this->assertSame(
+				SwitcherSettings::MOBILE_BEHAVIOR_RETAIN,
+				$settings->mobile_behavior(),
+				$presentation
+			);
+			$this->assertSame(
+				SwitcherSettings::MOBILE_BEHAVIOR_RETAIN,
+				SwitcherSettings::default_mobile_behavior_for( $presentation )
+			);
+		}
+	}
+
+	public function test_manual_classic_is_not_uml_family(): void {
+		$settings = SwitcherSettings::from_array(
+			array(
+				'placement' => SwitcherSettings::PLACEMENT_MANUAL,
+				'design'    => array(
+					'presentation' => SwitcherSettings::PRESENTATION_EDGE_PILL,
+				),
+			)
+		);
+
+		$this->assertSame( SwitcherSettings::PRESENTATION_CLASSIC_DROPDOWN, $settings->selector_presentation() );
+		$this->assertFalse( $settings->is_uml_family_floating() );
+		$this->assertNotContains( 'umc-switcher--uml-family', $settings->modifier_classes() );
+	}
+
+	public function test_settings_schema_remains_eight(): void {
+		$this->assertSame( 8, Settings::SCHEMA_VERSION );
+	}
+
 	public function test_settings_sanitize_includes_display_defaults(): void {
 		$clean = Settings::sanitize( array( 'currencies' => array() ) );
 

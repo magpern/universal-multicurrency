@@ -112,4 +112,47 @@ test.describe('v1.3 switcher presentation controller (harness)', () => {
 		await expect(menu).toBeVisible();
 		await expect(page.locator('[data-testid="switcher-b"] .umc-switcher__trigger')).toBeHidden();
 	});
+
+	test('family retain sets enhanced marker and keeps currency hrefs', async ({ page }) => {
+		await openHarness(page);
+		const root = page.locator('[data-testid="switcher-family-retain"]');
+		await expect(root).toHaveAttribute('data-umc-enhanced', '1');
+		await expect(root).toHaveAttribute('data-um-edge-control', 'currency');
+		await expect(root).toHaveAttribute('data-um-edge-slot', '2');
+		await expect(root.locator('.umc-switcher__trigger-content .umc-switcher__code')).toHaveText('EUR');
+		await expect(root.locator('.umc-switcher__trigger-content .umc-switcher__icon img')).toHaveAttribute('alt', '');
+		await expect(root.locator('.umc-switcher__link[href*="currency=SEK"]')).toHaveAttribute('href', /\?currency=SEK/);
+
+		await root.locator('.umc-switcher__trigger').click();
+		await expect(root).toHaveAttribute('data-umc-open', '1');
+		await expect(root.locator('.umc-switcher__link[aria-current="true"]')).toHaveCount(1);
+		await page.keyboard.press('Escape');
+		await expect(root.locator('.umc-switcher__trigger')).toBeFocused();
+		await expect(root).toHaveAttribute('data-umc-open', '0');
+	});
+
+	test('family retain does not open a sheet on a mobile viewport', async ({ page }) => {
+		await openHarness(page, 375, 812);
+		const root = page.locator('[data-testid="switcher-family-retain"]');
+		await root.locator('.umc-switcher__trigger').click();
+		await expect(root).not.toHaveClass(/umc-switcher--sheet/);
+		await expect(root.locator('.umc-switcher__panel')).not.toHaveAttribute('role', 'dialog');
+	});
+
+	test('family tab exposes left-edge attributes and visible code', async ({ page }) => {
+		await openHarness(page);
+		const root = page.locator('[data-testid="switcher-family-tab"]');
+		await expect(root).toHaveAttribute('data-um-edge', 'left');
+		await expect(root).toHaveClass(/umc-switcher--presentation-tab/);
+		await expect(root.locator('.umc-switcher__trigger-content .umc-switcher__code')).toHaveText('USD');
+		await expect(root.locator('.umc-switcher__link[href*="currency=XOF"] .umc-switcher__icon')).toHaveCount(0);
+	});
+
+	test('same-edge language control applies UMC slot offset variable', async ({ page }) => {
+		await openHarness(page);
+		const offset = await page.locator('[data-testid="switcher-family-retain"]').evaluate((el) =>
+			getComputedStyle(el).getPropertyValue('--um-edge-slot-offset').trim()
+		);
+		expect(offset.length).toBeGreaterThan(0);
+	});
 });

@@ -8,6 +8,11 @@ planning freeze. Production implementation must follow this document and
 
 **ADR:** [ADR-0035](../adr/0035-switcher-presentation-presets.md)
 
+Visual family alignment with Universal Multilingual v1.12.0 is specified in
+[ADR-0037](../adr/0037-switcher-uml-family-alignment.md) and
+[`docs/architecture/switcher-uml-family-alignment.md`](switcher-uml-family-alignment.md).
+That work refactors this stack; it does not replace it.
+
 **Builds on:** [Switcher customization (ADR-0022)](switcher-customization.md),
 [Currency presentation (ADR-0027)](switcher-currency-presentation.md),
 [Native switcher block (ADR-0028)](native-switcher-block.md)
@@ -98,7 +103,7 @@ SwitcherAssets (umc-switcher CSS/JS)
 
 | Key | Allowed | Notes |
 |---|---|---|
-| `design.presentation` | `edge_pill`, `floating_card`, `minimal_icon`, `classic_dropdown`, `sticky_footer` | Coerced to a value legal for `placement` |
+| `design.presentation` | `edge_pill`, `floating_card`, `minimal_icon`, `tab`, `classic_dropdown`, `sticky_footer` | Coerced to a value legal for `placement`. `tab` is additive (ADR-0037). |
 | `design.preset` | existing six | Deprecated as selector-style UI; **live token layer** |
 | `design.theme` | `automatic`, `light`, `dark`, `brand` | UI: Site theme / Light / Dark / Brand |
 | `design.motion` | `standard`, `reduced`, `off` | Read aliases: `subtle`→`standard`, `none`→`off` |
@@ -110,7 +115,7 @@ SwitcherAssets (umc-switcher CSS/JS)
 | Placement | Allowed presentations |
 |---|---|
 | `manual` | `classic_dropdown` (+ `style=horizontal_list`) |
-| `floating_side` | `edge_pill`, `floating_card`, `minimal_icon`, `classic_dropdown` |
+| `floating_side` | `edge_pill`, `floating_card`, `minimal_icon`, `tab`, `classic_dropdown` |
 | `sticky_footer` | `sticky_footer` only |
 
 ### Save-time coercion
@@ -130,8 +135,9 @@ design.presentation =
   classic_dropdown  otherwise
 
 responsive.mobile_behavior =
-  bottom_sheet if presentation in (edge_pill, minimal_icon)
-  retain       otherwise
+  retain       (absent-key default for all presentations, including UML-family
+                edge_pill / minimal_icon / tab — ADR-0037)
+  stored value is never rewritten when the key is already present
 
 design.motion: subtle → standard, none → off
 design.preset, content.*, position.*, visibility.*, custom_css, presentation.icon_*: unchanged

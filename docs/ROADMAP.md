@@ -626,18 +626,23 @@ milestones above used, with its own ADR and, where warranted, its own
 
 **ADR:** [ADR-0035](adr/0035-switcher-presentation-presets.md)
 **Architecture spec:** [`docs/architecture/switcher-presentation-presets.md`](architecture/switcher-presentation-presets.md)
-**Branch:** `feature/display-edge-pill-selector`
+**UML-family alignment ADR:** [ADR-0037](adr/0037-switcher-uml-family-alignment.md)
+**UML-family spec:** [`docs/architecture/switcher-uml-family-alignment.md`](architecture/switcher-uml-family-alignment.md)
+**Branch:** `feature/umc-selector-uml-alignment`
 
 Redesigns the floating currency selector as curated presentation presets
 (Edge Pill recommended for new Floating setups; Floating Card; Minimal Icon;
-Classic Dropdown; Sticky Footer surface) on the existing shared
+Tab; Classic Dropdown; Sticky Footer surface) on the existing shared
 `SwitcherSettings` → ViewModel → `SwitcherRenderer` → shared-assets stack.
 Settings schema **7 → 8** with a visually neutral migration (existing floating
-stores stay Classic unless the merchant opts in). Real bottom-sheet dialog
-contract; legacy `design.preset` token classes remain live under presentation
-geometry. Not M27. No OrderSnapshot / PersistedKeys / CacheState hash change.
-No REST/AJAX switching. No FOX/WOOCS coupling. No production deployment as
-part of the release process.
+stores stay Classic unless the merchant opts in). ADR-0037 aligns UML-family
+floating presentations with Universal Multilingual **v1.12.0** without a UML
+runtime dependency, schema bump, or currency-authority change. Real
+bottom-sheet dialog contract remains available when explicitly saved; new
+family defaults use `retain`. Legacy `design.preset` token classes remain live
+under presentation geometry. Not M27. No OrderSnapshot / PersistedKeys /
+CacheState hash change. No REST/AJAX switching. No FOX/WOOCS coupling. No
+production deployment as part of the release process.
 
 ## v1.2.0 — Free Shipping Threshold Display API (**v1.2.0**) — complete and released
 

@@ -30,6 +30,32 @@ final class CurrencyPresentationAssetRegistry {
 
 	public const REGION_US = 'US';
 
+	public const REGION_JP = 'JP';
+
+	public const REGION_CA = 'CA';
+
+	public const REGION_AU = 'AU';
+
+	public const REGION_NZ = 'NZ';
+
+	public const REGION_KR = 'KR';
+
+	public const REGION_CN = 'CN';
+
+	public const REGION_IN = 'IN';
+
+	public const REGION_BR = 'BR';
+
+	public const REGION_MX = 'MX';
+
+	public const REGION_SG = 'SG';
+
+	public const REGION_HK = 'HK';
+
+	public const REGION_ZA = 'ZA';
+
+	public const REGION_CZ = 'CZ';
+
 	private const ASSET_DIRECTORY = 'assets/icons/presentation/';
 
 	/**
@@ -69,6 +95,58 @@ final class CurrencyPresentationAssetRegistry {
 		self::REGION_US => array(
 			'file'  => 'US.svg',
 			'label' => 'United States (presentation)',
+		),
+		self::REGION_JP => array(
+			'file'  => 'JP.svg',
+			'label' => 'Japan (presentation)',
+		),
+		self::REGION_CA => array(
+			'file'  => 'CA.svg',
+			'label' => 'Canada (presentation)',
+		),
+		self::REGION_AU => array(
+			'file'  => 'AU.svg',
+			'label' => 'Australia (presentation)',
+		),
+		self::REGION_NZ => array(
+			'file'  => 'NZ.svg',
+			'label' => 'New Zealand (presentation)',
+		),
+		self::REGION_KR => array(
+			'file'  => 'KR.svg',
+			'label' => 'South Korea (presentation)',
+		),
+		self::REGION_CN => array(
+			'file'  => 'CN.svg',
+			'label' => 'China (presentation)',
+		),
+		self::REGION_IN => array(
+			'file'  => 'IN.svg',
+			'label' => 'India (presentation)',
+		),
+		self::REGION_BR => array(
+			'file'  => 'BR.svg',
+			'label' => 'Brazil (presentation)',
+		),
+		self::REGION_MX => array(
+			'file'  => 'MX.svg',
+			'label' => 'Mexico (presentation)',
+		),
+		self::REGION_SG => array(
+			'file'  => 'SG.svg',
+			'label' => 'Singapore (presentation)',
+		),
+		self::REGION_HK => array(
+			'file'  => 'HK.svg',
+			'label' => 'Hong Kong (presentation)',
+		),
+		self::REGION_ZA => array(
+			'file'  => 'ZA.svg',
+			'label' => 'South Africa (presentation)',
+		),
+		self::REGION_CZ => array(
+			'file'  => 'CZ.svg',
+			'label' => 'Czechia (presentation)',
 		),
 	);
 

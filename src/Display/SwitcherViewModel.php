@@ -173,4 +173,20 @@ final class SwitcherViewModel {
 	public function trigger_id(): string {
 		return 'umc-switcher-trigger-' . $this->instance_id;
 	}
+
+	/**
+	 * Whether the automatic floating surface should emit edge-control attributes.
+	 */
+	public function emits_edge_attributes(): bool {
+		return $this->settings->is_uml_family_floating();
+	}
+
+	/**
+	 * Physical edge for the convention attribute.
+	 */
+	public function edge_side(): string {
+		$position = $this->settings->position();
+
+		return (string) ( $position['side'] ?? SwitcherSettings::SIDE_RIGHT );
+	}
 }

@@ -20,8 +20,9 @@ full milestone history.
   country/region → currency routing, always subordinate to manual shopper
   selection and checkout currency locks.
 - **Storefront switcher** — shortcode, widget, and native Gutenberg block,
-  with structured presentation settings (placement, theme, size, shape,
-  optional bundled currency icons) and optional Advanced CSS.
+  with structured presentation settings (placement, Edge Pill / Minimal Icon /
+  Tab floating family, theme, size, shape, optional bundled currency icons)
+  and optional Advanced CSS.
 - **Checkout currency policy** — selected-currency or store-currency entry
   modes, causality-proven payment-gateway fallback, Classic and Checkout
   Blocks parity.
