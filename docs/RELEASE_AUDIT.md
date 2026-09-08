@@ -6,8 +6,9 @@ Includes all merged work since **v1.2.1**: Edge Pill / presentation presets
 (ADR-0035, PR #32), authenticated Regional Preferences (ADR-0036, PR #33), and
 UML-family floating selector alignment (ADR-0037, PR #34).
 
-**Repository status:** **prepared for v1.3.0**. Tag and GitHub release are cut by
-CI on the `v1.3.0` tag push.
+**Repository status:** **released as v1.3.0**. Git tag **`v1.3.0`** and
+GitHub release are published, on commit
+`2da36a0709e65af73b82b18eead9141a8d0846e2`.
 
 ## v1.3.0 release closure record
 
@@ -21,9 +22,10 @@ CI on the `v1.3.0` tag push.
 | Production migrations | none (settings schema 7→8 in-place; preferred-currency user meta additive) |
 | Unresolved release blockers | **0** |
 | Open Milestone 8 review findings | **0** |
-| Git tag `v1.3.0` | **Not yet created** |
-| GitHub release `v1.3.0` | **Not yet published** |
-| Artifact | `universal-multicurrency-1.3.0.zip` — built by CI on the tag from `composer install --no-dev` + `bin/build-zip.sh` |
+| Git tag `v1.3.0` | **Created** (annotated; target `2da36a0709e65af73b82b18eead9141a8d0846e2`) |
+| GitHub release `v1.3.0` | **Published** (not draft, not prerelease) |
+| Release workflow | **34196263976** (success) |
+| Artifact | `universal-multicurrency-1.3.0.zip` (769487 bytes; SHA-256 `81ecf26b1a7d11bded2573d4b86d524938dcddb26cab964603e14028febaceb8`) — downloaded from the published GitHub release itself (not a local build) |
 | Deployment | **Not performed** |
 | M27 | **Not created** |
 

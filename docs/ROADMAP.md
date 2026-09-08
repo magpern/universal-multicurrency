@@ -622,7 +622,7 @@ milestones above used, with its own ADR and, where warranted, its own
 `docs/architecture/*.md` specification.
 
 
-## v1.3.0 — Regional Preferences and UML-family selector (**v1.3.0**) — release pending
+## v1.3.0 — Regional Preferences and UML-family selector (**v1.3.0**) — complete and released
 
 **ADRs:** [ADR-0035](adr/0035-switcher-presentation-presets.md),
 [ADR-0036](adr/0036-authenticated-preferred-currency.md),
@@ -655,6 +655,13 @@ Legacy `design.preset` token classes remain live under presentation geometry.
 Not M27. OrderSnapshot **5** and CacheState **v1** unchanged. PersistedKeys
 **11 → 12**. No REST/AJAX switching. No FOX/WOOCS coupling. No production
 deployment as part of the release process.
+
+**Released as:** **v1.3.0** — tag `v1.3.0`, GitHub release published, artifact
+`universal-multicurrency-1.3.0.zip` (769487 bytes; SHA-256
+`81ecf26b1a7d11bded2573d4b86d524938dcddb26cab964603e14028febaceb8`). Tag target
+`2da36a0709e65af73b82b18eead9141a8d0846e2`. Full detail:
+[`RELEASE_AUDIT.md`](RELEASE_AUDIT.md),
+[`releases/V1_3_0_RELEASE_CLOSURE.md`](releases/V1_3_0_RELEASE_CLOSURE.md).
 
 ## v1.2.1 — Private update-server delivery (**v1.2.1**) — complete and released
 

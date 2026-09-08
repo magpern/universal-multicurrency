@@ -37,9 +37,9 @@ vendor/bin/phpunit -c phpunit.xml.dist --group performance
 vendor/bin/phpunit -c phpunit-integration.xml.dist --group performance
 ```
 
-**Current release on `main`:** **v1.3.0** (prepared; tag/release cut by CI).
+**Current release on `main`:** **v1.3.0** (released; production deployment not performed).
 
-## v1.3.0 — Regional Preferences and UML-family selector (prepared)
+## v1.3.0 — Regional Preferences and UML-family selector (released)
 
 Post-1.0 feature release (ADR-0035, ADR-0036, ADR-0037 — no `M27`). Authenticated
 preferred currency on WordPress Profile / WooCommerce Account; Edge Pill /
@@ -47,9 +47,11 @@ Minimal Icon / Tab floating family with flag + ISO code; EUR always uses the EU
 flag (presentation-only; not derived from geo). Settings schema **8**,
 PersistedKeys **12**, OrderSnapshot **5**, CacheState **v1**; no DB migration.
 `?currency=` switching, session, cookie, geo, and pricing/FX are unchanged.
-Build artifact `universal-multicurrency-1.3.0.zip`
-(`composer install --no-dev` + `bin/build-zip.sh`). Production deployment: **not
-performed**. See [`RELEASE_AUDIT.md`](RELEASE_AUDIT.md).
+**Released as:** **v1.3.0** — tag `v1.3.0`, GitHub release published, artifact
+`universal-multicurrency-1.3.0.zip` (769487 bytes; SHA-256
+`81ecf26b1a7d11bded2573d4b86d524938dcddb26cab964603e14028febaceb8`).
+Production deployment: **not performed**. See [`RELEASE_AUDIT.md`](RELEASE_AUDIT.md)
+and [`releases/V1_3_0_RELEASE_CLOSURE.md`](releases/V1_3_0_RELEASE_CLOSURE.md).
 
 ## v1.2.1 — Private update-server delivery (released)
 
