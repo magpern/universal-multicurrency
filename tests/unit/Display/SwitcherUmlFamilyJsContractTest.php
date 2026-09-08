@@ -57,6 +57,8 @@ final class SwitcherUmlFamilyJsContractTest extends TestCase {
 		$this->assertStringContainsString( "event.key === 'Escape'", $this->js );
 		$this->assertStringContainsString( 'onDocumentClick', $this->js );
 		$this->assertStringContainsString( 'onDocumentKeydown', $this->js );
+		$this->assertStringContainsString( "document.addEventListener('keydown', onDocumentKeydown, true)", $this->js );
+		$this->assertStringContainsString( 'event.stopPropagation();', $this->js );
 	}
 
 	public function test_family_retain_uses_expand_strategy(): void {

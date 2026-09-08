@@ -615,15 +615,34 @@ final class DisplaySettingsFieldTest extends WP_UnitTestCase {
 	}
 
 	public function test_eur_override_picker_is_absent_and_stored_override_is_explained(): void {
-		$this->save_display(
-			array(
-				'enabled'      => true,
-				'presentation' => array(
-					'icon_overrides' => array(
-						'EUR' => 'SE',
-						'USD' => 'US',
+		( new Settings() )->save(
+			array_merge(
+				Settings::defaults(),
+				array(
+					'currencies' => array(
+						'EUR' => array(
+							'enabled' => true,
+						),
+						'USD' => array(
+							'enabled' => true,
+						),
+						'SEK' => array(
+							'enabled' => true,
+						),
 					),
-				),
+					'display'    => array_merge(
+						SwitcherSettings::default_array(),
+						array(
+							'enabled'      => true,
+							'presentation' => array(
+								'icon_overrides' => array(
+									'EUR' => 'SE',
+									'USD' => 'US',
+								),
+							),
+						)
+					),
+				)
 			)
 		);
 
@@ -633,6 +652,14 @@ final class DisplaySettingsFieldTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'data-umc-eur-override-ignored', $html );
 		$this->assertStringNotContainsString(
 			'name="umc_display[presentation][icon_overrides][EUR]"',
+			$html
+		);
+		$this->assertStringContainsString(
+			'name="umc_display[presentation][icon_overrides][USD]"',
+			$html
+		);
+		$this->assertStringContainsString(
+			'name="umc_display[presentation][icon_overrides][SEK]"',
 			$html
 		);
 	}

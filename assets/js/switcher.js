@@ -404,6 +404,7 @@
 
 		if (event.key === 'Escape') {
 			event.preventDefault();
+			event.stopPropagation();
 			closeMenu(activeRoot, true);
 			return;
 		}
@@ -472,6 +473,7 @@
 
 			if (event.key === 'Escape') {
 				event.preventDefault();
+				event.stopPropagation();
 				closeMenu(root, true);
 				return;
 			}
@@ -547,7 +549,7 @@
 		});
 
 		document.addEventListener('click', onDocumentClick);
-		document.addEventListener('keydown', onDocumentKeydown);
+		document.addEventListener('keydown', onDocumentKeydown, true);
 
 		window.addEventListener('resize', function () {
 			instances.forEach(function (root) {
